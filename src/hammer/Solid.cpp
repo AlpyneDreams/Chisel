@@ -31,7 +31,7 @@ namespace engine::hammer
             float x = std::stof(std::string(coords[0]));
             float y = std::stof(std::string(coords[2]));
             float z = std::stof(std::string(coords[1]));
-            
+
             // FIXME: Apply scale here for now
             tri[i] = vec3(x, y, z) * vec3(0.0254f);
         }
@@ -60,7 +60,7 @@ namespace engine::hammer
 
             // Compute normal
             vec3 normal = glm::triangleNormal(tri[0], tri[1], tri[2]);
-            
+
             // Add first triangle
             for (int i = 0; i < 3; i++)
             {
@@ -70,13 +70,13 @@ namespace engine::hammer
             }
 
             // TODO: Actual face reconstruction by intersecting planes
-            
+
             // Add second triangle
             indices.push_back(index - 3); // tri[0]
             indices.push_back(index - 1); // tri[2]
 
             vec3 dy = tri[1] - tri[0]; // top left - bottom left
-            
+
             // Add 4th vertex
             vertices.push_back(tri[2] - dy);
             vertices.push_back(normal);

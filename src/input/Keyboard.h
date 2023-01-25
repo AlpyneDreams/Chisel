@@ -17,7 +17,7 @@ namespace engine
         Delete = 127,
         Max = 512
     };
-    
+
     inline struct Keyboard
     {
         // True if key is currently held down
@@ -37,6 +37,6 @@ namespace engine
         }
     private:
         PressMap<Key> keys;
-        
+
     } Keyboard;
 }

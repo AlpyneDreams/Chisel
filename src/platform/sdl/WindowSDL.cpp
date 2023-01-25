@@ -34,7 +34,7 @@ namespace engine
             int x = SDL_WINDOWPOS_CENTERED,
                 y = SDL_WINDOWPOS_CENTERED;
             int flags = SDL_WINDOW_SHOWN | (resizable ? SDL_WINDOW_RESIZABLE : 0);
-            
+
             // Create window!
             window = SDL_CreateWindow(name, x, y, width, height, flags);
 
@@ -94,7 +94,7 @@ namespace engine
                         // Don't send mouse event to ImGui if cursor is locked
                         if (Cursor.GetMode() == Cursor.Locked)
                             continue;
-                        
+
                         break;
                     }
 
@@ -111,7 +111,7 @@ namespace engine
                             case SDL_WINDOWEVENT_RESIZED:
                                 onResize(wev.data1, wev.data2);
                                 break;
-                            
+
                             case SDL_WINDOWEVENT_CLOSE:
                                 shouldClose = true;
                                 break;

@@ -42,7 +42,7 @@ namespace engine
         virtual void OnAttach() {}
         // Run before Render::Shutdown. Typically detaches ImGui
         virtual void OnDetach() {}
-    
+
         virtual bool ShouldClose() = 0;
         // Read input and events. Begin frames.
         // Should call Mouse.SetButton, Keyboard.SetKey, etc.

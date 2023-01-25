@@ -26,7 +26,7 @@ namespace engine::render
 
         constexpr BlendFunc(BlendMode src, BlendMode dst)
           : src(src), dst(dst), srcAlpha(src), dstAlpha(dst) {}
-        
+
         constexpr BlendFunc() : BlendFunc(BlendMode::Default, BlendMode::Default) {}
     };
 

@@ -30,7 +30,7 @@ hammer_src = files(
 hammer_deps = [
     sdl_dep,
     bgfx_dep,
-    
+
     fmt_dep,
     glm_dep,
     imgui_dep,

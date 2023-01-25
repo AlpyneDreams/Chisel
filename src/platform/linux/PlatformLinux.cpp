@@ -26,12 +26,12 @@ namespace engine
         int ret = pclose(f);
         if (ret < 0)
             Console.Error("FilePicker(): failed (code: {})", ret);
-        
+
         // Strip DLE if any
         auto pos = filename.find_last_of(10);
         if (pos != std::string::npos)
             filename[pos] = 0;
-        
+
         // Truncate to first null
         return std::string(filename.data());
     }

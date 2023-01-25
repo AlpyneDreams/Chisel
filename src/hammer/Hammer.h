@@ -8,19 +8,19 @@
 namespace engine::hammer
 {
     inline class editor::Tools& Tools = editor::Tools;
-    
+
     struct MapRender;
-    
+
     enum class SelectMode {
         Groups, Objects, Solids
     };
-        
+
     inline class Hammer
     {
     public:
     // Editing //
         SelectMode selectMode = SelectMode::Groups;
-        
+
         uint GetSelectionID(MapEntity& ent, Solid& solid)
         {
             switch (selectMode)
@@ -33,15 +33,15 @@ namespace engine::hammer
                     return solid.id;
             }
         }
-    
+
     // File I/O //
         // TODO: multiple open maps
         VMF map;
         void Open(const char* path);
-    
+
     // Systems //
         MapRender* Renderer;
-        
+
     // GUI //
         GUI::Window* viewport;
 

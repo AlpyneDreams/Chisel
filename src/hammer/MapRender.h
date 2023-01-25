@@ -23,7 +23,7 @@ namespace engine::hammer
             VertexAttribute::For<float>(3, VertexAttribute::Position),
             VertexAttribute::For<float>(3, VertexAttribute::Normal, true),
         };
-        
+
     public:
 
         render::Render& r = Tools.Render;
@@ -33,7 +33,7 @@ namespace engine::hammer
         {
             shader = Tools.Render.LoadShader("hammer_flat");
         }
-        
+
         void Update() final override
         {
             r.SetClearColor(true, Color(0.2, 0.2, 0.2));
@@ -41,14 +41,14 @@ namespace engine::hammer
             r.SetRenderTarget(Tools.rt_SceneView);
             r.SetShader(shader);
             r.SetTransform(glm::identity<mat4x4>());
-            
+
             DrawSolidsWith([&](MapEntity&, Solid& solid)
             {
                 r.SetUniform("u_color", solid.editor.color);
                 r.SetTransform(glm::identity<mat4x4>());
             });
         }
-                
+
         void ForEachEntity(std::function<void(MapEntity&)> DrawFunc)
         {
             DrawFunc(Hammer.map.world);

@@ -5,7 +5,7 @@
 #include <chrono>
 
 /** Time.h: Controls time for frames and ticks.
- * 
+ *
  * See: https://gafferongames.com/post/fix_your_timestep/
  */
 
@@ -21,7 +21,7 @@ namespace engine
 
         double  timeScale     = 1;      // The speed of time
         Seconds maxDeltaTime  = 0.25;   // The maximum time between frames
-        
+
         // TODO: Perhaps rename unscaled to realtime or real
 
         struct Unscaled {               // Real time, unaffected by timeScale or maxDeltaTime
@@ -35,13 +35,13 @@ namespace engine
         } fixed;
 
         Frames frameCount     = 0;      // Number of rendered frames
-        Frames tickCount      = 0;      // Number of simulated ticks 
+        Frames tickCount      = 0;      // Number of simulated ticks
 
         Seconds Advance(Seconds dt)
         {
             unscaled.time     += dt;
             unscaled.deltaTime = dt;
-            
+
             dt *= timeScale;
             time     += dt;
             deltaTime = dt;

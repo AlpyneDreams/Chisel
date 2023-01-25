@@ -36,7 +36,7 @@ namespace engine
     using uint4 = glm::uvec4;
     using uint3 = glm::uvec3;
     using uint2 = glm::uvec2;
-    
+
     // Quaternion
     using quat = glm::quat;
 

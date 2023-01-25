@@ -21,26 +21,26 @@ namespace engine::hammer
     struct SelectionModeWindow : GUI::Window
     {
         SelectionModeWindow() : GUI::Window(ICON_MC_CURSOR_DEFAULT, "Select", 256, 256, true) {}
-        
+
         void Draw() override
         {
             using enum SelectMode;
-            
+
             RadioButton("Groups", Groups);
             RadioButton("Objects", Objects);
             RadioButton("Solids", Solids);
         }
-        
+
         void RadioButton(const char* name, SelectMode mode)
         {
             bool selected = Hammer.selectMode == mode;
-                        
+
             if (selected)
                 ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
-            
+
             if (ImGui::Button(name, ImVec2(ImGui::GetContentRegionAvail().x, 0.f)))
                 Hammer.selectMode = mode;
-            
+
             if (selected)
                 ImGui::PopStyleColor();
         }

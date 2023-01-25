@@ -18,7 +18,7 @@ namespace engine::editor
                     if (Keyboard.GetKeyDown(Key::D)) {
                         Editor.Duplicate(ent);
                     }
-                } 
+                }
                 else if (Keyboard.GetKeyDown(Key::Delete)) {
                     ent.Delete();
                 }

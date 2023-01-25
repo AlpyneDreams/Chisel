@@ -20,7 +20,7 @@ namespace engine
             // Cannot process this key
             if (key > Size)
                 return;
-            
+
             if (down)
                 keysDown[key] = true;
             else

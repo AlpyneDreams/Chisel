@@ -84,7 +84,7 @@ namespace engine::hammer
         MapEntity() = default;
         MapEntity(KeyValues& ent);
     };
-    
+
     struct World : MapEntity
     {
         int mapversion = 0;

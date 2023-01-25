@@ -6,7 +6,7 @@
 
 namespace engine::render
 {
-    /** 
+    /**
      * High level scene rendering context
      * for use in render pipelines.
      */

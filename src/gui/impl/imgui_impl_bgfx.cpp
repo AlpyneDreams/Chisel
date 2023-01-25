@@ -132,7 +132,7 @@ void ImGui_Implbgfx_RenderDrawLists(ImDrawData* draw_data)
                 ImVec2 clip_max((pcmd->ClipRect.z - clip_off.x) * clip_scale.x, (pcmd->ClipRect.w - clip_off.y) * clip_scale.y);
                 if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
                     continue;
-                
+
                 bgfx::setScissor(
                     (int)clip_min.x, (int)(clip_min.y), (int)(clip_max.x - clip_min.x), (int)(clip_max.y - clip_min.y)
                 );
@@ -193,7 +193,7 @@ static void ImGui_Implbgfx_DestroyWindow(ImGuiViewport* viewport)
     {
         if (vd->view == g_LastView)
             g_LastView++;
-        
+
         bgfx::destroy(vd->fb);
         delete vd;
     }

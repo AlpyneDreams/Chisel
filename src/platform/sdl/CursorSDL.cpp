@@ -39,7 +39,7 @@ namespace engine
             // Lock mouse
             SDL_SetRelativeMouseMode(SDL_TRUE);
         }
-    
+
         // Unlocked
         if (mode != Cursor::Locked && lastMode == Cursor::Locked)
         {

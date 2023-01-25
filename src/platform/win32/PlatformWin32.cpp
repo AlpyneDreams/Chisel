@@ -26,7 +26,7 @@ namespace engine
         ofn.lpstrFile = filename;
         ofn.lpstrFile[0] = '\0';
         ofn.nMaxFile = sizeof(filename);
-        
+
         //open.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
         //open.nFilterIndex = 1;
 

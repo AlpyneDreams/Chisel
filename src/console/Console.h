@@ -11,7 +11,7 @@
 namespace engine
 {
     namespace GUI { struct ConsoleWindow; }
-    
+
     inline struct Console
     {
     public:
@@ -60,7 +60,7 @@ namespace engine
             Error("Cannot format log message: {}", err.what());
             return format;
         }
-        
+
         void Clear()
         {
             log.resize(0);

@@ -10,7 +10,7 @@
 #include "common/Ranges.h"
 #include "common/VTable.h"
 
-// TODO: Move this into /entity/? or keep in /engine/? 
+// TODO: Move this into /entity/? or keep in /engine/?
 
 namespace engine
 {
@@ -82,7 +82,7 @@ namespace engine
         SystemGroup(auto*... sys) {
             (systems.insert({typeid(decltype(sys)), {std::shared_ptr<System>(sys)}}), ...);
         }
-    
+
         template <SystemClass Sys>
         Sys& AddSystem(auto&... args)
         {
@@ -150,7 +150,7 @@ namespace engine
 
         Iterator begin() const {return systems.begin();}
         Iterator end() const {return systems.end();}
-    
+
     // System overrides:
 
         void Start() final override { started = true; Call(OnStart); }

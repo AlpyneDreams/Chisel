@@ -5,14 +5,14 @@
 namespace engine::editor
 {
     using SelectionID = uint32;
-    
+
     // TODO: Multiple selections.
     inline struct Selection
     {
     private:
         // Should match EntityNull in entity/Common.h
         static constexpr SelectionID Null = ~0;
-        
+
         SelectionID selected = Null;
 
     public:

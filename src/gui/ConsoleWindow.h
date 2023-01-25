@@ -40,7 +40,7 @@ namespace engine::GUI
             // Reserve enough left-over height for 1 separator + 1 input text
             const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
             ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
-            
+
             // Print each log line
             for (auto& [level, str] : Console.log) {
                 using Level = Console::Level;
@@ -104,10 +104,10 @@ namespace engine::GUI
 
                     if (data->EventKey == ImGuiKey_UpArrow)
                         pos = std::min(pos + 1, int(Console.history.size() - 1));
-                    
+
                     else if (data->EventKey == ImGuiKey_DownArrow)
                         pos = std::max(pos - 1, -1);
-                    
+
                     if (pos != historyPos)
                     {
                         // If moving away from current input, cache it

@@ -12,7 +12,7 @@ namespace engine
 
         Transform(vec3 pos = Vectors.Zero, quat rot = quat(), vec3 scale = Vectors.One)
             : position(pos), rotation(rot), scale(scale) {}
-        
+
         // Normalized forward (+Z) direction vector
         vec3 Forward() const {
             return rotation * Vectors.Forward;
@@ -22,7 +22,7 @@ namespace engine
         vec3 Up() const {
             return rotation * Vectors.Up;
         }
-        
+
         // Normalized right (+X) direction vector
         vec3 Right() const {
             return rotation * Vectors.Right;
@@ -35,7 +35,7 @@ namespace engine
             trs = glm::scale(trs, scale);
             return trs;
         }
-        
+
         void SetEulerAngles(vec3 degrees)
         {
             rotation = quat(glm::radians(degrees));
@@ -55,7 +55,7 @@ namespace engine
             // as long as the current rotation has not changed.
             if (rotation == eulerAnglesRotation) [[likely]]
                 return eulerAngles;
-            
+
             // If eulerAngles are not cached then recalculate them
             eulerAnglesRotation = rotation;
             eulerAngles = glm::degrees(glm::eulerAngles(rotation));

@@ -24,7 +24,7 @@ namespace engine
             Group& group = groups.emplace_back();
             return group;
         }
-        
+
         Mesh(VertexLayout& layout, const void* vertices, size_t vSize, const auto* indices, size_t iSize)
         {
             groups.push_back(Group {
@@ -44,6 +44,6 @@ namespace engine
 
     };
 
-    
+
 
 }

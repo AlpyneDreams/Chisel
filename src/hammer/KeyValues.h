@@ -18,7 +18,7 @@ namespace engine::hammer
     {
     private:
         using KVObject = std::map<std::string, std::shared_ptr<KeyValues>>;
-        
+
         inline static const std::string ObjectStr = "[object Object]";
     public:
         enum Type { Null, String, Object };
@@ -29,7 +29,7 @@ namespace engine::hammer
     private:
         // TODO: union or variant
         std::string value;
-        
+
         KVObject object;
         std::shared_ptr<KeyValues> next = nullptr;
 
@@ -57,7 +57,7 @@ namespace engine::hammer
         {
             if (type != String)
                 return ColorRGBA<T>(0, 0, 0, 0);
-            
+
             ColorRGBA<T> color;
             auto str = str::split(value);
             for (int i = 0; i < str.size() && i < 4; i++)
@@ -91,7 +91,7 @@ namespace engine::hammer
         KeyValues& Get(const char* key) {
             return object.contains(key) ? *object[key] : null;
         }
-        
+
         KeyValues& operator [](const char* key) {
             return Get(key);
         }
@@ -153,7 +153,7 @@ namespace engine::hammer
         {
             object.emplace(key, std::make_unique<KeyValues>(key, value));
         }
-        
+
         void add_child(std::unique_ptr<KeyValues> child)
         {
             std::shared_ptr<KeyValues> obj { child.release() };
@@ -215,7 +215,7 @@ namespace std
     struct tuple_size<engine::hammer::KeyValues> {
         static constexpr size_t value = 2;
     };
-    
+
     template<>
     struct tuple_element<0, engine::hammer::KeyValues> {
         using type = std::string;

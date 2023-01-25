@@ -33,7 +33,7 @@ namespace engine
 
         // Cannot call a ConVar like a function (can still Invoke)
         void operator()(auto... args) = delete;
-        
+
         // Print or set value
         void Invoke(ConCmd& cmd) final override
         {

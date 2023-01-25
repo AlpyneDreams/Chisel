@@ -32,7 +32,7 @@ namespace engine
 
         explicit ColorRGBA(auto r, auto g, auto b, auto a = NormalMax)
             : r(T(r)), g(T(g)), b(T(b)), a(T(a)) {}
-        
+
         template <std::endian Endian = std::endian::big>
         uint32 Pack()
         {

@@ -36,7 +36,7 @@ namespace engine::render
         {std::type_index(typeid(float)), bgfx::AttribType::Float},
     };
 
-    
+
     static bgfx::TextureFormat::Enum ConvertTextureFormat(TextureFormat format)
     {
         static std::unordered_map<TextureFormat, bgfx::TextureFormat::Enum> bgfxTextureFormats {
@@ -71,7 +71,7 @@ namespace engine::render
         bgfx::FrameBufferHandle fb;
         int view = -1;
         uint width, height;
-    
+
         bool                       readBack       = false;
         bgfx::TextureHandle        readBackBuffer = BGFX_INVALID_HANDLE;
         uint                       readBackFrame  = 0;
@@ -247,9 +247,9 @@ namespace engine::render
         {
             // Signal to BGFX not to create a render thread
             bgfx::renderFrame();
-            
+
             bgfx::Init init;
-            
+
             init.type = bgfx::RendererType::Vulkan;
 
             init.platformData.ndt = window->GetNativeDisplay();
@@ -275,7 +275,7 @@ namespace engine::render
             } else {
                 Console.Log("[BGFX] Initialized BGFX with {}!", bgfx::getRendererName(bgfx::getRendererType()));
             }
-            
+
             bgfx::setViewRect(state.defaultView, 0, 0, bgfx::BackbufferRatio::Equal);
 
             ImGui::CreateContext();
@@ -381,7 +381,7 @@ namespace engine::render
                 HandleBGFX* vh = new HandleBGFX();
                 vh->vb = vb;
                 group.vertices.handle = vh;
-                
+
                 if (group.indices)
                 {
                     auto ib = bgfx::createIndexBuffer(
@@ -646,13 +646,13 @@ namespace engine::render
             if (!mesh) {
                 return;
             }
-            
+
             if (!mesh->uploaded) [[unlikely]] {
                 UploadMesh(mesh);
             }
 
             bgfx::setState(state.state);
-            
+
             for (auto& group : mesh->groups) {
                 auto vb = static_cast<HandleBGFX*>(group.vertices.handle)->vb;
                 bgfx::setVertexBuffer(0, vb);
@@ -711,7 +711,7 @@ namespace engine::render
         }
 
     };
-    
+
     Render* Render::Create()
     {
         return new RenderBGFX();
@@ -749,6 +749,6 @@ namespace engine::render
         Console.Log("  Encoder Threads:     {}", caps->limits.maxEncoders);
         Console.Log("  Minimum Resource Command Buffer Size: {}", caps->limits.minResourceCbSize);
         Console.Log("  Transient VB Size:   {}", caps->limits.transientVbSize);
-        Console.Log("  Transient IB Size:   {}", caps->limits.transientIbSize);        
+        Console.Log("  Transient IB Size:   {}", caps->limits.transientIbSize);
     });
 }

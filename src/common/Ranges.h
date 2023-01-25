@@ -17,7 +17,7 @@ namespace engine
 
         Subrange(std::pair<Iterator, Iterator> pair) : first(pair.first), last(pair.second) {}
         Subrange(Iterator first, Iterator last) : first(first), last(last) {}
-        
+
         Iterator begin() const { return first; }
         Iterator end() const { return last; }
     };

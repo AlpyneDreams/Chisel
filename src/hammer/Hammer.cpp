@@ -49,7 +49,7 @@ namespace engine::hammer
         Tools.Renderer.OnEndCamera += [](render::RenderContext& ctx)
         {
             Tools.BeginSelectionPass(ctx);
-                        
+
             class hammer::Hammer& Hammer = hammer::Hammer;
             Hammer.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
             {

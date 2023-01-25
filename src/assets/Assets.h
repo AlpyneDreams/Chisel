@@ -50,10 +50,10 @@ namespace engine
                 Console.Error("[Assets] Failed to import %s asset: %s", Ext.value, path);
                 return ptr;
             }
-            
+
             // Cache loaded asset
             loadedAssets[path] = ptr;
-            
+
             return ptr;
         }
 
@@ -67,7 +67,7 @@ namespace engine
         void* Load(const char* path) {
             return nullptr;
         }
-        
+
     // Search Paths //
 
         void AddSearchPath(const char* path)

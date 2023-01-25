@@ -7,14 +7,14 @@ namespace engine
     /** Wraps a bitfield (flags) enum.
      * Set Flag: |= flag
      * Clear Flag: &= ~flag
-     * Has Any: (value | mask) != 0 
+     * Has Any: (value | mask) != 0
      * Has All: (value | mask) == mask
     */
     template <EnumType E>
     class Flags
     {
         using Int = std::underlying_type_t<E>;
-        
+
         Int value;
 
     public:

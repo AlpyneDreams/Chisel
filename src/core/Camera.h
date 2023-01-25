@@ -30,7 +30,7 @@ namespace engine
         {
             if (overrideViewMatrix)
                 return view;
-            
+
             // TODO: Cache this
             vec3 a = glm::radians(transform.GetEulerAngles());
             mat4x4 view = glm::eulerAngleZXY(-a.z, -a.x, -a.y);
@@ -103,7 +103,7 @@ namespace engine
 
         bool overrideViewMatrix = false;
         bool overrideProjMatrix = false;
-    
+
     public:
         static float ScaleFOV(float fovDegrees, float ratio) {
             return glm::degrees(atan(tan(glm::radians(fovDegrees) * 0.5f) * ratio)) * 2.0f;
@@ -113,12 +113,12 @@ namespace engine
         static float CalcVerticalFOV(float fovx, float aspectRatio) {
             return ScaleFOV(fovx, 1.f/aspectRatio);
         }
-        
+
         // Calculate horizontal X-FOV from Y-FOV based on W/H aspect ratio
         static float CalcHorizontalFOV(float fovy, float aspectRatio) {
             return ScaleFOV(fovy, aspectRatio);
         }
-        
+
         // Scale (reduce or expand) FOV based on ratio of two aspect ratios
         // Typically the base aspect is a reference aspect like 16:9 or 4:3
         static float ScaleFOVByWidthRatio(float fov, float aspect, float baseAspect) {

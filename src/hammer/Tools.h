@@ -20,18 +20,18 @@ namespace engine::editor
         Window* window          = Window::CreateWindow();
     public:
         SystemGroup systems;
-        
+
         // TODO: dedup
         RenderSystem Renderer   = RenderSystem(window);
         render::Render& Render  = *Renderer.render;
-        
+
     public:
     // Viewport //
         struct EditorCamera {
             Camera camera;
             Transform transform;
         } editorCamera;
-    
+
         render::Shader* sh_Color;
         render::Shader* sh_Grid;
 
@@ -46,7 +46,7 @@ namespace engine::editor
 
         // Read object ID from scene view render target and update selection
         void PickObject(uint2 mouse);
-        
+
         // Draw object ID to the selection buffer
         static void BeginSelectionPass(render::RenderContext& ctx);
         static void PreDrawSelection(render::Render& r, uint id);
@@ -54,21 +54,21 @@ namespace engine::editor
         // Draw wireframe outline of selected object
         void DrawSelectionOutline(Mesh* mesh);
         void DrawSelectionOutline(Mesh* mesh, Transform& transform);
-    
+
     // GUI //
         GUI::Window* console;
-    
+
     // Tools Engine Loop //
 
         void Init();
         void Loop();
         void Shutdown();
-        
+
     private:
         render::Render& r = Render;
 
     } Tools;
-    
+
     inline void Tools::PreDrawSelection(render::Render& r, uint id)
     {
         r.SetShader(editor::Tools.sh_Color);

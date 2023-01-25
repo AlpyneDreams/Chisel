@@ -11,7 +11,7 @@ namespace engine::editor
 {
     static RenderSystem& Renderer   = Tools.Renderer;
     static render::Render& r        = Tools.Render;
-    
+
     void Tools::Init()
     {
         console = &systems.AddSystem<GUI::ConsoleWindow>();
@@ -21,7 +21,7 @@ namespace engine::editor
 
         // Initialize gizmos
         Gizmos.Init();
-        
+
         // Load editor shaders
         sh_Color  = r.LoadShader("vs_basic", "fs_color");
         sh_Grid   = r.LoadShader("vs_grid", "fs_grid");
@@ -31,12 +31,12 @@ namespace engine::editor
         rt_SceneView = r.CreateRenderTarget(width, height);
         rt_ObjectID = r.CreateRenderTarget(width, height, render::TextureFormat::R32F, render::TextureFormat::D32F);
         rt_ObjectID->SetReadBack(true);
-        
+
         // Setup editor camera
         editorCamera.transform.position = vec3(2, 2.5, -3.5);
         editorCamera.transform.SetEulerAngles(vec3(30, -30, 0));
         editorCamera.camera.renderTarget = rt_SceneView;
-        
+
         // Setup camera renderer
         editor::Renderer.OnBeginFrame += [](render::Render& r) {
             editor::Renderer.DrawCamera(editor::Tools.editorCamera.camera, editor::Tools.editorCamera.transform);
@@ -75,7 +75,7 @@ namespace engine::editor
 
             // Amount to lerp between physics steps
             [[maybe_unused]] double alpha = accumulator / Time.fixed.deltaTime;
-            
+
             // Clear buffered input
             Input.Update();
 
@@ -101,7 +101,7 @@ namespace engine::editor
         delete window;
         Window::Shutdown();
     }
-    
+
     void Tools::BeginSelectionPass(render::RenderContext &ctx)
     {
         ctx.SetupCamera();
@@ -113,7 +113,7 @@ namespace engine::editor
         ctx.r.SetDepthTest(render::CompareFunc::LessEqual);
         ctx.r.SetDepthWrite(true);
     }
-    
+
     void Tools::PickObject(uint2 mouse)
     {
         rt_ObjectID->ReadTexture([=](float* data, size_t size, size_t width)
@@ -135,7 +135,7 @@ namespace engine::editor
             }
         });
     }
-    
+
     void Tools::DrawSelectionOutline(Mesh* mesh)
     {
         r.SetDepthTest(render::CompareFunc::LessEqual);

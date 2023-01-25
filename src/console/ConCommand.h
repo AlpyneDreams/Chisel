@@ -31,7 +31,7 @@ namespace engine
             argc(arguments.size()),
             argv(arguments)
         {}
-        
+
         constexpr auto begin() const { return argv.begin(); }
         constexpr auto end() const { return argv.end(); }
     };

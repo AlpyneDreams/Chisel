@@ -36,7 +36,7 @@ namespace engine
         {
             using namespace render;
             GUI::Update();
-            
+
             Render& r = *render;
 
             r.BeginFrame();
@@ -47,13 +47,13 @@ namespace engine
             {
                 DrawCamera(camera, transform);
             }*/
-            
+
             OnEndFrame(r);
             r.EndFrame();
 
             GUI::Render();
         }
-        
+
         void DrawCamera(Camera& camera, Transform& transform)
         {
             using namespace render;
@@ -72,6 +72,6 @@ namespace engine
         ~RenderSystem() {
             delete render;
         }
-        
+
     };
 }

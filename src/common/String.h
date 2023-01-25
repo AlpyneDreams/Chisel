@@ -71,13 +71,13 @@ namespace engine::str
 
         vector<string_view> tokens;
         for (size_t start = 0; start < string.size(); ) {
-            // Find first delimiter 
+            // Find first delimiter
             const auto end = string.find_first_of(delims, start);
-            
+
             // Add non-empty tokens
             if (start != end)
                 tokens.emplace_back(string.substr(start, end-start));
-            
+
             // Break at the end of string
             if (end == string_view::npos)
                 break;
