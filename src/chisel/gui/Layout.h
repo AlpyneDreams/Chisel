@@ -84,7 +84,7 @@ namespace chisel::hammer
 
                 if (ImGui::BeginMenu("Window"))
                 {
-                    ImGui::MenuItem(editor::Tools.console->name.c_str(), "`", &editor::Tools.console->open);
+                    ImGui::MenuItem(chisel::Tools.console->name.c_str(), "`", &chisel::Tools.console->open);
                     ImGui::MenuItem(Hammer.viewport->name.c_str(), "", &Hammer.viewport->open);
                     ImGui::MenuItem(ICON_MC_APPLICATION_OUTLINE " GUI Demo", "", &gui_demo.value);
                     ImGui::EndMenu();
@@ -97,7 +97,7 @@ namespace chisel::hammer
             {
                 if (ImGui::BeginMenuBar())
                 {
-                    GUI::WindowToggleButton(editor::Tools.console, 72.0f, "`");
+                    GUI::WindowToggleButton(chisel::Tools.console, 72.0f, "`");
                     ImGui::EndMenuBar();
                 }
                 ImGui::End();

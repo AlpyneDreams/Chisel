@@ -6,7 +6,7 @@
 
 namespace chisel::hammer
 {
-    using editor::View3D;
+    using chisel::View3D;
 
     struct Viewport : public View3D
     {
@@ -18,12 +18,10 @@ namespace chisel::hammer
 
         void OnPostDraw() override
         {
-            using namespace editor;
-
             // TODO: Better way to find solid by ID
             Hammer.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
             {
-                if (editor::Selection.Active() == Hammer.GetSelectionID(ent, solid))
+                if (chisel::Selection.Active() == Hammer.GetSelectionID(ent, solid))
                     DrawSelectionOutline(solid);
             });
 
@@ -33,7 +31,7 @@ namespace chisel::hammer
 
         void DrawSelectionOutline(Solid& solid)
         {
-            editor::Tools.DrawSelectionOutline(&solid.mesh);
+            chisel::Tools.DrawSelectionOutline(&solid.mesh);
         }
 
     };

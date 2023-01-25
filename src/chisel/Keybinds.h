@@ -5,7 +5,7 @@
 #include "input/Keyboard.h"
 #include <imgui.h>
 
-namespace chisel::editor
+namespace chisel
 {
     struct Keybinds : System
     {

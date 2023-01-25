@@ -7,7 +7,7 @@
 
 #include <bit>
 
-namespace chisel::editor
+namespace chisel
 {
     static RenderSystem& Renderer   = Tools.Renderer;
     static render::Render& r        = Tools.Render;
@@ -38,8 +38,8 @@ namespace chisel::editor
         editorCamera.camera.renderTarget = rt_SceneView;
 
         // Setup camera renderer
-        editor::Renderer.OnBeginFrame += [](render::Render& r) {
-            editor::Renderer.DrawCamera(editor::Tools.editorCamera.camera, editor::Tools.editorCamera.transform);
+        chisel::Renderer.OnBeginFrame += [](render::Render& r) {
+            chisel::Renderer.DrawCamera(chisel::Tools.editorCamera.camera, chisel::Tools.editorCamera.transform);
         };
     }
 
@@ -105,7 +105,7 @@ namespace chisel::editor
     void Tools::BeginSelectionPass(render::RenderContext &ctx)
     {
         ctx.SetupCamera();
-        ctx.r.SetRenderTarget(editor::Tools.rt_ObjectID);
+        ctx.r.SetRenderTarget(chisel::Tools.rt_ObjectID);
         ctx.r.SetClearColor(true, Colors.Black);
         ctx.r.SetBlendFunc(render::BlendFuncs::Normal);
         ctx.r.SetClearDepth(true, 1.0f);

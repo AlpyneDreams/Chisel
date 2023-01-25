@@ -28,7 +28,7 @@ namespace chisel
         // This frees data when the upload completes.
         // TODO: This requires renderer to be initialized.
         // Ideally we should upload the texture on first use like with meshes.
-        editor::Tools.Render.UploadTexture(texture);
+        chisel::Tools.Render.UploadTexture(texture);
 
         return texture;
     }

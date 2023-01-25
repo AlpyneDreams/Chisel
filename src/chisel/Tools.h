@@ -9,7 +9,7 @@
 #include "render/RenderSystem.h"
 #include "render/RenderContext.h"
 
-namespace chisel::editor
+namespace chisel
 {
     /**
      * Tools manages the editor viewport and general rendering.
@@ -71,7 +71,7 @@ namespace chisel::editor
 
     inline void Tools::PreDrawSelection(render::Render& r, uint id)
     {
-        r.SetShader(editor::Tools.sh_Color);
+        r.SetShader(chisel::Tools.sh_Color);
         float f = std::bit_cast<float>(id + 1); // add 1 as 0 is for background
         r.SetUniform("u_color", vec4(f, 0.f, 0.f, 1.0f));
     }

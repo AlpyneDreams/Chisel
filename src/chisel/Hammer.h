@@ -7,7 +7,7 @@
 
 namespace chisel::hammer
 {
-    inline class editor::Tools& Tools = editor::Tools;
+    inline class chisel::Tools& Tools = chisel::Tools;
 
     struct MapRender;
 

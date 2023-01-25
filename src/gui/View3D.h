@@ -19,7 +19,7 @@
 #include "gui/IconsMaterialCommunity.h"
 #include "render/Render.h"
 
-namespace chisel::editor
+namespace chisel
 {
     struct View3D : public GUI::Window
     {

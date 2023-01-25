@@ -10,7 +10,7 @@
 
 #include <vector>
 
-namespace chisel::editor
+namespace chisel
 {
     inline struct Gizmos
     {
