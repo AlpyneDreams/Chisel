@@ -64,6 +64,14 @@ namespace chisel
     }
 }
 
+namespace chisel::commands
+{
+    inline ConCommand quit("quit", "Quit the application", []() {
+        Tools.Shutdown();
+        exit(0);
+    }); 
+}
+
 int main(int argc, char* argv[])
 {
     using namespace chisel;
