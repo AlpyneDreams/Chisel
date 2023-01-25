@@ -9,7 +9,7 @@
 
 #include <vector>
 
-namespace chisel::hammer
+namespace chisel
 {
     struct Editor : KeyValues
     {

@@ -5,10 +5,8 @@
 #include "chisel/Hammer.h"
 #include "chisel/VMF.h"
 
-namespace chisel::hammer
+namespace chisel
 {
-    inline class chisel::Tools& Tools = chisel::Tools;
-
     struct MapRender;
 
     enum class SelectMode {

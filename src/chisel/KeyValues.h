@@ -12,7 +12,7 @@
 #include <string>
 #include <utility>
 
-namespace chisel::hammer
+namespace chisel
 {
     struct KeyValues
     {
@@ -197,13 +197,13 @@ namespace chisel::hammer
 
 // FMT/ostream support
 
-namespace chisel::hammer
+namespace chisel
 {
     inline std::ostream& operator<<(std::ostream& os, const KeyValues& kv) {
         return os << kv.operator std::string();
     }
 }
-template <> struct fmt::formatter<chisel::hammer::KeyValues> : ostream_formatter {};
+template <> struct fmt::formatter<chisel::KeyValues> : ostream_formatter {};
 
 
 // All the C++ boilerplate necessary to allow structured binding:
@@ -212,25 +212,25 @@ template <> struct fmt::formatter<chisel::hammer::KeyValues> : ostream_formatter
 namespace std
 {
     template <>
-    struct tuple_size<chisel::hammer::KeyValues> {
+    struct tuple_size<chisel::KeyValues> {
         static constexpr size_t value = 2;
     };
 
     template<>
-    struct tuple_element<0, chisel::hammer::KeyValues> {
+    struct tuple_element<0, chisel::KeyValues> {
         using type = std::string;
     };
 
     template<>
-    struct tuple_element<1, chisel::hammer::KeyValues> {
-        using type = chisel::hammer::KeyValues&;
+    struct tuple_element<1, chisel::KeyValues> {
+        using type = chisel::KeyValues&;
     };
 }
 
-namespace chisel::hammer
+namespace chisel
 {
     template<std::size_t Index>
-    std::tuple_element_t<Index, chisel::hammer::KeyValues>& get(chisel::hammer::KeyValues& kv)
+    std::tuple_element_t<Index, chisel::KeyValues>& get(chisel::KeyValues& kv)
     {
         if constexpr (Index == 0) return kv.name;
         if constexpr (Index == 1) return kv;

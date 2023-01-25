@@ -7,7 +7,7 @@
 #include "math/Math.h"
 #include <glm/gtx/normal.hpp>
 
-namespace chisel::hammer
+namespace chisel
 {
     static VertexLayout xyz = {
         VertexAttribute::For<float>(3, VertexAttribute::Position),

@@ -16,7 +16,7 @@ namespace chisel {
     extern ConVar<bool> gui_demo;
 }
 
-namespace chisel::hammer
+namespace chisel
 {
     struct SelectionModeWindow : GUI::Window
     {

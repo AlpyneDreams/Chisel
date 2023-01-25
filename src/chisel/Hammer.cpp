@@ -17,7 +17,7 @@
 #include <cstring>
 #include <vector>
 
-namespace chisel::hammer
+namespace chisel
 {
     void Hammer::Open(const char* path)
     {
@@ -39,10 +39,10 @@ namespace chisel::hammer
         Tools.Init();
 
         // Add hammer systems...
-        Renderer = &Tools.systems.AddSystem<hammer::MapRender>();
-        Tools.systems.AddSystem<hammer::Keybinds>();
-        Tools.systems.AddSystem<hammer::Layout>();
-        Tools.systems.AddSystem<hammer::SelectionModeWindow>();
+        Renderer = &Tools.systems.AddSystem<MapRender>();
+        Tools.systems.AddSystem<Keybinds>();
+        Tools.systems.AddSystem<Layout>();
+        Tools.systems.AddSystem<SelectionModeWindow>();
         viewport = &Tools.systems.AddSystem<Viewport>();
 
         // Setup Object ID pass
@@ -50,10 +50,10 @@ namespace chisel::hammer
         {
             Tools.BeginSelectionPass(ctx);
 
-            class hammer::Hammer& Hammer = hammer::Hammer;
+            class chisel::Hammer& Hammer = chisel::Hammer;
             Hammer.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
             {
-                Tools.PreDrawSelection(ctx.r, hammer::Hammer.GetSelectionID(ent, solid));
+                Tools.PreDrawSelection(ctx.r, chisel::Hammer.GetSelectionID(ent, solid));
                 ctx.r.DrawMesh(&solid.mesh);
             });
         };
@@ -66,6 +66,6 @@ namespace chisel::hammer
 
 int main(int argc, char* argv[])
 {
-    using namespace chisel::hammer;
+    using namespace chisel;
     Hammer.Run();
 }
