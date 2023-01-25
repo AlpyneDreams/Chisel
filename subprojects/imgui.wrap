@@ -1,0 +1,11 @@
+[wrap-git]
+directory = imgui-docking
+url = https://github.com/ocornut/imgui.git
+revision = docking
+depth = 1
+patch_directory = imgui
+wrapdb_version = 1.87-3
+
+[provide]
+imgui = imgui_dep
+

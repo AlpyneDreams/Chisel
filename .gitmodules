@@ -1,0 +1,15 @@
+[submodule "submodules/vookoo"]
+	path = submodules/vookoo
+	url = https://github.com/andy-thomason/Vookoo.git
+[submodule "submodules/bx"]
+	path = submodules/bx
+	url = https://github.com/bkaradzic/bx.git
+[submodule "submodules/bimg"]
+	path = submodules/bimg
+	url = https://github.com/bkaradzic/bimg.git
+[submodule "submodules/bgfx"]
+	path = submodules/bgfx
+	url = https://github.com/AlpyneDreams/bgfx.git
+[submodule "subprojects/rain"]
+	path = subprojects/rain
+	url = https://github.com/AlpyneDreams/rain.git

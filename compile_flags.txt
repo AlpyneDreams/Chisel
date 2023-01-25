@@ -1,0 +1,13 @@
+-xc++
+-std=c++20
+-Isrc
+-Isubprojects/entt/src
+-Isubprojects/fmt-8.1.1/include
+-Isubprojects/glm-0.9.9.8
+-Isubprojects/imgui-docking
+-Isubprojects/imguizmo
+-Isubprojects/SDL2-2.0.20/include
+-Isubmodules/bgfx/include
+-Isubmodules/bimg/include
+-Isubmodules/bx/include
+-Isubmodules/vookoo/include

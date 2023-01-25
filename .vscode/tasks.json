@@ -1,0 +1,44 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Setup",
+            "detail": "Meson",
+            "type": "shell",
+            "command": "meson build",
+            "group": "build"
+        },
+        {
+            "label": "Build & Install",
+            "detail": "Meson",
+            "type": "shell",
+            "command": "meson install -C build",
+            "linux": {
+                "problemMatcher": {
+                    "base": "$gcc",
+                    "fileLocation": ["autodetect", "${workspaceFolder}/build"]
+                },
+            },
+            "windows": {
+                "problemMatcher": {
+                    "base": "$msCompile",
+                    "fileLocation": ["autodetect", "${workspaceFolder}/build"]
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                //"echo": true,
+                "reveal": "always",
+                //"focus": false,
+                //"panel": "shared",
+                //"showReuseMessage": true,
+                "clear": true
+            }
+        }
+    ]
+}

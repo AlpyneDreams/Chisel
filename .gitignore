@@ -1,0 +1,25 @@
+# Clang cache
+/.cache
+
+# VS Code settings
+/.vscode/settings.json
+/.vscode/c_cpp_properties.json
+
+# The Binary
+/runtime/engine
+/runtime/editor
+/runtime/hammer
+/runtime/*.exe
+/runtime/*.pdb
+
+# ImGUI clutter
+/runtime/*.ui.ini
+
+# Meson subprojects
+/subprojects/packagecache
+/subprojects/*
+
+# Keep Meson .wrap and package files
+!/subprojects/*.wrap
+!/subprojects/packagefiles
+!/subprojects/rain
