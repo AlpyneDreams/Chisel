@@ -13,7 +13,7 @@ namespace engine::hammer
 {
     struct Editor : KeyValues
     {
-        Color color;
+        Color32 color;
         int visgroupid;
         int groupid;
         bool visgroupshown;
@@ -98,7 +98,7 @@ namespace engine::hammer
     {
         const char* name;
         int id;
-        Color color;
+        Color32 color;
         std::vector<Visgroup> children;
 
         Visgroup(KeyValues& visgroup);

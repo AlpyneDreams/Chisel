@@ -65,7 +65,8 @@ namespace engine
         }
     };
 
-    using Color = ColorRGBA<float>;
+    using Color   = ColorRGBA<float>;
+    using Color32 = ColorRGBA<byte>;
 
     // List of common colors
     const struct {
