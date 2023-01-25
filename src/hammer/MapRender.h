@@ -2,7 +2,7 @@
 
 #include "glm/ext/matrix_transform.hpp"
 #include "hammer/Hammer.h"
-#include "hammer/System.h"
+#include "core/System.h"
 #include "hammer/Tools.h"
 #include "hammer/VMF.h"
 #include "hammer/Selection.h"

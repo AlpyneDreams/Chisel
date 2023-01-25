@@ -10,7 +10,7 @@
 
 #include "core/Camera.h"
 
-#include "hammer/System.h"
+#include "core/System.h"
 
 namespace engine
 {

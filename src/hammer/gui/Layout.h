@@ -4,7 +4,7 @@
 
 #include "platform/Platform.h"
 #include "common/Common.h"
-#include "hammer/System.h"
+#include "core/System.h"
 #include "console/ConVar.h"
 
 #include "imgui.h"

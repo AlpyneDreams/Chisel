@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/Common.h"
-#include "hammer/System.h"
+#include "core/System.h"
 #include "math/Math.h"
 #include <imgui.h>
 #include <imgui_internal.h>

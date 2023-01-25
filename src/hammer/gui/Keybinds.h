@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hammer/System.h"
+#include "core/System.h"
 #include "hammer/gui/Layout.h"
 #include "input/Keyboard.h"
 #include <imgui.h>

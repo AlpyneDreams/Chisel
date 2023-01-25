@@ -1,7 +1,7 @@
 #pragma once
 
 #include "hammer/Editor.h"
-#include "hammer/System.h"
+#include "core/System.h"
 #include "input/Keyboard.h"
 #include <imgui.h>
 
