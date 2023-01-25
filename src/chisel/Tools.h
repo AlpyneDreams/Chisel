@@ -21,7 +21,6 @@ namespace chisel
     public:
         SystemGroup systems;
 
-        // TODO: dedup
         RenderSystem Renderer   = RenderSystem(window);
         render::Render& Render  = *Renderer.render;
 

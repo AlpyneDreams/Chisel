@@ -7,9 +7,9 @@
 #include "console/Console.h"
 #include "chisel/VMF.h"
 #include "gui/ConsoleWindow.h"
-#include "chisel/gui/Layout.h"
-#include "chisel/gui/Viewport.h"
-#include "chisel/gui/Keybinds.h"
+#include "gui/Layout.h"
+#include "gui/Viewport.h"
+#include "gui/Keybinds.h"
 
 #include "common/Filesystem.h"
 #include "render/Render.h"

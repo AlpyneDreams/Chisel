@@ -7,12 +7,11 @@
 #include "gui/Common.h"
 
 #include "core/Camera.h"
-
 #include "core/System.h"
 
 namespace chisel
 {
-    // Manages rendering systems and components
+    // Manages remdering device and callbacks
     struct RenderSystem : public System
     {
         Window* window;
@@ -41,13 +40,7 @@ namespace chisel
 
             r.BeginFrame();
             OnBeginFrame(r);
-
-            // Render each camera with the render pipeline
-            /*for (auto&& [ent, transform, camera] : World.Each<Transform, Camera>())
-            {
-                DrawCamera(camera, transform);
-            }*/
-
+            
             OnEndFrame(r);
             r.EndFrame();
 
@@ -60,6 +53,7 @@ namespace chisel
             RenderContext ctx = RenderContext(*render, camera, transform);
 
             OnBeginCamera(ctx);
+            
             OnEndCamera(ctx);
         }
 

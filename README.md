@@ -15,6 +15,7 @@ Included as Git submodules:
 - [bgfx](https://github.com/bkaradzic/bgfx) (with [bx](https://github.com/bkaradzic/bx) and [bimg](https://github.com/bkaradzic/bimg))
 
 Already included in repo:
+- [VDF Parser](https://github.com/TinyTinni/ValveFileVDF)
 - [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader)
 - [stb](https://github.com/nothings/stb) image loader and writer
 - [imgui_impl_bgfx.cpp](https://gist.github.com/RichardGale/6e2b74bc42b3005e08397236e4be0fd0)
