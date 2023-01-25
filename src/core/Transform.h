@@ -5,7 +5,7 @@
 // Cache euler angles
 #define EDITOR
 
-namespace engine
+namespace chisel
 {
     struct Transform
     {

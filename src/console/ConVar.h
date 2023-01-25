@@ -12,7 +12,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace engine
+namespace chisel
 {
     /** Represents a console variable. */
     template <typename T = const char*>

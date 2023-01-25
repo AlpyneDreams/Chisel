@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-namespace engine
+namespace chisel
 {
     // TODO: Better way to define asset loaders.
     // TODO: Exceptions or Result<T> for FindFile, Load, etc...

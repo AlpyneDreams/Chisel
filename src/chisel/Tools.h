@@ -9,7 +9,7 @@
 #include "render/RenderSystem.h"
 #include "render/RenderContext.h"
 
-namespace engine::editor
+namespace chisel::editor
 {
     /**
      * Tools manages the editor viewport and general rendering.

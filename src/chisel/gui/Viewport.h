@@ -4,7 +4,7 @@
 #include "chisel/Gizmos.h"
 #include "chisel/VMF.h"
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     using editor::View3D;
 

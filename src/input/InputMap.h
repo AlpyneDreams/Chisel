@@ -2,7 +2,7 @@
 
 #include "common/Enum.h"
 
-namespace engine
+namespace chisel
 {
     // Represents a set of digital buttons or keys
     template <EnumType E, E Size = E::Max>

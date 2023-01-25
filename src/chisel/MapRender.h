@@ -13,7 +13,7 @@
 #include "math/Color.h"
 #include <glm/gtx/normal.hpp>
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     // TODO: Make this a RenderPipeline
     struct MapRender : public System

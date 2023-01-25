@@ -17,7 +17,7 @@
 #include <cstring>
 #include <vector>
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     void Hammer::Open(const char* path)
     {
@@ -66,6 +66,6 @@ namespace engine::hammer
 
 int main(int argc, char* argv[])
 {
-    using namespace engine::hammer;
+    using namespace chisel::hammer;
     Hammer.Run();
 }

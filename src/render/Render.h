@@ -9,9 +9,9 @@
 #include <functional>
 #include <string_view>
 
-namespace engine { struct RenderSystem; struct Mesh; struct Texture; }
+namespace chisel { struct RenderSystem; struct Mesh; struct Texture; }
 
-namespace engine::render
+namespace chisel::render
 {
     // TODO: Consistent API for GPU child objects and uploading
 
@@ -46,7 +46,7 @@ namespace engine::render
 
     class Render
     {
-        friend struct ::engine::RenderSystem;
+        friend struct ::chisel::RenderSystem;
     protected:
         virtual void Init(Window* window) = 0;
         virtual void BeginFrame() = 0;

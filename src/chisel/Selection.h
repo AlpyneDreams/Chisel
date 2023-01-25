@@ -2,7 +2,7 @@
 
 #include "common/Common.h"
 
-namespace engine::editor
+namespace chisel::editor
 {
     using SelectionID = uint32;
 

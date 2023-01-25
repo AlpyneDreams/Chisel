@@ -8,7 +8,7 @@
 #include <SDL.h>
 #include <SDL_mouse.h>
 
-namespace engine
+namespace chisel
 {
     static Cursor::Mode currentMode = Cursor::Normal;
 

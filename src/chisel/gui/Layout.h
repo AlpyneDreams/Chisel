@@ -12,11 +12,11 @@
 
 #include "gui/IconsMaterialCommunity.h"
 
-namespace engine {
+namespace chisel {
     extern ConVar<bool> gui_demo;
 }
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     struct SelectionModeWindow : GUI::Window
     {

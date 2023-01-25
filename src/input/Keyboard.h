@@ -3,7 +3,7 @@
 #include "console/Console.h"
 #include "input/InputMap.h"
 
-namespace engine
+namespace chisel
 {
     // TODO: All the key codes. Should be basically 1:1 with SDL, maybe with some exceptions?
     enum class Key

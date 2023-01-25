@@ -5,7 +5,7 @@
 
 #include <cstddef>
 
-namespace engine
+namespace chisel
 {
     // Base class for VertexBuffer and IndexBuffer
     struct GraphicsBuffer

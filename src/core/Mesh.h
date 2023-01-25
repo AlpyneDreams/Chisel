@@ -6,7 +6,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 
-namespace engine
+namespace chisel
 {
     struct Mesh
     {

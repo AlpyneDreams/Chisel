@@ -3,7 +3,7 @@
 #include "math/Math.h"
 #include "input/InputMap.h"
 
-namespace engine
+namespace chisel
 {
     enum class MouseButton
     {
@@ -23,7 +23,7 @@ namespace engine
     /** Interface to mouse input.
      *
      * To control cursor appearence and behavior
-     * use engine::Cursor in platform/Cursor.h
+     * use chisel::Cursor in platform/Cursor.h
      */
     inline struct Mouse
     {

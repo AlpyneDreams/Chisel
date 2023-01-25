@@ -5,7 +5,7 @@
 #include "chisel/Hammer.h"
 #include "chisel/VMF.h"
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     inline class editor::Tools& Tools = editor::Tools;
 

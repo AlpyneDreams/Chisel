@@ -10,7 +10,7 @@
 
 #include "gui/IconsMaterialCommunity.h"
 
-namespace engine
+namespace chisel
 {
     // Merge in icon font(s) - see gui/docs/FONTS.md
     // This process is expensive for MaterialCommunityIcons (~7000 icons)

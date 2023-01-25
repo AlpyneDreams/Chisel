@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     Editor::Editor(KeyValues& editor) : KeyValues(editor),
         color               (editor["color"]),

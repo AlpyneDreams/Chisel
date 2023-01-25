@@ -7,7 +7,7 @@
 #include <imgui_internal.h>
 #include <string>
 
-namespace engine::GUI
+namespace chisel::GUI
 {
     struct Window : public System
     {

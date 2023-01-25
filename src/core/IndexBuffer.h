@@ -6,7 +6,7 @@
 
 #include <vector>
 
-namespace engine
+namespace chisel
 {
     struct IndexBuffer final : GraphicsBuffer
     {

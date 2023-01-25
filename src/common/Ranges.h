@@ -4,7 +4,7 @@
 #include <utility>
 #include <iterator>
 
-namespace engine
+namespace chisel
 {
     /** Simple iterable range on interval [first, last)
      * Similar to std::ranges::subrange. Can be used with iterator

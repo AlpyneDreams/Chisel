@@ -9,7 +9,7 @@
 #include <cstdlib>
 
 
-namespace engine
+namespace chisel
 {
     struct Texture : GraphicsBuffer
     {

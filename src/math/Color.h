@@ -7,7 +7,7 @@
 #include "common/Common.h"
 #include "math/Math.h"
 
-namespace engine
+namespace chisel
 {
     template <typename T = float>
     struct ColorRGBA

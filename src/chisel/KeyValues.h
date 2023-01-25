@@ -12,7 +12,7 @@
 #include <string>
 #include <utility>
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     struct KeyValues
     {
@@ -197,13 +197,13 @@ namespace engine::hammer
 
 // FMT/ostream support
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     inline std::ostream& operator<<(std::ostream& os, const KeyValues& kv) {
         return os << kv.operator std::string();
     }
 }
-template <> struct fmt::formatter<engine::hammer::KeyValues> : ostream_formatter {};
+template <> struct fmt::formatter<chisel::hammer::KeyValues> : ostream_formatter {};
 
 
 // All the C++ boilerplate necessary to allow structured binding:
@@ -212,25 +212,25 @@ template <> struct fmt::formatter<engine::hammer::KeyValues> : ostream_formatter
 namespace std
 {
     template <>
-    struct tuple_size<engine::hammer::KeyValues> {
+    struct tuple_size<chisel::hammer::KeyValues> {
         static constexpr size_t value = 2;
     };
 
     template<>
-    struct tuple_element<0, engine::hammer::KeyValues> {
+    struct tuple_element<0, chisel::hammer::KeyValues> {
         using type = std::string;
     };
 
     template<>
-    struct tuple_element<1, engine::hammer::KeyValues> {
-        using type = engine::hammer::KeyValues&;
+    struct tuple_element<1, chisel::hammer::KeyValues> {
+        using type = chisel::hammer::KeyValues&;
     };
 }
 
-namespace engine::hammer
+namespace chisel::hammer
 {
     template<std::size_t Index>
-    std::tuple_element_t<Index, engine::hammer::KeyValues>& get(engine::hammer::KeyValues& kv)
+    std::tuple_element_t<Index, chisel::hammer::KeyValues>& get(chisel::hammer::KeyValues& kv)
     {
         if constexpr (Index == 0) return kv.name;
         if constexpr (Index == 1) return kv;

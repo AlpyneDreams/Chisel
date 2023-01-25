@@ -4,10 +4,10 @@
 
 #include <imgui.h>
 
-namespace engine
+namespace chisel
 {
     /** Manages cursor appearance and behavior.
-     * To get mouse input, use engine::Mouse in input/Input.h
+     * To get mouse input, use chisel::Mouse in input/Input.h
      */
     inline struct Cursor
     {

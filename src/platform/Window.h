@@ -8,7 +8,7 @@
 #include "math/Math.h"
 #include "input/Input.h"
 
-namespace engine
+namespace chisel
 {
     /** Interface to a window.
      *  Backend could be SDL, for example.

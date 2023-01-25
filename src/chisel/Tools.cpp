@@ -7,7 +7,7 @@
 
 #include <bit>
 
-namespace engine::editor
+namespace chisel::editor
 {
     static RenderSystem& Renderer   = Tools.Renderer;
     static render::Render& r        = Tools.Render;

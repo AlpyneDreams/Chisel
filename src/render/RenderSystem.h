@@ -10,7 +10,7 @@
 
 #include "core/System.h"
 
-namespace engine
+namespace chisel
 {
     // Manages rendering systems and components
     struct RenderSystem : public System

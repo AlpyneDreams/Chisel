@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace engine
+namespace chisel
 {
     using uint  = unsigned int;
     using byte  = uint8_t;

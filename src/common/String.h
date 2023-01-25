@@ -8,7 +8,7 @@
 #include <string_view>
 #include <vector>
 
-namespace engine
+namespace chisel
 {
     // Compile-time string
     template <size_t N>
@@ -24,7 +24,7 @@ namespace engine
 
 }
 
-namespace engine::str
+namespace chisel::str
 {
     // Returns lowercased copy of str
     inline std::string toLower(std::string_view str)

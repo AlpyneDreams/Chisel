@@ -11,7 +11,7 @@
 
 using namespace tinyobj;
 
-namespace engine
+namespace chisel
 {
     struct VertexOBJ
     {

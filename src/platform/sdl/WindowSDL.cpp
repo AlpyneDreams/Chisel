@@ -18,7 +18,7 @@
     #undef CreateWindow
 #endif
 
-namespace engine
+namespace chisel
 {
     class WindowSDL final : public Window
     {

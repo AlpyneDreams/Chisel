@@ -12,7 +12,7 @@
 
 // TODO: Move this into /entity/? or keep in /engine/?
 
-namespace engine
+namespace chisel
 {
     struct System
     {

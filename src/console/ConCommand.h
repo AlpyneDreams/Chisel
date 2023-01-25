@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <string_view>
 
-namespace engine
+namespace chisel
 {
     struct ConCommand;
 

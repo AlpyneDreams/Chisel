@@ -4,7 +4,7 @@
 #include "Console.h"
 #include "ConCommand.h"
 
-namespace engine::commands
+namespace chisel::commands
 {
     inline ConCommand echo("echo", "Prints text to console", [](ConCmd& cmd) {
         Console.Log(cmd.args);
@@ -37,7 +37,7 @@ namespace engine::commands
     });
 }
 
-namespace engine::cvars
+namespace chisel::cvars
 {
 }
 

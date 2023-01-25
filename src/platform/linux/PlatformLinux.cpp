@@ -9,7 +9,7 @@
 // Linux Platform-specific implementations
 // (and probably some other Unices)
 
-namespace engine
+namespace chisel
 {
     std::string Platform::FilePicker(const char* startIn)
     {

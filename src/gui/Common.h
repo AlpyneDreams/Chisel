@@ -7,7 +7,7 @@
 
 struct ImFont;
 
-namespace engine
+namespace chisel
 {
     namespace GUI
     {

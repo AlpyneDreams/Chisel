@@ -3,7 +3,7 @@
 #include "input/Mouse.h"
 #include "input/Keyboard.h"
 
-namespace engine
+namespace chisel
 {
     inline struct Input
     {

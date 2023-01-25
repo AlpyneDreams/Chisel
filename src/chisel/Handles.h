@@ -12,7 +12,7 @@
 
 #include <vector>
 
-namespace engine::editor
+namespace chisel::editor
 {
     inline struct Handles
     {

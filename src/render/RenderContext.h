@@ -4,7 +4,7 @@
 
 #include <functional>
 
-namespace engine::render
+namespace chisel::render
 {
     /**
      * High level scene rendering context

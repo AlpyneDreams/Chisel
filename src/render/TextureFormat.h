@@ -2,7 +2,7 @@
 
 #include "common/Common.h"
 
-namespace engine::render
+namespace chisel::render
 {
     // TODO: All texture formats...
     enum class TextureFormat

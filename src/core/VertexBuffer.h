@@ -6,7 +6,7 @@
 #include "VertexLayout.h"
 
 
-namespace engine
+namespace chisel
 {
     struct VertexBuffer final : GraphicsBuffer
     {

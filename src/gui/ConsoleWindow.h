@@ -12,7 +12,7 @@
 
 #include "gui/IconsMaterialCommunity.h"
 
-namespace engine::GUI
+namespace chisel::GUI
 {
     struct ConsoleWindow : public Window
     {

@@ -6,7 +6,7 @@
 #include "platform/Window.h"
 #include "render/Render.h"
 
-namespace engine
+namespace chisel
 {
     struct Camera
     {

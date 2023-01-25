@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include <typeindex>
 
-namespace engine
+namespace chisel
 {
     struct VertexAttribute {
         enum Mode { Default, None, Position, Normal, Tangent, Bitangent, Color, Indices, Weight, TexCoord };

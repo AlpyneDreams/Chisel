@@ -8,7 +8,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-namespace engine
+namespace chisel
 {
     namespace GUI { struct ConsoleWindow; }
 

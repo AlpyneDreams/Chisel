@@ -25,7 +25,7 @@
 #include "console/ConCommand.h"
 #include "render/Texture.h"
 
-namespace engine::render
+namespace chisel::render
 {
     // Maps an integral type to bgfx::AttribType
     static std::unordered_map<std::type_index, bgfx::AttribType::Enum> bgfxAttribTypes {

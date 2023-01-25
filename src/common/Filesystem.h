@@ -17,7 +17,7 @@ namespace std::filesystem {
     std::string operator+(const std::string& str, const path& path);
 }
 
-namespace engine::fs
+namespace chisel::fs
 {
     using Path = std::filesystem::path;
 
@@ -57,4 +57,4 @@ namespace std::filesystem
     }
 }
 
-template <> struct fmt::formatter<engine::fs::Path> : ostream_formatter {};
+template <> struct fmt::formatter<chisel::fs::Path> : ostream_formatter {};

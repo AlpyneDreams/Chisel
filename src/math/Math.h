@@ -15,7 +15,7 @@
 
 #include <ostream>
 
-namespace engine
+namespace chisel
 {
     // Standard vectors
     using vec4 = glm::vec4;

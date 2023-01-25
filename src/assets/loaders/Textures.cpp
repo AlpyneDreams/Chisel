@@ -10,7 +10,7 @@
 
 #include <span>
 
-namespace engine
+namespace chisel
 {
     static Texture* LoadTexture(const fs::Path& path)
     {

@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <bitset>
 
-namespace engine
+namespace chisel
 {
     template <typename T>
     concept EnumType = std::is_enum_v<T>;

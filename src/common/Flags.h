@@ -2,7 +2,7 @@
 
 #include "Enum.h"
 
-namespace engine
+namespace chisel
 {
     /** Wraps a bitfield (flags) enum.
      * Set Flag: |= flag

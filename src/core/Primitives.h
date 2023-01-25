@@ -3,7 +3,7 @@
 #include "core/Mesh.h"
 #include "assets/Assets.h"
 
-namespace engine
+namespace chisel
 {
     inline struct Primitives
     {
