@@ -4,13 +4,13 @@
 
 #include "platform/Platform.h"
 #include "common/Common.h"
-#include "engine/System.h"
+#include "hammer/System.h"
 #include "console/ConVar.h"
 
 #include "imgui.h"
-#include "imgui/Common.h"
+#include "gui/Common.h"
 
-#include "imgui/IconsMaterialCommunity.h"
+#include "gui/IconsMaterialCommunity.h"
 
 namespace engine {
     extern ConVar<bool> gui_demo;

@@ -2,7 +2,7 @@ import os, json
 
 icons = json.load(open('icons.json'))
 
-out = open('../src/imgui/IconsMaterialCommunity.h', 'w')
+out = open('../src/gui/IconsMaterialCommunity.h', 'w')
 
 out.write('''
 // Generated from https://github.com/Templarian/MaterialDesign/blob/master/meta.json

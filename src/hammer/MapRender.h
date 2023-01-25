@@ -2,10 +2,10 @@
 
 #include "glm/ext/matrix_transform.hpp"
 #include "hammer/Hammer.h"
-#include "engine/System.h"
-#include "editor/Tools.h"
+#include "hammer/System.h"
+#include "hammer/Tools.h"
 #include "hammer/VMF.h"
-#include "editor/Selection.h"
+#include "hammer/Selection.h"
 
 #include "core/Primitives.h"
 #include "core/VertexLayout.h"

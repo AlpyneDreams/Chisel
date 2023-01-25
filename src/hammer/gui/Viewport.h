@@ -1,7 +1,7 @@
-#include "editor/gui/View3D.h"
+#include "gui/View3D.h"
 
 #include "hammer/Hammer.h"
-#include "editor/Gizmos.h"
+#include "hammer/Gizmos.h"
 #include "hammer/VMF.h"
 
 namespace engine::hammer

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "editor/Tools.h"
-#include "imgui/Window.h"
-#include "editor/Selection.h"
-#include "editor/Handles.h"
+#include "hammer/Tools.h"
+#include "gui/Window.h"
+#include "hammer/Selection.h"
+#include "hammer/Handles.h"
 #include "input/Input.h"
 #include "input/Keyboard.h"
 #include "platform/Cursor.h"
-#include "engine/Time.h"
+#include "common/Time.h"
 
 #include "core/Camera.h"
 #include "core/Transform.h"
@@ -16,7 +16,7 @@
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 
-#include "imgui/IconsMaterialCommunity.h"
+#include "gui/IconsMaterialCommunity.h"
 #include "render/Render.h"
 
 namespace engine::editor

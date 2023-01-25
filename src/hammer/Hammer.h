@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/Tools.h"
+#include "hammer/Tools.h"
 
 #include "hammer/Hammer.h"
 #include "hammer/VMF.h"

@@ -9,7 +9,7 @@
 #include "platform/Platform.h"
 #include "platform/Window.h"
 
-#include "imgui/impl/imgui_impl_sdl.h"
+#include "gui/impl/imgui_impl_sdl.h"
 
 #include <SDL.h>
 #include <SDL_syswm.h>

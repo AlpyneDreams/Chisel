@@ -6,7 +6,7 @@
 
 #include "console/Console.h"
 #include "hammer/VMF.h"
-#include "imgui/ConsoleWindow.h"
+#include "gui/ConsoleWindow.h"
 #include "hammer/gui/Layout.h"
 #include "hammer/gui/Viewport.h"
 #include "hammer/gui/Keybinds.h"

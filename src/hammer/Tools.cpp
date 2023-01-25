@@ -1,9 +1,9 @@
 
 #include "Tools.h"
-#include "engine/Time.h"
-#include "editor/Gizmos.h"
-#include "editor/Selection.h"
-#include "imgui/ConsoleWindow.h"
+#include "common/Time.h"
+#include "hammer/Gizmos.h"
+#include "hammer/Selection.h"
+#include "gui/ConsoleWindow.h"
 
 #include <bit>
 

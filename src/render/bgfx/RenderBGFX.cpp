@@ -1,7 +1,7 @@
 #include "common/Common.h"
 #include "common/Filesystem.h"
 #include "platform/Platform.h"
-#include "engine/Time.h"
+#include "common/Time.h"
 
 #include <algorithm>
 #include <bgfx/bgfx.h>
@@ -9,8 +9,8 @@
 #include <bgfx/platform.h>
 
 #include <imgui.h>
-#include "imgui/impl/imgui_impl_bgfx.h"
-#include "imgui/Common.h"
+#include "gui/impl/imgui_impl_bgfx.h"
+#include "gui/Common.h"
 
 #include <stdexcept>
 #include <unordered_map>
@@ -20,7 +20,7 @@
 #include "platform/Window.h"
 #include "render/Render.h"
 #include "core/Mesh.h"
-#include "engine/Time.h"
+#include "common/Time.h"
 #include "console/Console.h"
 #include "console/ConCommand.h"
 #include "render/Texture.h"

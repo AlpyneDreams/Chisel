@@ -8,11 +8,11 @@
 #include "console/ConVar.h"
 #include "common/Filesystem.h"
 
-#include "imgui/IconsMaterialCommunity.h"
+#include "gui/IconsMaterialCommunity.h"
 
 namespace engine
 {
-    // Merge in icon font(s) - see imgui/docs/FONTS.md
+    // Merge in icon font(s) - see gui/docs/FONTS.md
     // This process is expensive for MaterialCommunityIcons (~7000 icons)
     static void MergeIconFonts(float size)
     {
@@ -101,7 +101,7 @@ namespace engine
         return ImVec2{lhs.x - rhs.x, lhs.y - rhs.y};
     }
 
-    // https://github.com/ocornut/imgui/issues/3469#issuecomment-691845667
+    // https://github.com/ocornut/gui/issues/3469#issuecomment-691845667
     void GUI::ItemLabel(std::string_view title, bool right)
     {
         ImGuiWindow* window = ImGui::GetCurrentWindow();

@@ -4,7 +4,7 @@
 #include <string>
 
 #include "common/Reflection.h"
-#include "imgui/IconsMaterialCommunity.h"
+#include "gui/IconsMaterialCommunity.h"
 
 namespace engine::editor
 {

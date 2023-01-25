@@ -10,7 +10,7 @@
 
 #include "input/Input.h"
 
-#include "imgui/IconsMaterialCommunity.h"
+#include "gui/IconsMaterialCommunity.h"
 
 namespace engine::GUI
 {

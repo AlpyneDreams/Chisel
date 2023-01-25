@@ -19,11 +19,11 @@ hammer_src = files(
     #'render/vk/RenderVK.cpp',
     'render/pipelines/Forward.cpp',
 
-    'imgui/Common.cpp',
-    'imgui/impl/imgui_impl_sdl.cpp',
-    'imgui/impl/imgui_impl_bgfx.cpp',
+    'gui/Common.cpp',
+    'gui/impl/imgui_impl_sdl.cpp',
+    'gui/impl/imgui_impl_bgfx.cpp',
 
-    'editor/Tools.cpp',
+    'hammer/Tools.cpp',
     'hammer/Hammer.cpp',
     'hammer/VMF.cpp',
     'hammer/Solid.cpp',

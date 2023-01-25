@@ -6,11 +6,11 @@
 #include "render/pipelines/RenderPipeline.h"
 #include "render/pipelines/Forward.h"
 #include "render/RenderContext.h"
-#include "imgui/Common.h"
+#include "gui/Common.h"
 
 #include "core/Camera.h"
 
-#include "engine/System.h"
+#include "hammer/System.h"
 
 namespace engine
 {

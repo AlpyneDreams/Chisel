@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/Tools.h"
+#include "hammer/Tools.h"
 #include "assets/Assets.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "render/Render.h"
