@@ -31,7 +31,7 @@ namespace chisel
 
         void Start() final override
         {
-            shader = Tools.Render.LoadShader("hammer_flat");
+            shader = Tools.Render.LoadShader("flat");
         }
 
         void Update() final override
