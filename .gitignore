@@ -6,7 +6,7 @@
 /.vscode/c_cpp_properties.json
 
 # The Binary
-/runtime/hammer
+/runtime/chisel
 /runtime/*.exe
 /runtime/*.pdb
 

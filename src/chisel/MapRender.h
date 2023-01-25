@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glm/ext/matrix_transform.hpp"
-#include "chisel/Hammer.h"
+#include "chisel/Chisel.h"
 #include "core/System.h"
 #include "chisel/Tools.h"
 #include "chisel/VMF.h"

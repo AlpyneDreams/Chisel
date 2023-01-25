@@ -1,6 +1,6 @@
 #pragma once
 
-#include "chisel/Hammer.h"
+#include "chisel/Chisel.h"
 
 #include "platform/Platform.h"
 #include "common/Common.h"

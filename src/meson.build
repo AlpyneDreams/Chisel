@@ -21,7 +21,7 @@ chisel_src = files(
     'gui/impl/imgui_impl_bgfx.cpp',
 
     'chisel/Tools.cpp',
-    'chisel/Hammer.cpp',
+    'chisel/Chisel.cpp',
     'chisel/VMF.cpp',
     'chisel/Solid.cpp',
 )

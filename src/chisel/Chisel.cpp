@@ -1,5 +1,5 @@
 
-#include "chisel/Hammer.h"
+#include "chisel/Chisel.h"
 #include "chisel/MapRender.h"
 #include "common/String.h"
 #include "chisel/KeyValues.h"
@@ -38,7 +38,7 @@ namespace chisel
     {
         Tools.Init();
 
-        // Add hammer systems...
+        // Add chisel systems...
         Renderer = &Tools.systems.AddSystem<MapRender>();
         Tools.systems.AddSystem<Keybinds>();
         Tools.systems.AddSystem<Layout>();

@@ -1,6 +1,6 @@
 #include "gui/View3D.h"
 
-#include "chisel/Hammer.h"
+#include "chisel/Chisel.h"
 #include "chisel/Gizmos.h"
 #include "chisel/VMF.h"
 
