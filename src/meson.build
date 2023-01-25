@@ -7,7 +7,7 @@ engine_args = windows ? [] : [
 ]
 
 hammer_src = files(
-    # engine_src
+    'console/ConsoleCommands.cpp',
     'assets/loaders/Textures.cpp',
     'assets/loaders/MeshOBJ.cpp',
     windows ?
@@ -16,7 +16,6 @@ hammer_src = files(
     'platform/sdl/WindowSDL.cpp',
     'platform/sdl/CursorSDL.cpp',
     'render/bgfx/RenderBGFX.cpp',
-    #'render/vk/RenderVK.cpp',
     'render/pipelines/Forward.cpp',
 
     'gui/Common.cpp',
@@ -33,7 +32,6 @@ hammer_deps = [
     sdl_dep,
     bgfx_dep,
     
-    rain_dep,
     fmt_dep,
     glm_dep,
     imgui_dep,

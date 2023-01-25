@@ -1,6 +1,6 @@
 project('engine', 'cpp',
     version: 'latest',
-    default_options: ['cpp_std=c++20', 'python.platlibdir=', 'python.purelibdir=']
+    default_options: ['cpp_std=c++20']
 )
 
 # ImGui: Use 32-bit Wchar to support planes 1-16
@@ -8,19 +8,11 @@ add_global_arguments('-DIMGUI_USE_WCHAR32', language: 'cpp')
 
 windows    = build_machine.system() == 'windows'
 
-if windows
-    add_global_arguments('/std:c++20', language: 'cpp')
-endif
-
-rain       = subproject('rain')
-rain_dep   = rain.get_variable('rain_dep')
-
 # Force use local WrapDB SDL2 version on Windows
 sdl_dep    = dependency(windows ? 'libsdl2' : 'sdl2', fallback: 'sdl2', default_options: ['with_main=false'], static: true)
 
 fmt_dep    = dependency('fmt', static: true)
 vulkan_dep = dependency('vulkan')
-vookoo_dep = declare_dependency(include_directories: 'submodules/vookoo/include')
 glm_dep    = dependency('glm', static: true)
 imgui_dep  = dependency('imgui', default_options: ['vulkan=disabled'], static: true)
 imguizmo_dep  = dependency('imguizmo')
