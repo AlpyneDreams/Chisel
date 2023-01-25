@@ -12,7 +12,6 @@ windows    = build_machine.system() == 'windows'
 sdl_dep    = dependency(windows ? 'libsdl2' : 'sdl2', fallback: 'sdl2', default_options: ['with_main=false'], static: true)
 
 fmt_dep    = dependency('fmt', static: true)
-vulkan_dep = dependency('vulkan')
 glm_dep    = dependency('glm', static: true)
 imgui_dep  = dependency('imgui', default_options: ['vulkan=disabled'], static: true)
 imguizmo_dep  = dependency('imguizmo')

@@ -6,8 +6,6 @@
 /.vscode/c_cpp_properties.json
 
 # The Binary
-/runtime/engine
-/runtime/editor
 /runtime/hammer
 /runtime/*.exe
 /runtime/*.pdb
@@ -22,4 +20,3 @@
 # Keep Meson .wrap and package files
 !/subprojects/*.wrap
 !/subprojects/packagefiles
-!/subprojects/rain
