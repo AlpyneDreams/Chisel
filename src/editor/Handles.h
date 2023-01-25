@@ -5,7 +5,7 @@
 #include "math/Math.h"
 #include "math/Color.h"
 #include "render/Render.h"
-#include "entity/components/Transform.h"
+#include "core/Transform.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>

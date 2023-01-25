@@ -6,7 +6,7 @@
 
 #include "assets/Assets.h"
 #include "render/Texture.h"
-#include "engine/Engine.h"
+#include "editor/Tools.h"
 
 #include <span>
 
@@ -28,7 +28,7 @@ namespace engine
         // This frees data when the upload completes.
         // TODO: This requires renderer to be initialized.
         // Ideally we should upload the texture on first use like with meshes.
-        Engine.Render.UploadTexture(texture);
+        editor::Tools.Render.UploadTexture(texture);
 
         return texture;
     }

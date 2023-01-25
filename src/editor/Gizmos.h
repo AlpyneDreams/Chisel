@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/Engine.h"
+#include "editor/Tools.h"
 #include "assets/Assets.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "render/Render.h"
@@ -19,7 +19,7 @@ namespace engine::editor
 
         void DrawIcon(vec3 pos, Texture* icon)
         {
-            auto& r = Engine.Render;
+            auto& r = Tools.Render;
             r.SetShader(sh_Sprite);
             r.SetTexture(0, icnLight);
             r.SetBlendFunc(render::BlendFuncs::Alpha);
@@ -32,7 +32,7 @@ namespace engine::editor
         void Init()
         {
             icnLight = Assets.Load<Texture, ".PNG" >("textures/ui/light.png");
-            sh_Sprite = Engine.Render.LoadShader("vs_billboard", "fs_sprite");
+            sh_Sprite = Tools.Render.LoadShader("vs_billboard", "fs_sprite");
         }
     } Gizmos;
 }

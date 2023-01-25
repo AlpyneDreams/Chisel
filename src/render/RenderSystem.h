@@ -8,8 +8,7 @@
 #include "render/RenderContext.h"
 #include "imgui/Common.h"
 
-#include "entity/Scene.h"
-#include "entity/components/Camera.h"
+#include "core/Camera.h"
 
 #include "engine/System.h"
 
@@ -48,10 +47,10 @@ namespace engine
             OnBeginFrame(r);
 
             // Render each camera with the render pipeline
-            for (auto&& [ent, transform, camera] : World.Each<Transform, Camera>())
+            /*for (auto&& [ent, transform, camera] : World.Each<Transform, Camera>())
             {
                 DrawCamera(camera, transform);
-            }
+            }*/
             
             OnEndFrame(r);
             r.EndFrame();

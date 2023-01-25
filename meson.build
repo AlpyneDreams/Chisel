@@ -24,15 +24,6 @@ vookoo_dep = declare_dependency(include_directories: 'submodules/vookoo/include'
 glm_dep    = dependency('glm', static: true)
 imgui_dep  = dependency('imgui', default_options: ['vulkan=disabled'], static: true)
 imguizmo_dep  = dependency('imguizmo')
-entt_dep      = dependency('entt', required: false)
-
-# For EnTT, we have to use CMake. required: false stops meson
-# from trying to find a meson.build file in the wrapped project.
-if not entt_dep.found()
-    cmake      = import('cmake')
-    entt       = cmake.subproject('entt')
-    entt_dep   = entt.dependency('EnTT')
-endif
 
 bgfx_dep = declare_dependency(
     sources: files(

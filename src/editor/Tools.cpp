@@ -1,19 +1,23 @@
 
 #include "Tools.h"
-#include "engine/Engine.h"
+#include "engine/Time.h"
 #include "editor/Gizmos.h"
 #include "editor/Selection.h"
+#include "imgui/ConsoleWindow.h"
 
 #include <bit>
 
 namespace engine::editor
 {
+    static RenderSystem& Renderer   = Tools.Renderer;
+    static render::Render& r        = Tools.Render;
+    
     void Tools::Init()
     {
-        console = &Engine.systems.AddSystem<GUI::ConsoleWindow>();
+        console = &systems.AddSystem<GUI::ConsoleWindow>();
 
-        // Initialize engine
-        Engine.Init();
+        // Initialize render system
+        Renderer.Start();
 
         // Initialize gizmos
         Gizmos.Init();
@@ -23,7 +27,7 @@ namespace engine::editor
         sh_Grid   = r.LoadShader("vs_grid", "fs_grid");
 
         // Setup editor render targets
-        auto [width, height] = Engine.window->GetSize();
+        auto [width, height] = window->GetSize();
         rt_SceneView = r.CreateRenderTarget(width, height);
         rt_ObjectID = r.CreateRenderTarget(width, height, render::TextureFormat::R32F, render::TextureFormat::D32F);
         rt_ObjectID->SetReadBack(true);
@@ -34,22 +38,68 @@ namespace engine::editor
         editorCamera.camera.renderTarget = rt_SceneView;
         
         // Setup camera renderer
-        Renderer.OnBeginFrame += [](render::Render& r) {
-            Engine.renderSystem.DrawCamera(editor::Tools.editorCamera.camera, editor::Tools.editorCamera.transform);
+        editor::Renderer.OnBeginFrame += [](render::Render& r) {
+            editor::Renderer.DrawCamera(editor::Tools.editorCamera.camera, editor::Tools.editorCamera.transform);
         };
-
-        // Setup Object ID pass
-        Renderer.OnEndCamera += DrawSelectionPass;
     }
 
     void Tools::Loop()
     {
-        Engine.Loop();
+        systems.Start();
+
+        Time::Seconds lastTime    = Time::GetTime();
+        Time::Seconds accumulator = 0;
+
+        while (!window->ShouldClose())
+        {
+            auto currentTime = Time::GetTime();
+            auto deltaTime   = currentTime - lastTime;
+            lastTime = currentTime;
+
+            Time.Advance(deltaTime);
+
+            // TODO: Whether we use deltaTime or unscaled.deltaTime affects
+            // whether fixed.deltaTime needs to be changed with timeScale.
+            // Perhaps the accumulator logic could go into Time.
+            accumulator += Time.deltaTime;
+
+            while (accumulator >= Time.fixed.deltaTime)
+            {
+                // Perform fixed updates
+                systems.Tick();
+
+                accumulator     -= Time.fixed.deltaTime;
+                Time.fixed.time += Time.fixed.deltaTime;
+                Time.tickCount++;
+            }
+
+            // Amount to lerp between physics steps
+            [[maybe_unused]] double alpha = accumulator / Time.fixed.deltaTime;
+            
+            // Clear buffered input
+            Input.Update();
+
+            // Process input
+            window->PreUpdate();
+
+            // Perform system updates
+            systems.Update();
+
+            // Render
+            Renderer.Update();
+
+            // Present
+            window->Update();
+
+            Time.frameCount++;
+        }
     }
 
     void Tools::Shutdown()
     {
-        Engine.Shutdown();
+        Renderer.Shutdown();
+        delete window;
+        Window::Shutdown();
     }
     
     void Tools::BeginSelectionPass(render::RenderContext &ctx)
@@ -64,15 +114,6 @@ namespace engine::editor
         ctx.r.SetDepthWrite(true);
     }
     
-    void Tools::DrawSelectionPass(render::RenderContext &ctx)
-    {
-        editor::Tools.BeginSelectionPass(ctx);
-        
-        ctx.DrawRenderersWith([&](EntityID id) {
-            editor::Tools::PreDrawSelection(ctx.r, uint(id));
-        });
-    }
-
     void Tools::PickObject(uint2 mouse)
     {
         rt_ObjectID->ReadTexture([=](float* data, size_t size, size_t width)

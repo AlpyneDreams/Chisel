@@ -1,12 +1,12 @@
 #pragma once
 
-#include "engine/Engine.h"
 #include "common/Common.h"
 #include "math/Math.h"
 #include "render/Render.h"
 #include "imgui/Window.h"
-#include "entity/components/Camera.h"
-#include "entity/components/Transform.h"
+#include "core/Camera.h"
+#include "core/Transform.h"
+#include "render/RenderSystem.h"
 #include "render/RenderContext.h"
 
 namespace engine::editor
@@ -16,7 +16,15 @@ namespace engine::editor
      */
     inline class Tools
     {
-    
+    protected:
+        Window* window          = Window::CreateWindow();
+    public:
+        SystemGroup systems;
+        
+        // TODO: dedup
+        RenderSystem Renderer   = RenderSystem(window);
+        render::Render& Render  = *Renderer.render;
+        
     public:
     // Viewport //
         struct EditorCamera {
@@ -24,8 +32,6 @@ namespace engine::editor
             Transform transform;
         } editorCamera;
     
-        RenderSystem& Renderer = Engine.renderSystem;
-        
         render::Shader* sh_Color;
         render::Shader* sh_Grid;
 
@@ -44,7 +50,6 @@ namespace engine::editor
         // Draw object ID to the selection buffer
         static void BeginSelectionPass(render::RenderContext& ctx);
         static void PreDrawSelection(render::Render& r, uint id);
-        static void DrawSelectionPass(render::RenderContext& ctx);
 
         // Draw wireframe outline of selected object
         void DrawSelectionOutline(Mesh* mesh);
@@ -60,7 +65,7 @@ namespace engine::editor
         void Shutdown();
         
     private:
-        render::Render& r = Engine.Render;
+        render::Render& r = Render;
 
     } Tools;
     

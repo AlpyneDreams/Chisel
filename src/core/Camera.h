@@ -1,15 +1,14 @@
 #pragma once
 
 #include "math/Math.h"
-#include "Transform.h"
-#include "entity/Behavior.h"
+#include "core/Transform.h"
 
 #include "platform/Window.h"
 #include "render/Render.h"
 
 namespace engine
 {
-    struct Camera : RequireComponent<Transform>
+    struct Camera
     {
         // Horizontal field of view in degrees
         float fieldOfView = 90.0f;

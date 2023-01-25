@@ -1,11 +1,10 @@
 #pragma once
 
-#include "entity/Component.h"
 #include "math/Math.h"
 
 namespace engine
 {
-    struct Transform : Component
+    struct Transform
     {
         vec3 position;
         quat rotation;

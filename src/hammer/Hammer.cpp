@@ -5,7 +5,6 @@
 #include "hammer/KeyValues.h"
 
 #include "console/Console.h"
-#include "engine/Engine.h"
 #include "hammer/VMF.h"
 #include "imgui/ConsoleWindow.h"
 #include "hammer/gui/Layout.h"
@@ -40,14 +39,13 @@ namespace engine::hammer
         Tools.Init();
 
         // Add hammer systems...
-        Renderer = &Engine.systems.AddSystem<hammer::MapRender>();
-        Engine.systems.AddSystem<hammer::Keybinds>();
-        Engine.systems.AddSystem<hammer::Layout>();
-        Engine.systems.AddSystem<hammer::SelectionModeWindow>();
-        viewport = &Engine.systems.AddSystem<Viewport>();
+        Renderer = &Tools.systems.AddSystem<hammer::MapRender>();
+        Tools.systems.AddSystem<hammer::Keybinds>();
+        Tools.systems.AddSystem<hammer::Layout>();
+        Tools.systems.AddSystem<hammer::SelectionModeWindow>();
+        viewport = &Tools.systems.AddSystem<Viewport>();
 
         // Setup Object ID pass
-        Tools.Renderer.OnEndCamera -= Tools.DrawSelectionPass;
         Tools.Renderer.OnEndCamera += [](render::RenderContext& ctx)
         {
             Tools.BeginSelectionPass(ctx);

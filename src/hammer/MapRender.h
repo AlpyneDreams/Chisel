@@ -2,7 +2,6 @@
 
 #include "glm/ext/matrix_transform.hpp"
 #include "hammer/Hammer.h"
-#include "engine/Engine.h"
 #include "engine/System.h"
 #include "editor/Tools.h"
 #include "hammer/VMF.h"
@@ -26,12 +25,12 @@ namespace engine::hammer
         
     public:
 
-        render::Render& r = Engine.Render;
+        render::Render& r = Tools.Render;
         render::Shader* shader;
 
         void Start() final override
         {
-            shader = Engine.Render.LoadShader("hammer_flat");
+            shader = Tools.Render.LoadShader("hammer_flat");
         }
         
         void Update() final override

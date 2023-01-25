@@ -1,8 +1,6 @@
 #pragma once
 #include "Render.h"
-#include "entity/Scene.h"
-#include "entity/components/Camera.h"
-#include "entity/components/MeshRenderer.h"
+#include "core/Camera.h"
 
 #include <functional>
 
@@ -25,27 +23,6 @@ namespace engine::render
             mat4x4 view = camera.ViewMatrix(pov);
             mat4x4 proj = camera.ProjMatrix();
             r.SetViewTransform(view, proj);
-        }
-
-        void DrawRenderers()
-        {
-            for (auto&& [ent, transform, renderer] : World.Each<Transform, MeshRenderer>())
-            {
-                mat4x4 model = transform.GetTransformMatrix();
-                r.SetTransform(model);
-                r.DrawMesh(renderer.mesh);
-            }
-        }
-
-        void DrawRenderersWith(std::function<void(EntityID)> func)
-        {
-            for (auto&& [ent, transform, renderer] : World.Each<Transform, MeshRenderer>())
-            {
-                mat4x4 model = transform.GetTransformMatrix();
-                r.SetTransform(model);
-                func(ent);
-                r.DrawMesh(renderer.mesh);
-            }
         }
     };
 }

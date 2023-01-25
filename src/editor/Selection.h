@@ -4,7 +4,6 @@
 
 namespace engine::editor
 {
-    // Should match std::underlying_type_t<EntityID> from entity/Common.h
     using SelectionID = uint32;
     
     // TODO: Multiple selections.

@@ -4,13 +4,13 @@
 #include "imgui/Window.h"
 #include "editor/Selection.h"
 #include "editor/Handles.h"
-#include "engine/Engine.h"
 #include "input/Input.h"
 #include "input/Keyboard.h"
 #include "platform/Cursor.h"
+#include "engine/Time.h"
 
-#include "entity/components/Camera.h"
-#include "entity/components/Transform.h"
+#include "core/Camera.h"
+#include "core/Transform.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -119,7 +119,7 @@ namespace engine::editor
             g.HoveredWindow = hovered;
 
             // Begin scene view extra rendering
-            render::Render& r = Engine.Render;
+            render::Render& r = Tools.Render;
             r.SetRenderTarget(Tools.rt_SceneView);
 
             // Draw grid
