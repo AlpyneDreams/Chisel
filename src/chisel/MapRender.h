@@ -1,11 +1,11 @@
 #pragma once
 
 #include "glm/ext/matrix_transform.hpp"
-#include "hammer/Hammer.h"
+#include "chisel/Hammer.h"
 #include "core/System.h"
-#include "hammer/Tools.h"
-#include "hammer/VMF.h"
-#include "hammer/Selection.h"
+#include "chisel/Tools.h"
+#include "chisel/VMF.h"
+#include "chisel/Selection.h"
 
 #include "core/Primitives.h"
 #include "core/VertexLayout.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hammer/Hammer.h"
+#include "chisel/Hammer.h"
 
 #include "platform/Platform.h"
 #include "common/Common.h"
@@ -53,7 +53,7 @@ namespace engine::hammer
         void Start() override
         {
             ImGuiIO& io = ImGui::GetIO();
-            io.IniFilename = "hammer.ui.ini";
+            io.IniFilename = "chisel.ui.ini";
         }
 
         static void OpenFilePicker()

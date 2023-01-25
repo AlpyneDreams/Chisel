@@ -1,12 +1,11 @@
 fs = import('fs')
-python = import('python').find_installation('python3')
 
-engine_args = windows ? [] : [
+chisel_args = windows ? [] : [
     '-Wno-shadow',
     '-Wno-volatile' # for GLM
 ]
 
-hammer_src = files(
+chisel_src = files(
     'console/ConsoleCommands.cpp',
     'assets/loaders/Textures.cpp',
     'assets/loaders/MeshOBJ.cpp',
@@ -21,13 +20,13 @@ hammer_src = files(
     'gui/impl/imgui_impl_sdl.cpp',
     'gui/impl/imgui_impl_bgfx.cpp',
 
-    'hammer/Tools.cpp',
-    'hammer/Hammer.cpp',
-    'hammer/VMF.cpp',
-    'hammer/Solid.cpp',
+    'chisel/Tools.cpp',
+    'chisel/Hammer.cpp',
+    'chisel/VMF.cpp',
+    'chisel/Solid.cpp',
 )
 
-hammer_deps = [
+chisel_deps = [
     sdl_dep,
     bgfx_dep,
 
@@ -37,12 +36,11 @@ hammer_deps = [
     imguizmo_dep
 ]
 
-# TODO: Link editor_src as a lib
-hammer = executable('hammer', hammer_src,
-    dependencies    : hammer_deps,
+chisel = executable('chisel', chisel_src,
+    dependencies    : chisel_deps,
     install         : true,
     include_directories: include_directories('../submodules'),
     install_dir     : join_paths(meson.project_source_root(), 'runtime'),
     win_subsystem   : 'console',
-    cpp_args        : engine_args + ['-DEDITOR=1']
+    cpp_args        : chisel_args
 )

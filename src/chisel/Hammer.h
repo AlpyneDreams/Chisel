@@ -1,9 +1,9 @@
 #pragma once
 
-#include "hammer/Tools.h"
+#include "chisel/Tools.h"
 
-#include "hammer/Hammer.h"
-#include "hammer/VMF.h"
+#include "chisel/Hammer.h"
+#include "chisel/VMF.h"
 
 namespace engine::hammer
 {

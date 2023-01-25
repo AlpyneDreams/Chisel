@@ -1,8 +1,8 @@
 
 #include "Tools.h"
 #include "common/Time.h"
-#include "hammer/Gizmos.h"
-#include "hammer/Selection.h"
+#include "chisel/Gizmos.h"
+#include "chisel/Selection.h"
 #include "gui/ConsoleWindow.h"
 
 #include <bit>

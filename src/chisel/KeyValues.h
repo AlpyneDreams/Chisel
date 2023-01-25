@@ -2,7 +2,7 @@
 
 
 // TODO: Replace this with a better, simpler, parser
-#include "hammer/deps/vdf_parser.h"
+#include "chisel/deps/vdf_parser.h"
 
 #include "math/Color.h"
 #include "common/String.h"

@@ -1,8 +1,8 @@
 #include "gui/View3D.h"
 
-#include "hammer/Hammer.h"
-#include "hammer/Gizmos.h"
-#include "hammer/VMF.h"
+#include "chisel/Hammer.h"
+#include "chisel/Gizmos.h"
+#include "chisel/VMF.h"
 
 namespace engine::hammer
 {

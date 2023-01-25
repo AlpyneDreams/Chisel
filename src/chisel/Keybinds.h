@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hammer/Editor.h"
+#include "chisel/Editor.h"
 #include "core/System.h"
 #include "input/Keyboard.h"
 #include <imgui.h>

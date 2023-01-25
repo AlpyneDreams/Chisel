@@ -1,9 +1,9 @@
 #pragma once
 
-#include "hammer/Tools.h"
+#include "chisel/Tools.h"
 #include "gui/Window.h"
-#include "hammer/Selection.h"
-#include "hammer/Handles.h"
+#include "chisel/Selection.h"
+#include "chisel/Handles.h"
 #include "input/Input.h"
 #include "input/Keyboard.h"
 #include "platform/Cursor.h"

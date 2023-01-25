@@ -1,15 +1,15 @@
 
-#include "hammer/Hammer.h"
-#include "hammer/MapRender.h"
+#include "chisel/Hammer.h"
+#include "chisel/MapRender.h"
 #include "common/String.h"
-#include "hammer/KeyValues.h"
+#include "chisel/KeyValues.h"
 
 #include "console/Console.h"
-#include "hammer/VMF.h"
+#include "chisel/VMF.h"
 #include "gui/ConsoleWindow.h"
-#include "hammer/gui/Layout.h"
-#include "hammer/gui/Viewport.h"
-#include "hammer/gui/Keybinds.h"
+#include "chisel/gui/Layout.h"
+#include "chisel/gui/Viewport.h"
+#include "chisel/gui/Keybinds.h"
 
 #include "common/Filesystem.h"
 #include "render/Render.h"
