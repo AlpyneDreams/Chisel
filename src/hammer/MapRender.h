@@ -10,6 +10,7 @@
 #include "core/Primitives.h"
 #include "core/VertexLayout.h"
 #include "math/Math.h"
+#include "math/Color.h"
 #include <glm/gtx/normal.hpp>
 
 namespace engine::hammer
@@ -35,6 +36,8 @@ namespace engine::hammer
         
         void Update() final override
         {
+            r.SetClearColor(true, Color(0.2, 0.2, 0.2));
+            r.SetClearDepth(true, 1.0f);
             r.SetRenderTarget(Tools.rt_SceneView);
             r.SetShader(shader);
             r.SetTransform(glm::identity<mat4x4>());

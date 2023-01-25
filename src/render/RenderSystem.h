@@ -3,8 +3,6 @@
 #include "common/Event.h"
 #include "platform/Window.h"
 #include "render/Render.h"
-#include "render/pipelines/RenderPipeline.h"
-#include "render/pipelines/Forward.h"
 #include "render/RenderContext.h"
 #include "gui/Common.h"
 
@@ -19,7 +17,6 @@ namespace engine
     {
         Window* window;
         render::Render* render                       = render::Render::Create();
-        render::ForwardRenderPipeline renderPipeline = render::ForwardRenderPipeline(*render);
 
         Event<render::Render&> OnBeginFrame;
         Event<render::Render&> OnEndFrame;
@@ -33,7 +30,6 @@ namespace engine
             window->Create("Engine", 1920, 1080, true);
             render->Init(window);
             window->OnAttach();
-            renderPipeline.Init();
         }
 
         void Update()
@@ -64,7 +60,6 @@ namespace engine
             RenderContext ctx = RenderContext(*render, camera, transform);
 
             OnBeginCamera(ctx);
-            renderPipeline.RenderFrame(ctx);
             OnEndCamera(ctx);
         }
 

@@ -11,8 +11,6 @@
 
 namespace engine::hammer
 {
-    using Color = ColorRGBA<byte>;
-
     struct Editor : KeyValues
     {
         Color color;

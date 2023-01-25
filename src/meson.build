@@ -16,7 +16,6 @@ hammer_src = files(
     'platform/sdl/WindowSDL.cpp',
     'platform/sdl/CursorSDL.cpp',
     'render/bgfx/RenderBGFX.cpp',
-    'render/pipelines/Forward.cpp',
 
     'gui/Common.cpp',
     'gui/impl/imgui_impl_sdl.cpp',
