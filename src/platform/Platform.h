@@ -17,11 +17,6 @@ namespace engine
 {
     inline struct Platform
     {
-    #ifdef EDITOR
-        static constexpr bool Editor  = true;
-    #else
-        static constexpr bool Editor  = false;
-    #endif
         static constexpr bool Windows = PLATFORM_WINDOWS;
         static constexpr bool Linux   = PLATFORM_LINUX;
 

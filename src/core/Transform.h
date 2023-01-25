@@ -2,6 +2,9 @@
 
 #include "math/Math.h"
 
+// Cache euler angles
+#define EDITOR
+
 namespace engine
 {
     struct Transform
@@ -76,3 +79,5 @@ namespace engine
 
     };
 }
+
+#undef EDITOR
