@@ -19,7 +19,7 @@
 
 namespace chisel
 {
-    void Hammer::Open(const char* path)
+    void Chisel::Open(const char* path)
     {
         Console.Log("Open: '{}'", path);
         if (!fs::exists(path)) {
@@ -34,7 +34,7 @@ namespace chisel
         map = VMF(kv);
     }
 
-    void Hammer::Run()
+    void Chisel::Run()
     {
         Tools.Init();
 
@@ -50,10 +50,10 @@ namespace chisel
         {
             Tools.BeginSelectionPass(ctx);
 
-            class chisel::Hammer& Hammer = chisel::Hammer;
-            Hammer.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
+            class chisel::Chisel& Chisel = chisel::Chisel;
+            Chisel.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
             {
-                Tools.PreDrawSelection(ctx.r, chisel::Hammer.GetSelectionID(ent, solid));
+                Tools.PreDrawSelection(ctx.r, chisel::Chisel.GetSelectionID(ent, solid));
                 ctx.r.DrawMesh(&solid.mesh);
             });
         };
@@ -67,5 +67,5 @@ namespace chisel
 int main(int argc, char* argv[])
 {
     using namespace chisel;
-    Hammer.Run();
+    Chisel.Run();
 }

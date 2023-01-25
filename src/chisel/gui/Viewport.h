@@ -19,9 +19,9 @@ namespace chisel
         void OnPostDraw() override
         {
             // TODO: Better way to find solid by ID
-            Hammer.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
+            Chisel.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
             {
-                if (chisel::Selection.Active() == Hammer.GetSelectionID(ent, solid))
+                if (chisel::Selection.Active() == Chisel.GetSelectionID(ent, solid))
                     DrawSelectionOutline(solid);
             });
 

@@ -51,9 +51,9 @@ namespace chisel
 
         void ForEachEntity(std::function<void(MapEntity&)> DrawFunc)
         {
-            DrawFunc(Hammer.map.world);
+            DrawFunc(Chisel.map.world);
 
-            for (auto& ent : Hammer.map.entities)
+            for (auto& ent : Chisel.map.entities)
                 DrawFunc(ent);
         }
 

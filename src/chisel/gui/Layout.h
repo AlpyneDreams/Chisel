@@ -33,13 +33,13 @@ namespace chisel
 
         void RadioButton(const char* name, SelectMode mode)
         {
-            bool selected = Hammer.selectMode == mode;
+            bool selected = Chisel.selectMode == mode;
 
             if (selected)
                 ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
 
             if (ImGui::Button(name, ImVec2(ImGui::GetContentRegionAvail().x, 0.f)))
-                Hammer.selectMode = mode;
+                Chisel.selectMode = mode;
 
             if (selected)
                 ImGui::PopStyleColor();
@@ -60,7 +60,7 @@ namespace chisel
         {
             std::string file = Platform.FilePicker();
             if (!file.empty()) {
-                Hammer.Open(file.c_str());
+                Chisel.Open(file.c_str());
             }
         }
 
@@ -85,7 +85,7 @@ namespace chisel
                 if (ImGui::BeginMenu("Window"))
                 {
                     ImGui::MenuItem(chisel::Tools.console->name.c_str(), "`", &chisel::Tools.console->open);
-                    ImGui::MenuItem(Hammer.viewport->name.c_str(), "", &Hammer.viewport->open);
+                    ImGui::MenuItem(Chisel.viewport->name.c_str(), "", &Chisel.viewport->open);
                     ImGui::MenuItem(ICON_MC_APPLICATION_OUTLINE " GUI Demo", "", &gui_demo.value);
                     ImGui::EndMenu();
                 }

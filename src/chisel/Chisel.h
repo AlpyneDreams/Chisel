@@ -13,7 +13,7 @@ namespace chisel
         Groups, Objects, Solids
     };
 
-    inline class Hammer
+    inline class Chisel
     {
     public:
     // Editing //
@@ -43,9 +43,9 @@ namespace chisel
     // GUI //
         GUI::Window* viewport;
 
-    // Hammer Engine Loop //
+    // Chisel Engine Loop //
 
         void Run();
 
-    } Hammer;
+    } Chisel;
 }
