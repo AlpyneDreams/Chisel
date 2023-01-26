@@ -51,7 +51,7 @@ namespace chisel
 
         void ViewManiuplate(const Rect& viewport, mat4x4& view, float length = 35.f, float size = 128.f, Color color = Colors.Transparent)
         {
-            ImGuizmo::ViewManipulate(&view[0][0], length, ImVec2(viewport.x, viewport.y), ImVec2(size, size), color.Pack<std::endian::little>());
+            ImGuizmo::ViewManipulate(&view[0][0], length, ImVec2(viewport.x, viewport.y), ImVec2(size, size), color.PackABGR());
         }
 
         void DrawGrid2(const mat4x4& view, const mat4x4& proj, float gridSize = 100)

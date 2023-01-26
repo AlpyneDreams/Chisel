@@ -32,26 +32,26 @@ namespace chisel
 
         explicit ColorRGBA(auto r, auto g, auto b, auto a = NormalMax)
             : r(T(r)), g(T(g)), b(T(b)), a(T(a)) {}
-
-        template <std::endian Endian = std::endian::big>
+        
+        // Pack RGBA
         uint32 Pack()
         {
             using std::clamp;
             constexpr T packScale = T(255) / NormalMax;
-            if constexpr (Endian == std::endian::little)
-            {
-                return    uint32( clamp(a * packScale, T{0}, T{255}) ) << 24u
-                        | uint32( clamp(b * packScale, T{0}, T{255}) ) << 16u
-                        | uint32( clamp(g * packScale, T{0}, T{255}) ) <<  8u
-                        | uint32( clamp(r * packScale, T{0}, T{255}) ) <<  0u ;
-            }
-            else // assume big endian
-            {
-                return    uint32( clamp(r * packScale, T{0}, T{255}) ) << 24u
-                        | uint32( clamp(g * packScale, T{0}, T{255}) ) << 16u
-                        | uint32( clamp(b * packScale, T{0}, T{255}) ) <<  8u
-                        | uint32( clamp(a * packScale, T{0}, T{255}) ) <<  0u ;
-            }
+            return    uint32( clamp(a * packScale, T{0}, T{255}) ) << 24u
+                    | uint32( clamp(b * packScale, T{0}, T{255}) ) << 16u
+                    | uint32( clamp(g * packScale, T{0}, T{255}) ) <<  8u
+                    | uint32( clamp(r * packScale, T{0}, T{255}) ) <<  0u ;
+        }
+        
+        uint32 PackABGR()
+        {
+            using std::clamp;
+            constexpr T packScale = T(255) / NormalMax;
+            return    uint32( clamp(r * packScale, T{0}, T{255}) ) << 24u
+                    | uint32( clamp(g * packScale, T{0}, T{255}) ) << 16u
+                    | uint32( clamp(b * packScale, T{0}, T{255}) ) <<  8u
+                    | uint32( clamp(a * packScale, T{0}, T{255}) ) <<  0u ;
         }
 
         operator vec4() const
