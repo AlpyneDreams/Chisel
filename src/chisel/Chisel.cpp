@@ -51,11 +51,6 @@ namespace chisel
             Tools.BeginSelectionPass(ctx);
 
             class chisel::Chisel& Chisel = chisel::Chisel;
-            Chisel.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
-            {
-                Tools.PreDrawSelection(ctx.r, chisel::Chisel.GetSelectionID(ent, solid));
-                ctx.r.DrawMesh(&solid.mesh);
-            });
         };
 
         //Open("/home/alpyne/Desktop/test.vmf");
