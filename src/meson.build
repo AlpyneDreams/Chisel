@@ -24,6 +24,13 @@ chisel_src = files(
     'chisel/Chisel.cpp',
     'chisel/VMF.cpp',
     'chisel/Solid.cpp',
+
+    'chisel/CSG/Brush.cpp',
+    'chisel/CSG/CSGTree.cpp',
+    'chisel/CSG/FaceCache.cpp',
+    'chisel/CSG/Face.cpp',
+    'chisel/CSG/Fragment.cpp',
+    'chisel/CSG/Vertex.cpp',
 )
 
 chisel_deps = [

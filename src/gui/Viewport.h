@@ -19,14 +19,7 @@ namespace chisel
         void OnPostDraw() override
         {
             // TODO: Better way to find solid by ID
-            Chisel.Renderer->DrawSolidsWith([&](MapEntity& ent, Solid& solid)
-            {
-                if (chisel::Selection.Active() == Chisel.GetSelectionID(ent, solid))
-                    DrawSelectionOutline(solid);
-            });
-
-
-            Gizmos.DrawIcon(vec3(0), Gizmos.icnLight);
+            //Gizmos.DrawIcon(vec3(0), Gizmos.icnLight);
         }
 
         void DrawSelectionOutline(Solid& solid)
