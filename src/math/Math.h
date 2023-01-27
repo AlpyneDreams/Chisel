@@ -41,7 +41,8 @@ namespace chisel
     using quat = glm::quat;
 
     // Matrices
-    using mat4x4  = glm::mat4x4;
+    using mat4x4 = glm::mat4x4;
+    using mat3x3 = glm::mat3x3;
 
     enum struct Space {
         World,
