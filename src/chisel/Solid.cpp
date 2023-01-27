@@ -83,10 +83,7 @@ namespace chisel
             indices.push_back(index++);
         }
 
-        mesh = Mesh(xyz,
-            &vertices[0].x, vertices.size() * sizeof(vec3),
-            &indices[0], indices.size() * sizeof(uint32)
-        );
+        mesh = Mesh(xyz, vertices, indices);
     }
 
 }
