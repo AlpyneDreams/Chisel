@@ -7,7 +7,7 @@
 #include "gui/Common.h"
 
 #include "core/Camera.h"
-#include "core/System.h"
+#include "common/System.h"
 
 namespace chisel
 {
@@ -15,7 +15,7 @@ namespace chisel
     struct RenderSystem : public System
     {
         Window* window;
-        render::Render* render                       = render::Render::Create();
+        render::Render* render = render::Render::Create();
 
         Event<render::Render&> OnBeginFrame;
         Event<render::Render&> OnEndFrame;

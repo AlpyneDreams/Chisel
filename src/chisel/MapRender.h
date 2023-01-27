@@ -2,7 +2,7 @@
 
 #include "glm/ext/matrix_transform.hpp"
 #include "chisel/Chisel.h"
-#include "core/System.h"
+#include "common/System.h"
 #include "chisel/Tools.h"
 #include "chisel/VMF.h"
 #include "chisel/Selection.h"

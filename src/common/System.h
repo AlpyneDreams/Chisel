@@ -10,8 +10,6 @@
 #include "common/Ranges.h"
 #include "common/VTable.h"
 
-// TODO: Move this into /entity/? or keep in /engine/?
-
 namespace chisel
 {
     struct System
@@ -34,18 +32,8 @@ namespace chisel
         void*       Destructor;
     };
 
-    struct Behavior;
-
-    // TODO: Keep this trait?
     template <class T>
-    concept SystemClass = std::is_base_of_v<System, T> && !std::is_same_v<Behavior, T>;
-
-    // TODO
-    template <class... Components>
-    struct ComponentSystem;
-
-    // e.g.
-    // struct TransformSystem : ComponentSystem<Transform>
+    concept SystemClass = std::is_base_of_v<System, T>;
 
     struct SystemGroup : System
     {
@@ -56,7 +44,6 @@ namespace chisel
         // TODO: let systems define their own update order?
         //       (currently using insertion order)
         // TODO: store and retrieve systems in update order?
-        // TODO: VTable checks for Behaviors
 
         struct Callback {
             System* system;

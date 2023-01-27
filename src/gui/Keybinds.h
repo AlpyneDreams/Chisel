@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/System.h"
+#include "common/System.h"
 #include "gui/Layout.h"
 #include "input/Keyboard.h"
 #include <imgui.h>
