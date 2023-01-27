@@ -138,8 +138,8 @@ namespace chisel::CSG
     void Brush::MakeFragmentsDirty()
     {
         m_tree->MarkDirtyFragments(*this);
-        for (const auto& brush : m_intersectingBrushes)
-            brush->MakeFragmentsDirty();
+        for (auto* brush : m_intersectingBrushes)
+            m_tree->MarkDirtyFragments(*brush);
     }
 
 }

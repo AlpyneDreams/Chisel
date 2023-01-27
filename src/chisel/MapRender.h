@@ -9,6 +9,7 @@
 
 #include "core/Primitives.h"
 #include "core/VertexLayout.h"
+#include "common/Time.h"
 #include "math/Math.h"
 #include "math/Color.h"
 #include <glm/gtx/normal.hpp>
@@ -103,9 +104,14 @@ namespace chisel
                             m_indices.push_back(startIndex + tri[1]);
                             m_indices.push_back(startIndex + tri[2]);
                         }
+                        fprintf(stderr, "Adding triangle: (%g %g %g), (%g %g %g), (%g %g %g)\n",
+                            m_verts[startIndex + tri[0]].position.x, m_verts[startIndex + tri[0]].position.y, m_verts[startIndex + tri[0]].position.z,
+                            m_verts[startIndex + tri[1]].position.x, m_verts[startIndex + tri[1]].position.y, m_verts[startIndex + tri[1]].position.z,
+                            m_verts[startIndex + tri[2]].position.x, m_verts[startIndex + tri[2]].position.y, m_verts[startIndex + tri[2]].position.z);
                     }
                 }
             }
+            printf("UPDATING MESH\n");
             m_mesh = Mesh(LayoutCSG, m_verts, m_indices);
         }
 
@@ -166,14 +172,17 @@ namespace chisel
         render::Render& r = Tools.Render;
         render::Shader* shader;
 
+        CubePrimitive* tunnel = nullptr;
+
         void Start() final override
         {
             shader = Tools.Render.LoadShader("flat");
 
-            world.SetVoidVolume(ChiselVolumes::Air);
+            world.SetVoidVolume(ChiselVolumes::Solid);
 
-            new CubePrimitive(&world, ChiselVolumes::Solid);
-            new CubePrimitive(&world, ChiselVolumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(0.25f, 4.0, 0.25)));
+            new CubePrimitive(&world, ChiselVolumes::Air);
+            new CubePrimitive(&world, ChiselVolumes::Solid, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(0.25, 2.0, 0.25)));
+            tunnel = new CubePrimitive(&world, ChiselVolumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.25f, 0.25)));
         }
 
         void Update() final override
@@ -183,6 +192,16 @@ namespace chisel
             r.SetRenderTarget(Tools.rt_SceneView);
             r.SetShader(shader);
             r.SetTransform(glm::identity<mat4x4>());
+
+            if (tunnel)
+            {
+                static const CSG::Matrix4 tunnelOrigTransform = tunnel->GetTransform();
+                float time = Time::GetTime();
+                tunnel->SetTransform(
+                    glm::rotate(CSG::Matrix4(1), glm::radians(time * 45.0f), CSG::Vector3(0,1,0)) *
+                    tunnelOrigTransform
+                );
+            }
 
             auto rebuilt = world.Rebuild();
             for (CSG::Brush* brush : rebuilt)
