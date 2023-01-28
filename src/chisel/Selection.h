@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Common.h"
+#include "console/Console.h"
 
 namespace chisel
 {
@@ -10,12 +11,15 @@ namespace chisel
     inline struct Selection
     {
     private:
-        // Should match EntityNull in entity/Common.h
-        static constexpr SelectionID Null = ~0;
-
         SelectionID selected = Null;
 
     public:
+        static constexpr SelectionID Null = ~0;
+
+        bool Any() {
+            return selected != Null;
+        }
+
         SelectionID Active() {
             return selected;
         }
@@ -34,19 +38,19 @@ namespace chisel
 
         void Deselect(auto ent) {
             if (selected == SelectionID(ent)) {
-                selected = Null;
+                Select(Null);
             }
         }
 
         void Clear() {
-            selected = Null;
+            Select(Null);
         }
 
         void Toggle(auto ent) {
             if (selected == SelectionID(ent)) {
-                selected = Null;
+                Select(Null);
             } else {
-                selected = SelectionID(ent);
+                Select(ent);
             }
         }
     } Selection;
