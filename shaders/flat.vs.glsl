@@ -6,7 +6,7 @@ $output v_normal, v_view
 void main()
 {
 	vec3 pos = a_position;
-	vec3 normal = a_normal.xyz*2.0 - 1.0;
+	vec3 normal = a_normal.xyz;
 
 	gl_Position = mul(u_modelViewProj, vec4(pos, 1));
 	v_normal = mul(u_model[0], vec4(normal, 0)).xyz;

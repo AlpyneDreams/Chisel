@@ -39,6 +39,46 @@ namespace chisel
         VertexAttribute::For<float>(3, VertexAttribute::Normal, true),
     };
 
+    typedef struct {
+        double r;
+        double g;
+        double b;
+    } rgb;
+
+    typedef struct {
+        double h;
+        double s;
+        double v;
+    } hsv;
+
+    rgb hsv2rgb(hsv HSV)
+    {
+        rgb RGB;
+        double H = HSV.h, S = HSV.s, V = HSV.v,
+                P, Q, T,
+                fract;
+        (H == 360.)?(H = 0.):(H /= 60.);
+        fract = H - floor(H);
+        P = V*(1. - S);
+        Q = V*(1. - S*fract);
+        T = V*(1. - S*(1. - fract));
+        if      (0. <= H && H < 1.)
+            RGB = rgb{V, T, P};
+        else if (1. <= H && H < 2.)
+            RGB = rgb{Q, V, P};
+        else if (2. <= H && H < 3.)
+            RGB = rgb{P, V, T};
+        else if (3. <= H && H < 4.)
+            RGB = rgb{P, Q, V};
+        else if (4. <= H && H < 5.)
+            RGB = rgb{T, P, V};
+        else if (5. <= H && H < 6.)
+            RGB = rgb{V, P, Q};
+        else
+            RGB = rgb{0., 0., 0.};
+        return RGB;
+    }
+
     class Primitive
     {
     public:
@@ -48,6 +88,10 @@ namespace chisel
         {
             m_brush.SetVolumeOperation(CSG::CreateFillOperation(volume));
             m_brush.Userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
+
+            srand(m_brush.GetObjectID());
+            rgb tempcolor = hsv2rgb(hsv{ (float)(rand() % 360), 0.7f, 1.0f } );
+            m_tempcolor = vec4(tempcolor.r, tempcolor.g, tempcolor.b, 1.0f);
         }
 
         ~Primitive()
@@ -119,9 +163,17 @@ namespace chisel
         {
             return &m_mesh;
         }
+
+        // TODO: Remove me, debugging.
+        glm::vec4 GetTempColor() const
+        {
+            return m_tempcolor;
+        }
     protected:
         CSG::Brush& m_brush;
         CSG::Matrix4 m_transform;
+
+        glm::vec4 m_tempcolor;
 
         Mesh m_mesh;
         std::vector<VertexCSG> m_verts;
@@ -220,7 +272,11 @@ namespace chisel
 
             // TODO: Cull!
             for (const CSG::Brush& brush : world.GetBrushes())
-                r.DrawMesh(brush.GetUserdata<Primitive*>()->GetMesh());
+            {
+                Primitive* primitive = brush.GetUserdata<Primitive*>();
+                r.SetUniform("u_color", primitive->GetTempColor());
+                r.DrawMesh(primitive->GetMesh());
+            }
         }
     };
 
