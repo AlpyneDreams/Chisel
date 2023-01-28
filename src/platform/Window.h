@@ -36,7 +36,7 @@ namespace chisel
         static Window* CreateWindow();
         static void Shutdown();
 
-        virtual void Create(const char* name, uint width, uint height, bool resizable) = 0;
+        virtual void Create(const char* name, uint width, uint height, bool resizable, bool borderless) = 0;
 
         // Run after Render::Init. Typically confgiures ImGui
         virtual void OnAttach() {}

@@ -29,11 +29,11 @@ namespace chisel
     public:
         ~WindowSDL() { SDL_DestroyWindow(window); }
 
-        void Create(const char* name, uint width, uint height, bool resizable)
+        void Create(const char* name, uint width, uint height, bool resizable, bool borderless)
         {
             int x = SDL_WINDOWPOS_CENTERED,
                 y = SDL_WINDOWPOS_CENTERED;
-            int flags = SDL_WINDOW_SHOWN | (resizable ? SDL_WINDOW_RESIZABLE : 0);
+            int flags = SDL_WINDOW_SHOWN | (resizable ? SDL_WINDOW_RESIZABLE : 0) | (borderless ? SDL_WINDOW_BORDERLESS : 0);
 
             // Create window!
             window = SDL_CreateWindow(name, x, y, width, height, flags);
