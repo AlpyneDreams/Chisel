@@ -16,6 +16,10 @@ glm_dep    = dependency('glm', static: true)
 imgui_dep  = dependency('imgui', default_options: ['vulkan=disabled'], static: true)
 imguizmo_dep  = dependency('imguizmo')
 
+cmake = import('cmake')
+glaze_proj = cmake.subproject('glaze')
+glaze_dep = glaze_proj.dependency('glaze_glaze')
+
 bgfx_dep = declare_dependency(
     sources: files(
         'submodules/bgfx/src/amalgamated.cpp',

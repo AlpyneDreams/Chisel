@@ -40,7 +40,8 @@ chisel_deps = [
     fmt_dep,
     glm_dep,
     imgui_dep,
-    imguizmo_dep
+    imguizmo_dep,
+    glaze_dep,
 ]
 
 chisel = executable('chisel', chisel_src,
