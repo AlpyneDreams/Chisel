@@ -187,7 +187,7 @@ namespace chisel
             tunnel2 = new CubePrimitive(&world, ChiselVolumes::Solid, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.10f, 0.10)));
 
             std::string buffer{};
-            glz::write<glz::opts{.format = glz::json, .prettify = true}>(world, buffer);
+            glz::write<glz::opts{.format = glz::json, .prettify = false}>(world, buffer);
             fprintf(stderr, "%s\n", buffer.c_str());
         }
 
