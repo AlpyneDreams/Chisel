@@ -1,11 +1,11 @@
 @echo off
-for %%F in (vs_*.glsl *.vs.glsl) do (
+for %%F in (*.vert) do (
     echo %%F
-    ..\tools\bgfx\shaderc -f %%F -o ..\runtime\core\shaders\spirv\%%~nF.bin --type v --platform linux -p spirv
+    ..\tools\bgfx\shaderc -f %%F -o ..\runtime\core\shaders\spirv\%%F.bin --type v --platform linux -p spirv
 )
 
-for %%F in (fs_*.glsl *.fs.glsl) do (
+for %%F in (*.frag) do (
     echo %%F
-    ..\tools\bgfx\shaderc -f %%F -o ..\runtime\core\shaders\spirv\%%~nF.bin --type f --platform linux -p spirv
+    ..\tools\bgfx\shaderc -f %%F -o ..\runtime\core\shaders\spirv\%%F.bin --type f --platform linux -p spirv
 )
 pause

@@ -439,12 +439,12 @@ namespace chisel::render
             return new RenderTargetBGFX(width, height, color, depth);
         }
 
-        Shader* LoadShader(const char* vertexShader, const char* pixelShader)
+        Shader* CreateShader(const char* vsFile, const char* fsFile)
         {
-            bgfx::ShaderHandle vert = LoadShaderModule(vertexShader);
+            bgfx::ShaderHandle vert = LoadShaderModule(vsFile);
             bgfx::ShaderHandle frag = BGFX_INVALID_HANDLE;
-            if (pixelShader != NULL) {
-                frag = LoadShaderModule(pixelShader);
+            if (fsFile != NULL) {
+                frag = LoadShaderModule(fsFile);
             }
 
             ShaderBGFX* shader = new ShaderBGFX();

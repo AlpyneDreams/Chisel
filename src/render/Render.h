@@ -68,9 +68,13 @@ namespace chisel::render
             uint width, uint height,
             TextureFormat format = TextureFormat::RGBA32F,
             TextureFormat depth = TextureFormat::D32F) = 0;
-
-        virtual Shader* LoadShader(const char* vertexShader, const char* pixelShader) = 0; // TODO: Probably replace this
-        virtual Shader* LoadShader(const char* name) { return LoadShader((std::string(name) + ".vs").c_str(), (std::string(name) + ".fs").c_str()); }
+        
+        // TODO: Maybe replace these
+        virtual Shader* CreateShader(const char* vsFile, const char* fsFile = nullptr) = 0;
+        Shader* LoadShader(const char* vertexShader, const char* fragmentShader) {
+            return CreateShader((std::string(vertexShader) + ".vert").c_str(), (std::string(fragmentShader) + ".frag").c_str());
+        }
+        Shader* LoadShader(const char* name) { return LoadShader(name, name); }
 
     // Per-Camera State //
 

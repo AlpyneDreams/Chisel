@@ -1,4 +1,4 @@
-#include "bgfx_shader.sh"
+#include "common.glsl"
 
 uniform vec4 u_color;
 

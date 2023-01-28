@@ -23,8 +23,8 @@ namespace chisel
         Gizmos.Init();
 
         // Load editor shaders
-        sh_Color  = r.LoadShader("vs_basic", "fs_color");
-        sh_Grid   = r.LoadShader("vs_grid", "fs_grid");
+        sh_Color  = r.LoadShader("basic", "color");
+        sh_Grid   = r.LoadShader("grid");
 
         // Setup editor render targets
         auto [width, height] = window->GetSize();

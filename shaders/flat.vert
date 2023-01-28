@@ -1,7 +1,7 @@
 $input a_position, a_normal
 $output v_normal, v_view
 
-#include "bgfx_shader.sh"
+#include "common.glsl"
 
 void main()
 {

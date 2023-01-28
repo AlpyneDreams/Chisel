@@ -32,7 +32,7 @@ namespace chisel
         void Init()
         {
             icnLight = Assets.Load<Texture, ".PNG" >("textures/ui/light.png");
-            sh_Sprite = Tools.Render.LoadShader("vs_billboard", "fs_sprite");
+            sh_Sprite = Tools.Render.LoadShader("billboard", "sprite");
         }
     } Gizmos;
 }
