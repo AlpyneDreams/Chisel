@@ -205,7 +205,7 @@ namespace chisel
             for (size_t i = 0; i < 6; i++)
                 planes[i] = kUnitCubePlanes[i].Transformed(m_transform);
 
-            m_brush.SetPlanes(planes.begin(), planes.end());
+            m_brush.SetPlanes(&planes.front(), &planes.back() + 1);
         }
     };
 

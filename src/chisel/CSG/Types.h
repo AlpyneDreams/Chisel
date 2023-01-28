@@ -18,7 +18,7 @@ namespace chisel::CSG
 {
     struct Plane;
     class Brush;
-    class Face;
+    struct Face;
     struct Fragment;
     struct Vertex;
     class CSGTree;
@@ -34,7 +34,7 @@ namespace chisel::CSG
     using ObjectID = uint32_t;
     using Order = uint32_t;
 
-    static constexpr Unit EQUAL_EPSILON = 0.001;
+    static constexpr Unit EQUAL_EPSILON = 0.001f;
 
     inline bool CloseEnough(Unit a, Unit b, Unit epsilon = EQUAL_EPSILON)
     {

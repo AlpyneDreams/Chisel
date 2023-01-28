@@ -258,9 +258,9 @@ namespace chisel::CSG
         for (Brush* intersecting : brush.GetIntersectingBrushes())
         {
             const bool beforeIntersecting = brush.ComesBefore(*intersecting);
-            const ssize_t count = fragments.size();
+            const std::ptrdiff_t count = fragments.size();
 
-            for (ssize_t index = count - 1; index >= 0; index--)
+            for (std::ptrdiff_t index = count - 1; index >= 0; index--)
             {
                 Fragment fragment = std::move(fragments[index]);
                 fragments.erase(fragments.begin() + index);
