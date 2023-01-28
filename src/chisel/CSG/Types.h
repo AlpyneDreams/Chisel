@@ -12,6 +12,8 @@
 #include "math/Math.h"
 #include <glm/gtc/matrix_access.hpp>
 
+#include <glaze/glaze.hpp>
+
 namespace chisel::CSG
 {
     struct Plane;

@@ -41,3 +41,14 @@ namespace chisel::CSG
         }
     };
 }
+
+template <>
+struct glz::meta<chisel::CSG::Plane>
+{
+    using T = chisel::CSG::Plane;
+    static constexpr auto value = glz::object(
+        "normal", &T::normal,
+        "offset", &T::offset
+    );
+};
+

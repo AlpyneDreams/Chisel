@@ -26,6 +26,8 @@ namespace chisel::CSG
         void MarkDirtyFaceCache(Brush& brush);
         void MarkDirtyFragments(Brush& brush);
     private:
+        friend glz::meta<CSGTree>;
+
         std::vector<Brush*> QueryIntersectingBrushes(const AABB& aabb, const Brush* ignore);
         ObjectID GetNewObjectID();
 
@@ -37,3 +39,14 @@ namespace chisel::CSG
     };
 
 }
+
+
+template <>
+struct glz::meta<chisel::CSG::CSGTree>
+{
+    using T = chisel::CSG::CSGTree;
+    static constexpr auto value = glz::object(
+        "void_volume", &T::m_void,
+        "brushes", &T::m_brushes
+    );
+};

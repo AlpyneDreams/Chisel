@@ -185,6 +185,10 @@ namespace chisel
             new CubePrimitive(&world, ChiselVolumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(0.25, 2.0, 0.25)));
             tunnel = new CubePrimitive(&world, ChiselVolumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.25f, 0.25)));
             tunnel2 = new CubePrimitive(&world, ChiselVolumes::Solid, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.10f, 0.10)));
+
+            std::string buffer{};
+            glz::write<glz::opts{.format = glz::json, .prettify = true}>(world, buffer);
+            fprintf(stderr, "%s\n", buffer.c_str());
         }
 
         void Update() final override
