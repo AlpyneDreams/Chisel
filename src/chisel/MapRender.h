@@ -270,11 +270,27 @@ namespace chisel
             for (CSG::Brush* brush : rebuilt)
                 brush->GetUserdata<Primitive*>()->UpdateMesh();
 
+            auto& brushes = world.GetBrushes();
+
+            // TODO: Cull!
+            for (const CSG::Brush& brush : brushes)
+            {
+                Primitive* primitive = brush.GetUserdata<Primitive*>();
+                r.SetUniform("u_color", primitive->GetTempColor());
+                if (brush.GetObjectID() == Selection.Active())
+                    r.SetUniform("u_color", Color(1, 0, 0));
+
+                r.DrawMesh(primitive->GetMesh());
+            }
+        }
+
+        void DrawSelectionPass()
+        {
             // TODO: Cull!
             for (const CSG::Brush& brush : world.GetBrushes())
             {
                 Primitive* primitive = brush.GetUserdata<Primitive*>();
-                r.SetUniform("u_color", primitive->GetTempColor());
+                Tools.PreDrawSelection(r, brush.GetObjectID());
                 r.DrawMesh(primitive->GetMesh());
             }
         }

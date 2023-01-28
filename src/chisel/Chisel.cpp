@@ -48,9 +48,10 @@ namespace chisel
         // Setup Object ID pass
         Tools.Renderer.OnEndCamera += [](render::RenderContext& ctx)
         {
+            extern class chisel::Chisel Chisel;
+            
             Tools.BeginSelectionPass(ctx);
-
-            class chisel::Chisel& Chisel = chisel::Chisel;
+            Chisel.Renderer->DrawSelectionPass();
         };
 
         //Open("/home/alpyne/Desktop/test.vmf");
