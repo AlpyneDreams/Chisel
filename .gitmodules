@@ -7,3 +7,6 @@
 [submodule "submodules/bgfx"]
 	path = submodules/bgfx
 	url = https://github.com/AlpyneDreams/bgfx.git
+[submodule "subprojects/glaze"]
+	path = subprojects/glaze
+	url = https://github.com/stephenberry/glaze

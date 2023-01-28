@@ -26,7 +26,7 @@ namespace chisel
 
         void Start()
         {
-            window->Create("Engine", 1920, 1080, true);
+            window->Create("Engine", 1920, 1080, true, false);
             render->Init(window);
             window->OnAttach();
         }
