@@ -70,6 +70,7 @@ struct glz::meta<chisel::CSG::Brush>
     using T = chisel::CSG::Brush;
     static constexpr auto value = glz::object(
         "object_id", &T::m_objectId,
-        "planes", &T::m_planes
+        "planes", &T::m_planes,
+        "order", &T::m_order
     );
 };
