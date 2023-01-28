@@ -32,6 +32,9 @@ namespace chisel
 
         explicit ColorRGBA(auto r, auto g, auto b, auto a = NormalMax)
             : r(T(r)), g(T(g)), b(T(b)), a(T(a)) {}
+
+        explicit ColorRGBA(auto r, auto g, auto b)
+            : r(T(r)), g(T(g)), b(T(b)), a(T(NormalMax)) {}
         
         // Pack RGBA
         uint32 Pack()
