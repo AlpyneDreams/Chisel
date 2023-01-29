@@ -53,6 +53,7 @@ namespace chisel
         Space space         = Space::World;
         Rect  viewport;
         float cameraSpeed   = 7; // (m/s)
+        float sensitivity   = 0.5f;
         bool  allowAxisFlip = true;
 
         bool showGrid       = true;
@@ -182,6 +183,7 @@ namespace chisel
                     ImGui::TextUnformatted("Scene Camera");
                     ImGui::InputFloat("FOV", &camera.fieldOfView);
                     ImGui::InputFloat("Speed (m/s)", &cameraSpeed);
+                    ImGui::InputFloat("Sensitivity", &sensitivity);
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
@@ -237,8 +239,8 @@ namespace chisel
                         if (camera.rightHanded)
                             mouse.x = -mouse.x;
 
-                        camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * 0.5f));
-                        camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * 0.5), -0.49f * CHISEL_PI, 0.49f * CHISEL_PI);
+                        camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * sensitivity));
+                        camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * sensitivity), -0.49f * CHISEL_PI, 0.49f * CHISEL_PI);
                     }
 
                     if (Mouse.GetButtonUp(Mouse::Right) || Keyboard.GetKeyUp(Key::Z))
