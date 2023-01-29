@@ -9,6 +9,21 @@ namespace chisel
     template <typename T>
     concept EnumType = std::is_enum_v<T>;
 
+    // Implementation of UnderlyingType / ToUnderlying that is a
+    // no-op on non-enums, rather than an error.
+    
+    template <typename T, bool = std::is_enum_v<T>>
+    struct _UnderlyingType { using type = std::underlying_type_t<T>; };
+
+    template <typename T>
+    struct _UnderlyingType<T, false> { using type = T; };
+
+    template <typename T>
+    using UnderlyingType = _UnderlyingType<T>::type;
+
+    template <typename T>
+    constexpr UnderlyingType<T> ToUnderlying(T t) { return static_cast<UnderlyingType<T>>(t); }
+
     /** Bitset to use a regular 0..N enum as if it were bit flags.
      *  It is important to specify a Max value.
      */

@@ -4,6 +4,7 @@
 #include "ConCommand.h"
 #include "common/String.h"
 #include "common/Ranges.h"
+#include "common/Enum.h"
 
 #include <stdexcept>
 #include <string>
@@ -42,7 +43,7 @@ namespace chisel
                 PrintHelp();
             } else try {
                 value = ParseValue(cmd.args);
-                Console.Log("{} = {}", name, value);
+                PrintValue();
             } catch (invalid_argument const& err) {
                 Console.Error("Invalid {} value '{}'", DescribeType(), cmd.args);
             } catch (out_of_range const& err) {
@@ -75,8 +76,13 @@ namespace chisel
 
         void PrintHelp() final override
         {
-            Console.Log("{} = {}", name, value);
+            PrintValue();
             Console.Log("- {}, {}", description, DescribeType());
+        }
+        
+        void PrintValue()
+        {
+            Console.Log("{} = {}", name, ToUnderlying(value));
         }
     };
 
@@ -113,11 +119,10 @@ namespace chisel
         }
     }
 
-
     template <typename T>
     inline T ConVar<T>::ParseValue(const char* string)
     {
-        T value;
+        UnderlyingType<T> value;
         auto [ptr, err] = std::from_chars(string, string + std::strlen(string), value);
         switch (err)
         {
@@ -126,7 +131,7 @@ namespace chisel
             case std::errc::result_out_of_range:
                 throw std::out_of_range(string);
             default:
-                return value;
+                return T(value);
         }
     }
 }
