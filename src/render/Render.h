@@ -17,6 +17,10 @@ namespace chisel::render
 
     struct Shader {};
 
+    enum class MSAA { None = 0, x2 = 2, x4 = 4, x8 = 8, x16 = 16 };
+
+    constexpr bool IsValid(MSAA msaa) { return (uint(msaa) & (uint(msaa) - 1)) == 0 && uint(msaa) <= 16; }
+
     struct RenderTarget
     {
         using ReadBackFunc = std::function<void(float* ptr, size_t size, size_t with)>;
@@ -28,6 +32,8 @@ namespace chisel::render
         virtual void* GetDepthTexture() const = 0;
         virtual uint2 GetSize() const = 0;
         virtual void Resize(uint width, uint height) = 0;
+
+        virtual void SetMSAA(MSAA msaa) = 0;
 
         // TODO: Should be settable as a flag on creation
         virtual void SetReadBack(bool readBack) = 0;

@@ -79,6 +79,7 @@ namespace chisel::render
         ReadBackFunc               readBackFunc;
         float*                     readBackData   = nullptr;
         size_t                     readBackSize   = 0;
+        MSAA                       msaa           = MSAA::None;
 
         static inline std::set<RenderTargetBGFX*> pendingReadBacks;
 
@@ -93,11 +94,28 @@ namespace chisel::render
 
         void Create()
         {
-            color = bgfx::createTexture2D(width, height, false, 1, format, BGFX_TEXTURE_RT);
+            uint64 flags = BGFX_TEXTURE_RT;
+            
+            if (msaa > MSAA::None && IsValid(msaa)) {
+                // Remap: x2 -> 2, x4 -> 3, x8 -> 4, x16 -> 5
+                uint64 log2 = std::bit_width(uint64(msaa)) - 1;
+                flags |= ((log2+1) << BGFX_TEXTURE_RT_MSAA_SHIFT) & BGFX_TEXTURE_RT_MSAA_MASK;                
+            }
+
+            color = bgfx::createTexture2D(width, height, false, 1, format, flags);
+            
+            // If MSAA is enabled, then depth buffer must be write-only
+            if (msaa > MSAA::None)
+                flags |= BGFX_TEXTURE_RT_WRITE_ONLY;
+            
             if (hasDepth)
-                depth = bgfx::createTexture2D(width, height, false, 1, depthFormat, BGFX_TEXTURE_RT);
+                depth = bgfx::createTexture2D(width, height, false, 1, depthFormat, flags);
+            
             bgfx::TextureHandle handles[] = {color, depth};
             fb = bgfx::createFrameBuffer(hasDepth ? 2 : 1, handles, true);
+            
+            if (!bgfx::isValid(fb))
+                throw std::runtime_error("[BGFX] Failed to create framebuffer!");
 
             if (readBack) {
                 readBackBuffer = bgfx::createTexture2D(width, height, false, 1, format,
@@ -110,9 +128,11 @@ namespace chisel::render
 
         void Destroy()
         {
-            bgfx::destroy(fb);
-            bgfx::destroy(color);
-            if (hasDepth)
+            if (bgfx::isValid(fb))
+                bgfx::destroy(fb);
+            if (bgfx::isValid(color))
+                bgfx::destroy(color);
+            if (hasDepth && bgfx::isValid(depth))
                 bgfx::destroy(depth);
             if (readBack && bgfx::isValid(readBackBuffer))
                 bgfx::destroy(readBackBuffer);
@@ -140,6 +160,12 @@ namespace chisel::render
                 return;
 
             width = w; height = h;
+            Recreate();
+        }
+
+        void SetMSAA(MSAA mode)
+        {
+            msaa = mode;
             Recreate();
         }
 
@@ -236,6 +262,7 @@ namespace chisel::render
                 | BGFX_STATE_DEPTH_TEST_LESS
                 | BGFX_STATE_CULL_CCW // Clockwise winding order
                 | BGFX_STATE_MSAA
+                //| BGFX_STATE_LINEAA
             );
 
             bgfx::ProgramHandle currentProgram;
