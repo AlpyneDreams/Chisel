@@ -29,11 +29,11 @@ namespace chisel
             // Convert z-up to y-up
             // TODO: Handedness?
             float x = std::stof(std::string(coords[0]));
-            float y = std::stof(std::string(coords[2]));
-            float z = std::stof(std::string(coords[1]));
+            float y = std::stof(std::string(coords[1]));
+            float z = std::stof(std::string(coords[2]));
 
             // FIXME: Apply scale here for now
-            tri[i] = vec3(x, y, z) * vec3(0.0254f);
+            point_trio[i] = vec3(x, y, z) * vec3(0.0254f);
         }
     }
 
@@ -49,41 +49,6 @@ namespace chisel
     Solid::Solid(KeyValues& solid) : MapClass(solid),
         sides(solid["side"])
     {
-        std::vector<vec3>& vertices = *new std::vector<vec3>();
-        std::vector<uint32>& indices = *new std::vector<uint32>();
-        uint32 index = 0;
-
-        // Add each face to mesh
-        for (auto& side : sides)
-        {
-            auto& tri = side.plane.tri;
-
-            // Compute normal
-            vec3 normal = glm::triangleNormal(tri[0], tri[1], tri[2]);
-
-            // Add first triangle
-            for (int i = 0; i < 3; i++)
-            {
-                vertices.push_back(tri[i]);
-                vertices.push_back(normal);
-                indices.push_back(index++);
-            }
-
-            // TODO: Actual face reconstruction by intersecting planes
-
-            // Add second triangle
-            indices.push_back(index - 3); // tri[0]
-            indices.push_back(index - 1); // tri[2]
-
-            vec3 dy = tri[1] - tri[0]; // top left - bottom left
-
-            // Add 4th vertex
-            vertices.push_back(tri[2] - dy);
-            vertices.push_back(normal);
-            indices.push_back(index++);
-        }
-
-        mesh = Mesh(xyz, vertices, indices);
     }
 
 }

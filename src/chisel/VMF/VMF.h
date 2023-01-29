@@ -43,8 +43,7 @@ namespace chisel
 
     struct Plane
     {
-        // bottom left, top left, top right
-        vec3 tri[3];
+        std::array<vec3, 3> point_trio;
 
         Plane() = default;
         Plane(std::string_view plane);
@@ -67,8 +66,6 @@ namespace chisel
     struct Solid : MapClass
     {
         std::vector<Side> sides;
-
-        Mesh mesh;
 
         Solid(KeyValues& solid);
     };
