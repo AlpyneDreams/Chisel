@@ -37,7 +37,12 @@ namespace chisel
             newline = true;
         }
 
+#ifdef __INTELLISENSE__
+        // See: https://github.com/microsoft/vscode-cpptools/issues/10431
+        void Printf(Level level, auto... args)
+#else
         void Printf(Level level, const char* format = "", auto... args)
+#endif
         {
             std::string str = Format(format, args...);
             if (newline || log.size() <= 0) {
