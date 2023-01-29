@@ -3,7 +3,7 @@
 #include "chisel/Tools.h"
 
 #include "chisel/Chisel.h"
-#include "chisel/VMF.h"
+#include "chisel/VMF/VMF.h"
 
 namespace chisel
 {

@@ -2,10 +2,9 @@
 #include "chisel/Chisel.h"
 #include "chisel/MapRender.h"
 #include "common/String.h"
-#include "chisel/KeyValues.h"
+#include "chisel/VMF/KeyValues.h"
 
 #include "console/Console.h"
-#include "chisel/VMF.h"
 #include "gui/ConsoleWindow.h"
 #include "gui/Layout.h"
 #include "gui/Viewport.h"

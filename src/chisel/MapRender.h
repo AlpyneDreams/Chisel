@@ -4,7 +4,6 @@
 #include "chisel/Chisel.h"
 #include "common/System.h"
 #include "chisel/Tools.h"
-#include "chisel/VMF.h"
 #include "chisel/Selection.h"
 #include "chisel/Handles.h"
 

@@ -22,8 +22,8 @@ chisel_src = files(
 
     'chisel/Tools.cpp',
     'chisel/Chisel.cpp',
-    'chisel/VMF.cpp',
-    'chisel/Solid.cpp',
+    'chisel/VMF/VMF.cpp',
+    'chisel/VMF/Solid.cpp',
 
     'chisel/CSG/Brush.cpp',
     'chisel/CSG/CSGTree.cpp',
