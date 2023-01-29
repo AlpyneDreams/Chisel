@@ -36,15 +36,21 @@ namespace chisel
 
         void Maniuplate(Transform& transform, const mat4x4& view, const mat4x4& proj, Tool activeTool, Space space, bool gridSnap, const vec3& gridSize)
         {
-            float mtx[16];
+            mat4x4 mtx;
             vec3 angles = transform.GetEulerAngles();
-            ImGuizmo::RecomposeMatrixFromComponents(&transform.position[0], &angles[0], &transform.scale[0], mtx);
+            ImGuizmo::RecomposeMatrixFromComponents(&transform.position[0], &angles[0], &transform.scale[0], &mtx[0][0]);
 
+            if (Manipulate(mtx, view, proj, activeTool, space, gridSnap, gridSize))
+            {
+                ImGuizmo::DecomposeMatrixToComponents(&mtx[0][0], &transform.position[0], &angles[0], &transform.scale[0]);
+                transform.SetEulerAngles(angles);
+            }
+        }
+
+        bool Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, Tool activeTool, Space space, bool gridSnap, const vec3& gridSize)
+        {
             ImGuizmo::MODE mode = space == Space::World ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL;
-            ImGuizmo::Manipulate(&view[0][0], &proj[0][0], GetOperation(activeTool), mode, &mtx[0], NULL, gridSnap ? &gridSize.x : NULL);
-
-            ImGuizmo::DecomposeMatrixToComponents(mtx, &transform.position[0], &angles[0], &transform.scale[0]);
-            transform.SetEulerAngles(angles);
+            return ImGuizmo::Manipulate(&view[0][0], &proj[0][0], GetOperation(activeTool), mode, &model[0][0], NULL, gridSnap ? &gridSize.x : NULL);
         }
 
         bool IsMouseOver() { return ImGuizmo::IsOver(); }
