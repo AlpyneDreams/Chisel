@@ -6,6 +6,7 @@
 #include "chisel/Tools.h"
 #include "chisel/VMF.h"
 #include "chisel/Selection.h"
+#include "chisel/Handles.h"
 
 #include "core/Primitives.h"
 #include "core/VertexLayout.h"
@@ -277,8 +278,23 @@ namespace chisel
             {
                 Primitive* primitive = brush.GetUserdata<Primitive*>();
                 r.SetUniform("u_color", primitive->GetTempColor());
+                
                 if (brush.GetObjectID() == Selection.Active())
+                {
+                    mat4x4 transform = primitive->GetTransform();
+                    
+                    // Draw a wire box around the brush
+                    transform = glm::scale(transform, vec3(2.0f));
+                    r.SetTransform(transform);
+                    Tools.DrawSelectionOutline(&Primitives.Cube);
+                    
+                    // Draw wireframe of the brush's mesh
+                    r.SetTransform(glm::identity<mat4x4>());
+                    Tools.DrawSelectionOutline(primitive->GetMesh());
+                    
+                    // Draw the actual mesh faces in red
                     r.SetUniform("u_color", Color(1, 0, 0));
+                }
 
                 r.DrawMesh(primitive->GetMesh());
             }
@@ -292,6 +308,24 @@ namespace chisel
                 Primitive* primitive = brush.GetUserdata<Primitive*>();
                 Tools.PreDrawSelection(r, brush.GetObjectID());
                 r.DrawMesh(primitive->GetMesh());
+            }
+        }
+        
+        void DrawHandles(mat4x4& view, mat4x4& proj, auto... args)
+        {
+            if (!Selection.Any())
+                return;
+            
+            SelectionID id = Selection.Active();
+            
+            if (CSG::Brush* brush = world.GetBrush(CSG::ObjectID(id)))
+            {
+                if (Primitive* primitive = brush->GetUserdata<Primitive*>())
+                {
+                    mat4x4 mtx = primitive->GetTransform();
+                    if (Handles.Manipulate(mtx, view, proj, args...))
+                        primitive->SetTransform(mtx);
+                }
             }
         }
     };

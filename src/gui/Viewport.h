@@ -14,17 +14,13 @@ namespace chisel
 
         void DrawHandles(mat4x4& view, mat4x4& proj) override
         {
+            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, gridSnap, gridSize);
         }
 
         void OnPostDraw() override
         {
             // TODO: Better way to find solid by ID
             //Gizmos.DrawIcon(vec3(0), Gizmos.icnLight);
-        }
-
-        void DrawSelectionOutline(Solid& solid)
-        {
-            chisel::Tools.DrawSelectionOutline(&solid.mesh);
         }
 
     };

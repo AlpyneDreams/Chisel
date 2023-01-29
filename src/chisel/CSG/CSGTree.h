@@ -16,6 +16,14 @@ namespace chisel::CSG
         void DestroyBrush(Brush& brush);
         const std::list<Brush>& GetBrushes() const;
 
+        // TODO: This could be faster. Maybe use an indexed free list.
+        Brush* GetBrush(ObjectID id) {
+            for (Brush& brush : m_brushes)
+                if (brush.GetObjectID() == id)
+                    return &brush;
+            return nullptr;
+        }
+
         void SetVoidVolume(VolumeID type);
         VolumeID GetVoidVolume() const;
 
