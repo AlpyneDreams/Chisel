@@ -1,6 +1,7 @@
 #include "common/Common.h"
 #include "common/Filesystem.h"
 #include "platform/Platform.h"
+#include "console/ConVar.h"
 #include "common/Time.h"
 
 #include <algorithm>
@@ -53,6 +54,7 @@ namespace chisel::render
         return bgfxTextureFormats.contains(format) ? bgfxTextureFormats[format] : bgfx::TextureFormat::Unknown;
     }
 
+    ConVar<bool> r_vsync("r_vsync", false, "Enable/disable vsync");
 
     struct ShaderBGFX final : public Shader
     {
@@ -271,8 +273,13 @@ namespace chisel::render
         } state;
 
     protected:
+        bool m_bWasVSync = false;
+        Window *m_window = nullptr;
+
         void Init(Window* window)
         {
+            m_window = window;
+
             // Signal to BGFX not to create a render thread
             bgfx::renderFrame();
 
@@ -287,8 +294,10 @@ namespace chisel::render
             init.resolution.width = uint32(width);
             init.resolution.height = uint32(height);
 
-            //init.resolution.reset = BGFX_RESET_VSYNC;
+            if (r_vsync)
+                init.resolution.reset = BGFX_RESET_VSYNC;
             //init.resolution.maxFrameLatency = 1; // This reduces mouse input lag for imgui
+            m_bWasVSync = r_vsync;
 
             state.width = width, state.height = height;
 
@@ -318,6 +327,12 @@ namespace chisel::render
         void BeginFrame()
         {
             // Always clear this view even if no draw calls are made
+            if (m_window && m_bWasVSync != r_vsync)
+            {
+                auto [width, height] = m_window->GetSize();
+                bgfx::reset(uint32(width), uint32(height), r_vsync ? BGFX_RESET_VSYNC : 0);
+                m_bWasVSync = r_vsync;
+            }
             bgfx::touch(state.defaultView);
         }
 
