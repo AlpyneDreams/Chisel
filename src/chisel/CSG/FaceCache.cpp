@@ -48,9 +48,13 @@ namespace chisel::CSG
         {
             switch (face.CalculateVertexRelation(vertex))
             {
-                case FaceVertexRelations::Front:   return BrushVertexRelations::Outside;
-                case FaceVertexRelations::Aligned: return BrushVertexRelations::Aligned;
-                default: break;
+                case FaceVertexRelations::Front:
+                    return BrushVertexRelations::Outside;
+                case FaceVertexRelations::Aligned:
+                    type = BrushVertexRelations::Aligned;
+                    break;
+                default:
+                    break;
             }
         }
         return type;
