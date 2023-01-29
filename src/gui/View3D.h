@@ -26,9 +26,9 @@ namespace chisel
     static ConVar<float> cam_pitchup  ("cam_pitchup",   +89.0f,  "Set the max pitch value.");
     static ConVar<float> cam_pitchdown("cam_pitchdown", -89.0f,  "Set the min pitch value.");
 
-    static ConVar<float> m_sensitivity("sensitivity", 6.0f,   "Mouse sensitivity");
-    static ConVar<float> m_pitch      ("m_pitch",     0.022f, "Mouse pitch factor.");
-    static ConVar<float> m_yaw        ("m_yaw",       0.022f, "Mouse yaw factor.");
+    static ConVar<float> m_sensitivity("m_sensitivity", 6.0f,   "Mouse sensitivity");
+    static ConVar<float> m_pitch      ("m_pitch",       0.022f, "Mouse pitch factor.");
+    static ConVar<float> m_yaw        ("m_yaw",         0.022f, "Mouse yaw factor.");
 
     static ConVar<bool>  view_axis_allow_flip("view_axis_allow_flip", false, "Allow gizmos to flip axes contextually.");
     static ConVar<bool>  view_grid_show("view_grid_show", true, "Show grid.");
