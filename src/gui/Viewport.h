@@ -13,7 +13,7 @@ namespace chisel
 
         void DrawHandles(mat4x4& view, mat4x4& proj) override
         {
-            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, gridSnap, gridSize);
+            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, view_grid_snap, gridSize);
         }
 
         void OnPostDraw() override

@@ -52,6 +52,10 @@ namespace chisel
     static ConVar<float> m_pitch      ("m_pitch",     0.022f, "Mouse pitch factor.");
     static ConVar<float> m_yaw        ("m_yaw",       0.022f, "Mouse yaw factor.");
 
+    static ConVar<bool>  view_axis_allow_flip("view_axis_allow_flip", false, "Allow gizmos to flip axes contextually.");
+    static ConVar<bool>  view_grid_show("view_grid_show", true, "Show grid.");
+    static ConVar<bool>  view_grid_snap("view_grid_snap", true, "Snap to grid.");
+
     struct View3D : public GUI::Window
     {
         View3D(auto... args) : GUI::Window(args..., ImGuiWindowFlags_MenuBar) {}
@@ -61,10 +65,7 @@ namespace chisel
         Tool  activeTool    = Tool::Translate;
         Space space         = Space::World;
         Rect  viewport;
-        bool  allowAxisFlip = false;
 
-        bool showGrid       = true;
-        bool gridSnap       = true;
         vec3 gridSize       = vec3(64.0f);
         bool gridUniform    = true;
 
@@ -134,7 +135,7 @@ namespace chisel
             ImGuiWindow* hovered = g.HoveredWindow;
             g.HoveredWindow = NULL;
 
-            Handles.Begin(viewport, allowAxisFlip);
+            Handles.Begin(viewport, view_axis_allow_flip);
 
             Camera& camera = Tools.editorCamera.camera;
 
@@ -152,7 +153,7 @@ namespace chisel
             r.SetRenderTarget(Tools.rt_SceneView);
 
             // Draw grid
-            if (showGrid)
+            if (view_grid_show)
                 Handles.DrawGrid(r, Tools.sh_Grid);
 
             OnPostDraw();
@@ -190,7 +191,7 @@ namespace chisel
                     ImGui::TextUnformatted("Scene Camera");
                     ImGui::InputFloat("FOV", &camera.fieldOfView);
                     ImGui::InputFloat("Speed (hu/s)", &cam_maxspeed.value);
-                    ImGui::InputFloat("Sensitivity", &sensitivity.value);
+                    ImGui::InputFloat("Sensitivity", &m_sensitivity.value);
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
@@ -246,8 +247,8 @@ namespace chisel
                         if (camera.rightHanded)
                             mouse.x = -mouse.x;
 
-                        camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * sensitivity * m_yaw));
-                        camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * sensitivity * m_pitch), DegreesToRadians(cam_pitchdown), DegreesToRadians(cam_pitchup));
+                        camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * m_sensitivity * m_yaw));
+                        camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * m_sensitivity * m_pitch), DegreesToRadians(cam_pitchdown), DegreesToRadians(cam_pitchup));
                     }
 
                     if (Mouse.GetButtonUp(Mouse::Right) || Keyboard.GetKeyUp(Key::Z))
@@ -308,7 +309,7 @@ namespace chisel
                         space = Space(j);
                     }
                 }
-                ImGui::Checkbox("Axis Flip", &allowAxisFlip);
+                ImGui::Checkbox("Axis Flip", &view_axis_allow_flip.value);
                 ImGui::EndMenu();
             }
         }
@@ -317,8 +318,6 @@ namespace chisel
 
         void GridMenu()
         {
-            static bool showingGrid = true;
-
             char gridTabName[128];
             const bool isGridUniform = gridUniform || (gridSize.x == gridSize.y && gridSize.y == gridSize.z);
             if (isGridUniform)
@@ -328,11 +327,11 @@ namespace chisel
             if (BeginMenu(gridTabName))
             {
                 ImGui::TextUnformatted("Grid");
-                const char* label = showGrid
+                const char* label = view_grid_show
                     ? (ICON_MC_GRID " Show Grid")
                     : (ICON_MC_GRID_OFF " Show Grid");
-                ImGui::Checkbox(label, &showGrid);
-                ImGui::Checkbox(ICON_MC_MAGNET " Snap to Grid", &gridSnap);
+                ImGui::Checkbox(label, &view_grid_show.value);
+                ImGui::Checkbox(ICON_MC_MAGNET " Snap to Grid", &view_grid_snap.value);
                 ImGui::Checkbox(ICON_MC_LINK " Uniform Grid Size", &gridUniform);
                 if (gridUniform) {
                     if (ImGui::InputFloat("Grid Size", &gridSize.x))
@@ -341,10 +340,6 @@ namespace chisel
                     ImGui::InputFloat3("Grid Size", &gridSize.x);
                 }
                 ImGui::EndMenu();
-            }
-            else
-            {
-                showingGrid = showGrid;
             }
         }
 
