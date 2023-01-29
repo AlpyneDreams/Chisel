@@ -48,7 +48,7 @@ namespace chisel
         ConFunc function;
 
     public:
-        ConCommand(const char* name, const char* description, std::function<void(ConCmd&)> func, auto... flags)
+        ConCommand(const char* name, const char* description, ConFunc func, auto... flags)
           : name(name),
             description(description),
             function(func)

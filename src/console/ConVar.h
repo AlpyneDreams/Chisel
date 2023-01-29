@@ -19,21 +19,44 @@ namespace chisel
     template <typename T = const char*>
     struct ConVar : public ConCommand
     {
+    protected:
+        using CallbackFunc = std::function<void(T&)>;
+
+        CallbackFunc callback;
+        bool inCallback = false;
+    
+    public:
         T value;
         T defaultValue;
 
-        ConVar(const char* name, T defaultValue, const char* description, auto... flags)
-          : ConCommand(name, description, std::function<void(ConCmd&)>{}, flags...),
+        ConVar(const char* name, T defaultValue, const char* description, CallbackFunc func)
+          : ConCommand(name, description, std::function<void(ConCmd&)>{}, NULL),
+            value(defaultValue),
+            defaultValue(defaultValue),
+            callback(func)
+        {}
+        
+        ConVar(const char* name, T defaultValue, const char* description)
+          : ConCommand(name, description, std::function<void(ConCmd&)>{}, NULL),
             value(defaultValue),
             defaultValue(defaultValue)
         {}
 
-        ConVar(const char* name, T defaultValue, const char* description)
-          : ConVar(name, defaultValue, description, NULL)
-        {}
-
         // Cannot call a ConVar like a function (can still Invoke)
         void operator()(auto... args) = delete;
+        
+        inline void SetValue(T t)
+        {
+            value = t;
+            
+            // Allow callback to set the value without recursing!
+            if (!inCallback && callback)
+            {
+                inCallback = true;
+                callback(value);
+                inCallback = false;
+            }
+        }
 
         // Print or set value
         void Invoke(ConCmd& cmd) final override
@@ -42,7 +65,7 @@ namespace chisel
             if (cmd.argc == 0) {
                 PrintHelp();
             } else try {
-                value = ParseValue(cmd.args);
+                SetValue(ParseValue(cmd.args));
                 PrintValue();
             } catch (invalid_argument const& err) {
                 Console.Error("Invalid {} value '{}'", DescribeType(), cmd.args);
@@ -69,7 +92,7 @@ namespace chisel
             }
         }
 
-        ConVar<T>& operator =(const T& t) { value = t; return *this; }
+        ConVar<T>& operator =(const T& t) { SetValue(t); return *this; }
         operator T() const { return value; }
         bool operator ==(const T& t) { return value == t; }
         auto operator <=>(const T& t) { return value <=> t; }
