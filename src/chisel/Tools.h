@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Common.h"
+#include "console/ConCommand.h"
 #include "math/Math.h"
 #include "render/Render.h"
 #include "gui/Window.h"
@@ -8,6 +9,9 @@
 #include "core/Transform.h"
 #include "render/RenderSystem.h"
 #include "render/RenderContext.h"
+
+#include <charconv>
+#include <type_traits>
 
 namespace chisel
 {
@@ -73,4 +77,37 @@ namespace chisel
         float f = std::bit_cast<float>(id + 1); // add 1 as 0 is for background
         r.SetUniform("u_color", vec4(f, 0.f, 0.f, 1.0f));
     }
+
+    inline ConCommand getpos("getpos", "Prints current camera position", [](ConCmd& cmd) {
+        Camera& camera = Tools.editorCamera.camera;
+        Console.Log("setpos {} {} {}; setang {} {} {}", camera.position.x, camera.position.y, camera.position.z, RadiansToDegrees(camera.pitch), RadiansToDegrees(camera.yaw), 0.0f);
+    });
+
+    inline ConCommand setpos("setpos", "Sets current camera position", [](ConCmd& cmd) {
+        Camera& camera = Tools.editorCamera.camera;
+        if (cmd.argc != 3)
+        {
+            Console.Error("Not enough args.");
+            return;
+        }
+
+        glm::vec3 position = {};
+        for (size_t i = 0; i < 3; i++)
+        {
+            auto [ptr, err] = std::from_chars(cmd.argv[i].begin(), cmd.argv[i].end(), position[i]);
+            switch (err)
+            {
+                case std::errc::invalid_argument:
+                    Console.Error("Invalid value.");
+                    return;
+                case std::errc::result_out_of_range:
+                    Console.Error("Out of range.");
+                    return;
+                default:
+                    break;
+            }
+        }
+        camera.position = position;
+    });
+
 }
