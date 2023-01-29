@@ -277,6 +277,8 @@ namespace chisel
             auto& brushes = world.GetBrushes();
 
             // TODO: Cull!
+            Primitive* selectedPrimitive = nullptr;
+
             for (const CSG::Brush& brush : brushes)
             {
                 Primitive* primitive = brush.GetUserdata<Primitive*>();
@@ -284,6 +286,8 @@ namespace chisel
 
                 if (brush.GetObjectID() == Selection.Active())
                 {
+                    selectedPrimitive = primitive;
+
                     // Draw a wire box around the brush
                     r.SetTransform(glm::identity<mat4x4>());
                     Tools.DrawSelectionOutline(&Primitives.Cube);
@@ -297,6 +301,12 @@ namespace chisel
                 }
 
                 r.DrawMesh(primitive->GetMesh());
+            }
+
+            if (Keyboard.GetKeyUp(Key::Delete))
+            {
+                Selection.Clear();
+                delete selectedPrimitive;
             }
         }
 
