@@ -281,17 +281,17 @@ namespace chisel
             {
                 Primitive* primitive = brush.GetUserdata<Primitive*>();
                 r.SetUniform("u_color", primitive->GetTempColor());
-                
+
                 if (brush.GetObjectID() == Selection.Active())
                 {
                     // Draw a wire box around the brush
                     r.SetTransform(glm::identity<mat4x4>());
                     Tools.DrawSelectionOutline(&Primitives.Cube);
-                    
+
                     // Draw wireframe of the brush's mesh
                     r.SetTransform(glm::identity<mat4x4>());
                     Tools.DrawSelectionOutline(primitive->GetMesh());
-                    
+
                     // Draw the actual mesh faces in red
                     r.SetUniform("u_color", Color(1, 0, 0));
                 }
@@ -310,14 +310,14 @@ namespace chisel
                 r.DrawMesh(primitive->GetMesh());
             }
         }
-        
+
         void DrawHandles(mat4x4& view, mat4x4& proj, auto... args)
         {
             if (!Selection.Any())
                 return;
-            
+
             SelectionID id = Selection.Active();
-            
+
             if (CSG::Brush* brush = world.GetBrush(CSG::ObjectID(id)))
             {
                 auto bounds = brush->GetBounds();
