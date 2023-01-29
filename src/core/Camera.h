@@ -32,8 +32,7 @@ namespace chisel
                 return view;
 
             // TODO: Cache this
-            vec3 a = glm::radians(transform.GetEulerAngles());
-            mat4x4 view = glm::eulerAngleZXY(-a.z, -a.x, -a.y);
+            mat4x4 view = glm::toMat4(glm::conjugate(transform.rotation));
             view = glm::translate(view, -transform.position);
             return view;
         }
