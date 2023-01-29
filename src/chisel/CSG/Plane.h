@@ -36,10 +36,6 @@ namespace chisel::CSG
             const Vector3 transformedOrigin = Vector3{ matrix * Vector4{ ProjectPoint(Vector3(0.0, 0.0, 0.0)), 1.0 } };
             const Vector3 transformedNormal = glm::normalize(Vector3{ glm::transpose(glm::inverse(matrix)) * Vector4{ normal, 0.0 } });
 
-            printf("TRANSFORMED: %g %g %g - %g %g %g\n",
-                transformedOrigin.x, transformedOrigin.y, transformedOrigin.z,
-                transformedNormal.x, transformedNormal.y, transformedNormal.z);
-
             return Plane{ transformedOrigin, transformedNormal };
         }
 

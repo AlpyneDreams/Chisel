@@ -142,7 +142,7 @@ namespace chisel
                     }
                 }
             }
-            printf("UPDATING MESH: %u\n", uint32_t(m_indices.size()));
+            //printf("UPDATING MESH: %u\n", uint32_t(m_indices.size()));
             m_mesh = Mesh(LayoutCSG, m_verts, m_indices);
         }
 
@@ -218,14 +218,33 @@ namespace chisel
 
             world.SetVoidVolume(ChiselVolumes::Air);
 
+            /*
             new CubePrimitive(&world, ChiselVolumes::Solid);
             new CubePrimitive(&world, ChiselVolumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(0.25, 2.0, 0.25)));
             tunnel = new CubePrimitive(&world, ChiselVolumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.25f, 0.25)));
             tunnel2 = new CubePrimitive(&world, ChiselVolumes::Solid, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.10f, 0.10)));
+            */
 
+            auto map = fs::readFile("/home/joshua/c1a0.vmf");
+            //auto map = fs::readFile("/home/joshua/Code/Desolation/game/sdk_content/maps/hl2_sdk/sdk_phys_keepupright.vmf");
+            auto kv = KeyValues::Parse(map);
+            VMF vmf(kv);
+            std::vector<CSG::Plane> planes;
+            for (const auto& solid : vmf.world.solids)
+            {
+                planes.clear();
+                for (const auto& side : solid.sides)
+                    planes.emplace_back(side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2]);
+
+                Primitive *prim = new Primitive(&world, ChiselVolumes::Solid);
+                prim->GetBrush().SetPlanes(&planes.front(), &planes.back() + 1);
+            }
+
+            /*
             std::string buffer{};
             glz::write<glz::opts{.format = glz::json, .prettify = false}>(world, buffer);
             fprintf(stderr, "%s\n", buffer.c_str());
+            */
         }
 
         void Update() final override
