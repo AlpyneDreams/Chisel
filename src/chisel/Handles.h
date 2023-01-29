@@ -99,14 +99,14 @@ namespace chisel
             uint i = 0;
             for (int x = -radius; x <= radius; x++, i += 2)
             {
-                gridVertices[i] = vec4(x, 0, -radius, x % gridMajor == 0);
-                gridVertices[i+1] = vec4(x, 0, +radius, x % gridMajor == 0);
+                gridVertices[i] = vec4(x, -radius, 0, x % gridMajor == 0);
+                gridVertices[i+1] = vec4(x, +radius, 0, x % gridMajor == 0);
             }
 
             for (int z = -radius; z <= radius; z++, i += 2)
             {
-                gridVertices[i] = vec4(-radius, 0, z, z % gridMajor == 0);
-                gridVertices[i+1] = vec4(+radius, 0, z, z % gridMajor == 0);
+                gridVertices[i] = vec4(-radius, z, 0, z % gridMajor == 0);
+                gridVertices[i+1] = vec4(+radius, z, 0, z % gridMajor == 0);
             }
 
             auto& g = grid.AddGroup();

@@ -70,6 +70,28 @@ namespace chisel
         static const inline vec3 Left  = vec3(-1, 0, 0);
     } Vectors;
 
+    static constexpr float CHISEL_PI = 3.14159265358979323846f;
+
+    /// Convert a value from degrees to radians
+    constexpr float DegreesToRadians(float inV)
+    {
+        return inV * (CHISEL_PI / 180.0f);
+    }
+
+    /// Convert a value from radians to degrees
+    constexpr float RadiansToDegrees(float inV)
+    {
+        return inV * (180.0f / CHISEL_PI);
+    }
+
+    inline float AngleNormalize(float angle)
+    {
+        angle = fmodf(angle, 360.0f);
+        if (angle > +180) { angle -= 360; }
+        if (angle < -180) { angle += 360; }
+        return angle;
+    }
+
     struct Rect
     {
         union {
