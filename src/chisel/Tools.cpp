@@ -9,6 +9,8 @@
 
 namespace chisel
 {
+    extern ConVar<render::MSAA> r_msaa;
+
     static RenderSystem& Renderer   = Tools.Renderer;
     static render::Render& r        = Tools.Render;
 
@@ -28,7 +30,10 @@ namespace chisel
 
         // Setup editor render targets
         auto [width, height] = window->GetSize();
+        
         rt_SceneView = r.CreateRenderTarget(width, height);
+        rt_SceneView->SetMSAA(r_msaa);
+        
         rt_ObjectID = r.CreateRenderTarget(width, height, render::TextureFormat::R32F, render::TextureFormat::D32F);
         rt_ObjectID->SetReadBack(true);
 
@@ -154,4 +159,12 @@ namespace chisel
         DrawSelectionOutline(mesh);
     }
 
+    ConVar<render::MSAA> r_msaa("r_msaa", render::MSAA::x4, "Set MSAA level", [](render::MSAA& value)
+    {
+        if (!IsValid(value))
+            value = render::MSAA::None;
+        
+        if (Tools.rt_SceneView)
+            Tools.rt_SceneView->SetMSAA(value);
+    });
 }
