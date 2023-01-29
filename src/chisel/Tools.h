@@ -91,10 +91,10 @@ namespace chisel
             return;
         }
 
-        glm::vec3 position = {};
+        vec3 position = {};
         for (size_t i = 0; i < 3; i++)
         {
-            auto [ptr, err] = std::from_chars(cmd.argv[i].begin(), cmd.argv[i].end(), position[i]);
+            auto [ptr, err] = std::from_chars(&cmd.argv[i].front(), &cmd.argv[i].back() + 1, position[i]);
             switch (err)
             {
                 case std::errc::invalid_argument:

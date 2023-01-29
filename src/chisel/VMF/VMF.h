@@ -8,6 +8,7 @@
 #include "KeyValues.h"
 
 #include <vector>
+#include <array>
 
 namespace chisel
 {
