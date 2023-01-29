@@ -58,7 +58,7 @@ namespace chisel
 
         bool showGrid       = true;
         bool gridSnap       = true;
-        vec3 gridSize       = vec3(0.25f);
+        vec3 gridSize       = vec3(64.0f);
         bool gridUniform    = true;
 
         bool  popupOpen     = false;
@@ -312,10 +312,13 @@ namespace chisel
         {
             static bool showingGrid = true;
 
-            const char* name = showingGrid
-                ? (ICON_MC_GRID " " ICON_MC_MENU_DOWN)
-                : (ICON_MC_GRID_OFF " " ICON_MC_MENU_DOWN);
-            if (BeginMenu(name))
+            char gridTabName[128];
+            const bool isGridUniform = gridUniform || (gridSize.x == gridSize.y && gridSize.y == gridSize.z);
+            if (isGridUniform)
+                snprintf(gridTabName, sizeof(gridTabName), ICON_MC_GRID " %g " ICON_MC_MENU_DOWN, gridSize.x);
+            else
+                snprintf(gridTabName, sizeof(gridTabName), ICON_MC_GRID " %g %g %g " ICON_MC_MENU_DOWN, gridSize.x, gridSize.y, gridSize.z);
+            if (BeginMenu(gridTabName))
             {
                 ImGui::TextUnformatted("Grid");
                 const char* label = showGrid
