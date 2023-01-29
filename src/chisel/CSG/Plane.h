@@ -15,6 +15,9 @@ namespace chisel::CSG
         Plane(Vector3 point, Vector3 normal)
             : Plane(normal, -glm::dot(point, normal)) {}
 
+        Plane(Vector3 a, Vector3 b, Vector3 c)
+            : Plane(a, NormalFromPoints(a, b, c)) {}
+
         Vector3 normal = {};
         Unit    offset = {};
 
@@ -38,6 +41,13 @@ namespace chisel::CSG
                 transformedNormal.x, transformedNormal.y, transformedNormal.z);
 
             return Plane{ transformedOrigin, transformedNormal };
+        }
+
+        static CSG::Vector3 NormalFromPoints(const CSG::Vector3& a, const CSG::Vector3& b, const CSG::Vector3& c)
+        {
+            const CSG::Vector3 v1 = a - b;
+            const CSG::Vector3 v2 = c - b;
+            return glm::normalize(glm::cross(v1, v2));
         }
     };
 }
