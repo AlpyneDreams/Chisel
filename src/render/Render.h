@@ -94,11 +94,17 @@ namespace chisel::render
         virtual void SetTransform(const mat4x4& matrix) = 0;
         virtual void SetShader(Shader* shader) = 0;
         virtual void SetTexture(uint slot, Texture* texture) = 0;
+        
         // TODO: Hashed strings...
         virtual void SetUniform(std::string_view name, void* value, uint stride = 4, uint count = 1) = 0;
         void SetUniform(std::string_view name, vec4 value, uint count = 1) { SetUniform(name, &value[0], 4, count); };
         void SetUniform(std::string_view name, Color value, uint count = 1) { SetUniform(name, &value.data[0], 4, count); };
         void SetUniform(std::string_view name, mat4x4 value, uint count = 1) { SetUniform(name, &value[0][0], 16, count); };
+    
+    // State Recording //
+        
+        virtual void PushState() = 0;
+        virtual void PopState() = 0;
 
     // Draw Calls //
 

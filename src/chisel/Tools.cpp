@@ -138,13 +138,13 @@ namespace chisel
 
     void Tools::DrawSelectionOutline(Mesh* mesh)
     {
+        r.PushState();
         r.SetDepthTest(render::CompareFunc::LessEqual);
         r.SetPolygonMode(render::PolygonMode::Wireframe);
         r.SetShader(sh_Color);
         r.SetUniform("u_color", vec4(1, 0.6, 0.25, 1));
         r.DrawMesh(mesh);
-        r.SetPolygonMode(render::PolygonMode::Fill);
-        r.SetDepthTest(render::CompareFunc::Less);
+        r.PopState();
     }
 
     void Tools::DrawSelectionOutline(Mesh* mesh, Transform& transform)

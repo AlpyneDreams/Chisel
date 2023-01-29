@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <map>
 #include <typeindex>
+#include <stack>
 
 #include "platform/Window.h"
 #include "render/Render.h"
@@ -216,10 +217,10 @@ namespace chisel::render
             bgfx::ViewId view = 0;
             bgfx::ViewId nextView = 1;
 
-            const bgfx::ViewId defaultView = 0;
-            const bgfx::ViewId imguiView = 255;
+            static constexpr bgfx::ViewId defaultView = 0;
+            static constexpr bgfx::ViewId imguiView = 255;
 
-            mat4x4 mView, mProj;
+            mat4x4 mTransform, mView, mProj;
 
             struct ClearState {
                 uint16 flags = BGFX_CLEAR_NONE;
@@ -609,6 +610,7 @@ namespace chisel::render
 
         void SetTransform(const mat4x4& matrix)
         {
+            state.mTransform = matrix;
             bgfx::setTransform(&matrix[0][0]);
         }
 
@@ -637,6 +639,38 @@ namespace chisel::render
                 uniform = state.uniforms[name];
             }
             bgfx::setUniform(state.uniforms[name], value, count);
+        }
+
+    // State Recording //
+    
+    protected:
+        // TODO: Store partial state to make this faster.
+        std::stack<RenderState> stateStack;
+    
+    public:
+        void PushState()
+        {
+            stateStack.push(state);   
+        }
+        
+        void PopState()
+        {
+            if (stateStack.empty())
+                return;
+            state = stateStack.top();
+            stateStack.pop();
+            
+        // Per-view state
+            SetView(state.view);
+            // TODO: SetRenderTarget
+            bgfx::setViewTransform(state.view, &state.mView[0][0], &state.mProj[0][0]);
+            UpdateClearState(state);
+        
+        // Per-instance state
+            // Most things are set in DrawMesh    
+            bgfx::setTransform(&state.mTransform[0][0]);
+            // TODO: SetTexture
+            // TODO: SetUniform
         }
 
     // Draw Calls //
