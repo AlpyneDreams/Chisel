@@ -200,7 +200,7 @@ namespace chisel
                     Tools.PickObject(mouse);
                 }
 
-                if (!ImGui::GetIO().KeyCtrl)
+                if (!ImGui::GetIO().KeyCtrl && ImGui::IsWindowHovered())
                 {
                     // Right-click and hold (or press Z) to mouselook
                     // TODO: Make Z toggle instead of hold

@@ -28,6 +28,8 @@ namespace chisel::GUI
         {
             if (Keyboard.GetKeyUp(Key::Grave)) {
                 ToggleOrFocus();
+                if (open)
+                    focus = true;
             }
             Window::Update();
         }
