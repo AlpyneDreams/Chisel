@@ -346,6 +346,9 @@ namespace chisel::render
         {
             for (auto& group : mesh->groups)
             {
+                if (!group.vertices)
+                    continue;
+                
                 bgfx::VertexLayout layout;
                 layout.begin();
 
@@ -687,7 +690,11 @@ namespace chisel::render
 
             bgfx::setState(state.state);
 
-            for (auto& group : mesh->groups) {
+            for (auto& group : mesh->groups)
+            {
+                if (group.vertices.handle == nullptr)
+                    continue;
+
                 auto vb = static_cast<HandleBGFX*>(group.vertices.handle)->vb;
                 bgfx::setVertexBuffer(0, vb);
 
