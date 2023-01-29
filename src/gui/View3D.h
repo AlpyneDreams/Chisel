@@ -132,7 +132,7 @@ namespace chisel
 
             // Draw grid
             if (view_grid_show)
-                Handles.DrawGrid(r, Tools.sh_Grid);
+                Handles.DrawGrid(r, Tools.sh_Grid, gridSize);
 
             OnPostDraw();
         }
@@ -207,6 +207,17 @@ namespace chisel
                     ImVec2 absolute = ImGui::GetMousePos();
                     uint2 mouse = uint2(absolute.x - pos.x, absolute.y - pos.y);
                     Tools.PickObject(mouse);
+                }
+
+                if (Keyboard.GetKeyUp(Key::OpenBracket) || Keyboard.GetKeyUp(Key::CloseBracket))
+                {
+                    const bool up = Keyboard.GetKeyUp(Key::CloseBracket);
+                    if (up)
+                        gridSize *= 2.0f;
+                    else
+                        gridSize /= 2.0f;
+
+                    gridSize = glm::clamp(gridSize, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
                 }
 
                 if (!ImGui::GetIO().KeyCtrl && ImGui::IsWindowHovered())

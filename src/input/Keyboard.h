@@ -12,6 +12,7 @@ namespace chisel
         Return = '\r', Enter = '\r', Escape = 27,
         Spacebar = ' ', Space = ' ',
         Grave = '`', BackQuote = '`', BackTick = '`',
+        OpenBracket = '[', CloseBracket = ']',
         //Zero = '0', One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Minus = '-', Equals = '=',
         A = 'a', B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
         Delete = 127,

@@ -75,9 +75,9 @@ namespace chisel
     // Grid //
 
         // TODO: Scale grid based on snap increment. View based fade. Infinite grid
-        void DrawGrid(render::Render& r, render::Shader* shader)
+        void DrawGrid(render::Render& r, render::Shader* shader, vec3 gridSize)
         {
-            mat4x4 matrix = glm::translate(glm::identity<mat4x4>(), vec3(0, 0.015, 0));
+            mat4x4 matrix = glm::scale(glm::identity<mat4x4>(), gridSize);
             r.SetTransform(matrix);
             r.SetBlendFunc(render::BlendFuncs::Alpha);
             r.SetDepthTest(render::CompareFunc::LessEqual);
