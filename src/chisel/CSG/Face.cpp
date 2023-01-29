@@ -97,7 +97,7 @@ namespace chisel::CSG
         // Call only if test(fragment, face) == RELATION_SPLIT
 
         // Front + Back.
-        std::array<Fragment, 2> pieces =
+        std::array<Fragment, FragmentFaceRelations::Count> pieces =
         {
             // Front
             Fragment
@@ -115,6 +115,8 @@ namespace chisel::CSG
                 .back  = fragment.back,
                 // Vertices + relation is purposefully not set here.
             },
+            // Aligned (dummy)
+            Fragment {},
         };
 
         const size_t vertexCount = fragment.vertices.size();
@@ -133,7 +135,7 @@ namespace chisel::CSG
                 if (!edge)
                 {
                     // This shouldn't happen.
-                    fprintf(stderr, "This shouldn't happen.\n");
+                    fprintf(stderr, "This shouldn't happen (A).\n");
                     pieces[c0].vertices.push_back(v0);
                     continue;
                 }
@@ -143,7 +145,7 @@ namespace chisel::CSG
                 if (!v)
                 {
                     // This shouldn't happen.
-                    fprintf(stderr, "This shouldn't happen.\n");
+                    fprintf(stderr, "This shouldn't happen (B).\n");
                     pieces[c0].vertices.push_back(v0);
                     continue;
                 }
@@ -181,7 +183,7 @@ namespace chisel::CSG
         // down the convex bsp-tree (the list of faces) of the given brush.
         Face* face = brush->GetFace(faceIndex);
         if (!face)
-            return { fragment };
+            return { std::move(fragment) };
 
         switch (auto relation = fragment.CalculateFaceRelation(*face))
         {
