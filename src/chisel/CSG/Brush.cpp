@@ -19,6 +19,12 @@ namespace chisel::CSG
     {
     }
 
+    Brush::~Brush()
+    {
+        for (auto* brush : m_intersectingBrushes)
+            m_tree->MarkDirtyFragments(*brush);
+    }
+
 //-------------------------------------------------------------------------------------------------
 
     void Brush::SetPlanes(const Plane* first, const Plane* end)

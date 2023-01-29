@@ -13,6 +13,7 @@ namespace chisel::CSG
     {
     public:
         Brush(CSGTree* tree, ObjectID id);
+        ~Brush();
 
         CSGTree* GetTree() const { return m_tree; }
 

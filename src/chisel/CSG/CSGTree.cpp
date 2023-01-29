@@ -15,6 +15,8 @@ namespace chisel::CSG
 
     void CSGTree::DestroyBrush(Brush& brush)
     {
+        std::erase_if(m_dirtyFaceCacheBrushes, [ptr = &brush](Brush* val){ return val == ptr ; });
+        std::erase_if(m_dirtyFragmentBrushes, [ptr = &brush](Brush* val){ return val == ptr ; });
         m_brushes.remove_if([ptr = &brush](Brush& val){ return &val == ptr ; });
     }
 
