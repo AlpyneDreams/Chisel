@@ -61,7 +61,7 @@ namespace chisel
         Tool  activeTool    = Tool::Translate;
         Space space         = Space::World;
         Rect  viewport;
-        bool  allowAxisFlip = true;
+        bool  allowAxisFlip = false;
 
         bool showGrid       = true;
         bool gridSnap       = true;
