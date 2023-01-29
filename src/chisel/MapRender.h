@@ -12,6 +12,7 @@
 #include "common/Time.h"
 #include "math/Math.h"
 #include "math/Color.h"
+#include "VMF/VMF.h"
 #include <glm/gtx/normal.hpp>
 
 #include "CSG/CSGTree.h"
@@ -82,9 +83,8 @@ namespace chisel
     class Primitive
     {
     public:
-        Primitive(CSG::CSGTree* tree, ChiselVolume volume, const CSG::Matrix4& transform = CSG::Matrix4{1.0f})
+        Primitive(CSG::CSGTree* tree, ChiselVolume volume)
             : m_brush(tree->CreateBrush())
-            , m_transform(transform)
         {
             m_brush.SetVolumeOperation(CSG::CreateFillOperation(volume));
             m_brush.Userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
@@ -98,19 +98,6 @@ namespace chisel
         {
             m_brush.GetTree()->DestroyBrush(m_brush);
         }
-
-        void SetTransform(const CSG::Matrix4& mat)
-        {
-            m_transform = mat;
-            this->UpdatePlanes();
-        }
-
-        const CSG::Matrix4& GetTransform() const
-        {
-            return m_transform;
-        }
-
-        virtual void UpdatePlanes() = 0;
 
         void UpdateMesh()
         {
@@ -159,6 +146,11 @@ namespace chisel
             m_mesh = Mesh(LayoutCSG, m_verts, m_indices);
         }
 
+        CSG::Brush& GetBrush()
+        {
+            return m_brush;
+        }
+
         Mesh* GetMesh()
         {
             return &m_mesh;
@@ -171,8 +163,6 @@ namespace chisel
         }
     protected:
         CSG::Brush& m_brush;
-        CSG::Matrix4 m_transform;
-
         glm::vec4 m_tempcolor;
 
         Mesh m_mesh;
@@ -184,12 +174,7 @@ namespace chisel
     {
     public:
         CubePrimitive(CSG::CSGTree* tree, ChiselVolume volume, const CSG::Matrix4& transform = CSG::Matrix4{1.0f})
-            : Primitive(tree, volume, transform)
-        {
-            this->UpdatePlanes();
-        }
-
-        void UpdatePlanes() override
+            : Primitive(tree, volume)
         {
             static const std::array<CSG::Plane, 6> kUnitCubePlanes =
             {
@@ -203,7 +188,7 @@ namespace chisel
 
             std::array<CSG::Plane, 6> planes;
             for (size_t i = 0; i < 6; i++)
-                planes[i] = kUnitCubePlanes[i].Transformed(m_transform);
+                planes[i] = kUnitCubePlanes[i].Transformed(transform);
 
             m_brush.SetPlanes(&planes.front(), &planes.back() + 1);
         }
@@ -280,11 +265,8 @@ namespace chisel
                 
                 if (brush.GetObjectID() == Selection.Active())
                 {
-                    mat4x4 transform = primitive->GetTransform();
-                    
                     // Draw a wire box around the brush
-                    transform = glm::scale(transform, vec3(2.0f));
-                    r.SetTransform(transform);
+                    r.SetTransform(glm::identity<mat4x4>());
                     Tools.DrawSelectionOutline(&Primitives.Cube);
                     
                     // Draw wireframe of the brush's mesh
@@ -319,11 +301,17 @@ namespace chisel
             
             if (CSG::Brush* brush = world.GetBrush(CSG::ObjectID(id)))
             {
-                if (Primitive* primitive = brush->GetUserdata<Primitive*>())
+                auto bounds = brush->GetBounds();
+                if (!bounds)
+                    return;
+
+                // Get AABB center for translate for gizmo, then un-apply that
+                // translation when we get it out the gizmo.
+                auto mtx     = glm::translate(CSG::Matrix4(1.0), bounds->Center());
+                auto inv_mtx = glm::translate(CSG::Matrix4(1.0), -bounds->Center());
+                if (Handles.Manipulate(mtx, view, proj, args...))
                 {
-                    mat4x4 mtx = primitive->GetTransform();
-                    if (Handles.Manipulate(mtx, view, proj, args...))
-                        primitive->SetTransform(mtx);
+                    brush->Transform(mtx * inv_mtx);
                 }
             }
         }

@@ -96,6 +96,13 @@ namespace chisel::CSG
         return m_faceCache->GetFaces();
     }
 
+    void Brush::Transform(const Matrix4& matrix)
+    {
+        for (auto& plane : m_planes)
+            plane = plane.Transformed(matrix);
+        MakeFaceCacheDirty();
+    }
+
 //-------------------------------------------------------------------------------------------------
 
     void Brush::RebuildFaceCache()

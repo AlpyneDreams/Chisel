@@ -39,6 +39,8 @@ namespace chisel::CSG
 
         Face* GetFace(size_t index);
         const std::vector<Face>& GetFaces() const;
+
+        void Transform(const Matrix4& matrix);
     protected:
         friend class CSGTree;
 

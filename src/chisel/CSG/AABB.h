@@ -20,6 +20,11 @@ namespace chisel::CSG
                    glm::all(glm::greaterThanEqual(max, other.min));
         }
 
+        CSG::Vector3 Center() const
+        {
+            return 0.5f * (min + max);
+        }
+
         static AABB Extend(const AABB& bounds, Vector3 point)
         {
             return AABB
