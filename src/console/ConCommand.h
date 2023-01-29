@@ -99,9 +99,9 @@ namespace chisel
 
     public:
 
-        static void Execute(const char* string)
+        static void Execute(std::string_view string)
         {
-            Console.history.push_back(string);
+            Console.history.push_back(std::string(string));
             Console.Print(Console::Level::Input, "> {}", string);
 
             auto tokens  = str::split(string);

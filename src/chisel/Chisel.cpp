@@ -18,21 +18,6 @@
 
 namespace chisel
 {
-    void Chisel::Open(const char* path)
-    {
-        Console.Log("Open: '{}'", path);
-        if (!fs::exists(path)) {
-            Console.Error("Error: file '{}' does not exist", path);
-            return;
-        }
-
-        std::string vmf = fs::readFile(path);
-
-        KeyValues kv = KeyValues::Parse(vmf);
-
-        map = VMF(kv);
-    }
-
     void Chisel::Run()
     {
         Tools.Init();
@@ -53,7 +38,6 @@ namespace chisel
             Chisel.Renderer->DrawSelectionPass();
         };
 
-        //Open("/home/alpyne/Desktop/test.vmf");
         Tools.Loop();
         Tools.Shutdown();
     }

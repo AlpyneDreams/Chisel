@@ -6,6 +6,7 @@
 #include "chisel/Tools.h"
 #include "chisel/Selection.h"
 #include "chisel/Handles.h"
+#include "console/ConVar.h"
 
 #include "core/Primitives.h"
 #include "core/VertexLayout.h"
@@ -215,7 +216,6 @@ namespace chisel
         void Start() final override
         {
             shader = Tools.Render.LoadShader("flat");
-
             world.SetVoidVolume(ChiselVolumes::Air);
 
             /*
@@ -225,10 +225,24 @@ namespace chisel
             tunnel2 = new CubePrimitive(&world, ChiselVolumes::Solid, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.10f, 0.10)));
             */
 
-            auto map = fs::readFile("/home/joshua/c1a0.vmf");
-            //auto map = fs::readFile("/home/joshua/Code/Desolation/game/sdk_content/maps/hl2_sdk/sdk_phys_keepupright.vmf");
-            auto kv = KeyValues::Parse(map);
-            VMF vmf(kv);
+
+
+            /*
+            std::string buffer{};
+            glz::write<glz::opts{.format = glz::json, .prettify = false}>(world, buffer);
+            fprintf(stderr, "%s\n", buffer.c_str());
+            */
+        }
+
+        bool LoadVMF(std::string_view path)
+        {
+            auto map = fs::readFile(path);
+            if (!map)
+                return false;
+            auto kv = KeyValues::Parse(*map);
+            if (!kv)
+                return false;
+            VMF vmf(*kv);
             std::vector<CSG::Plane> planes;
             for (const auto& solid : vmf.world.solids)
             {
@@ -240,11 +254,7 @@ namespace chisel
                 prim->GetBrush().SetPlanes(&planes.front(), &planes.back() + 1);
             }
 
-            /*
-            std::string buffer{};
-            glz::write<glz::opts{.format = glz::json, .prettify = false}>(world, buffer);
-            fprintf(stderr, "%s\n", buffer.c_str());
-            */
+            return true;
         }
 
         void Update() final override
@@ -345,5 +355,16 @@ namespace chisel
             }
         }
     };
+
+    static ConCommand open_vmf("open_vmf", "Load a VMF from a file path.", [](ConCmd& cmd) {
+        if (cmd.argc != 1)
+        {
+            Console.Error("Usage: open_vmf <path>");
+            return;
+        }
+
+        if (!Chisel.Renderer->LoadVMF(cmd.argv[0]))
+            Console.Error("Failed to load VMF '{}'", cmd.argv[0]);
+    });
 
 }

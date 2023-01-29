@@ -8,6 +8,7 @@
 #include <tuple>
 #include <filesystem>
 #include <ostream>
+#include <optional>
 
 #include <fmt/ostream.h>
 
@@ -23,12 +24,12 @@ namespace chisel::fs
 
     using std::filesystem::exists;
 
-    inline const std::string readFile(const Path& path)
+    inline const std::optional<std::string> readFile(const Path& path)
     {
         using namespace std;
         ifstream file(path, ios::in | ios::binary);
-        if (!file)
-            throw runtime_error(std::string("[FS] Failed to open file: ") + path);
+        if (!file || file.bad())
+            return std::nullopt;
 
         std::string buffer;
 

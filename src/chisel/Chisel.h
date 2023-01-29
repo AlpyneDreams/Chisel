@@ -32,11 +32,6 @@ namespace chisel
             }
         }
 
-    // File I/O //
-        // TODO: multiple open maps
-        VMF map;
-        void Open(const char* path);
-
     // Systems //
         MapRender* Renderer;
 

@@ -738,7 +738,9 @@ namespace chisel::render
         const bgfx::Memory* LoadMem(const char* filePath)
         {
             auto buffer = fs::readFile(filePath);
-            return bgfx::copy(buffer.data(), buffer.size());
+            if (!buffer)
+                return nullptr;
+            return bgfx::copy(buffer->data(), buffer->size());
         }
 
         bgfx::ShaderHandle LoadShaderModule(const char* _name)

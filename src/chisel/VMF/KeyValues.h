@@ -11,6 +11,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <optional>
 
 namespace chisel
 {
@@ -83,9 +84,16 @@ namespace chisel
 
         bool operator !=(const KeyValues& kv) const { return !(*this == kv); }
 
-        static KeyValues Parse(std::string& str)
+        static std::optional<KeyValues> Parse(std::string& str)
         {
-            return tyti::vdf::read<KeyValues>(str.begin(), str.end());
+            try
+            {
+                return tyti::vdf::read<KeyValues>(str.begin(), str.end());
+            } catch (const std::exception& e)
+            {
+                Console.Error("Failed to parse KeyValues: {}", e.what());
+                return std::nullopt;
+            }
         }
 
         KeyValues& Get(const char* key) {

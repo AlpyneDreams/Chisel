@@ -8,6 +8,7 @@
 #include "input/Keyboard.h"
 #include "platform/Cursor.h"
 #include "common/Time.h"
+#include "console/ConVar.h"
 
 #include "core/Camera.h"
 #include "core/Transform.h"
@@ -43,6 +44,15 @@ inline float AngleNormalize(float angle)
 
 namespace chisel
 {
+    static ConVar<float> sensitivity ("sensitivity",   6.0f, "Mouse sensitivity");
+    static ConVar<float> sv_maxspeed ("sv_maxspeed",   700.0f, "Max speed");
+
+    static ConVar<float> cl_pitchup  ("cl_pitchup",   +89.0f, "Set the max pitch value.");
+    static ConVar<float> cl_pitchdown("cl_pitchdown", -89.0f, "Set the min pitch value.");
+
+    static ConVar<float> m_pitch("m_pitch", 0.022f, "Mouse pitch factor.");
+    static ConVar<float> m_yaw  ("m_yaw",   0.022f, "Mouse yaw factor.");
+
     struct View3D : public GUI::Window
     {
         View3D(auto... args) : GUI::Window(args..., ImGuiWindowFlags_MenuBar) {}
@@ -52,8 +62,6 @@ namespace chisel
         Tool  activeTool    = Tool::Translate;
         Space space         = Space::World;
         Rect  viewport;
-        float cameraSpeed   = 7; // (m/s)
-        float sensitivity   = 0.5f;
         bool  allowAxisFlip = true;
 
         bool showGrid       = true;
@@ -182,8 +190,8 @@ namespace chisel
                     Camera& camera = Tools.editorCamera.camera;
                     ImGui::TextUnformatted("Scene Camera");
                     ImGui::InputFloat("FOV", &camera.fieldOfView);
-                    ImGui::InputFloat("Speed (m/s)", &cameraSpeed);
-                    ImGui::InputFloat("Sensitivity", &sensitivity);
+                    ImGui::InputFloat("Speed (hu/s)", &sv_maxspeed.value);
+                    ImGui::InputFloat("Sensitivity", &sensitivity.value);
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
@@ -239,8 +247,8 @@ namespace chisel
                         if (camera.rightHanded)
                             mouse.x = -mouse.x;
 
-                        camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * sensitivity));
-                        camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * sensitivity), -0.49f * CHISEL_PI, 0.49f * CHISEL_PI);
+                        camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * sensitivity * m_yaw));
+                        camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * sensitivity * m_pitch), DegreesToRadians(cl_pitchdown), DegreesToRadians(cl_pitchup));
                     }
 
                     if (Mouse.GetButtonUp(Mouse::Right) || Keyboard.GetKeyUp(Key::Z))
@@ -255,8 +263,8 @@ namespace chisel
                     float a = Keyboard.GetKey(Key::A) ? 1.f : 0.f;
                     float d = Keyboard.GetKey(Key::D) ? 1.f : 0.f;
 
-                    camera.position += camera.forward() * (w-s) * cameraSpeed * float(Time.deltaTime);
-                    camera.position += camera.right() * (d-a) * cameraSpeed * float(Time.deltaTime);
+                    camera.position += camera.forward() * (w-s) * sv_maxspeed.value * float(Time.deltaTime);
+                    camera.position += camera.right() * (d-a) * sv_maxspeed.value * float(Time.deltaTime);
                 }
             }
         }

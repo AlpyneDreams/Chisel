@@ -59,9 +59,8 @@ namespace chisel
         static void OpenFilePicker()
         {
             std::string file = Platform.FilePicker();
-            if (!file.empty()) {
-                Chisel.Open(file.c_str());
-            }
+            if (!file.empty())
+                ConCommand::Execute(fmt::format("open_vmf {}", file));
         }
 
         void Update() override

@@ -33,7 +33,7 @@ namespace chisel
             float z = std::stof(std::string(coords[2]));
 
             // FIXME: Apply scale here for now
-            point_trio[i] = vec3(x, y, z) * vec3(0.0254f);
+            point_trio[i] = vec3(x, y, z);
         }
     }
 
