@@ -260,7 +260,7 @@ namespace chisel::render
                 | BGFX_STATE_WRITE_A
                 | BGFX_STATE_WRITE_Z
                 | BGFX_STATE_DEPTH_TEST_LESS
-                | BGFX_STATE_CULL_CCW // Clockwise winding order
+                | BGFX_STATE_CULL_CW // Clockwise winding order
                 | BGFX_STATE_MSAA
                 //| BGFX_STATE_LINEAA
             );

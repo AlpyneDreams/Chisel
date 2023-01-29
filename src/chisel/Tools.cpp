@@ -38,13 +38,12 @@ namespace chisel
         rt_ObjectID->SetReadBack(true);
 
         // Setup editor camera
-        editorCamera.transform.position = vec3(2, 2.5, -3.5);
-        editorCamera.transform.SetEulerAngles(vec3(30, -30, 0));
+        editorCamera.camera.position = vec3(2, 2.5, -3.5);
         editorCamera.camera.renderTarget = rt_SceneView;
 
         // Setup camera renderer
         chisel::Renderer.OnBeginFrame += [](render::Render& r) {
-            chisel::Renderer.DrawCamera(chisel::Tools.editorCamera.camera, chisel::Tools.editorCamera.transform);
+            chisel::Renderer.DrawCamera(chisel::Tools.editorCamera.camera);
         };
     }
 

@@ -19,6 +19,28 @@
 #include "gui/IconsMaterialCommunity.h"
 #include "render/Render.h"
 
+static constexpr float CHISEL_PI = 3.14159265358979323846f;
+
+/// Convert a value from degrees to radians
+constexpr float DegreesToRadians(float inV)
+{
+	return inV * (CHISEL_PI / 180.0f);
+}
+
+/// Convert a value from radians to degrees
+constexpr float RadiansToDegrees(float inV)
+{
+	return inV * (180.0f / CHISEL_PI);
+}
+
+inline float AngleNormalize(float angle)
+{
+	angle = fmodf(angle, 360.0f);
+	if (angle > +180) { angle -= 360; }
+	if (angle < -180) { angle += 360; }
+	return angle;
+}
+
 namespace chisel
 {
     struct View3D : public GUI::Window
@@ -107,10 +129,9 @@ namespace chisel
             Handles.Begin(viewport, allowAxisFlip);
 
             Camera& camera = Tools.editorCamera.camera;
-            Transform& transform = Tools.editorCamera.transform;
 
             // Get camera matrices
-            mat4x4 view = camera.ViewMatrix(transform);
+            mat4x4 view = camera.ViewMatrix();
             mat4x4 proj = camera.ProjMatrix();
 
             DrawHandles(view, proj);
@@ -190,7 +211,7 @@ namespace chisel
             // If mouse is over viewport,
             if (ImGui::IsMouseHoveringRect(pos, max))
             {
-                Transform& transform = Tools.editorCamera.transform;
+                Camera& camera = Tools.editorCamera.camera;
 
                 // Left-click: Select (or transform selection)
                 if (Mouse.GetButtonDown(Mouse::Left) && !popupOpen && (Selection.Empty() || !Handles.IsMouseOver()))
@@ -212,10 +233,12 @@ namespace chisel
 
                     if (Mouse.GetButton(Mouse::Right) || Keyboard.GetKey(Key::Z))
                     {
-                        // Mouselook
-                        vec3 euler = transform.GetEulerAngles();
-                        vec2 mouse = vec2(Mouse.GetMotion()) / vec2(2);
-                        transform.SetEulerAngles(vec3(euler.x + mouse.y, euler.y + mouse.x, euler.z));
+                        int2 mouse = Mouse.GetMotion();
+                        if (camera.rightHanded)
+                            mouse.x = -mouse.x;
+
+                        camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * 0.5f));
+                        camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * 0.5), -0.49f * CHISEL_PI, 0.49f * CHISEL_PI);
                     }
 
                     if (Mouse.GetButtonUp(Mouse::Right) || Keyboard.GetKeyUp(Key::Z))
@@ -230,8 +253,8 @@ namespace chisel
                     float a = Keyboard.GetKey(Key::A) ? 1.f : 0.f;
                     float d = Keyboard.GetKey(Key::D) ? 1.f : 0.f;
 
-                    transform.position += transform.Forward() * (w-s) * cameraSpeed * float(Time.deltaTime);
-                    transform.position += transform.Right() * (d-a) * cameraSpeed * float(Time.deltaTime);
+                    camera.position += camera.forward() * (w-s) * cameraSpeed * float(Time.deltaTime);
+                    camera.position += camera.right() * (d-a) * cameraSpeed * float(Time.deltaTime);
                 }
             }
         }

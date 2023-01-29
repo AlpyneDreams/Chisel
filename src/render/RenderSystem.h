@@ -47,10 +47,10 @@ namespace chisel
             GUI::Render();
         }
 
-        void DrawCamera(Camera& camera, Transform& transform)
+        void DrawCamera(Camera& camera)
         {
             using namespace render;
-            RenderContext ctx = RenderContext(*render, camera, transform);
+            RenderContext ctx = RenderContext(*render, camera);
 
             OnBeginCamera(ctx);
             

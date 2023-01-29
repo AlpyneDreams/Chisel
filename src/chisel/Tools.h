@@ -28,7 +28,6 @@ namespace chisel
     // Viewport //
         struct EditorCamera {
             Camera camera;
-            Transform transform;
         } editorCamera;
 
         render::Shader* sh_Color;

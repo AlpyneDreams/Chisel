@@ -24,16 +24,51 @@ namespace chisel
         // If not null then camera only renders to this texture
         render::RenderTarget* renderTarget = nullptr;
 
+        float pitch = 0.0f;
+        float yaw = 0.0f;
+        vec3 position = vec3();
+        vec3 up = vec3(0, 0, 1);
+        // TODO: Update BGFX_STATE_CULL_CW -> BGFX_STATE_CULL_CCW
+        // when we change from rightHanded -> leftHanded.
+        bool rightHanded = true;
+        vec3 right() const
+        {
+            vec3 res = glm::cross(forward(), up);
+            return rightHanded ? res : -res;
+        }
+        vec3 forward() const
+        {
+            // TODO: Genericize the Forward function
+            // to account for other Ups.
+            const float x = std::cos(pitch) * std::cos(yaw);
+            const float y = std::sin(pitch);
+            const float z = std::cos(pitch) * std::sin(yaw);
+
+            return vec3(x, z, y);
+        }
+
     public:
         // World to camera matrix
-        mat4x4 ViewMatrix(Transform& transform)
+        mat4x4 ViewMatrix()
         {
             if (overrideViewMatrix)
                 return view;
 
-            // TODO: Cache this
-            mat4x4 view = glm::toMat4(glm::conjugate(transform.rotation));
-            view = glm::translate(view, -transform.position);
+            if (rightHanded)
+            {
+                view = glm::lookAtRH(
+                    position,
+                    position + forward(),
+                    up);
+            }
+            else
+            {
+                view = glm::lookAtLH(
+                    position,
+                    position + forward(),
+                    up);
+            }
+
             return view;
         }
 
@@ -74,8 +109,11 @@ namespace chisel
                 fovX = ScaleFOVByWidthRatio(fovX, aspectRatio, (scaleFOVAspect.x/scaleFOVAspect.y));
             float fovY = CalcVerticalFOV(fovX, aspectRatio);
 
-            // TOOD: Cache this
-            proj = glm::perspectiveLH_ZO(glm::radians(fovY), aspectRatio, near, far);
+            if (rightHanded)
+                proj = glm::perspectiveRH_ZO(glm::radians(fovY), aspectRatio, near, far);
+            else
+                proj = glm::perspectiveLH_ZO(glm::radians(fovY), aspectRatio, near, far);
+
             return proj;
         }
 
