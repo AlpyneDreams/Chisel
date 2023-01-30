@@ -23,17 +23,17 @@
 
 namespace chisel
 {
-    static ConVar<float> cam_maxspeed ("cam_maxspeed",  750.0f,  "Max speed");
-    static ConVar<float> cam_pitchup  ("cam_pitchup",   +89.0f,  "Set the max pitch value.");
-    static ConVar<float> cam_pitchdown("cam_pitchdown", -89.0f,  "Set the min pitch value.");
+    inline ConVar<float> cam_maxspeed ("cam_maxspeed",  750.0f,  "Max speed");
+    inline ConVar<float> cam_pitchup  ("cam_pitchup",   +89.0f,  "Set the max pitch value.");
+    inline ConVar<float> cam_pitchdown("cam_pitchdown", -89.0f,  "Set the min pitch value.");
 
-    static ConVar<float> m_sensitivity("m_sensitivity", 6.0f,   "Mouse sensitivity");
-    static ConVar<float> m_pitch      ("m_pitch",       0.022f, "Mouse pitch factor.");
-    static ConVar<float> m_yaw        ("m_yaw",         0.022f, "Mouse yaw factor.");
+    inline ConVar<float> m_sensitivity("m_sensitivity", 6.0f,   "Mouse sensitivity");
+    inline ConVar<float> m_pitch      ("m_pitch",       0.022f, "Mouse pitch factor.");
+    inline ConVar<float> m_yaw        ("m_yaw",         0.022f, "Mouse yaw factor.");
 
-    static ConVar<bool>  view_axis_allow_flip("view_axis_allow_flip", false, "Allow gizmos to flip axes contextually.");
-    static ConVar<bool>  view_grid_show("view_grid_show", true, "Show grid.");
-    static ConVar<bool>  view_grid_snap("view_grid_snap", true, "Snap to grid.");
+    inline ConVar<bool>  view_axis_allow_flip("view_axis_allow_flip", false, "Allow gizmos to flip axes contextually.");
+    inline ConVar<bool>  view_grid_show("view_grid_show", true, "Show grid.");
+    inline ConVar<bool>  view_grid_snap("view_grid_snap", true, "Snap to grid.");
 
     struct View3D : public GUI::Window
     {

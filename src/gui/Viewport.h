@@ -36,7 +36,7 @@ namespace chisel
         void OnPostDraw() override
         {
             if (IsMouseOver(viewport))
-            {                
+            {
                 if (Selection.Any() && Mouse.GetButtonDown(Mouse.Middle))
                 {
                     ImGui::OpenPopup("Selection");
