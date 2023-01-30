@@ -79,14 +79,6 @@ namespace chisel
         using glm::radians;
     }
 
-    inline float AngleNormalize(float angle)
-    {
-        angle = fmodf(angle, 360.0f);
-        if (angle > +180) { angle -= 360; }
-        if (angle < -180) { angle += 360; }
-        return angle;
-    }
-
     inline float Snap(float value, float snap)
     {
         return std::round(value / snap) * snap;

@@ -250,12 +250,19 @@ namespace chisel
         void MouseLook(int2 mouse)
         {
             Camera& camera = GetCamera();
-            if (camera.rightHanded)
-                mouse.x = -mouse.x;
 
-            // TODO: Why normalizing radians?
-            camera.angles.y = AngleNormalize(camera.angles.y + math::radians(mouse.x * m_sensitivity * m_yaw));
-            camera.angles.x = std::clamp(camera.angles.x - math::radians(mouse.y * m_sensitivity * m_pitch), math::radians(float(cam_pitchdown)), math::radians(float(cam_pitchup)));            
+            // Pitch down, yaw left
+            if (camera.rightHanded)
+                mouse = -mouse;
+
+            // Apply mouselook
+            vec3 angles = math::degrees(camera.angles);
+            angles.xy += vec2(mouse.y * m_pitch, mouse.x * m_yaw) * float(m_sensitivity);
+
+            // Clamp up/down look angles
+            angles.x = std::clamp<float>(angles.x, cam_pitchdown, cam_pitchup);
+
+            camera.angles = math::radians(angles);
         }
 
         // Returns true if window is not collapsed
