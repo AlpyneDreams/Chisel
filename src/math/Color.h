@@ -36,6 +36,32 @@ namespace chisel
         explicit ColorRGBA(auto r, auto g, auto b)
             : r(T(r)), g(T(g)), b(T(b)), a(T(NormalMax)) {}
         
+        static ColorRGBA<T> HSV(double H, double S, double V)
+        {
+            ColorRGBA<T> RGB;
+            double P, Q, U, fract;
+            (H == 360.) ? (H = 0.) : (H /= 60.);
+            fract = H - floor(H);
+            P = V*(1. - S);
+            Q = V*(1. - S*fract);
+            U = V*(1. - S*(1. - fract));
+            if      (0. <= H && H < 1.)
+                RGB = {V, U, P};
+            else if (1. <= H && H < 2.)
+                RGB = {Q, V, P};
+            else if (2. <= H && H < 3.)
+                RGB = {P, V, U};
+            else if (3. <= H && H < 4.)
+                RGB = {P, Q, V};
+            else if (4. <= H && H < 5.)
+                RGB = {U, P, V};
+            else if (5. <= H && H < 6.)
+                RGB = {V, P, Q};
+            else
+                RGB = {0., 0., 0.};
+            return RGB;
+        }
+        
         // Pack RGBA
         uint32 Pack()
         {
