@@ -26,14 +26,20 @@ namespace chisel
 
         float pitch = 0.0f;
         float yaw = 0.0f;
+        float roll = 0.0f;
         vec3 position = vec3();
-        vec3 up = vec3(0, 0, 1);
+        vec3 abs_up = vec3(0, 0, 1);
         // TODO: Update BGFX_STATE_CULL_CW -> BGFX_STATE_CULL_CCW
         // when we change from rightHanded -> leftHanded.
         bool rightHanded = true;
+        vec3 up() const
+        {
+            glm::mat4 roll_mat = glm::rotate(glm::mat4(1.0f), roll, forward());
+            return glm::mat3(roll_mat) * abs_up;
+        }
         vec3 right() const
         {
-            vec3 res = glm::cross(forward(), up);
+            vec3 res = glm::cross(forward(), abs_up);
             return rightHanded ? res : -res;
         }
         vec3 forward() const
@@ -59,14 +65,14 @@ namespace chisel
                 view = glm::lookAtRH(
                     position,
                     position + forward(),
-                    up);
+                    up());
             }
             else
             {
                 view = glm::lookAtLH(
                     position,
                     position + forward(),
-                    up);
+                    up());
             }
 
             return view;
