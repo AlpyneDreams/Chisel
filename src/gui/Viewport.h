@@ -37,7 +37,7 @@ namespace chisel
         {
             if (IsMouseOver(viewport))
             {
-                if (Selection.Any() && Mouse.GetButtonDown(Mouse.Middle))
+                if (Selection.Any() && (Mouse.GetButtonUp(Mouse.Right) || Mouse.GetButtonDown(Mouse.Middle)))
                 {
                     ImGui::OpenPopup("Selection");
                 }
