@@ -14,11 +14,19 @@ namespace chisel
     {
         Viewport() : View3D(ICON_MC_IMAGE_SIZE_SELECT_ACTUAL, "Viewport", 512, 512, true) {}
 
+        // TODO: One map per viewport
+        Map& map = Chisel.map;
+
         void OnClick(uint2 mouse)
         {
             // Left-click: Select (or transform selection)
             Tools.PickObject(mouse);
-        }        
+        }
+
+        void OnResizeGrid(vec3& gridSize)
+        {
+            map.gridSize = gridSize;
+        }
 
         void DrawHandles(mat4x4& view, mat4x4& proj) override
         {
@@ -66,6 +74,7 @@ namespace chisel
                     gridSize /= 2.0f;
 
                 gridSize = glm::clamp(gridSize, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
+                OnResizeGrid(gridSize);
             }
             //Gizmos.DrawIcon(vec3(0), Gizmos.icnLight);
         }

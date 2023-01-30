@@ -45,8 +45,7 @@ namespace chisel
         Space space         = Space::World;
         Rect  viewport;
 
-        // TODO: One map per View3D
-        vec3& gridSize      = Chisel.map.gridSize;
+        vec3 gridSize       = vec3(64.f);
         bool gridUniform    = true;
 
         bool  popupOpen     = false;
@@ -54,6 +53,7 @@ namespace chisel
     // Virtual Methods //
 
         virtual void OnClick(uint2 pos) {}
+        virtual void OnResizeGrid(vec3& gridSize) {}
         virtual void DrawHandles(mat4x4& view, mat4x4& proj) {}
         virtual void OnPostDraw() {}
 
@@ -316,9 +316,10 @@ namespace chisel
                 ImGui::Checkbox(ICON_MC_LINK " Uniform Grid Size", &gridUniform);
                 if (gridUniform) {
                     if (ImGui::InputFloat("Grid Size", &gridSize.x))
-                        gridSize = gridSize.xxx;
+                        OnResizeGrid(gridSize = gridSize.xxx);
                 } else {
-                    ImGui::InputFloat3("Grid Size", &gridSize.x);
+                    if (ImGui::InputFloat3("Grid Size", &gridSize.x))
+                        OnResizeGrid(gridSize);
                 }
                 ImGui::EndMenu();
             }
