@@ -121,6 +121,14 @@ namespace chisel
             mat4x4 view = camera.ViewMatrix();
             mat4x4 proj = camera.ProjMatrix();
 
+            {
+                const float size = 128.0f;
+                Rect gizmoViewPort = viewport;
+                gizmoViewPort.x = gizmoViewPort.x + gizmoViewPort.w - size;
+                mat4x4 gizmoView = view;
+                Handles.ViewManiuplate(gizmoViewPort, gizmoView, 35.f, size, Colors.Transparent);
+            }
+
             DrawHandles(view, proj);
 
             // HACK: Reset hovered window
