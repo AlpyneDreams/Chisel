@@ -36,6 +36,9 @@ namespace chisel
         }
         */
 
+    // File I/O //
+        bool LoadVMF(std::string_view path);
+
     // Systems //
         MapRender* Renderer;
 

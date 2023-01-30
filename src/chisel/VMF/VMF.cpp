@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-namespace chisel
+namespace chisel::VMF
 {
     Editor::Editor(KeyValues& editor) : KeyValues(editor),
         color               (editor["color"]),

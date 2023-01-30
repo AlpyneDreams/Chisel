@@ -10,7 +10,7 @@
 #include <vector>
 #include <array>
 
-namespace chisel
+namespace chisel::VMF
 {
     struct Editor : KeyValues
     {

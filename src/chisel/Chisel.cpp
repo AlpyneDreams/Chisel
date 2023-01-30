@@ -3,6 +3,7 @@
 #include "chisel/MapRender.h"
 #include "common/String.h"
 #include "chisel/VMF/KeyValues.h"
+#include "chisel/VMF/VMF.h"
 
 #include "console/Console.h"
 #include "gui/ConsoleWindow.h"
@@ -41,14 +42,48 @@ namespace chisel
         Tools.Loop();
         Tools.Shutdown();
     }
+    
+    bool Chisel::LoadVMF(std::string_view path)
+    {
+        auto text = fs::readFile(path);
+        if (!text)
+            return false;
+        
+        auto kv = KeyValues::Parse(*text);
+        if (!kv)
+            return false;
+
+        VMF::VMF vmf(*kv);
+        std::vector<CSG::Plane> planes;
+        for (const auto& solid : vmf.world.solids)
+        {
+            planes.clear();
+            for (const auto& side : solid.sides)
+                planes.emplace_back(side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2]);
+
+            Brush& brush = map.AddBrush();
+            brush.GetBrush().SetPlanes(&planes.front(), &planes.back() + 1);
+        }
+
+        return true;
+    }
 }
 
 namespace chisel::commands
 {
-    inline ConCommand quit("quit", "Quit the application", []() {
+    static ConCommand quit("quit", "Quit the application", []() {
         Tools.Shutdown();
         exit(0);
-    }); 
+    });
+    
+    static ConCommand open_vmf("open_vmf", "Load a VMF from a file path.", [](ConCmd& cmd)
+    {
+        if (cmd.argc != 1)
+            return Console.Error("Usage: open_vmf <path>");
+
+        if (!Chisel.LoadVMF(cmd.argv[0]))
+            Console.Error("Failed to load VMF '{}'", cmd.argv[0]);
+    });
 }
 
 int main(int argc, char* argv[])
