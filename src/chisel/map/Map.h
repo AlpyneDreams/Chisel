@@ -47,6 +47,7 @@ namespace chisel
      */
     struct Map : BrushEntity
     {
+        vec3                gridSize = vec3(64.0f);
         std::vector<Atom>   atoms;
         
         Map()

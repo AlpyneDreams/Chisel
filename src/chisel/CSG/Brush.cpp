@@ -109,6 +109,20 @@ namespace chisel::CSG
         MakeFaceCacheDirty();
     }
 
+    void Brush::AlignToGrid(const Vector3& gridSize)
+    {
+        auto bounds = GetBounds();
+        if (!bounds)
+            return;
+
+        // Align this brush to mins of bounding box
+        // like Hammer does (for when moving brushes)
+        // on-grid.
+        CSG::Vector3 ref  = bounds->min;
+        CSG::Vector3 snap = Snap(bounds->min, gridSize);
+        Transform(glm::translate(glm::identity<CSG::Matrix4>(), snap - ref));
+    }
+
 //-------------------------------------------------------------------------------------------------
 
     void Brush::RebuildFaceCache()

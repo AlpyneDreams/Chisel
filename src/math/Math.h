@@ -92,6 +92,16 @@ namespace chisel
         return angle;
     }
 
+    inline float Snap(float value, float snap)
+    {
+        return std::round(value / snap) * snap;
+    }
+
+    inline glm::vec3 Snap(glm::vec3 value, glm::vec3 snap)
+    {
+        return glm::round(value / snap) * snap;
+    }
+
     struct Rect
     {
         union {

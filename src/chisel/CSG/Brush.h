@@ -42,6 +42,7 @@ namespace chisel::CSG
         const std::vector<Face>& GetFaces() const;
 
         void Transform(const Matrix4& matrix);
+        void AlignToGrid(const Vector3& gridSize);
     protected:
         friend class CSGTree;
 

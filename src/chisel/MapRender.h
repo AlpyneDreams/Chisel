@@ -102,6 +102,8 @@ namespace chisel
                 if (Handles.Manipulate(mtx, view, proj, args...))
                 {
                     brush->GetBrush().Transform(mtx * inv_mtx);
+                    // TODO: Align to grid fights with the gizmo rn :s
+                    //brush->GetBrush().AlignToGrid(map.gridSize);
                 }
             }
         }

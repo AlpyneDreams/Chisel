@@ -4,6 +4,7 @@
 #include "gui/Window.h"
 #include "chisel/Selection.h"
 #include "chisel/Handles.h"
+#include "chisel/Chisel.h"
 #include "input/Input.h"
 #include "input/Keyboard.h"
 #include "platform/Cursor.h"
@@ -44,7 +45,8 @@ namespace chisel
         Space space         = Space::World;
         Rect  viewport;
 
-        vec3 gridSize       = vec3(64.0f);
+        // TODO: One map per View3D
+        vec3& gridSize      = Chisel.map.gridSize;
         bool gridUniform    = true;
 
         bool  popupOpen     = false;
