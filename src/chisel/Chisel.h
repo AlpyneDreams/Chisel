@@ -3,7 +3,7 @@
 #include "chisel/Tools.h"
 
 #include "chisel/Chisel.h"
-#include "chisel/VMF/VMF.h"
+#include "chisel/map/Map.h"
 
 namespace chisel
 {
@@ -17,9 +17,12 @@ namespace chisel
     {
     public:
     // Editing //
+        Map map;
+
         SelectMode selectMode = SelectMode::Groups;
 
-        uint GetSelectionID(MapEntity& ent, Solid& solid)
+        /*
+        uint GetSelectionID(VMF::MapEntity& ent, VMF::Solid& solid)
         {
             switch (selectMode)
             {
@@ -31,6 +34,7 @@ namespace chisel
                     return solid.id;
             }
         }
+        */
 
     // Systems //
         MapRender* Renderer;
