@@ -29,7 +29,7 @@ namespace chisel::VMF
         classname           (ent["classname"]),
         targetname          (ent["targetname"])
     {
-        auto origin_str = (std::string)ent["origin"];
+        std::string origin_str = ent["origin"];
         if (!origin_str.empty())
         {
             auto coords = str::split(origin_str, " ");
@@ -50,12 +50,12 @@ namespace chisel::VMF
             if (ent.name == "connections")
             {
                 for (const auto& connection : ent)
-                    connections.emplace(connection.name, std::string(connection));
+                    connections.emplace(connection.name, connection);
                 continue;
             }
 
             if (child.type == KeyValues::String)
-                kv.emplace(child.name, std::string(child));
+                kv.emplace(child.name, child);
         }
     }
 
