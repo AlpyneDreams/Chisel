@@ -22,7 +22,7 @@
 
 namespace chisel
 {
-    static ConVar<float> cam_maxspeed ("cam_maxspeed",   700.0f, "Max speed");
+    static ConVar<float> cam_maxspeed ("cam_maxspeed", 1000.0f,  "Max speed");
     static ConVar<float> cam_pitchup  ("cam_pitchup",   +89.0f,  "Set the max pitch value.");
     static ConVar<float> cam_pitchdown("cam_pitchdown", -89.0f,  "Set the min pitch value.");
 
