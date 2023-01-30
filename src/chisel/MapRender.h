@@ -40,16 +40,12 @@ namespace chisel
             map.Rebuild();
 
             // TODO: Cull!
-            Brush* selectedPrimitive = nullptr;
-
             for (Brush& brush : map)
             {
                 r.SetUniform("u_color", brush.GetTempColor());
 
                 if (brush.GetObjectID() == Selection.Active())
                 {
-                    selectedPrimitive = &brush;
-
                     // Draw a wire box around the brush
                     r.SetTransform(glm::identity<mat4x4>());
                     Tools.DrawSelectionOutline(&Primitives.Cube);
@@ -63,12 +59,6 @@ namespace chisel
                 }
 
                 r.DrawMesh(brush.GetMesh());
-            }
-
-            if (Keyboard.GetKeyUp(Key::Delete))
-            {
-                Selection.Clear();
-                delete selectedPrimitive;
             }
         }
 

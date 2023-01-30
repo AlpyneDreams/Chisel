@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <list>
 
 #include "core/Mesh.h"
 #include "CSG/Brush.h"
@@ -18,7 +18,7 @@ namespace chisel
     struct BrushEntity : Entity
     {
     protected:
-        std::vector<Brush>  brushes;
+        std::list<Brush>  brushes;
         CSG::CSGTree        tree;
         
     public:
@@ -29,6 +29,22 @@ namespace chisel
                 if (brush.GetObjectID() == id)
                     return &brush;
             return nullptr;
+        }
+        
+        Brush& AddBrush(Volume volume = Volumes::Solid)
+        {
+            return brushes.emplace_back(tree.CreateBrush(), volume);
+        }
+        
+        Brush& AddCube(Volume volume = Volumes::Solid, mat4x4 transform = glm::identity<mat4x4>())
+        {
+            brushes.push_back(CubeBrush(tree.CreateBrush(), volume, transform));
+            return brushes.back();
+        }
+        
+        void RemoveBrush(const Brush& brush)
+        {
+            brushes.remove(brush);
         }
         
         void Rebuild()
@@ -48,7 +64,7 @@ namespace chisel
     struct Map : BrushEntity
     {
         vec3                gridSize = vec3(64.0f);
-        std::vector<Atom>   atoms;
+        std::list<Atom>   atoms;
         
         Map()
         {
@@ -75,17 +91,6 @@ namespace chisel
                 );
             }*/
 
-        }
-        
-        Brush& AddBrush(Volume volume = Volumes::Solid)
-        {
-            return brushes.emplace_back(tree.CreateBrush(), volume);
-        }
-        
-        Brush& AddCube(Volume volume = Volumes::Solid, mat4x4 transform = glm::identity<mat4x4>())
-        {
-            brushes.push_back(CubeBrush(tree.CreateBrush(), volume, transform));
-            return brushes.back();
         }
     };
 }

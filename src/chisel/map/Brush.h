@@ -44,6 +44,11 @@ namespace chisel
                 brush->GetTree()->DestroyBrush(*brush);
         }
 
+        bool operator ==(const Brush& that) const
+        {
+            return brush == that.brush;
+        }
+
         void UpdateMesh()
         {
             mesh.vertices.clear();
