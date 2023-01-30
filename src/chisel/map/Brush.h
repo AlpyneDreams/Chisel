@@ -46,7 +46,9 @@ namespace chisel
 
         bool operator ==(const Brush& that) const
         {
-            return brush == that.brush;
+            return brush == that.brush
+                && brush != nullptr
+                && that.brush != nullptr;
         }
 
         void UpdateMesh()
