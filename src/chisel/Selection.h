@@ -51,8 +51,8 @@ namespace chisel
         void Clear();
         ISelectable* Find(SelectionID id);
 
-        ISelectable** begin() { return &m_selection[0]; }
-        ISelectable** end()   { return &m_selection[m_selection.size()]; }
+        ISelectable** begin() { return &m_selection.front(); }
+        ISelectable** end()   { return &m_selection.back() + 1; }
     private:
         std::vector<ISelectable*> m_selection;
     } Selection;
