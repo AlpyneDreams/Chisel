@@ -13,7 +13,7 @@ namespace chisel
     struct Mesh
     {
         struct Group {
-            VertexBuffer vertices;
+            VertexBuffer vertices = VertexBuffer();
             IndexBuffer indices = IndexBuffer();
         };
 
@@ -39,6 +39,8 @@ namespace chisel
         template <typename Vertex, size_t V, typename Index, size_t I>
         void Init(VertexLayout& layout, Vertex (&vertices)[V], Index (&indices)[I])
         {
+            if (V == 0 || I == 0)
+                return;
             groups.push_back(Group {
                 VertexBuffer(layout, vertices, sizeof(vertices)),
                 IndexBuffer(indices, sizeof(indices))
@@ -49,6 +51,8 @@ namespace chisel
         template <typename Vertex, typename Index>
         void Init(VertexLayout& layout, std::vector<Vertex>& vertices, std::vector<Index>& indices)
         {
+            if (indices.empty() || vertices.empty())
+                return;
             groups.push_back(Group {
                 VertexBuffer(layout, vertices.data(), vertices.size() * sizeof(Vertex)),
                 IndexBuffer(indices.data(), indices.size() * sizeof(Index))
@@ -58,6 +62,8 @@ namespace chisel
         template <typename Vertex, size_t V>
         void Init(VertexLayout& layout, Vertex (&vertices)[V])
         {
+            if (V == 0)
+                return;
             groups.push_back(Group {
                 VertexBuffer(layout, vertices, sizeof(vertices))
             });
@@ -70,17 +76,16 @@ namespace chisel
         std::vector<Vertex> vertices;
         std::vector<Index> indices;
         
-        MeshBuffer(VertexLayout& layout)
-            : Mesh(layout, vertices, indices)
-        {}
+        MeshBuffer()
+        {
+        }
         
         Group& AddGroup() = delete;
         
         void Update()
         {
-            VertexLayout layout = groups[0].vertices.layout;
             groups.clear();
-            Init(layout, vertices, indices);
+            Init(Vertex::Layout, vertices, indices);
             uploaded = false;
         }
     };

@@ -18,7 +18,7 @@ namespace chisel
         CSG::Brush*             brush;
         Volume                  volume;
 
-        MeshBuffer<VertexCSG>   mesh = MeshBuffer<VertexCSG>(VertexCSG::Layout);     
+        MeshBuffer<VertexCSG>   mesh = MeshBuffer<VertexCSG>();     
         Color                   tempcolor;
 
     public:
@@ -94,7 +94,6 @@ namespace chisel
                     }
                 }
             }
-            printf("UPDATING MESH: %u\n", uint32_t(mesh.indices.size()));
             mesh.Update();
         }
 
