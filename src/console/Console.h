@@ -8,6 +8,8 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include "math/Math.h"
+
 namespace chisel
 {
     namespace GUI { struct ConsoleWindow; }
@@ -85,3 +87,6 @@ namespace chisel
         friend struct ConCommand;
     } Console;
 }
+
+template <int N, typename T>
+struct fmt::formatter<glm::vec<N, T>> : fmt::ostream_formatter {};
