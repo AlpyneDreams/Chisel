@@ -57,6 +57,8 @@ namespace chisel
         virtual void DrawHandles(mat4x4& view, mat4x4& proj) {}
         virtual void OnPostDraw() {}
 
+        Camera& GetCamera() { return Tools.editorCamera.camera; }
+
     // Draw Modes //
 
         enum class DrawMode {
@@ -118,7 +120,7 @@ namespace chisel
 
             Handles.Begin(viewport, view_axis_allow_flip);
 
-            Camera& camera = Tools.editorCamera.camera;
+            Camera& camera = GetCamera();
 
             // Get camera matrices
             mat4x4 view = camera.ViewMatrix();
@@ -168,7 +170,7 @@ namespace chisel
                 ImGui::SameLine(ImGui::GetWindowWidth() - 40);
                 if (BeginMenu(ICON_MC_VIDEO " " ICON_MC_MENU_DOWN))
                 {
-                    Camera& camera = Tools.editorCamera.camera;
+                    Camera& camera = GetCamera();
                     ImGui::TextUnformatted("Scene Camera");
                     ImGui::InputFloat("FOV", &camera.fieldOfView);
                     ImGui::InputFloat("Speed (hu/s)", &cam_maxspeed.value);
@@ -202,7 +204,7 @@ namespace chisel
             // If mouse is over viewport,
             if (ImGui::IsWindowHovered() && IsMouseOver(viewport))
             {
-                Camera& camera = Tools.editorCamera.camera;
+                Camera& camera = GetCamera();
 
                 // Left-click: Select (or transform selection)
                 if (Mouse.GetButtonDown(Mouse::Left) && !popupOpen && !Handles.IsMouseOver())
@@ -224,12 +226,7 @@ namespace chisel
 
                     if (Mouse.GetButton(Mouse::Right) || Keyboard.GetKey(Key::Z))
                     {
-                        int2 mouse = Mouse.GetMotion();
-                        if (camera.rightHanded)
-                            mouse.x = -mouse.x;
-
-                        camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * m_sensitivity * m_yaw));
-                        camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * m_sensitivity * m_pitch), DegreesToRadians(cam_pitchdown), DegreesToRadians(cam_pitchup));
+                        MouseLook(Mouse.GetMotion());
                     }
 
                     if (Mouse.GetButtonUp(Mouse::Right) || Keyboard.GetKeyUp(Key::Z))
@@ -248,6 +245,16 @@ namespace chisel
                     camera.position += camera.right() * (d-a) * cam_maxspeed.value * float(Time.deltaTime);
                 }
             }
+        }
+        
+        void MouseLook(int2 mouse)
+        {
+            Camera& camera = GetCamera();
+            if (camera.rightHanded)
+                mouse.x = -mouse.x;
+
+            camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * m_sensitivity * m_yaw));
+            camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * m_sensitivity * m_pitch), DegreesToRadians(cam_pitchdown), DegreesToRadians(cam_pitchup));
         }
 
         // Returns true if window is not collapsed

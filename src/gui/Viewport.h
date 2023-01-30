@@ -28,17 +28,32 @@ namespace chisel
             map.gridSize = gridSize;
         }
 
+        bool isDraggingCube = false;
+
         void DrawHandles(mat4x4& view, mat4x4& proj) override
         {
+            // Draw transform handles
+            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, view_grid_snap, gridSize);
+            
+            // Draw view cube
             {
                 const float size = 128.0f;
-                Rect gizmoViewPort = viewport;
-                gizmoViewPort.x = gizmoViewPort.x + gizmoViewPort.w - size;
-                mat4x4 gizmoView = view;
-                Handles.ViewManiuplate(gizmoViewPort, gizmoView, 35.f, size, Colors.Transparent);
+                Rect gizmoRect = viewport;
+                gizmoRect.x = viewport.x + viewport.w - size;
+                Handles.ViewManiuplate(gizmoRect, view, 35.f, size, Colors.Transparent);
+                
+                // Since we don't actually update the view matrix, just apply sped-up
+                // mouselook if the user is dragging the cube with left click.
+                if ((isDraggingCube || IsMouseOver(gizmoRect)) && Mouse.GetButton(Mouse.Left))
+                {
+                    isDraggingCube = true;
+                    MouseLook(Mouse.GetMotion() * 5);
+                }
+                else
+                {
+                    isDraggingCube = false;
+                }
             }
-
-            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, view_grid_snap, gridSize);
         }
 
         void OnPostDraw() override
