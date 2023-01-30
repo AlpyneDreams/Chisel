@@ -219,6 +219,27 @@ namespace chisel
                     Tools.PickObject(mouse);
                 }
 
+                if (Selection.Any() && Mouse.GetButtonDown(Mouse::Middle))
+                {
+                    ImGui::OpenPopup("Selection");
+                }
+
+                ResetPadding();
+                if (ImGui::BeginPopup("Selection"))
+                {
+                    ImGui::Text("Brush Selection");
+                    ImGui::Separator();
+                    ImGui::Selectable( ICON_MC_SCISSORS_CUTTING " Cut");
+                    ImGui::Selectable( ICON_MC_FILE_DOCUMENT " Copy");
+                    ImGui::Selectable( ICON_MC_CLIPBOARD " Paste");
+                    ImGui::Separator();
+                    ImGui::Selectable( ICON_MC_GRID " Align to Grid");
+                    // TODO: Hook me up to the brush->AlignToGrid function
+                    // when mapdoc exists
+                    ImGui::EndPopup();
+                }
+                NoPadding();
+
                 if (Keyboard.GetKeyUp(Key::OpenBracket) || Keyboard.GetKeyUp(Key::CloseBracket))
                 {
                     const bool up = Keyboard.GetKeyUp(Key::CloseBracket);
