@@ -22,15 +22,6 @@ namespace chisel
         CSG::CSGTree        tree;
 
     public:
-        // TODO: This could be faster. Maybe use an indexed free list.
-        Brush* GetBrush(auto id)
-        {
-            for (Brush& brush : brushes)
-                if (brush.GetObjectID() == id)
-                    return &brush;
-            return nullptr;
-        }
-
         Brush& AddBrush(Volume volume = Volumes::Solid)
         {
             return brushes.emplace_back(tree.CreateBrush(), volume);

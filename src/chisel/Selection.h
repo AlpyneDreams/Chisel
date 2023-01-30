@@ -3,55 +3,57 @@
 #include "common/Common.h"
 #include "console/Console.h"
 
+#include "chisel/Types.h"
+#include <optional>
+
 namespace chisel
 {
-    using SelectionID = uint32;
+    class Selection;
 
-    // TODO: Multiple selections.
-    inline struct Selection
+    using SelectionID = uint32_t;
+
+
+    class ISelectable
     {
-    private:
-        SelectionID selected = Null;
-
     public:
-        static constexpr SelectionID Null = ~0;
+        ISelectable();
+        virtual ~ISelectable();
 
-        bool Any() {
-            return selected != Null;
-        }
+        SelectionID GetSelectionID() const { return m_id; }
+        bool IsSelected() const { return m_selected; }
 
-        SelectionID Active() {
-            return selected;
-        }
+        virtual std::optional<AABB> SelectionBounds() const = 0;
+        virtual void SelectionTransform(const mat4x4& matrix) = 0;
+        virtual void SelectionDelete() = 0;
+        virtual void SelectionAlignToGrid(vec3 gridSize) = 0;
+    protected:
+        friend class Selection;
 
-        bool Selected(auto ent) {
-            return selected == SelectionID(ent);
-        }
+        void SetSelected(bool selected) { m_selected = selected; }
+        static ISelectable* Find(SelectionID id);
+    private:
+        static SelectionID s_lastId;
+        static std::unordered_map<SelectionID, ISelectable*> s_map;
 
-        bool Empty() {
-            return selected == Null;
-        }
+        SelectionID m_id = 0;
+        bool m_selected = false;
+    };
 
-        void Select(auto ent) {
-            selected = SelectionID(ent);
-        }
+    extern class Selection
+    {
+    public:
+        Selection();
 
-        void Deselect(auto ent) {
-            if (selected == SelectionID(ent)) {
-                Select(Null);
-            }
-        }
+        bool Empty();
+        void Select(ISelectable* ent);
+        void Unselect(ISelectable* ent);
+        void Toggle(ISelectable* ent);
+        void Clear();
+        ISelectable* Find(SelectionID id);
 
-        void Clear() {
-            Select(Null);
-        }
-
-        void Toggle(auto ent) {
-            if (selected == SelectionID(ent)) {
-                Select(Null);
-            } else {
-                Select(ent);
-            }
-        }
+        ISelectable** begin() { return &m_selection[0]; }
+        ISelectable** end()   { return &m_selection[m_selection.size()]; }
+    private:
+        std::vector<ISelectable*> m_selection;
     } Selection;
 }

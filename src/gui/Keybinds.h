@@ -21,19 +21,13 @@ namespace chisel
             }
             
             Map& map = Chisel.map;
-            
-            if (Selection.Any())
+            if (Keyboard.GetKeyUp(Key::Delete))
             {
-                if (Brush* selected = map.GetBrush(Selection.Active()))
+                for (ISelectable* selectable : Selection)
                 {
-                    // Delete: Remove selected brushes
-                    if (Keyboard.GetKeyUp(Key::Delete))
-                    {
-                        Selection.Clear();
-                        map.RemoveBrush(*selected);
-                    }
-
+                    selectable->SelectionDelete();
                 }
+                Selection.Clear();
             }
         }
     };

@@ -3,6 +3,7 @@
 #include "core/Mesh.h"
 #include "../CSG/Brush.h"
 #include "../CSG/CSGTree.h"
+#include "chisel/Selection.h"
 
 #include "math/Color.h"
 
@@ -12,7 +13,9 @@
 
 namespace chisel
 {
-    struct Brush : Atom
+    struct BrushEntity;
+
+    struct Brush : Atom, ISelectable
     {
     protected:
         CSG::Brush*             brush;
@@ -104,6 +107,20 @@ namespace chisel
 
         // TODO: Remove me, debugging.
         glm::vec4 GetTempColor() const { return tempcolor; }
+
+        void Delete()
+        {
+            Console.Error("Need a reference to the map in here to kill myself.");
+        }
+
+        // Selectable Interface
+
+        std::optional<AABB> SelectionBounds() const { return brush->GetBounds(); }
+        void SelectionTransform(const mat4x4& matrix) { brush->Transform(matrix); }
+        void SelectionDelete() { Delete(); }
+        void SelectionAlignToGrid(vec3 gridSize) { brush->AlignToGrid(gridSize); }
+
+
     };
 
     Brush CubeBrush(CSG::Brush& brush, Volume volume, const mat4x4& transform = glm::identity<mat4x4>())

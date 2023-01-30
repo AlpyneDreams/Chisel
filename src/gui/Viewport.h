@@ -60,7 +60,7 @@ namespace chisel
         {
             if (IsMouseOver(viewport))
             {
-                if (Selection.Any() && (/*Mouse.GetButtonUp(Mouse.Right) ||*/ Mouse.GetButtonDown(Mouse.Middle)))
+                if (!Selection.Empty() && (/*Mouse.GetButtonUp(Mouse.Right) ||*/ Mouse.GetButtonDown(Mouse.Middle)))
                 {
                     ImGui::OpenPopup("Selection");
                 }
@@ -69,13 +69,20 @@ namespace chisel
                 {
                     ImGui::Text("Brush Selection");
                     ImGui::Separator();
-                    ImGui::Selectable( ICON_MC_SCISSORS_CUTTING " Cut");
-                    ImGui::Selectable( ICON_MC_FILE_DOCUMENT " Copy");
-                    ImGui::Selectable( ICON_MC_CLIPBOARD " Paste");
+                    ImGui::Selectable( ICON_MC_SCISSORS_CUTTING " Cut (TODO)");
+                    ImGui::Selectable( ICON_MC_FILE_DOCUMENT " Copy (TODO)");
+                    ImGui::Selectable( ICON_MC_CLIPBOARD " Paste (TODO)");
+                    if (ImGui::Selectable( ICON_MC_TRASH_CAN " Delete"))
+                    {
+                        for (ISelectable* selectable : Selection)
+                            selectable->SelectionDelete();
+                    }
                     ImGui::Separator();
-                    ImGui::Selectable( ICON_MC_GRID " Align to Grid");
-                    // TODO: Hook me up to the brush->AlignToGrid function
-                    // when mapdoc exists
+                    if (ImGui::Selectable( ICON_MC_GRID " Align to Grid"))
+                    {
+                        for (ISelectable* selectable : Selection)
+                            selectable->SelectionAlignToGrid(gridSize);
+                    }
                     ImGui::EndPopup();
                 }
             }

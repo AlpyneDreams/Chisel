@@ -134,8 +134,21 @@ namespace chisel
                     if (id == 0)
                         Selection.Clear();
                     else
-                        // subtract 1, because 0 is reserved for null
-                        Selection.Select(id - 1);
+                    {
+                        ISelectable* selection = Selection.Find(id);
+                        if (selection)
+                        {
+                            if (Keyboard.GetKey(Key::LeftCTRL))
+                            {
+                                Selection.Toggle(selection);
+                            }
+                            else
+                            {
+                                Selection.Clear();
+                                Selection.Select(selection);
+                            }
+                        }
+                    }
                 }
             }
         });

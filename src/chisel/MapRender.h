@@ -44,7 +44,7 @@ namespace chisel
             {
                 r.SetUniform("u_color", brush.GetTempColor());
 
-                if (brush.GetObjectID() == Selection.Active())
+                if (brush.IsSelected())
                 {
                     // Draw a wire box around the brush
                     r.SetTransform(glm::identity<mat4x4>());
@@ -74,27 +74,33 @@ namespace chisel
 
         void DrawHandles(mat4x4& view, mat4x4& proj, auto... args)
         {
-            if (!Selection.Any())
+            if (Selection.Empty())
                 return;
 
-            SelectionID id = Selection.Active();
-
-            if (Brush* brush = map.GetBrush(id))
+            std::optional<AABB> bounds;
+            for (ISelectable* selectable : Selection)
             {
-                auto bounds = brush->GetBrush().GetBounds();
-                if (!bounds)
-                    return;
+                auto selected_bounds = selectable->SelectionBounds();
+                if (!selected_bounds)
+                    continue;
 
-                // Get AABB center for translate for gizmo, then un-apply that
-                // translation when we get it out the gizmo.
-                auto mtx     = glm::translate(CSG::Matrix4(1.0), bounds->Center());
-                auto inv_mtx = glm::translate(CSG::Matrix4(1.0), -bounds->Center());
-                if (Handles.Manipulate(mtx, view, proj, args...))
-                {
-                    brush->GetBrush().Transform(mtx * inv_mtx);
-                    // TODO: Align to grid fights with the gizmo rn :s
-                    //brush->GetBrush().AlignToGrid(map.gridSize);
-                }
+                bounds = bounds
+                    ? AABB::Extend(AABB::Extend(*bounds, selected_bounds->min), selected_bounds->max)
+                    : *selected_bounds;
+            }
+
+            if (!bounds)
+                return;
+
+            auto mtx     = glm::translate(CSG::Matrix4(1.0), bounds->Center());
+            auto inv_mtx = glm::translate(CSG::Matrix4(1.0), -bounds->Center());
+            if (Handles.Manipulate(mtx, view, proj, args...))
+            {
+                auto transform = mtx * inv_mtx;
+                for (ISelectable* selectable : Selection)
+                    selectable->SelectionTransform(transform);
+                // TODO: Align to grid fights with the gizmo rn :s
+                //brush->GetBrush().AlignToGrid(map.gridSize);
             }
         }
     };

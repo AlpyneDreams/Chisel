@@ -74,7 +74,7 @@ namespace chisel
     inline void Tools::PreDrawSelection(render::Render& r, uint id)
     {
         r.SetShader(chisel::Tools.sh_Color);
-        float f = std::bit_cast<float>(id + 1); // add 1 as 0 is for background
+        float f = std::bit_cast<float>(id);
         r.SetUniform("u_color", vec4(f, 0.f, 0.f, 1.0f));
     }
 
