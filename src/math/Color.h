@@ -46,19 +46,19 @@ namespace chisel
             Q = V*(1. - S*fract);
             U = V*(1. - S*(1. - fract));
             if      (0. <= H && H < 1.)
-                RGB = {V, U, P};
+                RGB = ColorRGBA<T>{V, U, P};
             else if (1. <= H && H < 2.)
-                RGB = {Q, V, P};
+                RGB = ColorRGBA<T>{Q, V, P};
             else if (2. <= H && H < 3.)
-                RGB = {P, V, U};
+                RGB = ColorRGBA<T>{P, V, U};
             else if (3. <= H && H < 4.)
-                RGB = {P, Q, V};
+                RGB = ColorRGBA<T>{P, Q, V};
             else if (4. <= H && H < 5.)
-                RGB = {U, P, V};
+                RGB = ColorRGBA<T>{U, P, V};
             else if (5. <= H && H < 6.)
-                RGB = {V, P, Q};
+                RGB = ColorRGBA<T>{V, P, Q};
             else
-                RGB = {0., 0., 0.};
+                RGB = ColorRGBA<T>{0., 0., 0.};
             return RGB;
         }
         

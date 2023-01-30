@@ -3,8 +3,8 @@
 #include <list>
 
 #include "core/Mesh.h"
-#include "CSG/Brush.h"
-#include "CSG/CSGTree.h"
+#include "../CSG/Brush.h"
+#include "../CSG/CSGTree.h"
 
 #include "Common.h"
 #include "Brush.h"

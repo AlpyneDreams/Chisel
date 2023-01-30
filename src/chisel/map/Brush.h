@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/Mesh.h"
-#include "CSG/Brush.h"
-#include "CSG/CSGTree.h"
+#include "../CSG/Brush.h"
+#include "../CSG/CSGTree.h"
 
 #include "math/Color.h"
 
