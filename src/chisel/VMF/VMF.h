@@ -73,11 +73,13 @@ namespace chisel::VMF
 
     struct MapEntity : MapClass
     {
-        const char* classname = nullptr;
-        int spawnflags = 0;
-        // connections {}
         std::vector<Solid> solids;
-        // hidden {}
+        const char* classname;
+        const char* targetname;
+        vec3 origin;
+
+        std::unordered_map<std::string, std::string> kv;
+        std::unordered_map<std::string, std::string> connections;
 
         MapEntity() = default;
         MapEntity(KeyValues& ent);
@@ -85,9 +87,6 @@ namespace chisel::VMF
 
     struct World : MapEntity
     {
-        int mapversion = 0;
-        const char* skyname = nullptr;
-
         World() = default;
         World(KeyValues& world);
     };

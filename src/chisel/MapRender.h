@@ -5,6 +5,7 @@
 #include "chisel/Tools.h"
 #include "chisel/Selection.h"
 #include "chisel/Handles.h"
+#include "chisel/Gizmos.h"
 
 #include "core/Primitives.h"
 #include "common/Time.h"
@@ -59,6 +60,11 @@ namespace chisel
                 }
 
                 r.DrawMesh(brush.GetMesh());
+            }
+
+            for (const auto& entity : map.entities)
+            {
+                Gizmos.DrawIcon(entity.origin, Gizmos.icnLight);
             }
         }
 

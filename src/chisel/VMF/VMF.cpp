@@ -25,14 +25,41 @@ namespace chisel::VMF
     {}
 
     MapEntity::MapEntity(KeyValues& ent) : MapClass(ent),
+        solids              (ent["solid"]),
         classname           (ent["classname"]),
-        spawnflags          (ent["spawnflags"]),
-        solids              (ent["solid"])
-    {}
+        targetname          (ent["targetname"])
+    {
+        auto origin_str = (std::string)ent["origin"];
+        if (!origin_str.empty())
+        {
+            auto coords = str::split(origin_str, " ");
+            float x = std::stof(std::string(coords[0]));
+            float y = std::stof(std::string(coords[1]));
+            float z = std::stof(std::string(coords[2]));
+            origin = vec3(x, y, z);
+        }
 
-    World::World(KeyValues& world) : MapEntity(world),
-        mapversion          (world["mapversion"]),
-        skyname             (world["skyname"])
+        for (const auto& child : ent)
+        {
+            if (ent.name == "id" ||
+                ent.name == "solid" ||
+                ent.name == "classname" ||
+                ent.name == "targetname")
+                continue;
+
+            if (ent.name == "connections")
+            {
+                for (const auto& connection : ent)
+                    connections.emplace(connection.name, std::string(connection));
+                continue;
+            }
+
+            if (child.type == KeyValues::String)
+                kv.emplace(child.name, std::string(child));
+        }
+    }
+
+    World::World(KeyValues& world) : MapEntity(world)
     {}
 
     Visgroup::Visgroup(KeyValues& visgroup) : KeyValues(visgroup),

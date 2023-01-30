@@ -64,6 +64,20 @@ namespace chisel
             Brush& brush = map.AddBrush();
             brush.GetBrush().SetPlanes(&planes.front(), &planes.back() + 1);
         }
+        for (auto& entity : vmf.entities)
+        {
+            if (!entity.solids.empty())
+                continue;
+
+            PointEntity point_entity;
+            point_entity.classname = entity.classname;
+            point_entity.targetname = entity.targetname;
+            point_entity.origin = entity.origin;
+            Console.Log("origin: {}", point_entity.origin);
+            point_entity.kv = std::move(entity.kv);
+            point_entity.connections = std::move(entity.connections);
+            map.entities.push_back(point_entity);
+        }
 
         return true;
     }

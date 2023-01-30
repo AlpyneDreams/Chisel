@@ -24,7 +24,9 @@ namespace chisel
             r.SetTexture(0, icnLight);
             r.SetBlendFunc(render::BlendFuncs::Alpha);
             r.SetDepthWrite(false);
-            r.SetTransform(glm::translate(mat4x4(1), pos));
+            //mat4x4 mtx = glm::translate(glm::scale(mat4x4(1.0f), glm::vec3(64.0f)), pos);
+            mat4x4 mtx = glm::scale(glm::translate(mat4x4(1.0f), pos), glm::vec3(64.0f));
+            r.SetTransform(mtx);
             r.DrawMesh(&Primitives.Quad);
             r.SetDepthWrite(true);
         }

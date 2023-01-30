@@ -11,9 +11,19 @@
 
 namespace chisel
 {
-    struct Entity : Atom {};
+    struct Entity : Atom
+    {
+        std::string classname;
+        std::string targetname;
+        glm::vec3 origin;
 
-    struct PointEntity : Entity {};
+        std::unordered_map<std::string, std::string> kv;
+        std::unordered_map<std::string, std::string> connections;
+    };
+
+    struct PointEntity : Entity
+    {
+    };
 
     struct BrushEntity : Entity
     {
@@ -55,7 +65,7 @@ namespace chisel
     struct Map : BrushEntity
     {
         vec3                gridSize = vec3(64.0f);
-        std::list<Atom>   atoms;
+        std::list<Entity> entities;
 
         Map()
         {
