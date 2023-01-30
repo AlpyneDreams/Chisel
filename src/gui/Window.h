@@ -67,6 +67,14 @@ namespace chisel::GUI
             ImGui::End();
         }
 
+        bool IsMouseOver(const Rect& rect) const
+        {
+            return ImGui::IsMouseHoveringRect(
+                ImVec2(rect.x, rect.y),
+                ImVec2(rect.x + rect.w, rect.y + rect.h)
+            );
+        }
+
         // Focuses the window if it's hidden,
         // otherwise toggles it open/closed.
         void ToggleOrFocus()

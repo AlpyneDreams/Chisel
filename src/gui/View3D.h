@@ -23,7 +23,7 @@
 
 namespace chisel
 {
-    static ConVar<float> cam_maxspeed ("cam_maxspeed", 1000.0f,  "Max speed");
+    static ConVar<float> cam_maxspeed ("cam_maxspeed",  750.0f,  "Max speed");
     static ConVar<float> cam_pitchup  ("cam_pitchup",   +89.0f,  "Set the max pitch value.");
     static ConVar<float> cam_pitchdown("cam_pitchdown", -89.0f,  "Set the min pitch value.");
 
@@ -53,6 +53,7 @@ namespace chisel
 
     // Virtual Methods //
 
+        virtual void OnClick(uint2 pos) {}
         virtual void DrawHandles(mat4x4& view, mat4x4& proj) {}
         virtual void OnPostDraw() {}
 
@@ -122,14 +123,6 @@ namespace chisel
             // Get camera matrices
             mat4x4 view = camera.ViewMatrix();
             mat4x4 proj = camera.ProjMatrix();
-
-            {
-                const float size = 128.0f;
-                Rect gizmoViewPort = viewport;
-                gizmoViewPort.x = gizmoViewPort.x + gizmoViewPort.w - size;
-                mat4x4 gizmoView = view;
-                Handles.ViewManiuplate(gizmoViewPort, gizmoView, 35.f, size, Colors.Transparent);
-            }
 
             DrawHandles(view, proj);
 
@@ -207,51 +200,19 @@ namespace chisel
             Toolbar();
 
             // If mouse is over viewport,
-            if (ImGui::IsMouseHoveringRect(pos, max))
+            if (ImGui::IsWindowHovered() && IsMouseOver(viewport))
             {
                 Camera& camera = Tools.editorCamera.camera;
 
                 // Left-click: Select (or transform selection)
-                if (Mouse.GetButtonDown(Mouse::Left) && !popupOpen && (Selection.Empty() || !Handles.IsMouseOver()))
+                if (Mouse.GetButtonDown(Mouse::Left) && !popupOpen && !Handles.IsMouseOver())
                 {
                     ImVec2 absolute = ImGui::GetMousePos();
                     uint2 mouse = uint2(absolute.x - pos.x, absolute.y - pos.y);
-                    Tools.PickObject(mouse);
+                    OnClick(mouse);
                 }
 
-                if (Selection.Any() && Mouse.GetButtonDown(Mouse::Middle))
-                {
-                    ImGui::OpenPopup("Selection");
-                }
-
-                ResetPadding();
-                if (ImGui::BeginPopup("Selection"))
-                {
-                    ImGui::Text("Brush Selection");
-                    ImGui::Separator();
-                    ImGui::Selectable( ICON_MC_SCISSORS_CUTTING " Cut");
-                    ImGui::Selectable( ICON_MC_FILE_DOCUMENT " Copy");
-                    ImGui::Selectable( ICON_MC_CLIPBOARD " Paste");
-                    ImGui::Separator();
-                    ImGui::Selectable( ICON_MC_GRID " Align to Grid");
-                    // TODO: Hook me up to the brush->AlignToGrid function
-                    // when mapdoc exists
-                    ImGui::EndPopup();
-                }
-                NoPadding();
-
-                if (Keyboard.GetKeyUp(Key::OpenBracket) || Keyboard.GetKeyUp(Key::CloseBracket))
-                {
-                    const bool up = Keyboard.GetKeyUp(Key::CloseBracket);
-                    if (up)
-                        gridSize *= 2.0f;
-                    else
-                        gridSize /= 2.0f;
-
-                    gridSize = glm::clamp(gridSize, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
-                }
-
-                if (!ImGui::GetIO().KeyCtrl && ImGui::IsWindowHovered())
+                if (!ImGui::GetIO().KeyCtrl)
                 {
                     // Right-click and hold (or press Z) to mouselook
                     // TODO: Make Z toggle instead of hold
