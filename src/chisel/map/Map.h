@@ -82,11 +82,11 @@ namespace chisel
                 static const CSG::Matrix4 tunnel2OrigTransform = tunnel2->GetTransform();
                 float time = 0.0f;//Time::GetTime();
                 tunnel->SetTransform(
-                    glm::rotate(CSG::Matrix4(1), glm::radians(time), CSG::Vector3(0,1,0)) *
+                    glm::rotate(CSG::Matrix4(1), math::radians(time), CSG::Vector3(0,1,0)) *
                     tunnelOrigTransform
                 );
                 tunnel2->SetTransform(
-                    glm::rotate(CSG::Matrix4(1), glm::radians(time), CSG::Vector3(0,1,0)) *
+                    glm::rotate(CSG::Matrix4(1), math::radians(time), CSG::Vector3(0,1,0)) *
                     tunnel2OrigTransform
                 );
             }*/

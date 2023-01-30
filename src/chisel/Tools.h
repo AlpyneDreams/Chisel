@@ -80,7 +80,7 @@ namespace chisel
 
     inline ConCommand getpos("getpos", "Prints current camera position", [](ConCmd& cmd) {
         Camera& camera = Tools.editorCamera.camera;
-        Console.Log("setpos {} {} {}; setang {} {} {}", camera.position.x, camera.position.y, camera.position.z, RadiansToDegrees(camera.pitch), RadiansToDegrees(camera.yaw), 0.0f);
+        Console.Log("setpos {}; setang {}", camera.position, math::degrees(camera.angles));
     });
 
     inline ConCommand setpos("setpos", "Sets current camera position", [](ConCmd& cmd) {

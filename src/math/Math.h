@@ -51,37 +51,32 @@ namespace chisel
     };
 
     // Defines coordinate space vectors for a
-    // left-handed (+Z forward), Y-up system
+    // right-handed (+X forward), Z-up system
     inline struct Vectors
     {
         static const inline vec3 One  = vec3(1, 1, 1);
         static const inline vec3 Zero = vec3(0, 0, 0);
 
-        // +Z forward, -Z backward
-        static const inline vec3 Forward = vec3(0, 0, +1);
-        static const inline vec3 Back    = vec3(0, 0, -1);
+        // +X forward, -X backward
+        static const inline vec3 Forward = vec3(+1, 0, 0);
+        static const inline vec3 Back    = vec3(-1, 0, 0);
 
-        // +Y up, -Y down
-        static const inline vec3 Up   = vec3(0, +1, 0);
-        static const inline vec3 Down = vec3(0, -1, 0);
+        // +Z up, -Z down
+        static const inline vec3 Up   = vec3(0, 0, +1);
+        static const inline vec3 Down = vec3(0, 0, -1);
 
-        // +X right, -X left
-        static const inline vec3 Right = vec3(+1, 0, 0);
-        static const inline vec3 Left  = vec3(-1, 0, 0);
+        // -Y right, +Y left
+        static const inline vec3 Right = vec3(0, +1, 0);
+        static const inline vec3 Left  = vec3(0, -1, 0);
     } Vectors;
 
-    static constexpr float CHISEL_PI = 3.14159265358979323846f;
-
-    /// Convert a value from degrees to radians
-    constexpr float DegreesToRadians(float inV)
+    namespace math
     {
-        return inV * (CHISEL_PI / 180.0f);
-    }
-
-    /// Convert a value from radians to degrees
-    constexpr float RadiansToDegrees(float inV)
-    {
-        return inV * (180.0f / CHISEL_PI);
+        // Convert radians to degrees (scalar or vector)
+        using glm::degrees;
+        
+        // Convert degrees to radians (scalar or vector)
+        using glm::radians;
     }
 
     inline float AngleNormalize(float angle)

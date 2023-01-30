@@ -24,31 +24,37 @@ namespace chisel
         // If not null then camera only renders to this texture
         render::RenderTarget* renderTarget = nullptr;
 
-        float pitch = 0.0f;
-        float yaw = 0.0f;
-        float roll = 0.0f;
-        vec3 position = vec3();
-        vec3 abs_up = vec3(0, 0, 1);
+        // TODO: Move all of this stuff to Transform
+
+        // TODO: Less cos/sin. The direction vectors can be computed faster by
+        // multiplying a quat by a unit vector, or from a matrix column.
+
+        vec3 position;
+        vec3 angles;
+
         // TODO: Update BGFX_STATE_CULL_CW -> BGFX_STATE_CULL_CCW
         // when we change from rightHanded -> leftHanded.
         bool rightHanded = true;
-        vec3 up() const
+
+        vec3 Up() const
         {
-            glm::mat4 roll_mat = glm::rotate(glm::mat4(1.0f), roll, forward());
-            return glm::mat3(roll_mat) * abs_up;
+            glm::mat4 roll_mat = glm::rotate(glm::mat4(1.0f), angles.z, Forward());
+            return glm::mat3(roll_mat) * Vectors.Up;
         }
-        vec3 right() const
+
+        vec3 Right() const
         {
-            vec3 res = glm::cross(forward(), abs_up);
+            vec3 res = glm::cross(Forward(), Vectors.Up);
             return rightHanded ? res : -res;
         }
-        vec3 forward() const
+
+        vec3 Forward() const
         {
             // TODO: Genericize the Forward function
             // to account for other Ups.
-            const float x = std::cos(pitch) * std::cos(yaw);
-            const float y = std::sin(pitch);
-            const float z = std::cos(pitch) * std::sin(yaw);
+            const float x = std::cos(angles.x) * std::cos(angles.y);
+            const float y = std::sin(angles.x);
+            const float z = std::cos(angles.x) * std::sin(angles.y);
 
             return vec3(x, z, y);
         }
@@ -64,15 +70,15 @@ namespace chisel
             {
                 view = glm::lookAtRH(
                     position,
-                    position + forward(),
-                    up());
+                    position + Forward(),
+                    Up());
             }
             else
             {
                 view = glm::lookAtLH(
                     position,
-                    position + forward(),
-                    up());
+                    position + Forward(),
+                    Up());
             }
 
             return view;
@@ -116,9 +122,9 @@ namespace chisel
             float fovY = CalcVerticalFOV(fovX, aspectRatio);
 
             if (rightHanded)
-                proj = glm::perspectiveRH_ZO(glm::radians(fovY), aspectRatio, near, far);
+                proj = glm::perspectiveRH_ZO(math::radians(fovY), aspectRatio, near, far);
             else
-                proj = glm::perspectiveLH_ZO(glm::radians(fovY), aspectRatio, near, far);
+                proj = glm::perspectiveLH_ZO(math::radians(fovY), aspectRatio, near, far);
 
             return proj;
         }
@@ -149,7 +155,7 @@ namespace chisel
 
     public:
         static float ScaleFOV(float fovDegrees, float ratio) {
-            return glm::degrees(atan(tan(glm::radians(fovDegrees) * 0.5f) * ratio)) * 2.0f;
+            return math::degrees(atan(tan(glm::radians(fovDegrees) * 0.5f) * ratio)) * 2.0f;
         }
 
         // Calculate vertical Y-FOV from X-FOV based on W/H aspect ratio

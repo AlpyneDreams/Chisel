@@ -39,8 +39,7 @@ namespace chisel
 
         // Setup editor camera
         editorCamera.camera.position = vec3(-64.0f, -32.0f, 32.0f) * 32.0f;
-        editorCamera.camera.pitch = DegreesToRadians(-30.0f);
-        editorCamera.camera.yaw = DegreesToRadians(30.0f);
+        editorCamera.camera.angles = math::radians(vec3(-30.0f, 30.0f, 0));
         editorCamera.camera.renderTarget = rt_SceneView;
 
         // Setup camera renderer

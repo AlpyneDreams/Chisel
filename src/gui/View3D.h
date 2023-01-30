@@ -241,8 +241,8 @@ namespace chisel
                     float a = Keyboard.GetKey(Key::A) ? 1.f : 0.f;
                     float d = Keyboard.GetKey(Key::D) ? 1.f : 0.f;
 
-                    camera.position += camera.forward() * (w-s) * cam_maxspeed.value * float(Time.deltaTime);
-                    camera.position += camera.right() * (d-a) * cam_maxspeed.value * float(Time.deltaTime);
+                    camera.position += camera.Forward() * (w-s) * cam_maxspeed.value * float(Time.deltaTime);
+                    camera.position += camera.Right() * (d-a) * cam_maxspeed.value * float(Time.deltaTime);
                 }
             }
         }
@@ -253,8 +253,9 @@ namespace chisel
             if (camera.rightHanded)
                 mouse.x = -mouse.x;
 
-            camera.yaw   = AngleNormalize(camera.yaw + DegreesToRadians(mouse.x * m_sensitivity * m_yaw));
-            camera.pitch = std::clamp(camera.pitch - DegreesToRadians(mouse.y * m_sensitivity * m_pitch), DegreesToRadians(cam_pitchdown), DegreesToRadians(cam_pitchup));
+            // TODO: Why normalizing radians?
+            camera.angles.y = AngleNormalize(camera.angles.y + math::radians(mouse.x * m_sensitivity * m_yaw));
+            camera.angles.x = std::clamp(camera.angles.x - math::radians(mouse.y * m_sensitivity * m_pitch), math::radians(float(cam_pitchdown)), math::radians(float(cam_pitchup)));            
         }
 
         // Returns true if window is not collapsed

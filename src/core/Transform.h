@@ -41,7 +41,7 @@ namespace chisel
 
         void SetEulerAngles(vec3 degrees)
         {
-            rotation = quat(glm::radians(degrees));
+            rotation = quat(math::radians(degrees));
         #if defined(EDITOR)
             // Cache Euler angles. This avoids weird behavior when performing
             // round trip conversions from Euler -> Quaternion -> Euler in
@@ -61,11 +61,11 @@ namespace chisel
 
             // If eulerAngles are not cached then recalculate them
             eulerAnglesRotation = rotation;
-            eulerAngles = glm::degrees(glm::eulerAngles(rotation));
+            eulerAngles = math::degrees(glm::eulerAngles(rotation));
             return eulerAngles;
         #endif
             // TODO: Normalize quaternion?
-            return glm::degrees(glm::eulerAngles(rotation));
+            return math::degrees(glm::eulerAngles(rotation));
         }
 
     private:
