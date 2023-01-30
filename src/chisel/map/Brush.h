@@ -119,7 +119,7 @@ namespace chisel
         void SelectionTransform(const mat4x4& matrix) { brush->Transform(matrix); }
         void SelectionDelete() { Delete(); }
         void SelectionAlignToGrid(vec3 gridSize) { brush->AlignToGrid(gridSize); }
-
+        void SelectionSetVolume(Volume volume) { brush->SetVolumeOperation(CSG::CreateFillOperation(volume)); }
 
     };
 

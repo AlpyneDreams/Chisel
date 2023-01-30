@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/VertexLayout.h"
+
 namespace chisel
 {
     struct Atom {};

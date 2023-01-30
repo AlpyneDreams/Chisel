@@ -83,6 +83,20 @@ namespace chisel
                         for (ISelectable* selectable : Selection)
                             selectable->SelectionAlignToGrid(gridSize);
                     }
+                    if (ImGui::BeginMenu(ICON_MC_CUBE_OUTLINE " Change Volume"))
+                    {
+                        if (ImGui::MenuItem(ICON_MC_CUBE "Solid"))
+                        {
+                            for (ISelectable* selectable : Selection)
+                                selectable->SelectionSetVolume(Volumes::Solid);
+                        }
+                        if (ImGui::MenuItem(ICON_MC_CUBE_OUTLINE "Air"))
+                        {
+                            for (ISelectable* selectable : Selection)
+                                selectable->SelectionSetVolume(Volumes::Air);
+                        }
+                        ImGui::EndMenu();
+                    }
                     ImGui::EndPopup();
                 }
             }

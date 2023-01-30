@@ -4,6 +4,7 @@
 #include "console/Console.h"
 
 #include "chisel/Types.h"
+#include "map/Common.h"
 #include <optional>
 
 namespace chisel
@@ -26,6 +27,7 @@ namespace chisel
         virtual void SelectionTransform(const mat4x4& matrix) = 0;
         virtual void SelectionDelete() = 0;
         virtual void SelectionAlignToGrid(vec3 gridSize) = 0;
+        virtual void SelectionSetVolume(Volume volume) = 0;
     protected:
         friend class Selection;
 
