@@ -22,7 +22,7 @@ namespace chisel
 
     public:
         enum class Tool {
-            Translate, Rotate, Scale, Universal
+            Translate, Rotate, Scale, Universal, Bounds
         };
 
     // ImGuizmo //
@@ -47,10 +47,20 @@ namespace chisel
             }
         }
 
-        bool Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, Tool activeTool, Space space, bool gridSnap, const vec3& gridSize)
+        bool Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, Tool activeTool, Space space,
+                        bool gridSnap, const vec3& gridSize, const float* localBounds = NULL, const vec3& boundsSnap = vec3(1))
         {
-            ImGuizmo::MODE mode = space == Space::World ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL;
-            return ImGuizmo::Manipulate(&view[0][0], &proj[0][0], GetOperation(activeTool), mode, &model[0][0], NULL, gridSnap ? &gridSize.x : NULL);
+            return ImGuizmo::Manipulate(
+                &view[0][0],
+                &proj[0][0],
+                GetOperation(activeTool),
+                space == Space::World ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL,
+                &model[0][0],
+                NULL, // deltaMatrix
+                gridSnap ? &gridSize[0] : NULL,
+                activeTool == Tool::Bounds ? localBounds : NULL,
+                &boundsSnap[0]
+            );
         }
 
         bool IsMouseOver() { return ImGuizmo::IsOver(); }
@@ -126,6 +136,7 @@ namespace chisel
                 case Tool::Rotate:    return ROTATE;
                 case Tool::Scale:     return SCALE;
                 case Tool::Universal: return UNIVERSAL;
+                case Tool::Bounds:    return BOUNDS;
             }
         }
 

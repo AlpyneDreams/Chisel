@@ -351,6 +351,7 @@ namespace chisel
             ToolbarButton(ICON_MC_AUTORENEW, Tool::Rotate);
             ToolbarButton(ICON_MC_RESIZE, Tool::Scale);
             ToolbarButton(ICON_MC_ALPHA_U_BOX_OUTLINE, Tool::Universal);
+            ToolbarButton(ICON_MC_VECTOR_SQUARE, Tool::Bounds);
             ImGui::Unindent(5.f);
 
         }

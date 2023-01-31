@@ -78,7 +78,7 @@ namespace chisel
             }
         }
 
-        void DrawHandles(mat4x4& view, mat4x4& proj, auto... args)
+        void DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool gridSnap, const vec3& gridSize)
         {
             if (Selection.Empty())
                 return;
@@ -86,23 +86,27 @@ namespace chisel
             std::optional<AABB> bounds;
             for (ISelectable* selectable : Selection)
             {
-                auto selected_bounds = selectable->SelectionBounds();
-                if (!selected_bounds)
+                auto selectedBounds = selectable->SelectionBounds();
+                if (!selectedBounds)
                     continue;
 
                 bounds = bounds
-                    ? AABB::Extend(*bounds, *selected_bounds)
-                    : *selected_bounds;
+                    ? AABB::Extend(*bounds, *selectedBounds)
+                    : *selectedBounds;
             }
 
             if (!bounds)
                 return;
 
-            auto mtx     = glm::translate(CSG::Matrix4(1.0), bounds->Center());
-            auto inv_mtx = glm::translate(CSG::Matrix4(1.0), -bounds->Center());
-            if (Handles.Manipulate(mtx, view, proj, args...))
+            AABB localBounds = bounds->MakeLocal();
+
+            // TODO: scaling and rotation
+            auto mtx = glm::translate(CSG::Matrix4(1.0), bounds->Center());
+            auto inv = glm::translate(CSG::Matrix4(1.0), -bounds->Center());
+            if (Handles.Manipulate(mtx, view, proj, tool, space, gridSnap, gridSize, bounds ? &localBounds.min[0] : NULL, gridSize))
             {
-                auto transform = mtx * inv_mtx;
+                auto transform = mtx * inv;
+
                 for (ISelectable* selectable : Selection)
                     selectable->SelectionTransform(transform);
                 // TODO: Align to grid fights with the gizmo rn :s

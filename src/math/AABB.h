@@ -23,6 +23,17 @@ namespace chisel
             return 0.5f * (min + max);
         }
 
+        AABB MakeLocal() const {
+            vec3 center = Center();
+            return AABB { min - center, max - center };
+        }
+
+        vec3 Dimensions() const {
+            return glm::abs(max - min);
+        }
+
+    // Extending //
+
         static AABB Extend(const AABB& bounds, vec3 point)
         {
             return AABB
