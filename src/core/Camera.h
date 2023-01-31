@@ -39,12 +39,12 @@ namespace chisel
         vec3 Up() const
         {
             glm::mat4 roll_mat = glm::rotate(glm::mat4(1.0f), angles.z, Forward());
-            return glm::mat3(roll_mat) * Vectors.Up;
+            return glm::normalize(glm::mat3(roll_mat) * Vectors.Up);
         }
 
         vec3 Right() const
         {
-            vec3 res = glm::cross(Forward(), Vectors.Up);
+            vec3 res = glm::normalize(glm::cross(Forward(), Vectors.Up));
             return rightHanded ? res : -res;
         }
 
@@ -56,7 +56,7 @@ namespace chisel
             const float y = std::sin(angles.x);
             const float z = std::cos(angles.x) * std::sin(angles.y);
 
-            return vec3(x, z, y);
+            return glm::normalize(vec3(x, z, y));
         }
 
     public:
