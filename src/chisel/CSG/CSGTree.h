@@ -16,14 +16,6 @@ namespace chisel::CSG
         void DestroyBrush(Brush& brush);
         const std::list<Brush>& GetBrushes() const;
 
-        // TODO: This could be faster. Maybe use an indexed free list.
-        Brush* GetBrush(ObjectID id) {
-            for (Brush& brush : m_brushes)
-                if (brush.GetObjectID() == id)
-                    return &brush;
-            return nullptr;
-        }
-
         void SetVoidVolume(VolumeID type);
         VolumeID GetVoidVolume() const;
 
@@ -34,8 +26,6 @@ namespace chisel::CSG
         void MarkDirtyFaceCache(Brush& brush);
         void MarkDirtyFragments(Brush& brush);
     private:
-        friend glz::meta<CSGTree>;
-
         std::vector<Brush*> QueryIntersectingBrushes(const AABB& aabb, const Brush* ignore);
         ObjectID GetNewObjectID();
 
@@ -43,18 +33,7 @@ namespace chisel::CSG
         std::unordered_set<Brush*> m_dirtyFaceCacheBrushes;
         std::unordered_set<Brush*> m_dirtyFragmentBrushes;
         VolumeID m_void = VolumeID(0);
-        uint64_t m_lastObjectId = 0;
+        uint32_t m_lastObjectId = 0;
     };
 
 }
-
-
-template <>
-struct glz::meta<chisel::CSG::CSGTree>
-{
-    using T = chisel::CSG::CSGTree;
-    static constexpr auto value = glz::object(
-        "void_volume", &T::m_void,
-        "brushes", &T::m_brushes
-    );
-};

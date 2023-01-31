@@ -9,6 +9,8 @@
 
 namespace chisel::CSG
 {
+    // Brush!
+    // A convex solid made up of planes.
     class Brush : public UserdataProvider
     {
     public:
@@ -51,8 +53,6 @@ namespace chisel::CSG
 
         void RebuildFaceFragments();
     private:
-        friend glz::meta<Brush>;
-
         void MakeFaceCacheDirty();
         void MakeFragmentsDirty();
 
@@ -67,14 +67,3 @@ namespace chisel::CSG
         Order m_order = 0;
     };
 }
-
-template <>
-struct glz::meta<chisel::CSG::Brush>
-{
-    using T = chisel::CSG::Brush;
-    static constexpr auto value = glz::object(
-        "object_id", &T::m_objectId,
-        "order", &T::m_order,
-        "sides", &T::m_sides
-    );
-};
