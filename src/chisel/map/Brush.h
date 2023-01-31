@@ -68,8 +68,8 @@ namespace chisel
 
                     const bool flipFace = fragment.back.volume == Volumes::Air;
                     const vec3 normal = flipFace
-                        ? -face.plane->normal
-                        :  face.plane->normal;
+                        ? -face.side->plane.normal
+                        :  face.side->plane.normal;
 
                     const size_t startIndex = mesh.vertices.size();
                     for (const auto& vert : fragment.vertices)
@@ -137,11 +137,11 @@ namespace chisel
             CSG::Plane(vec3(0,0,-1), vec3(0,0,-1))
         };
         
-        std::array<CSG::Plane, 6> planes;
+        std::array<CSG::Side, 6> sides;
         for (size_t i = 0; i < 6; i++)
-            planes[i] = kUnitCubePlanes[i].Transformed(glm::scale(transform, vec3(64.f)));
+            sides[i].plane = kUnitCubePlanes[i].Transformed(glm::scale(transform, vec3(64.f)));
         
-        cube.GetBrush().SetPlanes(&planes.front(), &planes.back() + 1);
+        cube.GetBrush().SetSides(&sides.front(), &sides.back() + 1);
         
         return cube;
     }

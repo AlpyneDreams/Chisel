@@ -1,15 +1,15 @@
 #include "../CSG/FaceCache.h"
 #include "../CSG/Vertex.h"
-#include "../CSG/Plane.h"
+#include "../CSG/Side.h"
 
 namespace chisel::CSG
 {
-    FaceCache::FaceCache(const std::vector<Plane>& planes)
+    FaceCache::FaceCache(const std::vector<Side>& sides)
     {
-        size_t count = planes.size();
+        size_t count = sides.size();
         m_faces.reserve(count);
-        for (const auto& plane : planes)
-            m_faces.push_back(Face(&plane));
+        for (const auto& side : sides)
+            m_faces.push_back(Face(&side));
 
         for (size_t i = 0; i < count - 2; i++)
         {

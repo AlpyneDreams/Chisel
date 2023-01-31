@@ -17,7 +17,7 @@ namespace chisel::CSG
 
         static std::optional<Vertex> CreateVertex(std::array<Face*, 3> faces);
 
-        const Plane* plane;
+        const Side* side;
         std::vector<Vertex> vertices;
         std::vector<Fragment> fragments;
     };

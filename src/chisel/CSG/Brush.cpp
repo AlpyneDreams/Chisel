@@ -27,15 +27,15 @@ namespace chisel::CSG
 
 //-------------------------------------------------------------------------------------------------
 
-    void Brush::SetPlanes(const Plane* first, const Plane* end)
+    void Brush::SetSides(const Side* first, const Side* end)
     {
-        m_planes = std::vector(first, end);
+        m_sides = std::vector(first, end);
         MakeFaceCacheDirty();
     }
 
-    const std::vector<Plane>& Brush::GetPlanes() const
+    const std::vector<Side>& Brush::GetSides() const
     {
-        return m_planes;
+        return m_sides;
     }
 
     void Brush::SetOrder(Order order)
@@ -104,8 +104,8 @@ namespace chisel::CSG
 
     void Brush::Transform(const Matrix4& matrix)
     {
-        for (auto& plane : m_planes)
-            plane = plane.Transformed(matrix);
+        for (auto& side : m_sides)
+            side.plane = side.plane.Transformed(matrix);
         MakeFaceCacheDirty();
     }
 
@@ -127,7 +127,7 @@ namespace chisel::CSG
 
     void Brush::RebuildFaceCache()
     {
-        m_faceCache = FaceCache(m_planes);
+        m_faceCache = FaceCache(m_sides);
     }
 
     void Brush::RebuildIntersectingBrushes()

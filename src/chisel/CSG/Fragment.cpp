@@ -1,6 +1,6 @@
 #include "../CSG/Fragment.h"
 #include "../CSG/Face.h"
-#include "../CSG/Plane.h"
+#include "../CSG/Side.h"
 
 namespace chisel::CSG
 {
@@ -18,7 +18,7 @@ namespace chisel::CSG
         if (counts[FaceVertexRelations::Front] == 0 &&
             counts[FaceVertexRelations::Back] == 0)
         {
-            return glm::dot(otherFace.plane->normal, this->face->plane->normal) < 0
+            return glm::dot(otherFace.side->plane.normal, this->face->side->plane.normal) < 0
                 ? FragmentFaceRelations::ReverseAligned
                 : FragmentFaceRelations::Aligned;
         }

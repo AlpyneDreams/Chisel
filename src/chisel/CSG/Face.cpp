@@ -13,7 +13,7 @@ namespace chisel::CSG
         // of the point to the face plane.
         // If they are equal, then they are aligned,
         // otherwise we are on either side of the plane.
-        float dist = plane->SignedDistance(vertex.position);
+        float dist = side->plane.SignedDistance(vertex.position);
         if (CloseEnough(dist, 0.0))
             return FaceVertexRelations::Aligned;
         else if (dist > 0.0)
@@ -52,7 +52,7 @@ namespace chisel::CSG
 
         float d = dot(cross(
             vertices[1].position - vertices[0].position,
-            vertices[2].position - vertices[0].position), plane->normal);
+            vertices[2].position - vertices[0].position), side->plane.normal);
 
         if (d < 0)
             std::reverse(vertices.begin(), vertices.end());
@@ -65,16 +65,16 @@ namespace chisel::CSG
         std::sort(faces.begin(), faces.end());
 
         Matrix3 m;
-        m = glm::row(m, 0, faces[0]->plane->normal);
-        m = glm::row(m, 1, faces[1]->plane->normal);
-        m = glm::row(m, 2, faces[2]->plane->normal);
+        m = glm::row(m, 0, faces[0]->side->plane.normal);
+        m = glm::row(m, 1, faces[1]->side->plane.normal);
+        m = glm::row(m, 2, faces[2]->side->plane.normal);
 
         Unit det = glm::determinant(m);
         if (CloseEnough(det, 0.0))
             return std::nullopt;
 
         Matrix3 mx(m), my(m), mz(m);
-        Vector3 offsets{ faces[0]->plane->offset, faces[1]->plane->offset, faces[2]->plane->offset };
+        Vector3 offsets{ faces[0]->side->plane.offset, faces[1]->side->plane.offset, faces[2]->side->plane.offset };
         mx = glm::column(mx, 0, -offsets);
         my = glm::column(my, 1, -offsets);
         mz = glm::column(mz, 2, -offsets);

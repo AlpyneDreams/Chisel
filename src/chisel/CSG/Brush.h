@@ -3,7 +3,7 @@
 #include "../CSG/Types.h"
 
 #include "../CSG/FaceCache.h"
-#include "../CSG/Plane.h"
+#include "../CSG/Side.h"
 #include "../CSG/Userdata.h"
 #include "../CSG/Volume.h"
 
@@ -18,8 +18,8 @@ namespace chisel::CSG
         CSGTree* GetTree() const { return m_tree; }
 
         // TODO: Use Span type.
-        void SetPlanes(const Plane* first, const Plane* end);
-        const std::vector<Plane>& GetPlanes() const;
+        void SetSides(const Side* first, const Side* end);
+        const std::vector<Side>& GetSides() const;
 
         void SetOrder(Order order);
         Order GetOrder() const;
@@ -59,7 +59,7 @@ namespace chisel::CSG
         CSGTree* m_tree;
         const ObjectID m_objectId;
 
-        std::vector<Plane> m_planes;
+        std::vector<Side> m_sides;
         std::optional<FaceCache> m_faceCache;
 
         std::vector<Brush*> m_intersectingBrushes;
@@ -75,6 +75,6 @@ struct glz::meta<chisel::CSG::Brush>
     static constexpr auto value = glz::object(
         "object_id", &T::m_objectId,
         "order", &T::m_order,
-        "planes", &T::m_planes
+        "sides", &T::m_sides
     );
 };

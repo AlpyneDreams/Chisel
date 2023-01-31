@@ -11,7 +11,7 @@ namespace chisel::CSG
     class FaceCache
     {
     public:
-        FaceCache(const std::vector<Plane>& planes);
+        FaceCache(const std::vector<Side>& sides);
 
         std::vector<Face>& GetFaces() { return m_faces; }
         const std::vector<Face>& GetFaces() const { return m_faces; }

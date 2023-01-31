@@ -54,15 +54,15 @@ namespace chisel
             return false;
 
         VMF::VMF vmf(*kv);
-        std::vector<CSG::Plane> planes;
+        std::vector<CSG::Side> sides;
         for (const auto& solid : vmf.world.solids)
         {
-            planes.clear();
+            sides.clear();
             for (const auto& side : solid.sides)
-                planes.emplace_back(side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2]);
+                sides.emplace_back(CSG::Side{ .plane = CSG::Plane{ side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2] } } );
 
             Brush& brush = map.AddBrush();
-            brush.GetBrush().SetPlanes(&planes.front(), &planes.back() + 1);
+            brush.GetBrush().SetSides(&sides.front(), &sides.back() + 1);
         }
         for (auto& entity : vmf.entities)
         {
