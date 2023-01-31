@@ -40,19 +40,19 @@ namespace chisel
                 const float size = 128.0f;
                 Rect gizmoRect = viewport;
                 gizmoRect.x = viewport.x + viewport.w - size;
+                gizmoRect.w = size;
+                gizmoRect.h = size;
                 Handles.ViewManiuplate(gizmoRect, view, 35.f, size, Colors.Transparent);
                 
                 // Since we don't actually update the view matrix, just apply sped-up
                 // mouselook if the user is dragging the cube with left click.
-                if ((isDraggingCube || IsMouseOver(gizmoRect)) && Mouse.GetButton(Mouse.Left))
-                {
+                if (IsMouseOver(gizmoRect) && Mouse.GetButtonDown(Mouse.Left))
                     isDraggingCube = true;
-                    MouseLook(Mouse.GetMotion() * 5);
-                }
-                else
-                {
+                else if (!Mouse.GetButton(Mouse.Left))
                     isDraggingCube = false;
-                }
+
+                if (isDraggingCube && Mouse.GetButton(Mouse.Left))
+                    MouseLook(Mouse.GetMotion() * 5);
             }
         }
 
