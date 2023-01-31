@@ -91,7 +91,7 @@ namespace chisel
                     continue;
 
                 bounds = bounds
-                    ? AABB::Extend(AABB::Extend(*bounds, selected_bounds->min), selected_bounds->max)
+                    ? AABB::Extend(*bounds, *selected_bounds)
                     : *selected_bounds;
             }
 

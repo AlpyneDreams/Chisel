@@ -3,9 +3,10 @@
 #include "common/Common.h"
 #include "console/Console.h"
 
-#include "chisel/Types.h"
+#include "math/AABB.h"
 #include "map/Common.h"
 #include <optional>
+#include <unordered_map>
 
 namespace chisel
 {

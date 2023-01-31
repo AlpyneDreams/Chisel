@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../CSG/Types.h"
+#include "math/AABB.h"
 
-#include "../CSG/AABB.h"
+#include "../CSG/Types.h"
 #include "../CSG/Face.h"
 #include "../CSG/Relation.h"
 

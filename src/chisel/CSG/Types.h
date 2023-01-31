@@ -22,7 +22,6 @@ namespace chisel::CSG
     struct Fragment;
     struct Vertex;
     class CSGTree;
-    struct AABB;
     class FaceCache;
 
     using Unit    = float;
