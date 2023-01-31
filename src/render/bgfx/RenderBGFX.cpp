@@ -207,7 +207,7 @@ namespace chisel::render
                 {
                     rt->readBackFunc(rt->readBackData, rt->readBackSize, rt->width);
                     rt->readBackFrame = 0;
-                    delete rt->readBackData;
+                    delete[] rt->readBackData;
                     rt->readBackData = nullptr;
                     pendingReadBacks.erase(it++);
                     continue;
