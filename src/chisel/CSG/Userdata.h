@@ -4,14 +4,14 @@
 
 namespace chisel::CSG
 {
-    class UserdataProvider
+    struct UserdataProvider
     {
-    public:
         template <typename T>
         T GetUserdata() const
         {
-            return reinterpret_cast<T>(Userdata);
+            return reinterpret_cast<T>(userdata);
         }
-        mutable uint64_t Userdata = 0;
+
+        mutable uint64_t userdata = 0;
     };
 }

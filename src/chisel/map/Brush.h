@@ -15,6 +15,15 @@ namespace chisel
 {
     struct BrushEntity;
 
+    struct SideData
+    {
+        std::array<vec4, 2> textureAxes{};
+        std::array<float, 2> scale{ 1.0f, 1.0f };
+        float rotate = 0;
+        float lightmapScale = 16;
+        uint32_t smoothing = 0;
+    };
+
     struct Brush : Atom, ISelectable
     {
     protected:
@@ -29,7 +38,7 @@ namespace chisel
             : brush(&brush), volume(volume)
         {
             brush.SetVolumeOperation(CSG::CreateFillOperation(volume));
-            brush.Userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
+            brush.userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
 
             srand(brush.GetObjectID());
             tempcolor = Color::HSV((float)(rand() % 360), 0.7f, 1.0f);
