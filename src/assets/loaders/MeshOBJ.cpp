@@ -32,7 +32,7 @@ namespace chisel
             VertexAttribute::For<float>(3, VertexAttribute::Color),
         };
 
-        std::string string(&file_data[0], &file_data[file_data.size()]);
+        std::string string(&file_data.front(), &file_data.back() + 1);
 
         ObjReader obj;
 
