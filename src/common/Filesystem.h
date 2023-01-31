@@ -9,6 +9,8 @@
 #include <filesystem>
 #include <ostream>
 #include <optional>
+#include <vector>
+#include <cstdint>
 
 #include <fmt/ostream.h>
 
@@ -24,24 +26,39 @@ namespace chisel::fs
 
     using std::filesystem::exists;
 
-    inline const std::optional<std::string> readFile(const Path& path)
+    template <typename T>
+    inline std::optional<T> readFileImpl(const Path& path, bool binary)
     {
         using namespace std;
-        ifstream file(path, ios::in | ios::binary);
+        auto flags = ios::in;
+        if (binary) flags |= ios::binary;
+
+        ifstream file(path, flags);
         if (!file || file.bad())
             return std::nullopt;
 
-        std::string buffer;
+        T buffer;
 
         // Resize buffer to file size
         file.seekg(0, ios::end);
-        buffer.resize(file.tellg());
+        auto size = file.tellg();
+        buffer.resize(size);
         file.seekg(0, ios::beg);
 
         // Read file into buffer
-        file.read(&buffer[0], buffer.size());
+        file.read((char*)&buffer[0], size);
 
         return buffer;
+    }
+
+    inline std::optional<std::string> readFileText(const Path& path)
+    {
+        return readFileImpl<std::string>(path, false);
+    }
+
+    inline std::optional<std::vector<uint8_t>> readFileBinary(const Path& path)
+    {
+        return readFileImpl<std::vector<uint8_t>>(path, true);
     }
 }
 

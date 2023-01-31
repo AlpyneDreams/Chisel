@@ -23,7 +23,7 @@ namespace chisel
     };
 
     template <>
-    Mesh* ImportAsset<Mesh, FixedString(".OBJ")>(const fs::Path& path)
+    Mesh* ImportAsset<Mesh, FixedString(".OBJ")>(std::string_view path, std::vector<uint8_t> file_data)
     {
         static VertexLayout LayoutOBJ = VertexLayout {
             VertexAttribute::For<float>(3, VertexAttribute::Position),
@@ -32,9 +32,11 @@ namespace chisel
             VertexAttribute::For<float>(3, VertexAttribute::Color),
         };
 
+        std::string string(&file_data[0], &file_data[file_data.size()]);
+
         ObjReader obj;
 
-        if (!obj.ParseFromFile(path.string())) {
+        if (!obj.ParseFromString(string, "")) {
             if (!obj.Error().empty()) {
                 Console.Error("[OBJ Loader] Failed to load '{}': {}", path, obj.Error());
             }

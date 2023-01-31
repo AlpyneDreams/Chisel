@@ -4,6 +4,7 @@
 #include "common/String.h"
 #include "common/Filesystem.h"
 #include "core/Mesh.h"
+#include "../submodules/libvpk-plusplus/libvpk++.h"
 
 #include <vector>
 #include <map>
@@ -16,82 +17,128 @@ namespace chisel
     // Override this to support different asset formats.
     // Ext - all uppercase, starts with a dot
     template <class Asset, FixedString Ext>
-    Asset* ImportAsset(const fs::Path& path);
+    Asset* ImportAsset(std::string_view path, std::vector<uint8_t> data);
 
     inline struct Assets
     {
-        using Path = fs::Path;
-        std::vector<Path> searchPaths;
+        std::vector<std::string> searchPaths;
+        std::vector<std::unique_ptr<libvpk::VPKSet>> pakFiles;
         // TODO: Hashing...
-        std::map<Path, void*> loadedAssets;
+        std::unordered_map<std::string, void*> loadedAssets;
 
         Assets()
         {
             // TODO: Load search paths from app info file
             AddSearchPath("core");
+            AddPakFile("/home/joshua/.local/share/Steam/steamapps/common/Half-Life 2/hl1/hl1_pak");
         }
 
     // Asset Loading //
 
         template <class T, FixedString Ext>
-        T* Load(const char* path)
+        T* Load(std::string_view path)
         {
-            Path file = FindFile(path);
-            if (file.empty())
-                return nullptr;
+            // Ugh.
+            auto pathStr = std::string(path);
 
             // Cache hit
-            if (loadedAssets.contains(file))
-                return (T*)loadedAssets[file];
+            if (loadedAssets.contains(pathStr))
+                return (T*)loadedAssets[pathStr];
+
+            auto data = ReadFile(pathStr);
+            if (!data)
+                return nullptr;
 
             // Attempt to load asset for first time
-            T* ptr = ImportAsset<T, Ext>(file);
+            T* ptr = ImportAsset<T, Ext>(path, std::move(*data));
             if (!ptr) {
                 Console.Error("[Assets] Failed to import %s asset: %s", Ext.value, path);
-                return ptr;
+                return nullptr;
             }
 
             // Cache loaded asset
-            loadedAssets[path] = ptr;
+            loadedAssets[pathStr] = ptr;
 
             return ptr;
         }
 
+        std::optional<std::vector<uint8_t>> ReadFile(const std::string& path)
+        {
+            auto loose_data = ReadLooseFile(path);
+            if (loose_data)
+                return loose_data;
+
+            auto vpk_data = ReadPakFile(path);
+            if (vpk_data)
+                return vpk_data;
+
+            Console.Error("[Assets] Can't find file: '{}'", path);
+            return std::nullopt;
+        }
+
+        std::optional<std::vector<uint8_t>> ReadLooseFile(const std::string& path)
+        {
+            for (const auto& dir : searchPaths)
+            {
+                fs::Path fullPath = fs::Path(dir) / fs::Path(path);
+                if (fs::exists(fullPath))
+                    return fs::readFileBinary(fullPath);
+            }
+            return std::nullopt;
+        }
+
+        std::optional<std::vector<uint8_t>> ReadPakFile(const std::string& path)
+        {
+            for (const auto& pak : pakFiles)
+            {
+                auto file = pak->file(path);
+                if (!file)
+                    continue;
+
+                auto stream = libvpk::VPKFileStream(*file);
+
+                std::vector<uint8_t> data;
+                data.resize(file->length());
+                stream.read((char*)data.data(), file->length());
+
+                return data;
+            }
+            return std::nullopt;
+        }
+
         // TODO: Dynamic extension
         template <class T>
-        T* Load(const char* path) {
+        T* Load(std::string_view path) {
             return nullptr;
         }
 
         // TODO: Map ext -> type
-        void* Load(const char* path) {
+        void* Load(std::string_view path) {
             return nullptr;
         }
 
     // Search Paths //
 
-        void AddSearchPath(const char* path)
+        void AddSearchPath(std::string_view path)
         {
-            Path dir = Path(path);
-            if (!fs::exists(dir)) {
+            if (!fs::exists(fs::Path(path))) {
                 Console.Error("[Assets] Failed to find search path '{}'", path);
                 return;
             }
-            searchPaths.push_back(dir);
+            searchPaths.push_back(std::string(path));
         }
 
-        // Find actual path of asset in search paths
-        Path FindFile(const char* path) const
+        void AddPakFile(std::string_view path)
         {
-            for (const Path& dir : searchPaths)
+            try
             {
-                Path fullPath = dir / path;
-                if (fs::exists(fullPath))
-                    return fullPath;
+                auto pak = std::make_unique<libvpk::VPKSet>(path);
+                pakFiles.emplace_back(std::move(pak));
             }
-
-            Console.Error("[Assets] Can't find file: '{}'", path);
-            return Path();
+            catch (const std::exception& e)
+            {
+                Console.Error("[Assets] Failed to load pak file '{}': {}", path, e.what());
+            }
         }
 
     } Assets;

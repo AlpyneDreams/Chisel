@@ -12,17 +12,17 @@
 
 namespace chisel
 {
-    static Texture* LoadTexture(const fs::Path& path)
+    static Texture* LoadTexture(std::string_view path, std::vector<uint8_t> data)
     {
         int x, y, n;
 
         // 8 bits per channel
-        byte* data = stbi_load(path.string().c_str(), &x, &y, &n, 0);
+        byte* texture_data = stbi_load_from_memory(data.data(), int(data.size()), &x, &y, &n, 0);
 
-        if (!data)
+        if (!texture_data)
             return nullptr;
 
-        Texture* texture = new Texture(uint(x), uint(y), data, uint(n), 8);
+        Texture* texture = new Texture(uint(x), uint(y), texture_data, uint(n), 8);
         texture->path = path;
 
         // This frees data when the upload completes.
@@ -34,8 +34,8 @@ namespace chisel
     }
 
     template <>
-    Texture* ImportAsset<Texture, FixedString(".PNG")>(const fs::Path& path) { return LoadTexture(path); }
+    Texture* ImportAsset<Texture, FixedString(".PNG")>(std::string_view path, std::vector<uint8_t> data) { return LoadTexture(path, std::move(data)); }
 
     template <>
-    Texture* ImportAsset<Texture, FixedString(".TGA")>(const fs::Path& path) { return LoadTexture(path); }
+    Texture* ImportAsset<Texture, FixedString(".TGA")>(std::string_view path, std::vector<uint8_t> data) { return LoadTexture(path, std::move(data)); }
 }
