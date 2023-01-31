@@ -43,7 +43,29 @@ namespace chisel::VMF
         rotation            (side["rotation"]),
         lightmapscale       (side["lightmapscale"]),
         smoothing_groups    (side["smoothing_groups"])
-    {}
+    {
+        auto parseAxis = [&](std::string value, vec4& axis, float& scale)
+        {
+            auto values = str::split(value, "]");
+
+            auto axis_part = values[0];
+            axis_part.remove_prefix(1);
+            axis_part = str::trim(axis_part);
+            auto coords = str::split(axis_part, " ");
+            float x = std::stof(std::string(coords[0]));
+            float y = std::stof(std::string(coords[1]));
+            float z = std::stof(std::string(coords[2]));
+            float w = std::stof(std::string(coords[3]));
+            axis = vec4(x, y, z, w);
+
+            auto scale_part = values[1];
+            scale_part.remove_prefix(1);
+            scale_part = str::trim(scale_part);
+            scale = std::stof(std::string(scale_part));
+        };
+        parseAxis(side["uaxis"], axis[0], scale[0]);
+        parseAxis(side["vaxis"], axis[1], scale[1]);
+    }
 
 
     Solid::Solid(KeyValues& solid) : MapClass(solid),

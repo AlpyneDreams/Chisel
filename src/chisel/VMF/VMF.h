@@ -54,11 +54,11 @@ namespace chisel::VMF
     {
         Plane plane;
         const char* material;
-        // uaxis
-        // vaxis
+        vec4 axis[2];
+        float scale[2];
         float rotation;
         float lightmapscale;
-        float smoothing_groups;
+        int smoothing_groups;
         // dispinfo {}
 
         Side(KeyValues& side);
