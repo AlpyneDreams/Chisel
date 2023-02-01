@@ -444,6 +444,27 @@ namespace chisel::render
             mesh->uploaded = true;
         }
 
+        void DeleteMesh(Mesh& mesh)
+        {
+            if (!mesh.uploaded)
+                return;
+            
+            for (auto& group : mesh.groups)
+            {
+                if (group.vertices.handle) {
+                    bgfx::destroy(static_cast<HandleBGFX*>(group.vertices.handle)->vb);
+                    group.vertices.handle = nullptr;
+                }
+
+                if (group.indices && group.indices.handle) {
+                    bgfx::destroy(static_cast<HandleBGFX*>(group.vertices.handle)->ib);
+                    group.indices.handle = nullptr;
+                }
+            }
+            
+            mesh.uploaded = false;
+        }
+
         void UploadTexture(Texture* texture, bool release)
         {
             if (texture->uploaded)
