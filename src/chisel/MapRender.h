@@ -73,7 +73,7 @@ namespace chisel
             // TODO: Cull!
             for (Solid& brush : map)
             {
-                Tools.PreDrawSelection(r, brush.GetObjectID());
+                Tools.PreDrawSelection(r, brush.GetSelectionID());
                 r.DrawMesh(brush.GetMesh());
             }
         }

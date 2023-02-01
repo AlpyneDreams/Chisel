@@ -130,7 +130,7 @@ namespace chisel
 
     };
 
-    Solid CubeBrush(CSG::Brush& brush, Volume volume, const mat4x4& transform = glm::identity<mat4x4>())
+    inline Solid CubeBrush(CSG::Brush& brush, Volume volume, const mat4x4& transform = glm::identity<mat4x4>())
     {
         Solid cube = Solid(brush, volume);
         
