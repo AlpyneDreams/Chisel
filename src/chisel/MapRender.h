@@ -78,40 +78,6 @@ namespace chisel
             }
         }
 
-        void DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool gridSnap, const vec3& gridSize)
-        {
-            if (Selection.Empty())
-                return;
-
-            std::optional<AABB> bounds;
-            for (ISelectable* selectable : Selection)
-            {
-                auto selectedBounds = selectable->SelectionBounds();
-                if (!selectedBounds)
-                    continue;
-
-                bounds = bounds
-                    ? AABB::Extend(*bounds, *selectedBounds)
-                    : *selectedBounds;
-            }
-
-            if (!bounds)
-                return;
-
-            AABB localBounds = bounds->MakeLocal();
-
-            // TODO: scaling and rotation
-            auto mtx = glm::translate(CSG::Matrix4(1.0), bounds->Center());
-            auto inv = glm::translate(CSG::Matrix4(1.0), -bounds->Center());
-            if (Handles.Manipulate(mtx, view, proj, tool, space, gridSnap, gridSize, bounds ? &localBounds.min[0] : NULL, gridSize))
-            {
-                auto transform = mtx * inv;
-
-                for (ISelectable* selectable : Selection)
-                    selectable->SelectionTransform(transform);
-                // TODO: Align to grid fights with the gizmo rn :s
-                //brush->GetBrush().AlignToGrid(map.gridSize);
-            }
-        }
+        void DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool gridSnap, const vec3& gridSize);
     };
 }

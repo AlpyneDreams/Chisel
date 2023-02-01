@@ -34,33 +34,62 @@ namespace chisel
             ImGuizmo::SetDrawlist();
         }
 
-        void Maniuplate(Transform& transform, const mat4x4& view, const mat4x4& proj, Tool activeTool, Space space, bool gridSnap, const vec3& gridSize)
+        bool Manipulate(Transform& transform, auto... args)
         {
             mat4x4 mtx;
             vec3 angles = transform.GetEulerAngles();
             ImGuizmo::RecomposeMatrixFromComponents(&transform.position[0], &angles[0], &transform.scale[0], &mtx[0][0]);
 
-            if (Manipulate(mtx, view, proj, activeTool, space, gridSnap, gridSize))
+            if (Manipulate(mtx, args...))
             {
                 ImGuizmo::DecomposeMatrixToComponents(&mtx[0][0], &transform.position[0], &angles[0], &transform.scale[0]);
                 transform.SetEulerAngles(angles);
+                return true;
             }
+            return false;
         }
 
-        bool Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, Tool activeTool, Space space,
+        bool Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, Tool tool, Space space,
                         bool gridSnap, const vec3& gridSize, const float* localBounds = NULL, const vec3& boundsSnap = vec3(1))
         {
-            return ImGuizmo::Manipulate(
+            bool bounds = tool == Tool::Bounds;
+
+            // Only snap if we're translating
+            gridSnap = gridSnap && tool == Tool::Translate;
+
+            // Record previous model transform
+            mat4x4 prev;
+            if (bounds)
+                prev = model;
+            
+            // This will be updated only when not dragging the bounds
+            // otherwise things get pretty funky.
+            static vec3 lastBoundsSnap = vec3(0);
+
+            bool changed = ImGuizmo::Manipulate(
                 &view[0][0],
                 &proj[0][0],
-                GetOperation(activeTool),
+                GetOperation(tool),
                 space == Space::World ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL,
                 &model[0][0],
                 NULL, // deltaMatrix
                 gridSnap ? &gridSize[0] : NULL,
-                activeTool == Tool::Bounds ? localBounds : NULL,
-                &boundsSnap[0]
+                bounds ? localBounds : NULL,
+                &lastBoundsSnap[0]
             );
+
+            if (bounds)
+            {
+                // Update bounds snap if not currently dragging
+                if (!ImGui::IsMouseDown(0))
+                    lastBoundsSnap = boundsSnap;
+
+                // Manually detect changes to the matrix
+                if (!changed)
+                    return model != prev;
+            }
+
+            return changed;
         }
 
         bool IsMouseOver() { return ImGuizmo::IsOver(); }

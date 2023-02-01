@@ -23,13 +23,13 @@ namespace chisel
             return 0.5f * (min + max);
         }
 
-        AABB MakeLocal() const {
-            vec3 center = Center();
-            return AABB { min - center, max - center };
-        }
-
         vec3 Dimensions() const {
             return glm::abs(max - min);
+        }
+
+        // Compute the matrix to transform a 1x1 cube at the origin to this box
+        mat4x4 ComputeMatrix() const {
+            return glm::scale(glm::translate(mat4x4(1), Center()), Dimensions());
         }
 
     // Extending //
