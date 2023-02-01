@@ -54,7 +54,8 @@ namespace chisel::render
         return bgfxTextureFormats.contains(format) ? bgfxTextureFormats[format] : bgfx::TextureFormat::Unknown;
     }
 
-    ConVar<bool> r_vsync("r_vsync", false, "Enable/disable vsync");
+    ConVar r_vsync("r_vsync", false, "Enable/disable vsync");
+    ConVar r_stats("r_stats", false, "Show renderer debug info");
 
     struct ShaderBGFX final : public Shader
     {
@@ -348,7 +349,7 @@ namespace chisel::render
             const bgfx::Stats* stats = bgfx::getStats();
             bgfx::dbgTextPrintf(0, 2, 0x0f, "Backbuffer %dW x %dH in pixels, debug text %dW x %dH in characters.", stats->width, stats->height, stats->textWidth, stats->textHeight);
             */
-            bgfx::setDebug(BGFX_DEBUG_TEXT);
+            bgfx::setDebug(BGFX_DEBUG_TEXT | (r_stats ? BGFX_DEBUG_STATS : 0));
 
             static double totalTime = 0;
             static double fps = (1 / Time.unscaled.deltaTime);
