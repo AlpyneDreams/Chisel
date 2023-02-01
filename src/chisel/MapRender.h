@@ -41,7 +41,7 @@ namespace chisel
             map.Rebuild();
 
             // TODO: Cull!
-            for (Brush& brush : map)
+            for (Solid& brush : map)
             {
                 r.SetUniform("u_color", brush.GetTempColor());
 
@@ -71,7 +71,7 @@ namespace chisel
         void DrawSelectionPass()
         {
             // TODO: Cull!
-            for (Brush& brush : map)
+            for (Solid& brush : map)
             {
                 Tools.PreDrawSelection(r, brush.GetObjectID());
                 r.DrawMesh(brush.GetMesh());

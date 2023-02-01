@@ -61,7 +61,7 @@ namespace chisel
             for (uint64_t i = 0; const auto& side : solid.sides)
                 sides.emplace_back(CSG::Side{ { .userdata = i++ }, CSG::Plane{ side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2] } });
 
-            Brush& brush = map.AddBrush();
+            Solid& brush = map.AddBrush();
             brush.GetBrush().SetSides(&sides.front(), &sides.back() + 1);
         }
         for (auto& entity : vmf.entities)

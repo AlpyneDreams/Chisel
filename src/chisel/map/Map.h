@@ -7,7 +7,7 @@
 #include "../CSG/CSGTree.h"
 
 #include "Common.h"
-#include "Brush.h"
+#include "Solid.h"
 
 namespace chisel
 {
@@ -28,7 +28,7 @@ namespace chisel
     struct BrushEntity : Entity
     {
     protected:
-        std::list<Brush>  brushes;
+        std::list<Solid>    brushes;
         CSG::CSGTree        tree;
 
     public:
@@ -37,18 +37,18 @@ namespace chisel
             brushes.clear();
         }
 
-        Brush& AddBrush(Volume volume = Volumes::Solid)
+        Solid& AddBrush(Volume volume = Volumes::Solid)
         {
             return brushes.emplace_back(tree.CreateBrush(), volume);
         }
 
-        Brush& AddCube(Volume volume = Volumes::Solid, mat4x4 transform = glm::identity<mat4x4>())
+        Solid& AddCube(Volume volume = Volumes::Solid, mat4x4 transform = glm::identity<mat4x4>())
         {
             brushes.push_back(CubeBrush(tree.CreateBrush(), volume, transform));
             return brushes.back();
         }
 
-        void RemoveBrush(const Brush& brush)
+        void RemoveBrush(const Solid& brush)
         {
             brushes.remove(brush);
         }
@@ -57,7 +57,7 @@ namespace chisel
         {
             auto rebuilt = tree.Rebuild();
             for (CSG::Brush* brush : rebuilt)
-                brush->GetUserdata<Brush*>()->UpdateMesh();
+                brush->GetUserdata<Solid*>()->UpdateMesh();
         }
 
         auto begin() { return brushes.begin(); }

@@ -13,8 +13,6 @@
 
 namespace chisel
 {
-    struct BrushEntity;
-
     struct SideData
     {
         std::array<vec4, 2> textureAxes{};
@@ -24,7 +22,7 @@ namespace chisel
         uint32_t smoothing = 0;
     };
 
-    struct Brush : Atom, ISelectable
+    struct Solid : Atom, ISelectable
     {
     protected:
         CSG::Brush*             brush;
@@ -34,7 +32,7 @@ namespace chisel
         Color                   tempcolor;
 
     public:
-        Brush(CSG::Brush& brush, Volume volume)
+        Solid(CSG::Brush& brush, Volume volume)
             : brush(&brush), volume(volume)
         {
             brush.SetVolumeOperation(CSG::CreateFillOperation(volume));
@@ -44,19 +42,19 @@ namespace chisel
             tempcolor = Color::HSV((float)(rand() % 360), 0.7f, 1.0f);
         }
 
-        Brush(Brush&& that)
-            : Brush(*that.brush, that.volume)
+        Solid(Solid&& that)
+            : Solid(*that.brush, that.volume)
         {
             that.brush = nullptr;
         }
         
-        ~Brush()
+        ~Solid()
         {
             if (brush)
                 brush->GetTree()->DestroyBrush(*brush);
         }
 
-        bool operator ==(const Brush& that) const
+        bool operator ==(const Solid& that) const
         {
             return brush == that.brush
                 && brush != nullptr
@@ -132,9 +130,9 @@ namespace chisel
 
     };
 
-    Brush CubeBrush(CSG::Brush& brush, Volume volume, const mat4x4& transform = glm::identity<mat4x4>())
+    Solid CubeBrush(CSG::Brush& brush, Volume volume, const mat4x4& transform = glm::identity<mat4x4>())
     {
-        Brush cube = Brush(brush, volume);
+        Solid cube = Solid(brush, volume);
         
         static const std::array<CSG::Plane, 6> kUnitCubePlanes =
         {
