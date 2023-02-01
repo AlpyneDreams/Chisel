@@ -86,6 +86,8 @@ namespace chisel
             if constexpr (std::is_same_v<T, bool>) {
                 return "bool";
             } else if constexpr (std::is_integral_v<T>) {
+                return "integer";
+            } else if constexpr (std::is_floating_point_v<T>) {
                 return "number";
             } else {
                 return "string";
