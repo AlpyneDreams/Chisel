@@ -81,9 +81,21 @@ namespace chisel
 
     // UI //
 
-        bool BeginMenu(const char* label, bool enabled = true)
+        bool BeginMenu(const char* label, const char* tooltip = nullptr, bool enabled = true)
         {
             bool open = ImGui::BeginMenu(label, enabled);
+
+            if (tooltip)
+            {
+                if (!open && ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s", tooltip);
+                
+                if (open)
+                {
+                    ImGui::TextUnformatted(tooltip);
+                    ImGui::Separator();
+                }
+            }
 
             // Prevent click on viewport when clicking menu
             if (open && ImGui::IsWindowHovered())
@@ -154,9 +166,16 @@ namespace chisel
                 CoordinateSpacePicker();
                 GridMenu();
 
+                if (BeginMenu(str::format(ICON_MC_ANGLE_ACUTE " %g " ICON_MC_MENU_DOWN, rotationSnap).c_str(), "Rotation"))
+                {
+                    ImGui::Checkbox(ICON_MC_MAGNET " Rotation Snap", &view_rotate_snap.value);
+                    ImGui::InputFloat("Angle Snap", &rotationSnap);
+                    ImGui::EndMenu();
+                }
+
                 // Right side
                 ImGui::SameLine(ImGui::GetWindowWidth() - 90);
-                if (BeginMenu(ICON_MC_IMAGE_MULTIPLE " " ICON_MC_MENU_DOWN))
+                if (BeginMenu(ICON_MC_IMAGE_MULTIPLE " " ICON_MC_MENU_DOWN, "Render Mode"))
                 {
                     for (int i = 0; i < sizeof(drawModes) / sizeof(const char*); i++)
                     {
@@ -168,10 +187,9 @@ namespace chisel
 
                 // Right side
                 ImGui::SameLine(ImGui::GetWindowWidth() - 40);
-                if (BeginMenu(ICON_MC_VIDEO " " ICON_MC_MENU_DOWN))
+                if (BeginMenu(ICON_MC_VIDEO " " ICON_MC_MENU_DOWN, "Camera"))
                 {
                     Camera& camera = GetCamera();
-                    ImGui::TextUnformatted("Scene Camera");
                     ImGui::InputFloat("FOV", &camera.fieldOfView);
                     ImGui::InputFloat("Speed (hu/s)", &cam_maxspeed.value);
                     ImGui::InputFloat("Sensitivity", &m_sensitivity.value);
@@ -299,7 +317,7 @@ namespace chisel
             };
             int i = int(space);
             auto label = std::string(items[i]) + " " ICON_MC_MENU_DOWN;
-            if (BeginMenu(label.c_str())) {
+            if (BeginMenu(label.c_str(), "Transform")) {
                 for (size_t j = 0; j < std::size(items); j++) {
                     if (ImGui::MenuItem(items[j], "", space == Space(j))) {
                         space = Space(j);
@@ -320,9 +338,8 @@ namespace chisel
                 snprintf(gridTabName, sizeof(gridTabName), ICON_MC_GRID " %g " ICON_MC_MENU_DOWN, gridSize.x);
             else
                 snprintf(gridTabName, sizeof(gridTabName), ICON_MC_GRID " %g %g %g " ICON_MC_MENU_DOWN, gridSize.x, gridSize.y, gridSize.z);
-            if (BeginMenu(gridTabName))
+            if (BeginMenu(gridTabName, "Grid"))
             {
-                ImGui::TextUnformatted("Grid");
                 const char* label = view_grid_show
                     ? (ICON_MC_GRID " Show Grid")
                     : (ICON_MC_GRID_OFF " Show Grid");
