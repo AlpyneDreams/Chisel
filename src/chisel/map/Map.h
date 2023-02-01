@@ -32,6 +32,11 @@ namespace chisel
         CSG::CSGTree        tree;
 
     public:
+        ~BrushEntity()
+        {
+            brushes.clear();
+        }
+
         Brush& AddBrush(Volume volume = Volumes::Solid)
         {
             return brushes.emplace_back(tree.CreateBrush(), volume);

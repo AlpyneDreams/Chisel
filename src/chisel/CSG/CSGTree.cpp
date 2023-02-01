@@ -6,6 +6,11 @@ namespace chisel::CSG
     {
     }
 
+    CSGTree::~CSGTree()
+    {
+        m_brushes.clear();
+    }
+
 //-------------------------------------------------------------------------------------------------
 
     Brush& CSGTree::CreateBrush()

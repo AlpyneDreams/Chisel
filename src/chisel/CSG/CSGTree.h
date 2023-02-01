@@ -11,6 +11,7 @@ namespace chisel::CSG
     {
     public:
         CSGTree();
+        ~CSGTree();
 
         Brush& CreateBrush();
         void DestroyBrush(Brush& brush);
