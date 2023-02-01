@@ -83,20 +83,18 @@ namespace chisel
 
     // UI //
 
-        bool BeginMenu(const char* label, const char* tooltip = nullptr, bool enabled = true)
+        bool BeginMenu(const char* label, const char* name, bool enabled = true)
         {
-            bool open = ImGui::BeginMenu(label, enabled);
+            std::string menuName = std::string(label) + "###" + name;
+            bool open = ImGui::BeginMenu(menuName.c_str(), enabled);
 
-            if (tooltip)
+            if (!open && ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", name);
+
+            if (open)
             {
-                if (!open && ImGui::IsItemHovered())
-                    ImGui::SetTooltip("%s", tooltip);
-                
-                if (open)
-                {
-                    ImGui::TextUnformatted(tooltip);
-                    ImGui::Separator();
-                }
+                ImGui::TextUnformatted(name);
+                ImGui::Separator();
             }
 
             // Prevent click on viewport when clicking menu
