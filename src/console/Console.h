@@ -88,5 +88,13 @@ namespace chisel
     } Console;
 }
 
+// Formatters for GLM Types //
+
 template <int N, typename T>
 struct fmt::formatter<glm::vec<N, T>> : fmt::ostream_formatter {};
+
+template <int N, int M, typename T, glm::qualifier P>
+struct fmt::formatter<glm::mat<N, M, T, P>> : fmt::ostream_formatter {};
+
+template <>
+struct fmt::formatter<glm::quat> : fmt::ostream_formatter {};

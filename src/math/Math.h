@@ -147,13 +147,13 @@ namespace glm
         return out << glm::to_string(g);
     }
 
-    // Write matNxN to stream
+    // Write matNxM to stream
     template <int N, int M, typename T, glm::qualifier P>
     inline std::ostream& operator<<(std::ostream& out, const glm::mat<N, M, T, P>& g) {
         return out << glm::to_string(g);
     }
 
-    // Write matNxN to stream
+    // Write quat to stream
     inline std::ostream& operator<<(std::ostream& out, const glm::quat& g) {
         return out << glm::to_string(g);
     }
