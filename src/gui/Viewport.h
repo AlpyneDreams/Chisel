@@ -33,7 +33,9 @@ namespace chisel
         void DrawHandles(mat4x4& view, mat4x4& proj) override
         {
             // Draw transform handles
-            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, view_grid_snap, gridSize);
+            bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
+            vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : gridSize;
+            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, snap, snapSize);
             
             // Draw view cube
             {

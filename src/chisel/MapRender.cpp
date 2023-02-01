@@ -4,7 +4,7 @@
 
 namespace chisel
 {
-    void MapRender::DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool gridSnap, const vec3& gridSize)
+    void MapRender::DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool snap, const vec3& snapSize)
     {
         if (Selection.Empty())
             return;
@@ -30,9 +30,9 @@ namespace chisel
         auto inv = glm::inverse(mtx);
 
         AABB localBounds = { vec3(-0.5), vec3(0.5) };
-        vec3 boundsSnap = gridSize / bounds->Dimensions();
+        vec3 boundsSnap = snapSize / bounds->Dimensions();
 
-        if (Handles.Manipulate(mtx, view, proj, tool, space, gridSnap, gridSize, &localBounds.min[0], boundsSnap))
+        if (Handles.Manipulate(mtx, view, proj, tool, space, snap, snapSize, &localBounds.min[0], boundsSnap))
         {
             auto transform = mtx * inv;
 

@@ -50,20 +50,20 @@ namespace chisel
         }
 
         bool Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, Tool tool, Space space,
-                        bool gridSnap, const vec3& gridSize, const float* localBounds = NULL, const vec3& boundsSnap = vec3(1))
+                        bool snap, const vec3& snapSize, const float* localBounds = NULL, const vec3& boundsSnap = vec3(1))
         {
             bool bounds = tool == Tool::Bounds;
 
-            // Only snap if we're translating
-            gridSnap = gridSnap && tool == Tool::Translate;
+            // Only snap if we're translating or rotating
+            snap = snap && (tool == Tool::Translate || tool == Tool::Rotate);
 
             // Record previous model transform
             mat4x4 prev;
             if (bounds)
                 prev = model;
-            
-            // This will be updated only when not dragging the bounds
-            // otherwise things get pretty funky.
+
+            // This will be updated only when not dragging the
+            // bounds otherwise things get pretty funky.
             static vec3 lastBoundsSnap = vec3(0);
 
             bool changed = ImGuizmo::Manipulate(
@@ -73,7 +73,7 @@ namespace chisel
                 space == Space::World ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL,
                 &model[0][0],
                 NULL, // deltaMatrix
-                gridSnap ? &gridSize[0] : NULL,
+                snap ? &snapSize[0] : NULL,
                 bounds ? localBounds : NULL,
                 &lastBoundsSnap[0]
             );

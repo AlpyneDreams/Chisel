@@ -34,6 +34,7 @@ namespace chisel
     inline ConVar<bool>  view_axis_allow_flip("view_axis_allow_flip", false, "Allow gizmos to flip axes contextually.");
     inline ConVar<bool>  view_grid_show("view_grid_show", true, "Show grid.");
     inline ConVar<bool>  view_grid_snap("view_grid_snap", true, "Snap to grid.");
+    inline ConVar<bool>  view_rotate_snap("view_rotate_snap", true, "Snap rotation angles.");
 
     struct View3D : public GUI::Window
     {
@@ -45,8 +46,9 @@ namespace chisel
         Space space         = Space::World;
         Rect  viewport;
 
-        vec3 gridSize       = vec3(64.f);
-        bool gridUniform    = true;
+        vec3  gridSize       = vec3(64.f);
+        bool  gridUniform    = true;
+        float rotationSnap   = 15.f;
 
         bool  popupOpen     = false;
 
@@ -166,7 +168,9 @@ namespace chisel
                 CoordinateSpacePicker();
                 GridMenu();
 
-                if (BeginMenu(str::format(ICON_MC_ANGLE_ACUTE " %g " ICON_MC_MENU_DOWN, rotationSnap).c_str(), "Rotation"))
+                const char* rotationIcon = rotationSnap < 90.f ? ICON_MC_ANGLE_ACUTE
+                                         : (rotationSnap == 90.f ? ICON_MC_ANGLE_RIGHT : ICON_MC_ANGLE_OBTUSE);
+                if (BeginMenu(str::format("%s %g " ICON_MC_MENU_DOWN, rotationIcon, rotationSnap).c_str(), "Rotation"))
                 {
                     ImGui::Checkbox(ICON_MC_MAGNET " Rotation Snap", &view_rotate_snap.value);
                     ImGui::InputFloat("Angle Snap", &rotationSnap);

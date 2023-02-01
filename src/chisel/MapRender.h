@@ -78,6 +78,6 @@ namespace chisel
             }
         }
 
-        void DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool gridSnap, const vec3& gridSize);
+        void DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool snap, const vec3& snapSize);
     };
 }
