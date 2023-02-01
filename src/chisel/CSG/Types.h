@@ -22,7 +22,7 @@ namespace chisel::CSG
     class CSGTree;
     class FaceCache;
     struct Side;
-    class UserdataProvider;
+    struct UserdataProvider;
 
     using Unit    = float;
     using Vector3 = glm::vec<3, Unit, glm::defaultp>;

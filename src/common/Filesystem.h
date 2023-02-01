@@ -30,7 +30,7 @@ namespace chisel::fs
     inline std::optional<T> readFileImpl(const Path& path, bool binary)
     {
         using namespace std;
-        auto flags = ios::in;
+        std::ios::openmode flags = ios::in;
         if (binary) flags |= ios::binary;
 
         ifstream file(path, flags);
