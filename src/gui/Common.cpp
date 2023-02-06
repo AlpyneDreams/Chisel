@@ -58,7 +58,19 @@ namespace chisel
         //AddFontFile("Karla-Regular.ttf", 15);
         //AddFontFile("Roboto-Medium.ttf", 15);
 
-        ImVec4* colors = ImGui::GetStyle().Colors;
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        // Widget rounding
+        style.FrameRounding = 4;
+        style.GrabRounding = 4;
+        style.TabRounding = 4;
+
+        // Windows - keep it subtle because root viewport windows have no rounding
+        style.WindowRounding = 6;
+        style.ChildRounding = 6;
+        style.PopupRounding = 6;
+
+        ImVec4* colors = style.Colors;
         colors[ImGuiCol_WindowBg]               = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
         colors[ImGuiCol_FrameBg]                = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
         colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
