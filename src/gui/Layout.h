@@ -102,8 +102,9 @@ namespace chisel
                 ImGui::End();
             }
 
-            // ImGuiDockNodeFlags_PassthruCentralNode
-            ImGui::DockSpaceOverViewport(NULL);
+            // ImGuiDockNodeFlags_PassthruCentralNode   - Show viewport under windows. We use a rendertarget instead for 3D views.
+            // ImGuiDockNodeFlags_AutoHideTabBar        - Hide tab bar if there is only one window docked in a space.
+            ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_AutoHideTabBar);
         }
     };
 }
