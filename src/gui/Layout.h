@@ -12,23 +12,42 @@
 
 #include "gui/IconsMaterialCommunity.h"
 
-namespace chisel {
-    extern ConVar<bool> gui_demo;
-}
-
 namespace chisel
 {
-    struct SelectionModeWindow : GUI::Window
+    extern ConVar<bool> gui_demo;
+
+    struct SelectionModeToolbar : GUI::Window
     {
-        SelectionModeWindow() : GUI::Window(ICON_MC_CURSOR_DEFAULT, "Select", 256, 256, true) {}
+        SelectionModeToolbar() : GUI::Window(
+            ICON_MC_CURSOR_DEFAULT, "Select", 500, 32, true,
+            ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar) {}
+
+        void PreDraw() override
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(500.f, 32.f));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.f, 8.f));
+        }
+
+        void PostDraw() override
+        {
+            ImGui::PopStyleVar(3);
+        }
 
         void Draw() override
         {
             using enum SelectMode;
-
-            RadioButton("Groups", Groups);
-            RadioButton("Objects", Objects);
-            RadioButton("Solids", Solids);
+            ImGui::BeginMenuBar();
+            ImGui::TextUnformatted("Select:");
+            ImGui::BeginDisabled();
+            RadioButton(ICON_MC_VECTOR_POINT " Vertices", SelectMode(-1));
+            RadioButton(ICON_MC_VECTOR_POLYLINE " Edges", SelectMode(-1));
+            RadioButton(ICON_MC_VECTOR_SQUARE " Faces", SelectMode(-1));
+            ImGui::EndDisabled();
+            RadioButton(ICON_MC_VECTOR_TRIANGLE " Solids", Solids);
+            RadioButton(ICON_MC_CUBE_OUTLINE " Objects", Objects);
+            RadioButton(ICON_MC_GROUP " Groups", Groups);
+            ImGui::EndMenuBar();
         }
 
         void RadioButton(const char* name, SelectMode mode)
@@ -36,9 +55,9 @@ namespace chisel
             bool selected = Chisel.selectMode == mode;
 
             if (selected)
-                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
+                ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
 
-            if (ImGui::Button(name, ImVec2(ImGui::GetContentRegionAvail().x, 0.f)))
+            if (bool clicked = GUI::MenuBarButton(name))
                 Chisel.selectMode = mode;
 
             if (selected)

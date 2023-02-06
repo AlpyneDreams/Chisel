@@ -50,17 +50,14 @@ namespace chisel::GUI
                 return;
             }
 
+            // Setup window variables
             ImGui::SetNextWindowSize(ImVec2(float(width), float(height)), ImGuiCond_FirstUseEver);
             PreDraw();
-            if (ImGui::Begin(name.c_str(), &open, flags))
+
+            if (visible = ImGui::Begin(name.c_str(), &open, flags))
             {
                 m_window = ImGui::GetCurrentWindow();
-                visible = true;
                 Draw();
-            }
-            else
-            {
-                visible = false;
             }
 
             PostDraw();

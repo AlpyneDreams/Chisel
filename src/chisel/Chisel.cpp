@@ -27,7 +27,7 @@ namespace chisel
         Renderer = &Tools.systems.AddSystem<MapRender>();
         Tools.systems.AddSystem<Keybinds>();
         Tools.systems.AddSystem<Layout>();
-        Tools.systems.AddSystem<SelectionModeWindow>();
+        Tools.systems.AddSystem<SelectionModeToolbar>();
         viewport = &Tools.systems.AddSystem<Viewport>();
 
         // Setup Object ID pass
