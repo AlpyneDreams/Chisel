@@ -1,6 +1,7 @@
 // Derived from this Gist by Richard Gale:
 //     https://gist.github.com/RichardGale/6e2b74bc42b3005e08397236e4be0fd0
 // Updated to support multiple viewports.
+// 2023-02-05: Applied fix for imgui/imgui#4790 and clamp scissor rects.
 
 // ImGui BFFX binding
 // In this binding, ImTextureID is used to store an OpenGL 'GLuint' texture
@@ -91,7 +92,6 @@ void ImGui_Implbgfx_RenderDrawLists(ImDrawData* draw_data)
     // Render command lists
     for (int n = 0; n < draw_data->CmdListsCount; n++) {
         const ImDrawList* cmd_list = draw_data->CmdLists[n];
-        uint32_t idx_buffer_offset = 0;
 
         bgfx::TransientVertexBuffer tvb;
         bgfx::TransientIndexBuffer tib;
@@ -133,6 +133,10 @@ void ImGui_Implbgfx_RenderDrawLists(ImDrawData* draw_data)
                 if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
                     continue;
 
+                // Clamp scissor to within window mins.
+                if (clip_min.x < 0.f) clip_min.x = 0.f;
+                if (clip_min.y < 0.f) clip_min.y = 0.f;
+
                 bgfx::setScissor(
                     (int)clip_min.x, (int)(clip_min.y), (int)(clip_max.x - clip_min.x), (int)(clip_max.y - clip_min.y)
                 );
@@ -142,11 +146,9 @@ void ImGui_Implbgfx_RenderDrawLists(ImDrawData* draw_data)
                     (uint16_t)((intptr_t)pcmd->TextureId & 0xffff)};
                 bgfx::setTexture(0, g_AttribLocationTex, texture);
                 bgfx::setVertexBuffer(0, &tvb, 0, numVertices);
-                bgfx::setIndexBuffer(&tib, idx_buffer_offset, pcmd->ElemCount);
+                bgfx::setIndexBuffer(&tib, pcmd->IdxOffset, pcmd->ElemCount);
                 bgfx::submit(view, g_ShaderHandle);
             }
-
-            idx_buffer_offset += pcmd->ElemCount;
         }
     }
 }
