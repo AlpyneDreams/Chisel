@@ -78,7 +78,7 @@ namespace chisel
             return;
 
         std::optional<AABB> bounds;
-        for (ISelectable* selectable : Selection)
+        for (Selectable* selectable : Selection)
         {
             auto selectedBounds = selectable->SelectionBounds();
             if (!selectedBounds)
@@ -104,7 +104,7 @@ namespace chisel
         {
             auto transform = mtx * inv;
 
-            for (ISelectable* selectable : Selection)
+            for (Selectable* selectable : Selection)
                 selectable->SelectionTransform(transform);
             // TODO: Align to grid fights with the gizmo rn :s
             //brush->GetBrush().AlignToGrid(map.gridSize);

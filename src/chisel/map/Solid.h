@@ -24,7 +24,7 @@ namespace chisel
         uint32_t smoothing = 0;
     };
 
-    struct Solid : Atom, ISelectable
+    struct Solid : Atom, Selectable
     {
     protected:
         CSG::Brush*             brush;

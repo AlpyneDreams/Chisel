@@ -2,24 +2,24 @@
 
 namespace chisel
 {
-    SelectionID ISelectable::s_lastId = 0;
-    std::unordered_map<SelectionID, ISelectable*> ISelectable::s_map;
+    SelectionID Selectable::s_lastId = 0;
+    std::unordered_map<SelectionID, Selectable*> Selectable::s_map;
 
 //-------------------------------------------------------------------------------------------------
 
-    ISelectable::ISelectable()
+    Selectable::Selectable()
         : m_id(++s_lastId)
     {
         s_map.emplace(m_id, this);
     }
 
-    ISelectable::~ISelectable()
+    Selectable::~Selectable()
     {
         Selection.Unselect(this);
         s_map.erase(m_id);
     }
 
-    /*static*/ ISelectable* ISelectable::Find(SelectionID id)
+    /*static*/ Selectable* Selectable::Find(SelectionID id)
     {
         auto iter = s_map.find(id);
         if (iter == s_map.end())
@@ -39,7 +39,7 @@ namespace chisel
         return m_selection.empty();
     }
 
-    void Selection::Select(ISelectable* ent)
+    void Selection::Select(Selectable* ent)
     {
         if (ent->IsSelected())
             return;
@@ -48,7 +48,7 @@ namespace chisel
         m_selection.emplace_back(ent);
     }
 
-    void Selection::Unselect(ISelectable* ent)
+    void Selection::Unselect(Selectable* ent)
     {
         if (!ent->IsSelected())
             return;
@@ -57,7 +57,7 @@ namespace chisel
         std::erase(m_selection, ent);
     }
 
-    void Selection::Toggle(ISelectable* ent)
+    void Selection::Toggle(Selectable* ent)
     {
         if (ent->IsSelected())
             Unselect(ent);
@@ -72,9 +72,9 @@ namespace chisel
         m_selection.clear();
     }
 
-    ISelectable* Selection::Find(SelectionID id)
+    Selectable* Selection::Find(SelectionID id)
     {
-        return ISelectable::Find(id);
+        return Selectable::Find(id);
     }
 
     class Selection Selection;

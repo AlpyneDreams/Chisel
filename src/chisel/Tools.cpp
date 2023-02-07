@@ -135,7 +135,7 @@ namespace chisel
                         Selection.Clear();
                     else
                     {
-                        ISelectable* selection = Selection.Find(id);
+                        Selectable* selection = Selection.Find(id);
                         if (selection)
                         {
                             if (Keyboard.GetKey(Key::LeftCTRL))

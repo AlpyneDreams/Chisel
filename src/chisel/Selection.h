@@ -10,16 +10,13 @@
 
 namespace chisel
 {
-    class Selection;
-
     using SelectionID = uint32_t;
 
-
-    class ISelectable
+    class Selectable
     {
     public:
-        ISelectable();
-        virtual ~ISelectable();
+        Selectable();
+        virtual ~Selectable();
 
         SelectionID GetSelectionID() const { return m_id; }
         bool IsSelected() const { return m_selected; }
@@ -33,10 +30,10 @@ namespace chisel
         friend class Selection;
 
         void SetSelected(bool selected) { m_selected = selected; }
-        static ISelectable* Find(SelectionID id);
+        static Selectable* Find(SelectionID id);
     private:
         static SelectionID s_lastId;
-        static std::unordered_map<SelectionID, ISelectable*> s_map;
+        static std::unordered_map<SelectionID, Selectable*> s_map;
 
         SelectionID m_id = 0;
         bool m_selected = false;
@@ -48,15 +45,15 @@ namespace chisel
         Selection();
 
         bool Empty();
-        void Select(ISelectable* ent);
-        void Unselect(ISelectable* ent);
-        void Toggle(ISelectable* ent);
+        void Select(Selectable* ent);
+        void Unselect(Selectable* ent);
+        void Toggle(Selectable* ent);
         void Clear();
-        ISelectable* Find(SelectionID id);
+        Selectable* Find(SelectionID id);
 
-        ISelectable** begin() { return m_selection.size() > 0 ? &m_selection.front() : nullptr; }
-        ISelectable** end()   { return m_selection.size() > 0 ? &m_selection.back() + 1 : nullptr; }
+        Selectable** begin() { return m_selection.size() > 0 ? &m_selection.front() : nullptr; }
+        Selectable** end()   { return m_selection.size() > 0 ? &m_selection.back() + 1 : nullptr; }
     private:
-        std::vector<ISelectable*> m_selection;
+        std::vector<Selectable*> m_selection;
     } Selection;
 }

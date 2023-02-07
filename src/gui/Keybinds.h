@@ -23,7 +23,7 @@ namespace chisel
             Map& map = Chisel.map;
             if (Keyboard.GetKeyUp(Key::Delete))
             {
-                for (ISelectable* selectable : Selection)
+                for (Selectable* selectable : Selection)
                 {
                     selectable->SelectionDelete();
                 }

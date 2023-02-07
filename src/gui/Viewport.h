@@ -76,25 +76,25 @@ namespace chisel
                     ImGui::Selectable( ICON_MC_CLIPBOARD " Paste (TODO)");
                     if (ImGui::Selectable( ICON_MC_TRASH_CAN " Delete"))
                     {
-                        for (ISelectable* selectable : Selection)
+                        for (Selectable* selectable : Selection)
                             selectable->SelectionDelete();
                     }
                     ImGui::Separator();
                     if (ImGui::Selectable( ICON_MC_GRID " Align to Grid"))
                     {
-                        for (ISelectable* selectable : Selection)
+                        for (Selectable* selectable : Selection)
                             selectable->SelectionAlignToGrid(gridSize);
                     }
                     if (ImGui::BeginMenu(ICON_MC_CUBE_OUTLINE " Change Volume"))
                     {
                         if (ImGui::MenuItem(ICON_MC_CUBE "Solid"))
                         {
-                            for (ISelectable* selectable : Selection)
+                            for (Selectable* selectable : Selection)
                                 selectable->SelectionSetVolume(Volumes::Solid);
                         }
                         if (ImGui::MenuItem(ICON_MC_CUBE_OUTLINE "Air"))
                         {
-                            for (ISelectable* selectable : Selection)
+                            for (Selectable* selectable : Selection)
                                 selectable->SelectionSetVolume(Volumes::Air);
                         }
                         ImGui::EndMenu();
