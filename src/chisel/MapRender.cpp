@@ -1,9 +1,12 @@
 #include "MapRender.h"
 
+#include "console/ConVar.h"
 #include "core/Transform.h"
 
 namespace chisel
 {
+    static ConVar<bool> r_rebuildworld("r_rebuildworld", true, "Rebuild world");
+
     static ConVar<bool> r_drawbrushes("r_drawbrushes", true, "Draw brushes");
     static ConVar<bool> r_drawsprites("r_drawsprites", true, "Draw sprites");
 
@@ -20,7 +23,8 @@ namespace chisel
         r.SetShader(shader);
         r.SetTransform(glm::identity<mat4x4>());
 
-        map.Rebuild();
+        if (r_rebuildworld)
+            map.Rebuild();
 
         // TODO: Cull!
         if (r_drawbrushes)
