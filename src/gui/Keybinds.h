@@ -25,7 +25,7 @@ namespace chisel
             {
                 for (Selectable* selectable : Selection)
                 {
-                    selectable->SelectionDelete();
+                    selectable->Delete();
                 }
                 Selection.Clear();
             }

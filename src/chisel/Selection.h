@@ -21,11 +21,11 @@ namespace chisel
         SelectionID GetSelectionID() const { return m_id; }
         bool IsSelected() const { return m_selected; }
 
-        virtual std::optional<AABB> SelectionBounds() const = 0;
-        virtual void SelectionTransform(const mat4x4& matrix) = 0;
-        virtual void SelectionDelete() = 0;
-        virtual void SelectionAlignToGrid(vec3 gridSize) = 0;
-        virtual void SelectionSetVolume(Volume volume) = 0;
+        virtual std::optional<AABB> GetBounds() const = 0;
+        virtual void Transform(const mat4x4& matrix) = 0;
+        virtual void Delete() = 0;
+        virtual void AlignToGrid(vec3 gridSize) = 0;
+        virtual void SetVolume(Volume volume) = 0;
     protected:
         friend class Selection;
 

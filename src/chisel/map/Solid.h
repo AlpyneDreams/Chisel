@@ -149,18 +149,13 @@ namespace chisel
         // TODO: Remove me, debugging.
         glm::vec4 GetTempColor() const { return tempcolor; }
 
-        void Delete()
-        {
-            Console.Error("Need a reference to the map in here to kill myself.");
-        }
+    // Selectable Interface //
 
-        // Selectable Interface
-
-        std::optional<AABB> SelectionBounds() const { return brush->GetBounds(); }
-        void SelectionTransform(const mat4x4& matrix) { brush->Transform(matrix); }
-        void SelectionDelete() { Delete(); }
-        void SelectionAlignToGrid(vec3 gridSize) { brush->AlignToGrid(gridSize); }
-        void SelectionSetVolume(Volume volume) { brush->SetVolumeOperation(CSG::CreateFillOperation(volume)); }
+        std::optional<AABB> GetBounds() const final override { return brush->GetBounds(); }
+        void Transform(const mat4x4& matrix) final override { brush->Transform(matrix); }
+        void Delete() final override { Console.Error("Need a reference to the map in here to kill myself."); }
+        void AlignToGrid(vec3 gridSize) final override { brush->AlignToGrid(gridSize); }
+        void SetVolume(Volume volume) final override { brush->SetVolumeOperation(CSG::CreateFillOperation(volume)); }
 
     };
 
