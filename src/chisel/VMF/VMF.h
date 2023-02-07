@@ -58,7 +58,7 @@ namespace chisel::VMF
         float scale[2];
         float rotation;
         float lightmapscale;
-        int smoothing_groups;
+        uint32 smoothing_groups;
         // dispinfo {}
 
         Side(KeyValues& side);

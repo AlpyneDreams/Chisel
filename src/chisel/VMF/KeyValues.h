@@ -50,6 +50,7 @@ namespace chisel
         operator std::vector<T>();
 
         operator int() const { return type == String ? std::stoi(*this) : 0; }
+        operator uint() const { return type == String ? uint(std::stoul(*this)) : 0; }
         operator float() const { return type == String ? std::stof(*this) : 0.f; }
         operator bool() const { return type == Object || (type == String && std::stoi(*this) != 0); }
 
