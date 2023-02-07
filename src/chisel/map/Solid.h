@@ -4,6 +4,8 @@
 #include "../CSG/Brush.h"
 #include "../CSG/CSGTree.h"
 #include "chisel/Selection.h"
+#include "assets/Assets.h"
+#include "render/Texture.h"
 
 #include "math/Color.h"
 
@@ -31,6 +33,8 @@ namespace chisel
         MeshBuffer<VertexCSG>   mesh = MeshBuffer<VertexCSG>();     
         Color                   tempcolor;
 
+        static inline Texture* gridTexture = nullptr;
+
     public:
         Solid(CSG::Brush& brush, Volume volume)
             : brush(&brush), volume(volume)
@@ -40,6 +44,9 @@ namespace chisel
 
             srand(brush.GetObjectID());
             tempcolor = Color::HSV((float)(rand() % 360), 0.7f, 1.0f);
+
+            if (!gridTexture)
+                gridTexture = Assets.Load<Texture, ".PNG">("materials/dev_grey.png");
         }
 
         Solid(Solid&& that)
@@ -61,6 +68,12 @@ namespace chisel
                 && that.brush != nullptr;
         }
 
+        void SetSides(CSG::Side *begin_side, CSG::Side *end_side, SideData* begin_data, SideData* end_data)
+        {
+            GetBrush().SetSides(begin_side, end_side);
+            m_sides = std::vector<SideData>(begin_data, end_data);
+        }
+
         void UpdateMesh()
         {
             mesh.vertices.clear();
@@ -79,8 +92,22 @@ namespace chisel
                         :  face.side->plane.normal;
 
                     const size_t startIndex = mesh.vertices.size();
+                    const SideData& data = m_sides[face.side->userdata];
                     for (const auto& vert : fragment.vertices)
-                        mesh.vertices.emplace_back(vert.position, normal);
+                    {
+                        const float mappingWidth = 64.0f;
+                        const float mappingHeight = 64.0f;
+
+                        float u = glm::dot(glm::vec3(data.textureAxes[0].xyz), glm::vec3(vert.position)) / data.scale[0] + data.textureAxes[0].w;
+                        float v = glm::dot(glm::vec3(data.textureAxes[1].xyz), glm::vec3(vert.position)) / data.scale[1] + data.textureAxes[1].w;
+
+                        u = mappingWidth  ? u / float(mappingWidth)  : 0.0f;
+                        v = mappingHeight ? v / float(mappingHeight) : 0.0f;
+
+                        Console.Log("B: uv: {} {}", u, v);
+
+                        mesh.vertices.emplace_back(vert.position, normal, glm::vec2(u, v));
+                    }
 
                     std::vector<CSG::TriangleIndices> tris = fragment.Triangulate();
                     for (const auto& tri : tris)
@@ -106,6 +133,13 @@ namespace chisel
             }
             mesh.Update();
         }
+
+        Texture *GetTexture()
+        {
+            return gridTexture;
+        }
+
+        std::vector<SideData> m_sides;
 
         CSG::ObjectID GetObjectID() const { return brush->GetObjectID(); }
         CSG::Brush& GetBrush() { return *brush; }

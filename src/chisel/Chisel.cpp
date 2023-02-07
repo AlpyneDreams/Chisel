@@ -55,14 +55,27 @@ namespace chisel
 
         VMF::VMF vmf(*kv);
         std::vector<CSG::Side> sides;
+        std::vector<SideData> side_data;
         for (const auto& solid : vmf.world.solids)
         {
             sides.clear();
             for (uint64_t i = 0; const auto& side : solid.sides)
+            {
                 sides.emplace_back(CSG::Side{ { .userdata = i++ }, CSG::Plane{ side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2] } });
 
+                SideData data =
+                {
+                    .textureAxes   = {{ side.axis[0],  side.axis[1] }},
+                    .scale         = {{ side.scale[0], side.scale[1] }},
+                    .rotate        = side.rotation,
+                    .lightmapScale = side.lightmapscale,
+                    .smoothing     = side.smoothing_groups,
+                };
+                side_data.emplace_back( data );
+            }
+
             Solid& brush = map.AddBrush();
-            brush.GetBrush().SetSides(&sides.front(), &sides.back() + 1);
+            brush.SetSides(&sides.front(), &sides.back() + 1, &side_data.front(), &side_data.back() + 1);
         }
         for (auto& entity : vmf.entities)
         {
@@ -73,7 +86,6 @@ namespace chisel
             point_entity.classname = entity.classname;
             point_entity.targetname = entity.targetname;
             point_entity.origin = entity.origin;
-            Console.Log("origin: {}", point_entity.origin);
             point_entity.kv = std::move(entity.kv);
             point_entity.connections = std::move(entity.connections);
             map.entities.push_back(point_entity);

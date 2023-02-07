@@ -12,7 +12,7 @@ namespace chisel
 
     void MapRender::Start()
     {
-        shader = Tools.Render.LoadShader("flat");
+        shader = Tools.Render.LoadShader("brush");
     }
 
     void MapRender::Update()
@@ -46,6 +46,8 @@ namespace chisel
                     // Draw the actual mesh faces in red
                     r.SetUniform("u_color", Color(1, 0, 0));
                 }
+
+                r.SetTexture(0, brush.GetTexture());
 
                 r.DrawMesh(brush.GetMesh());
             }
