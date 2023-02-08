@@ -34,7 +34,7 @@ namespace chisel
     {
     }
 
-    bool Selection::Empty()
+    bool Selection::Empty() const
     {
         return m_selection.empty();
     }
@@ -75,6 +75,34 @@ namespace chisel
     Selectable* Selection::Find(SelectionID id)
     {
         return Selectable::Find(id);
+    }
+
+//-------------------------------------------------------------------------------------------------
+
+    std::optional<AABB> Selection::GetBounds() const
+    {
+        std::optional<AABB> bounds;
+        for (Selectable* selectable : m_selection)
+        {
+            auto selectedBounds = selectable->GetBounds();
+            if (!selectedBounds)
+                continue;
+
+            bounds = bounds
+                ? AABB::Extend(*bounds, *selectedBounds)
+                : *selectedBounds;
+        }
+        
+        return bounds;
+    }
+
+    void Selection::Delete()
+    {
+        for (Selectable* s : m_selection)
+        {
+            s->Delete();
+        }
+        Clear();
     }
 
     class Selection Selection;

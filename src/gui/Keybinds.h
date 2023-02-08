@@ -21,13 +21,8 @@ namespace chisel
             }
             
             Map& map = Chisel.map;
-            if (Keyboard.GetKeyUp(Key::Delete))
-            {
-                for (Selectable* selectable : Selection)
-                {
-                    selectable->Delete();
-                }
-                Selection.Clear();
+            if (Keyboard.GetKeyUp(Key::Delete)) {
+                Selection.Delete();
             }
         }
     };
