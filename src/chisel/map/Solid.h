@@ -24,7 +24,7 @@ namespace chisel
         uint32_t smoothing = 0;
     };
 
-    struct Solid : Atom, Selectable
+    struct Solid : Atom
     {
     protected:
         CSG::Brush*             brush;
@@ -155,10 +155,8 @@ namespace chisel
 
         std::optional<AABB> GetBounds() const final override { return brush->GetBounds(); }
         void Transform(const mat4x4& matrix) final override { brush->Transform(matrix); }
-        void Delete() final override { Console.Error("Need a reference to the map in here to kill myself."); }
         void AlignToGrid(vec3 gridSize) final override { brush->AlignToGrid(gridSize); }
         void SetVolume(Volume volume) final override { brush->SetVolumeOperation(CSG::CreateFillOperation(volume)); }
-
     };
 
     inline Solid CubeBrush(CSG::Brush& brush, Volume volume, const mat4x4& transform = glm::identity<mat4x4>())

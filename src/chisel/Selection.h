@@ -4,7 +4,7 @@
 #include "console/Console.h"
 
 #include "math/AABB.h"
-#include "map/Common.h"
+#include "map/Volume.h"
 #include <optional>
 #include <unordered_map>
 
@@ -58,10 +58,10 @@ namespace chisel
     // Selectable Interface //
 
         std::optional<AABB> GetBounds() const final override;
-        void Transform(const mat4x4& matrix) final override { for (auto* s : m_selection) { s->Transform(matrix); } }
+        void Transform(const mat4x4& matrix) final override { for (auto* s : m_selection) s->Transform(matrix); }
         void Delete() final override;
-        void AlignToGrid(vec3 gridSize) final override { for (auto* s : m_selection) { s->AlignToGrid(gridSize); } }
-        void SetVolume(Volume volume) final override { for (auto* s : m_selection) { s->SetVolume(volume); } }
+        void AlignToGrid(vec3 gridSize) final override { for (auto* s : m_selection) s->AlignToGrid(gridSize); }
+        void SetVolume(Volume volume) final override { for (auto* s : m_selection) s->SetVolume(volume); }
 
     private:
         std::vector<Selectable*> m_selection;

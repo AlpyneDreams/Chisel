@@ -15,14 +15,24 @@ namespace chisel
     {
         std::string classname;
         std::string targetname;
-        glm::vec3 origin;
 
         std::unordered_map<std::string, std::string> kv;
         std::unordered_map<std::string, std::string> connections;
+
+        std::optional<AABB> GetBounds() const override { return std::nullopt; }
+        void Transform(const mat4x4& matrix) override { /* Do Nothing */ }
+        void AlignToGrid(vec3 gridSize) override { /* Do Nothing */ }
+        void SetVolume(Volume volume) override { /* Do Nothing */ }
     };
 
-    struct PointEntity : Entity
+    struct PointEntity final : Entity
     {
+        glm::vec3 origin;
+
+        std::optional<AABB> GetBounds() const final override { return AABB(origin, origin); }
+        void Transform(const mat4x4& matrix) final override { origin = matrix * vec4(origin, 0); }
+        void AlignToGrid(vec3 gridSize) final override { origin = Snap(origin, gridSize); }
+        void SetVolume(Volume volume) final override { /* Do Nothing */ }
     };
 
     struct BrushEntity : Entity
@@ -62,15 +72,41 @@ namespace chisel
 
         auto begin() { return brushes.begin(); }
         auto end() { return brushes.end(); }
+
+    // Selectable Interface //
+
+        std::optional<AABB> GetBounds() const final override
+        {
+            std::optional<AABB> bounds;
+            for (const Solid& selectable : brushes)
+            {
+                auto selectedBounds = selectable.GetBounds();
+                if (!selectedBounds)
+                    continue;
+
+                bounds = bounds
+                    ? AABB::Extend(*bounds, *selectedBounds)
+                    : *selectedBounds;
+            }
+
+            return bounds;
+        }
+
+        void Transform(const mat4x4& matrix) final override { for (auto& b : brushes) b.Transform(matrix); }
+        void AlignToGrid(vec3 gridSize) final override { for (auto& b : brushes) b.AlignToGrid(gridSize); }
+        void SetVolume(Volume volume) final override { for (auto& b : brushes) b.SetVolume(volume); }
+
     };
 
     /**
      * Represents the entire map document, world brushes, and entities.
      */
-    struct Map : BrushEntity
+    struct Map final : BrushEntity
     {
-        vec3                gridSize = vec3(64.0f);
-        std::list<Entity> entities;
+        vec3 gridSize = vec3(64.0f);
+
+        // TODO: Polymorphic linked list
+        std::vector<Entity*> entities;
 
         Map()
         {

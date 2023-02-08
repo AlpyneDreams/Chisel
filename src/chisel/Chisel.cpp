@@ -82,13 +82,13 @@ namespace chisel
             if (!entity.solids.empty())
                 continue;
 
-            PointEntity point_entity;
-            point_entity.classname = entity.classname;
-            point_entity.targetname = entity.targetname;
-            point_entity.origin = entity.origin;
-            point_entity.kv = std::move(entity.kv);
-            point_entity.connections = std::move(entity.connections);
-            map.entities.push_back(point_entity);
+            PointEntity* ent = new PointEntity();
+            ent->classname = entity.classname;
+            ent->targetname = entity.targetname;
+            ent->origin = entity.origin;
+            ent->kv = std::move(entity.kv);
+            ent->connections = std::move(entity.connections);
+            map.entities.push_back(ent);
         }
 
         return true;

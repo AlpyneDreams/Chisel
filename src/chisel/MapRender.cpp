@@ -55,9 +55,10 @@ namespace chisel
 
         if (r_drawsprites)
         {
-            for (const auto& entity : map.entities)
+            for (const auto* entity : map.entities)
             {
-                Gizmos.DrawIcon(entity.origin, Gizmos.icnLight);
+                if (const PointEntity* point = dynamic_cast<const PointEntity*>(entity))
+                    Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
             }
         }
     }
