@@ -92,7 +92,9 @@ namespace chisel
                         :  face.side->plane.normal;
 
                     const size_t startIndex = mesh.vertices.size();
-                    const SideData& data = m_sides[face.side->userdata];
+
+                    static const SideData defaultSide; 
+                    const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
                     for (const auto& vert : fragment.vertices)
                     {
                         const float mappingWidth = 64.0f;
