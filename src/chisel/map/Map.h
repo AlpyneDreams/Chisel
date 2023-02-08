@@ -42,7 +42,7 @@ namespace chisel
             return brushes.emplace_back(tree.CreateBrush(), volume);
         }
 
-        Solid& AddCube(Volume volume = Volumes::Solid, mat4x4 transform = glm::identity<mat4x4>())
+        Solid& AddCube(mat4x4 transform = glm::identity<mat4x4>(), Volume volume = Volumes::Solid)
         {
             brushes.push_back(CubeBrush(tree.CreateBrush(), volume, transform));
             return brushes.back();
