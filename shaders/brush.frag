@@ -20,8 +20,11 @@ void main()
 	// Half lambert
 	NoL = 0.5 + (0.5 * NoL);
 
-	//gl_FragColor.rgb = ambient + (color * NoL);
-	gl_FragColor.rgb = vec3(uv, 0);
+	gl_FragColor.rgb = ambient + (color * NoL);
     //gl_FragColor.rgb = texture2D(s_texColor, uv).rgb * NoL;
+
+	// Debug
+	//gl_FragColor.rgb = vec3(uv, 0);
+
 	gl_FragColor.a = 1;
 }
