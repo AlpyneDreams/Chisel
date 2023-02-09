@@ -12,6 +12,7 @@
 #include "Common.h"
 
 #include <memory>
+#include <unordered_map>
 
 namespace chisel
 {
@@ -82,21 +83,23 @@ namespace chisel
         {
             meshes.clear();
 
-/*
-            std::unordered_set<Texture*> uniqueTextures;
-            for (auto& face : brush->GetFaces()) {
+            // Create one mesh for each unique material
+            size_t textureCount = 0;
+            std::unordered_map<Texture*, size_t> uniqueTextures;
+            for (auto& face : brush->GetFaces())
+            {
                 const SideData& data = m_sides[face.side->userdata];
-                uniqueTextures.insert(data.texture);
+                if (!uniqueTextures.contains(data.texture))
+                    uniqueTextures.emplace(data.texture, textureCount++);
             }
-            size_t textureCount = uniqueTextures.size();
-*/
+
+            meshes.resize(textureCount);
 
             for (auto& face : brush->GetFaces())
             {
                 const SideData& data = m_sides[face.side->userdata];
 
-                meshes.emplace_back();
-                BrushMesh& brushmesh = meshes.back();
+                BrushMesh& brushmesh = meshes[uniqueTextures[data.texture]];
                 brushmesh.texture = data.texture;
                 auto& mesh = brushmesh.mesh;
 
@@ -147,8 +150,11 @@ namespace chisel
                             mesh.vertices[startIndex + tri[2]].position.x, mesh.vertices[startIndex + tri[2]].position.y, mesh.vertices[startIndex + tri[2]].position.z);*/
                     }
                 }
-                mesh.Update();
             }
+
+            // Upload all meshes after they're complete
+            for (auto& submesh : meshes)
+                submesh.mesh.Update();
         }
 
         std::vector<SideData> m_sides;
