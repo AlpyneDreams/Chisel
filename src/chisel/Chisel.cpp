@@ -63,8 +63,16 @@ namespace chisel
             {
                 sides.emplace_back(CSG::Side{ { .userdata = i++ }, CSG::Plane{ side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2] } });
 
+                // WIP, good enough for now.
+                std::string material_path = "materials/";
+                material_path += side.material;
+                material_path += ".vtf";
+
+                Console.Log("Loading material: {}", material_path);
+
                 SideData data =
                 {
+                    .texture       = Assets.Load<Texture, ".VTF">(material_path),
                     .textureAxes   = {{ side.axis[0],  side.axis[1] }},
                     .scale         = {{ side.scale[0], side.scale[1] }},
                     .rotate        = side.rotation,

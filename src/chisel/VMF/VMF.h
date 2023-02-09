@@ -19,7 +19,7 @@ namespace chisel::VMF
         int groupid;
         bool visgroupshown;
         bool visgroupautoshown;
-        const char* comments = nullptr;
+        std::string comments;
         // logicalpos
 
         Editor() = default;
@@ -53,7 +53,7 @@ namespace chisel::VMF
     struct Side : MapAtom
     {
         Plane plane;
-        const char* material;
+        std::string material;
         vec4 axis[2];
         float scale[2];
         float rotation;
@@ -74,8 +74,8 @@ namespace chisel::VMF
     struct MapEntity : MapClass
     {
         std::vector<Solid> solids;
-        const char* classname;
-        const char* targetname;
+        std::string classname;
+        std::string targetname;
         vec3 origin;
 
         std::unordered_map<std::string, std::string> kv;
@@ -93,7 +93,7 @@ namespace chisel::VMF
 
     struct Visgroup : KeyValues
     {
-        const char* name;
+        std::string name;
         int id;
         Color32 color;
         std::vector<Visgroup> children;

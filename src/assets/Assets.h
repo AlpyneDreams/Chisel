@@ -30,6 +30,7 @@ namespace chisel
         {
             // TODO: Load search paths from app info file
             AddSearchPath("core");
+            AddPakFile("/home/joshua/.local/share/Steam/steamapps/common/Half-Life 2/hl2/hl2_textures");
             AddPakFile("/home/joshua/.local/share/Steam/steamapps/common/Half-Life 2/hl1/hl1_pak");
         }
 
@@ -52,7 +53,7 @@ namespace chisel
             // Attempt to load asset for first time
             T* ptr = ImportAsset<T, Ext>(path, std::move(*data));
             if (!ptr) {
-                Console.Error("[Assets] Failed to import %s asset: %s", Ext.value, path);
+                Console.Error("[Assets] Failed to import {} asset: {}", Ext.value, path);
                 return nullptr;
             }
 
@@ -89,9 +90,13 @@ namespace chisel
 
         std::optional<std::vector<uint8_t>> ReadPakFile(const std::string& path)
         {
+            std::string lower_string = path;
+            std::transform(lower_string.begin(), lower_string.end(), lower_string.begin(),
+                [](char c){ return std::tolower(c); });
+
             for (const auto& pak : pakFiles)
             {
-                auto file = pak->file(path);
+                auto file = pak->file(lower_string);
                 if (!file)
                     continue;
 

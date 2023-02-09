@@ -66,12 +66,14 @@ namespace chisel
         const auto& header = vtfData.getHeader();
         std::span<const uint8_t> imageData = vtfData.imageData(0, 0, 0);
 
+        Console.Log("Loading {}: {} {}", path, (void*)imageData.data(), imageData.size());
+
         std::unique_ptr<uint8_t[]> owned_data{ new uint8_t[imageData.size()] };
         std::memcpy(owned_data.get(), imageData.data(), imageData.size());
 
         Texture* texture = new Texture(uint16_t(header.width), uint16_t(header.height), uint16_t(header.depth), RemapVTFImageFormat(header.format), std::move(owned_data), imageData.size());
         texture->path = path;
 
-        return nullptr;
+        return texture;
     }
 }

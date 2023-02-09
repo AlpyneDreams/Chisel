@@ -499,7 +499,7 @@ namespace chisel::render
                 false,
                 uint16_t(texture->depth),
                 ConvertTextureFormat(texture->format),
-                BGFX_TEXTURE_NONE,
+                BGFX_TEXTURE_SRGB,
                 release
                   ? bgfx::makeRef(texture->data.data(), texture->data.size(), releaseFn, texture)
                   : bgfx::makeRef(texture->data.data(), texture->data.size())
@@ -702,6 +702,11 @@ namespace chisel::render
 
         void SetTexture(uint slot, Texture* texture)
         {
+            if (!texture) {
+                bgfx::setTexture(slot, BGFX_INVALID_HANDLE, BGFX_INVALID_HANDLE);
+                return;
+            }
+
             if (!texture->uploaded) [[unlikely]] {
                 UploadTexture(texture);
             }

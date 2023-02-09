@@ -31,25 +31,29 @@ namespace chisel
         {
             for (Solid& brush : map)
             {
-                r.SetUniform("u_color", brush.GetTempColor());
-
-                if (brush.IsSelected())
+                for (auto& mesh : brush.GetMeshes())
                 {
-                    // Draw a wire box around the brush
-                    r.SetTransform(glm::identity<mat4x4>());
-                    Tools.DrawSelectionOutline(&Primitives.Cube);
+                    r.SetUniform("u_color", Color(1, 1, 1));//brush.GetTempColor());
 
-                    // Draw wireframe of the brush's mesh
-                    r.SetTransform(glm::identity<mat4x4>());
-                    Tools.DrawSelectionOutline(brush.GetMesh());
+                    if (brush.IsSelected())
+                    {
+                        // Draw a wire box around the brush
+                        r.SetTransform(glm::identity<mat4x4>());
+                        Tools.DrawSelectionOutline(&Primitives.Cube);
 
-                    // Draw the actual mesh faces in red
-                    r.SetUniform("u_color", Color(1, 0, 0));
+                        // Draw wireframe of the brush's mesh
+                        r.SetTransform(glm::identity<mat4x4>());
+                        Tools.DrawSelectionOutline(&mesh.mesh);
+
+                        // Draw the actual mesh faces in red
+                        r.SetUniform("u_color", Color(1, 0, 0));
+                    }
+
+                    if (mesh.texture)
+                        r.SetTexture(0, mesh.texture);
+
+                    r.DrawMesh(&mesh.mesh);
                 }
-
-                r.SetTexture(0, brush.GetTexture());
-
-                r.DrawMesh(brush.GetMesh());
             }
         }
 
@@ -68,8 +72,11 @@ namespace chisel
         // TODO: Cull!
         for (Solid& brush : map)
         {
-            Tools.PreDrawSelection(r, brush.GetSelectionID());
-            r.DrawMesh(brush.GetMesh());
+            for (auto& mesh : brush.GetMeshes())
+            {
+                Tools.PreDrawSelection(r, brush.GetSelectionID());
+                r.DrawMesh(&mesh.mesh);
+            }
         }
     }
 

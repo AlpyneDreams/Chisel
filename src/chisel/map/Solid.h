@@ -17,11 +17,18 @@ namespace chisel
 {
     struct SideData
     {
+        Texture *texture{};
         std::array<vec4, 2> textureAxes{};
         std::array<float, 2> scale{ 1.0f, 1.0f };
         float rotate = 0;
         float lightmapScale = 16;
         uint32_t smoothing = 0;
+    };
+
+    struct BrushMesh
+    {
+        MeshBuffer<VertexCSG> mesh = MeshBuffer<VertexCSG>();
+        Texture *texture = nullptr;
     };
 
     struct Solid : Atom
@@ -30,10 +37,10 @@ namespace chisel
         CSG::Brush*             brush;
         Volume                  volume;
 
-        MeshBuffer<VertexCSG>   mesh = MeshBuffer<VertexCSG>();     
+        std::vector<BrushMesh>  meshes;
         Color                   tempcolor;
 
-        static inline Texture* gridTexture = nullptr;
+        Texture* gridTexture = nullptr;
 
     public:
         Solid(CSG::Brush& brush, Volume volume)
@@ -44,9 +51,6 @@ namespace chisel
 
             srand(brush.GetObjectID());
             tempcolor = Color::HSV((float)(rand() % 360), 0.7f, 1.0f);
-
-            if (!gridTexture)
-                gridTexture = Assets.Load<Texture, ".PNG">("materials/dev_grey.png");
         }
 
         Solid(Solid&& that)
@@ -76,11 +80,26 @@ namespace chisel
 
         void UpdateMesh()
         {
-            mesh.vertices.clear();
-            mesh.indices.clear();
+            meshes.clear();
+
+/*
+            std::unordered_set<Texture*> uniqueTextures;
+            for (auto& face : brush->GetFaces()) {
+                const SideData& data = m_sides[face.side->userdata];
+                uniqueTextures.insert(data.texture);
+            }
+            size_t textureCount = uniqueTextures.size();
+*/
 
             for (auto& face : brush->GetFaces())
             {
+                const SideData& data = m_sides[face.side->userdata];
+
+                meshes.emplace_back();
+                BrushMesh& brushmesh = meshes.back();
+                brushmesh.texture = data.texture;
+                auto& mesh = brushmesh.mesh;
+
                 for (auto& fragment : face.fragments)
                 {
                     if (fragment.back.volume == fragment.front.volume)
@@ -93,8 +112,6 @@ namespace chisel
 
                     const size_t startIndex = mesh.vertices.size();
 
-                    static const SideData defaultSide; 
-                    const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
                     for (const auto& vert : fragment.vertices)
                     {
                         const float mappingWidth = 64.0f;
@@ -130,13 +147,8 @@ namespace chisel
                             mesh.vertices[startIndex + tri[2]].position.x, mesh.vertices[startIndex + tri[2]].position.y, mesh.vertices[startIndex + tri[2]].position.z);*/
                     }
                 }
+                mesh.Update();
             }
-            mesh.Update();
-        }
-
-        Texture *GetTexture()
-        {
-            return gridTexture;
         }
 
         std::vector<SideData> m_sides;
@@ -144,7 +156,7 @@ namespace chisel
         CSG::ObjectID GetObjectID() const { return brush->GetObjectID(); }
         CSG::Brush& GetBrush() { return *brush; }
 
-        Mesh* GetMesh() { return &mesh; }
+        std::vector<BrushMesh>& GetMeshes() { return meshes; }
 
         // TODO: Remove me, debugging.
         glm::vec4 GetTempColor() const { return tempcolor; }
