@@ -74,8 +74,8 @@ namespace chisel::render
         // Simple RT with optional depth
         virtual RenderTarget* CreateRenderTarget(
             uint width, uint height,
-            TextureFormat format = TextureFormat::RGBA32F,
-            TextureFormat depth = TextureFormat::D32F) = 0;
+            TextureFormat format = TextureFormats::RGBA32F,
+            TextureFormat depth = TextureFormats::D32F) = 0;
         
         // TODO: Maybe replace these
         virtual Shader* CreateShader(const char* vsFile, const char* fsFile = nullptr) = 0;

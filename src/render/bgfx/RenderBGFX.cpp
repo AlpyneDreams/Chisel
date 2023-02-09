@@ -41,16 +41,16 @@ namespace chisel::render
 
     static bgfx::TextureFormat::Enum ConvertTextureFormat(TextureFormat format)
     {
-        static std::unordered_map<TextureFormat, bgfx::TextureFormat::Enum> bgfxTextureFormats {
+        static constexpr std::array<std::pair<TextureFormat, bgfx::TextureFormat::Enum>, TextureFormats::Count> bgfxTextureFormats {{
             {TextureFormat::R8,         bgfx::TextureFormat::R8},
             {TextureFormat::RG8,        bgfx::TextureFormat::RG8},
             {TextureFormat::RGBA8,      bgfx::TextureFormat::RGBA8},
             {TextureFormat::R32F,       bgfx::TextureFormat::R32F},
             {TextureFormat::RGBA32F,    bgfx::TextureFormat::RGBA32F},
             {TextureFormat::D32F,       bgfx::TextureFormat::D32F},
-        };
+        }};
 
-        return bgfxTextureFormats.contains(format) ? bgfxTextureFormats[format] : bgfx::TextureFormat::Unknown;
+        return bgfxTextureFormats[format].second;
     }
 
     ConVar r_vsync("r_vsync", false, "Enable/disable vsync");
@@ -88,7 +88,7 @@ namespace chisel::render
         RenderTargetBGFX(uint width, uint height, TextureFormat color, TextureFormat depth) : width(width), height(height)
         {
             format = ConvertTextureFormat(color);
-            if (depth == TextureFormat::None)
+            if (depth == TextureFormats::None)
                 hasDepth = false;
             depthFormat = ConvertTextureFormat(depth);
             Create();

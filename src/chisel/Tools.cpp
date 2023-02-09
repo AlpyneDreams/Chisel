@@ -34,7 +34,7 @@ namespace chisel
         rt_SceneView = r.CreateRenderTarget(width, height);
         rt_SceneView->SetMSAA(r_msaa);
         
-        rt_ObjectID = r.CreateRenderTarget(width, height, render::TextureFormat::R32F, render::TextureFormat::D32F);
+        rt_ObjectID = r.CreateRenderTarget(width, height, render::TextureFormats::R32F, render::TextureFormats::D32F);
         rt_ObjectID->SetReadBack(true);
 
         // Setup editor camera
