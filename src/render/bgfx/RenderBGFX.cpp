@@ -98,25 +98,25 @@ namespace chisel::render
         void Create()
         {
             uint64 flags = BGFX_TEXTURE_RT;
-            
+
             if (msaa > MSAA::None && IsValid(msaa)) {
                 // Remap: x2 -> 2, x4 -> 3, x8 -> 4, x16 -> 5
                 uint64 log2 = std::bit_width(uint64(msaa)) - 1;
-                flags |= ((log2+1) << BGFX_TEXTURE_RT_MSAA_SHIFT) & BGFX_TEXTURE_RT_MSAA_MASK;                
+                flags |= ((log2+1) << BGFX_TEXTURE_RT_MSAA_SHIFT) & BGFX_TEXTURE_RT_MSAA_MASK;
             }
 
             color = bgfx::createTexture2D(width, height, false, 1, format, flags);
-            
+
             // If MSAA is enabled, then depth buffer must be write-only
             if (msaa > MSAA::None)
                 flags |= BGFX_TEXTURE_RT_WRITE_ONLY;
-            
+
             if (hasDepth)
                 depth = bgfx::createTexture2D(width, height, false, 1, depthFormat, flags);
-            
+
             bgfx::TextureHandle handles[] = {color, depth};
             fb = bgfx::createFrameBuffer(hasDepth ? 2 : 1, handles, true);
-            
+
             if (!bgfx::isValid(fb))
                 throw std::runtime_error("[BGFX] Failed to create framebuffer!");
 
@@ -391,7 +391,7 @@ namespace chisel::render
             {
                 if (!group.vertices)
                     continue;
-                
+
                 bgfx::VertexLayout layout;
                 layout.begin();
 
@@ -449,7 +449,7 @@ namespace chisel::render
         {
             if (!mesh.uploaded)
                 return;
-            
+
             for (auto& group : mesh.groups)
             {
                 if (group.vertices.handle) {
@@ -462,7 +462,7 @@ namespace chisel::render
                     group.indices.handle = nullptr;
                 }
             }
-            
+
             mesh.uploaded = false;
         }
 
@@ -709,32 +709,32 @@ namespace chisel::render
         }
 
     // State Recording //
-    
+
     protected:
         // TODO: Store partial state to make this faster.
         std::stack<RenderState> stateStack;
-    
+
     public:
         void PushState()
         {
-            stateStack.push(state);   
+            stateStack.push(state);
         }
-        
+
         void PopState()
         {
             if (stateStack.empty())
                 return;
             state = stateStack.top();
             stateStack.pop();
-            
+
         // Per-view state
             SetView(state.view);
             // TODO: SetRenderTarget
             bgfx::setViewTransform(state.view, &state.mView[0][0], &state.mProj[0][0]);
             UpdateClearState(state);
-        
+
         // Per-instance state
-            // Most things are set in DrawMesh    
+            // Most things are set in DrawMesh
             bgfx::setTransform(&state.mTransform[0][0]);
             // TODO: SetTexture
             // TODO: SetUniform
