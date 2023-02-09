@@ -31,16 +31,16 @@ namespace chisel
           : GraphicsBuffer()
           , width(width)
           , height(height)
-          , format(format)
           , depth(depth)
+          , format(format)
           , data(data)
         {}
         Texture(uint16_t width, uint16_t height, uint16_t depth, Format format, std::unique_ptr<uint8_t[]> owned_data, size_t size)
           : GraphicsBuffer()
           , width(width)
           , height(height)
-          , format(format)
           , depth(depth)
+          , format(format)
           , owned_data(std::move(owned_data))
           , data(this->owned_data.get(), size)
         {}

@@ -41,16 +41,28 @@ namespace chisel::render
 
     static bgfx::TextureFormat::Enum ConvertTextureFormat(TextureFormat format)
     {
-        static constexpr std::array<std::pair<TextureFormat, bgfx::TextureFormat::Enum>, TextureFormats::Count> bgfxTextureFormats {{
-            {TextureFormat::R8,         bgfx::TextureFormat::R8},
-            {TextureFormat::RG8,        bgfx::TextureFormat::RG8},
-            {TextureFormat::RGBA8,      bgfx::TextureFormat::RGBA8},
-            {TextureFormat::R32F,       bgfx::TextureFormat::R32F},
-            {TextureFormat::RGBA32F,    bgfx::TextureFormat::RGBA32F},
-            {TextureFormat::D32F,       bgfx::TextureFormat::D32F},
+        static constexpr std::array<bgfx::TextureFormat::Enum, TextureFormats::Count> bgfxTextureFormats {{
+            bgfx::TextureFormat::Unknown,
+            bgfx::TextureFormat::R8,
+            bgfx::TextureFormat::RG8,
+            bgfx::TextureFormat::RGBA8,
+            bgfx::TextureFormat::BGRA8,
+            bgfx::TextureFormat::B5G6R5,
+            bgfx::TextureFormat::R5G6B5,
+            bgfx::TextureFormat::BC1,
+            bgfx::TextureFormat::BC2,
+            bgfx::TextureFormat::BC3,
+            bgfx::TextureFormat::BC4,
+            bgfx::TextureFormat::BC5,
+            bgfx::TextureFormat::BC6H,
+            bgfx::TextureFormat::BC7,
+            bgfx::TextureFormat::R32F,
+            bgfx::TextureFormat::RG32F,
+            bgfx::TextureFormat::RGBA32F,
+            bgfx::TextureFormat::D32F,
         }};
 
-        return bgfxTextureFormats[format].second;
+        return bgfxTextureFormats[format];
     }
 
     ConVar r_vsync("r_vsync", false, "Enable/disable vsync");
