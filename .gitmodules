@@ -13,3 +13,6 @@
 [submodule "submodules/libvpk-plusplus"]
 	path = submodules/libvpk-plusplus
 	url = https://github.com/Joshua-Ashton/libvpk-plusplus
+[submodule "submodules/libvtf-plusplus"]
+	path = submodules/libvtf-plusplus
+	url = https://github.com/Joshua-Ashton/libvtf-plusplus
