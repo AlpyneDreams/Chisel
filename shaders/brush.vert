@@ -12,5 +12,5 @@ void main()
 	gl_Position = mul(u_modelViewProj, vec4(pos, 1));
 	v_normal = mul(u_model[0], vec4(normal, 0)).xyz;
 	v_view = mul(u_modelView, vec4(pos, 1)).xyz;
-	v_texcoord0.xy = mod(uv, 1.0);
+	v_texcoord0.xy = uv;
 }

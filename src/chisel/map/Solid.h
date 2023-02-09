@@ -106,8 +106,6 @@ namespace chisel
                         u = mappingWidth  ? u / float(mappingWidth)  : 0.0f;
                         v = mappingHeight ? v / float(mappingHeight) : 0.0f;
 
-                        Console.Log("B: pos: {} uaxis: [{}] vaxis: [{}] uv: {} {}", glm::vec3(vert.position), data.textureAxes[0], data.textureAxes[1], u, v);
-
                         mesh.vertices.emplace_back(vert.position, normal, glm::vec2(u, v));
                     }
 

@@ -65,9 +65,6 @@ namespace chisel::VMF
         };
         parseAxis(side["uaxis"], axis[0], scale[0]);
         parseAxis(side["vaxis"], axis[1], scale[1]);
-
-        //Console.Log("A: uaxis: {} {} {} {} scale_x: {}", axis[0].x, axis[0].y, axis[0].z, axis[0].w, scale[0]);
-        //Console.Log("A: vaxis: {} {} {} {} scale_y: {}", axis[1].x, axis[1].y, axis[1].z, axis[1].w, scale[1]);
     }
 
 
