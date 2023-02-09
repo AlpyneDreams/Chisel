@@ -8,7 +8,7 @@
 
 namespace chisel
 {
-    struct VertexBuffer final : GraphicsBuffer
+    struct VertexBuffer final : ElementBuffer
     {
         VertexLayout layout;
         union {
@@ -19,7 +19,7 @@ namespace chisel
         VertexBuffer() {}
 
         VertexBuffer(VertexLayout layout, const void* vertices, size_t size)
-          : GraphicsBuffer(size / layout.Stride()),
+          : ElementBuffer(size / layout.Stride()),
             layout(layout),
             pointer(vertices)
         {}

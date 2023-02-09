@@ -8,7 +8,7 @@
 
 namespace chisel
 {
-    struct IndexBuffer final : GraphicsBuffer
+    struct IndexBuffer final : ElementBuffer
     {
         enum { UInt16, UInt32 } type = UInt32;
         const void* indices;
@@ -16,13 +16,13 @@ namespace chisel
         IndexBuffer() {}
 
         IndexBuffer(const uint32* indices, size_t size)
-          : GraphicsBuffer(size / sizeof(uint32)),
+          : ElementBuffer(size / sizeof(uint32)),
             type(UInt32),
             indices(indices)
         {}
 
         IndexBuffer(const uint16* indices, size_t size)
-          : GraphicsBuffer(size / sizeof(uint16)),
+          : ElementBuffer(size / sizeof(uint16)),
             type(UInt16),
             indices(indices)
         {}

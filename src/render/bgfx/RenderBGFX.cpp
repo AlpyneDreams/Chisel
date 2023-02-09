@@ -44,7 +44,6 @@ namespace chisel::render
         static std::unordered_map<TextureFormat, bgfx::TextureFormat::Enum> bgfxTextureFormats {
             {TextureFormat::R8,         bgfx::TextureFormat::R8},
             {TextureFormat::RG8,        bgfx::TextureFormat::RG8},
-            {TextureFormat::RGB8,       bgfx::TextureFormat::RGB8},
             {TextureFormat::RGBA8,      bgfx::TextureFormat::RGBA8},
             {TextureFormat::R32F,       bgfx::TextureFormat::R32F},
             {TextureFormat::RGBA32F,    bgfx::TextureFormat::RGBA32F},
@@ -389,7 +388,7 @@ namespace chisel::render
         {
             for (auto& group : mesh->groups)
             {
-                if (!group.vertices)
+                if (!group.vertices.Size())
                     continue;
 
                 bgfx::VertexLayout layout;
@@ -429,7 +428,7 @@ namespace chisel::render
                 vh->vb = vb;
                 group.vertices.handle = vh;
 
-                if (group.indices)
+                if (group.indices.Size())
                 {
                     auto ib = bgfx::createIndexBuffer(
                         bgfx::makeRef(group.indices.indices, group.indices.Size()),
@@ -457,8 +456,8 @@ namespace chisel::render
                     group.vertices.handle = nullptr;
                 }
 
-                if (group.indices && group.indices.handle) {
-                    bgfx::destroy(static_cast<HandleBGFX*>(group.vertices.handle)->ib);
+                if (group.indices.handle) {
+                    bgfx::destroy(static_cast<HandleBGFX*>(group.indices.handle)->ib);
                     group.indices.handle = nullptr;
                 }
             }
@@ -466,15 +465,17 @@ namespace chisel::render
             mesh.uploaded = false;
         }
 
-        void UploadTexture(Texture* texture, bool release)
+        void UploadTexture(Texture* texture)
         {
             if (texture->uploaded)
                 return;
 
-            if (!texture->hasData) {
+            if (!texture->Valid()) {
                 Console.Error("Tried to upload texture '{}' but it has no data!", texture->path);
                 return;
             }
+
+            const bool release = !!texture->owned_data;
 
             auto releaseFn = [](void* data, void* userData) {
                 ((Texture*)userData)->Free();
@@ -484,12 +485,12 @@ namespace chisel::render
                 uint16(texture->width),
                 uint16(texture->height),
                 false,
-                1,
+                uint16_t(texture->depth),
                 ConvertTextureFormat(texture->format),
                 BGFX_TEXTURE_NONE,
                 release
-                  ? bgfx::makeRef(texture->data, texture->Size(), releaseFn, texture)
-                  : bgfx::makeRef(texture->data, texture->Size())
+                  ? bgfx::makeRef(texture->data.data(), texture->data.size(), releaseFn, texture)
+                  : bgfx::makeRef(texture->data.data(), texture->data.size())
             );
 
             HandleBGFX* handle = new HandleBGFX();
@@ -690,7 +691,7 @@ namespace chisel::render
         void SetTexture(uint slot, Texture* texture)
         {
             if (!texture->uploaded) [[unlikely]] {
-                UploadTexture(texture, true);
+                UploadTexture(texture);
             }
 
             HandleBGFX* handle = static_cast<HandleBGFX*>(texture->handle);

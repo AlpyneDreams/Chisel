@@ -67,7 +67,7 @@ namespace chisel::render
         virtual void UploadMesh(Mesh* mesh) = 0;
         virtual void DeleteMesh(Mesh& mesh) = 0;
 
-        virtual void UploadTexture(Texture* texture, bool release = true) = 0;
+        virtual void UploadTexture(Texture* texture) = 0;
 
     // Resource Creation and Loading //
 

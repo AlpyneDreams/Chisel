@@ -14,15 +14,16 @@ namespace chisel
 {
     static Texture* LoadTexture(std::string_view path, std::vector<uint8_t> data)
     {
-        int x, y, n;
+        int width, height, channels;
 
         // 8 bits per channel
-        byte* texture_data = stbi_load_from_memory(data.data(), int(data.size()), &x, &y, &n, 0);
+        std::unique_ptr<uint8_t[]> owned_data;
+        owned_data.reset(stbi_load_from_memory(data.data(), int(data.size()), &width, &height, &channels, STBI_rgb_alpha));
 
-        if (!texture_data)
+        if (!owned_data)
             return nullptr;
 
-        Texture* texture = new Texture(uint(x), uint(y), texture_data, uint(n), 8);
+        Texture* texture = new Texture(uint16_t(width), uint16_t(height), 1u, Texture::Format::RGBA8, std::move(owned_data), width * height * 4);
         texture->path = path;
 
         // This frees data when the upload completes.
