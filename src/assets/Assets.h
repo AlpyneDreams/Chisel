@@ -21,6 +21,9 @@ namespace chisel
 
     inline struct Assets
     {
+        // TODO: Path class, iterable, normalization, etc.
+        using Path = std::string_view;
+
         std::vector<std::string> searchPaths;
         std::vector<std::unique_ptr<libvpk::VPKSet>> pakFiles;
         // TODO: Hashing...
@@ -36,6 +39,11 @@ namespace chisel
 
     // Asset Loading //
 
+        bool IsLoaded(const std::string& path)
+        {
+            return loadedAssets.contains(path);
+        }
+
         template <class T, FixedString Ext>
         T* Load(std::string_view path)
         {
@@ -43,7 +51,7 @@ namespace chisel
             auto pathStr = std::string(path);
 
             // Cache hit
-            if (loadedAssets.contains(pathStr))
+            if (IsLoaded(pathStr))
                 return (T*)loadedAssets[pathStr];
 
             auto data = ReadFile(pathStr);

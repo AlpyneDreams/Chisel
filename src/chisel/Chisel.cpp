@@ -68,7 +68,8 @@ namespace chisel
                 material_path += side.material;
                 material_path += ".vtf";
 
-                Console.Log("Loading material: {}", material_path);
+                if (!Assets.IsLoaded(material_path))
+                    Console.Log("Loading material: {}", material_path);
 
                 SideData data =
                 {
