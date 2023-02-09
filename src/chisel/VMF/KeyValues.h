@@ -44,7 +44,7 @@ namespace chisel
 
         operator std::string() const { return type == Object ? ObjectStr : value; }
         operator std::string_view() const { return type == Object ? ObjectStr : value; }
-        operator const char*() const { return type == Object ? ObjectStr.c_str() : value.c_str(); }
+        //operator const char*() const { return type == Object ? ObjectStr.c_str() : value.c_str(); } // use std::string
 
         template <typename T>
         operator std::vector<T>();

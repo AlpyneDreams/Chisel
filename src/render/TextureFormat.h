@@ -5,7 +5,8 @@
 namespace chisel::render
 {
     // TODO: All texture formats...
-    namespace TextureFormats {
+    namespace TextureFormats
+    {
         enum TextureFormat : uint32_t
         {
             None = 0,

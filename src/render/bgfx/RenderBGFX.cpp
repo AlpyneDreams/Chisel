@@ -13,6 +13,7 @@
 #include "gui/impl/imgui_impl_bgfx.h"
 #include "gui/Common.h"
 
+#include <array>
 #include <stdexcept>
 #include <unordered_map>
 #include <map>
