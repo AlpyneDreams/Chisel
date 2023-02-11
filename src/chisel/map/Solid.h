@@ -117,8 +117,8 @@ namespace chisel
 
                     for (const auto& vert : fragment.vertices)
                     {
-                        const float mappingWidth = 64.0f;
-                        const float mappingHeight = 64.0f;
+                        const float mappingWidth = data.texture ? data.texture->width : 32.0f;
+                        const float mappingHeight = data.texture ? data.texture->height : 32.0f;
 
                         float u = glm::dot(glm::vec3(data.textureAxes[0].xyz), glm::vec3(vert.position)) / data.scale[0] + data.textureAxes[0].w;
                         float v = glm::dot(glm::vec3(data.textureAxes[1].xyz), glm::vec3(vert.position)) / data.scale[1] + data.textureAxes[1].w;

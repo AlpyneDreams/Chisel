@@ -500,7 +500,7 @@ namespace chisel::render
                 false,
                 uint16_t(texture->depth),
                 ConvertTextureFormat(texture->format),
-                BGFX_TEXTURE_SRGB,
+                0,
                 release
                   ? bgfx::makeRef(texture->data.data(), texture->data.size(), releaseFn, texture)
                   : bgfx::makeRef(texture->data.data(), texture->data.size())

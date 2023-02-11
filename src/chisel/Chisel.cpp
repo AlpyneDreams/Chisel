@@ -56,10 +56,10 @@ namespace chisel
         VMF::VMF vmf(*kv);
         std::vector<CSG::Side> sides;
         std::vector<SideData> side_data;
-        for (const auto& solid : vmf.world.solids)
+        for (uint64_t i = 0; const auto& solid : vmf.world.solids)
         {
             sides.clear();
-            for (uint64_t i = 0; const auto& side : solid.sides)
+            for (const auto& side : solid.sides)
             {
                 sides.emplace_back(CSG::Side{ { .userdata = i++ }, CSG::Plane{ side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2] } });
 
