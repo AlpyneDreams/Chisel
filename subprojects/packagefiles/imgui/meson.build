@@ -76,7 +76,7 @@ if glfw_dep.found()
 endif
 sdl2_dep = dependency('sdl2', required: get_option('sdl2'))
 if sdl2_dep.found()
-    sources += 'backends/imgui_impl_sdl.cpp'
+    sources += 'backends/imgui_impl_sdl2.cpp'
     dependencies += sdl2_dep
 endif
 if get_option('osx').enabled() or (get_option('osx').auto() and target_machine.system() == 'darwin')
