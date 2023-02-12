@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Common.h"
+#include "Path.h"
+
 #include <fstream>
 #include <iterator>
 #include <stdexcept>
@@ -22,8 +24,6 @@ namespace std::filesystem {
 
 namespace chisel::fs
 {
-    using Path = std::filesystem::path;
-
     using std::filesystem::exists;
 
     template <typename T>
