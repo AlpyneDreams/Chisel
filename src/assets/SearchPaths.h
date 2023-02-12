@@ -4,6 +4,8 @@
 #include "common/Path.h"
 #include "common/String.h"
 
+#include <cstdlib>
+
 namespace chisel
 {
     inline struct SearchPaths
@@ -13,9 +15,9 @@ namespace chisel
 
         Path Resolve(const Path& searchPath)
         {
-            static constexpr auto SteamApps = Platform.Windows
-                                            ? "C:/Program Files (x86)/Steam/steamapps/common"
-                                            : "$HOME/.local/share/Steam/steamapps/common";
+            static std::string SteamApps = Platform.Windows
+                                        ? "C:/Program Files (x86)/Steam/steamapps/common"
+                                        : std::string(std::getenv("HOME")) + "/.local/share/Steam/steamapps/common";
 
             return str::replace(searchPath, "$STEAMAPPS", SteamApps);
         }
