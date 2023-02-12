@@ -10,6 +10,8 @@
 #include <vector>
 #include <array>
 
+namespace chisel { struct Map; }
+
 namespace chisel::VMF
 {
     struct Editor : KeyValues
@@ -126,5 +128,7 @@ namespace chisel::VMF
 
         VMF() = default;
         VMF(KeyValues &vmf);
+
+        void Import(Map& map);
     };
 }

@@ -54,51 +54,7 @@ namespace chisel
             return false;
 
         VMF::VMF vmf(*kv);
-        std::vector<CSG::Side> sides;
-        std::vector<SideData> side_data;
-        for (uint64_t i = 0; const auto& solid : vmf.world.solids)
-        {
-            sides.clear();
-            for (const auto& side : solid.sides)
-            {
-                sides.emplace_back(CSG::Side{ { .userdata = i++ }, CSG::Plane{ side.plane.point_trio[0], side.plane.point_trio[1], side.plane.point_trio[2] } });
-
-                // WIP, good enough for now.
-                std::string material_path = "materials/";
-                material_path += side.material;
-                material_path += ".vtf";
-
-                if (!Assets.IsLoaded(material_path))
-                    Console.Log("Loading material: {}", material_path);
-
-                SideData data =
-                {
-                    .texture       = Assets.Load<Texture, ".VTF">(material_path),
-                    .textureAxes   = {{ side.axis[0],  side.axis[1] }},
-                    .scale         = {{ side.scale[0], side.scale[1] }},
-                    .rotate        = side.rotation,
-                    .lightmapScale = side.lightmapscale,
-                    .smoothing     = side.smoothing_groups,
-                };
-                side_data.emplace_back( data );
-            }
-
-            Solid& brush = map.AddBrush();
-            brush.SetSides(&sides.front(), &sides.back() + 1, &side_data.front(), &side_data.back() + 1);
-        }
-        for (auto& entity : vmf.entities)
-        {
-            if (!entity.solids.empty())
-                continue;
-
-            PointEntity* ent = new PointEntity();
-            ent->classname = entity.classname;
-            ent->targetname = entity.targetname;
-            ent->origin = entity.origin;
-            ent->kv = std::move(entity.kv);
-            ent->connections = std::move(entity.connections);
-            map.entities.push_back(ent);
-        }
+        vmf.Import(map);
 
         return true;
     }
