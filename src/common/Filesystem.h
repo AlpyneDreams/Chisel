@@ -33,7 +33,7 @@ namespace chisel::fs
         std::ios::openmode flags = ios::in;
         if (binary) flags |= ios::binary;
 
-        ifstream file(path, flags);
+        ifstream file(std::filesystem::path(path), flags);
         if (!file || file.bad())
             return std::nullopt;
 
@@ -75,4 +75,5 @@ namespace std::filesystem
     }
 }
 
+template <> struct fmt::formatter<std::filesystem::path> : ostream_formatter {};
 template <> struct fmt::formatter<chisel::fs::Path> : ostream_formatter {};

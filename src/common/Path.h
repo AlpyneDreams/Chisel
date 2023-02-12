@@ -4,94 +4,53 @@
 
 namespace chisel::fs
 {
+    // Wrapper for std::filesystem::path that maintains a UTF-8 string copy.
     class Path
     {
-        using Char = char;
-        using String = std::string;
-        using StringView = std::string_view;
-
-        struct PathNode;
-
-        String text;
-        std::vector<PathNode> parts;
-
-        static constexpr StringView delims = "\\/";
+        std::filesystem::path   m_path;
+        std::string             m_text;
 
     public:
-        Path()                  = default;
-        Path(const Path& p)     = default;
-        //Path(Path&& p)          = default;
-        ~Path()                 = default;
-
-        Path(const auto& source)    { Assign(source); }
-        Path(String&& source)       { Assign(StringView(source)); }
-        Path(auto first, auto last) { Assign(StringView(first, last)); }
+        Path(auto... args) : m_path(args...), m_text(m_path.string()) {}
 
         // Append a subpath with a separator
-        Path& operator /=(const Path& path) { Append(path); return *this; }
+        Path& operator /=(const Path& path)
+        {
+            m_path /= path.m_path;
+            m_text = m_path.string();
+            return *this;
+        }
 
         // Conversion to const char*
-        operator const Char*() const { return text.data(); }
+        operator const char*() const { return m_text.c_str(); }
 
-        // Conversion with std::filesystem::path
-        Path(const std::filesystem::path& path) { Assign(StringView(path.string())); }
-        operator std::filesystem::path() const { return std::filesystem::path(text); }
+        // Conversion to std::filesystem::path
+        operator const std::filesystem::path&() const { return m_path; }
+
+        // Conversion to std::string_view
+        operator std::string_view() const { return m_text; }
 
         friend Path operator /(const Path& lhs, const Path& rhs)
         {
             Path temp = lhs;
             return (temp /= rhs);
         }
+
+        friend std::ostream& operator<<(std::ostream& os, const Path& path) {
+            return os << path.m_text;
+        }
         
+        friend struct std::hash<chisel::fs::Path>;
 
-    protected:
-        void Assign(StringView string)
-        {
-            text = string;
-            using namespace std;
-
-            for (size_t start = 0; start < string.size(); ) {
-                // Find first delimiter
-                const auto end = string.find_first_of(delims, start);
-
-                // Add non-empty tokens
-                if (start != end)
-                    parts.emplace_back(start, string.substr(start, end-start).size());
-
-                // Break at the end of string
-                if (end == string_view::npos)
-                    break;
-
-                start = end + 1;
-            }
-
-            // TODO: Normalize text here...
-        }
-
-        void Append(const Path& path)
-        {
-            size_t offset = text.size();
-
-            for (auto& part : path.parts)
-            {
-                text += '/';
-                text += part(path.text);
-                parts.push_back(part + offset);
-            }
-        }
-
-    private:
-        struct PathNode
-        {
-            size_t start, length;
-            
-            StringView operator()(const String& str) const {
-                return StringView(str.data() + start, length);
-            }
-
-            PathNode operator+(size_t amt) const {
-                return PathNode(start + amt, length);
-            }
-        };
+        bool operator ==(const Path& path) const { return m_path == path.m_path; }
     };
 }
+
+template<>
+struct std::hash<chisel::fs::Path>
+{
+    std::size_t operator()(const chisel::fs::Path& p) const
+    {
+        return std::hash<std::filesystem::path>()(p.m_path);
+    }
+};
