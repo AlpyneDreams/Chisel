@@ -149,7 +149,7 @@ namespace chisel::VMF
                 BrushEntity* brush = new BrushEntity();
                 ent = brush;
 
-                for (auto& solid : entity.solids)
+                for (const auto& solid : entity.solids)
                 {
                     AddSolid(*brush, solid);
                 }

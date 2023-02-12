@@ -42,6 +42,11 @@ namespace chisel
         CSG::CSGTree        tree;
 
     public:
+        BrushEntity()
+        {
+            tree.SetVoidVolume(Volumes::Air);
+        }
+
         ~BrushEntity()
         {
             brushes.clear();
@@ -63,7 +68,7 @@ namespace chisel
             brushes.remove(brush);
         }
 
-        void Rebuild()
+        virtual void Rebuild()
         {
             auto rebuilt = tree.Rebuild();
             for (CSG::Brush* brush : rebuilt)
@@ -108,10 +113,17 @@ namespace chisel
         // TODO: Polymorphic linked list
         std::vector<Entity*> entities;
 
-        Map()
+        void Rebuild() final override
         {
-            tree.SetVoidVolume(Volumes::Air);
+            BrushEntity::Rebuild();
 
+            for (Entity* ent : entities)
+                if (BrushEntity* brush = dynamic_cast<BrushEntity*>(ent))
+                    brush->Rebuild();
+        }
+
+        Map() : BrushEntity()
+        {
             //brushes.push_back(CubeBrush(tree.CreateBrush(), Volumes::Solid));
             //brushes.push_back(CubeBrush(tree.CreateBrush(), Volumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(0.25, 2.0, 0.25))));
             //brushes.push_back(CubeBrush(tree.CreateBrush(), Volumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.25f, 0.25))));

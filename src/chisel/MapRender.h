@@ -28,6 +28,8 @@ namespace chisel
         void Start() final override;
         void Update() final override;
 
+        void DrawBrushEntity(BrushEntity& ent);
+
         void DrawSelectionPass();
 
         void DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool snap, const vec3& snapSize);

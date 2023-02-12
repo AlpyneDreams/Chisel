@@ -8,6 +8,7 @@ namespace chisel
     static ConVar<bool> r_rebuildworld("r_rebuildworld", true, "Rebuild world");
 
     static ConVar<bool> r_drawbrushes("r_drawbrushes", true, "Draw brushes");
+    static ConVar<bool> r_drawworld("r_drawworld", true, "Draw world");
     static ConVar<bool> r_drawsprites("r_drawsprites", true, "Draw sprites");
 
     void MapRender::Start()
@@ -29,31 +30,13 @@ namespace chisel
         // TODO: Cull!
         if (r_drawbrushes)
         {
-            for (Solid& brush : map)
+            if (r_drawworld)
+                DrawBrushEntity(map);
+
+            for (auto* entity : map.entities)
             {
-                for (auto& mesh : brush.GetMeshes())
-                {
-                    r.SetUniform("u_color", Color(1, 1, 1));//brush.GetTempColor());
-
-                    if (brush.IsSelected())
-                    {
-                        // Draw a wire box around the brush
-                        r.SetTransform(glm::identity<mat4x4>());
-                        Tools.DrawSelectionOutline(&Primitives.Cube);
-
-                        // Draw wireframe of the brush's mesh
-                        r.SetTransform(glm::identity<mat4x4>());
-                        Tools.DrawSelectionOutline(&mesh.mesh);
-
-                        // Draw the actual mesh faces in red
-                        r.SetUniform("u_color", Color(1, 0, 0));
-                    }
-
-                    if (mesh.texture)
-                        r.SetTexture(0, mesh.texture);
-
-                    r.DrawMesh(&mesh.mesh);
-                }
+                if (BrushEntity* brush = dynamic_cast<BrushEntity*>(entity))
+                    DrawBrushEntity(*brush);
             }
         }
 
@@ -63,6 +46,37 @@ namespace chisel
             {
                 if (const PointEntity* point = dynamic_cast<const PointEntity*>(entity))
                     Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
+            }
+        }
+    }
+    
+    void MapRender::DrawBrushEntity(BrushEntity& ent)
+    {
+        for (Solid& brush : ent)
+        {
+            for (auto& mesh : brush.GetMeshes())
+            {
+                r.SetUniform("u_color", Color(1, 1, 1));//brush.GetTempColor());
+
+                if (brush.IsSelected())
+                {
+                    // Draw a wire box around the brush
+                    //r.SetTransform(brush.GetBounds()->ComputeMatrix());
+                    //Tools.DrawSelectionOutline(&Primitives.Cube);
+
+                    // Draw wireframe of the brush's mesh
+                    r.SetTransform(glm::identity<mat4x4>());
+                    for (auto& mesh : brush.GetMeshes())
+                        Tools.DrawSelectionOutline(&mesh.mesh);
+
+                    // Draw the actual mesh faces in red
+                    r.SetUniform("u_color", Color(1, 0, 0));
+                }
+
+                if (mesh.texture)
+                    r.SetTexture(0, mesh.texture);
+
+                r.DrawMesh(&mesh.mesh);
             }
         }
     }
