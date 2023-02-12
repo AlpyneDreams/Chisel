@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assets/SearchPaths.h"
 #include "console/Console.h"
 #include "common/Common.h"
 #include "common/String.h"
@@ -33,8 +34,8 @@ namespace chisel
         {
             // TODO: Load search paths from app info file
             AddSearchPath("core");
-            AddPakFile("/home/joshua/.local/share/Steam/steamapps/common/Half-Life 2/hl2/hl2_textures");
-            AddPakFile("/home/joshua/.local/share/Steam/steamapps/common/Half-Life 2/hl1/hl1_pak");
+            AddPakFile("$STEAMAPPS/Half-Life 2/hl2/hl2_textures");
+            AddPakFile("$STEAMAPPS/Half-Life 2/hl1/hl1_pak");
         }
 
     // Asset Loading //
@@ -127,16 +128,18 @@ namespace chisel
 
     // Search Paths //
 
-        void AddSearchPath(const Path& path)
+        void AddSearchPath(const Path& p)
         {
+            Path path = SearchPaths.Resolve(p);
             if (!fs::exists(path)) {
                 return Console.Error("[Assets] Failed to find search path '{}'", path);
             }
             searchPaths.push_back(path);
         }
 
-        void AddPakFile(const Path& path)
+        void AddPakFile(const Path& p)
         {
+            Path path = SearchPaths.Resolve(p);
             try
             {
                 auto pak = std::make_unique<libvpk::VPKSet>(path);

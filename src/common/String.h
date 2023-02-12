@@ -111,4 +111,16 @@ namespace chisel::str
         return buffer;
     }
 
+    inline std::string replace(std::string_view input, std::string_view pattern, std::string_view replacement)
+    {
+        std::string str = std::string(input);
+        size_t index = 0;
+        while (index = str.find(pattern, index), index != std::string_view::npos)
+        {
+            str = str.replace(index, pattern.size(), replacement);
+            index += replacement.size();
+        }
+        return str;
+    }
+
 }
