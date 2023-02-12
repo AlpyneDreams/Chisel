@@ -253,6 +253,21 @@ namespace chisel::render
 
     class RenderBGFX final : public Render
     {
+        struct UniformInfo
+        {
+            UniformInfo() {}
+            UniformInfo(bgfx::UniformHandle h) : handle(h) {}
+
+            bgfx::UniformHandle handle = BGFX_INVALID_HANDLE;
+            void* value = nullptr;
+        };
+
+        struct TextureInfo
+        {
+            bgfx::TextureHandle texture = BGFX_INVALID_HANDLE;
+            bgfx::UniformHandle sampler = BGFX_INVALID_HANDLE;
+        };
+
         struct RenderState {
             uint width, height;
             bgfx::ViewId view = 0;
@@ -282,7 +297,8 @@ namespace chisel::render
 
             bgfx::ProgramHandle currentProgram;
 
-            std::map<std::string_view, bgfx::UniformHandle> uniforms;
+            std::map<std::string_view, UniformInfo> uniforms;
+            std::map<uint, TextureInfo> textures;
         } state;
 
     protected:
@@ -384,8 +400,8 @@ namespace chisel::render
 
         void Shutdown()
         {
-            for (auto& [name, handle] : state.uniforms) {
-                bgfx::destroy(handle);
+            for (auto& [name, uniform] : state.uniforms) {
+                bgfx::destroy(uniform.handle);
             }
 
             ImGui_Implbgfx_Shutdown();
@@ -508,9 +524,12 @@ namespace chisel::render
 
             HandleBGFX* handle = new HandleBGFX();
             handle->texture = tex;
-            handle->sampler = bgfx::createUniform(texture->path, bgfx::UniformType::Sampler);
-            texture->handle = handle;
 
+            // TODO: Should we really create one sampler for each texture?
+            std::string samplerName = std::string("texture_") + std::to_string(std::hash<fs::Path>()(texture->path));
+            handle->sampler = bgfx::createUniform(samplerName.c_str(), bgfx::UniformType::Sampler);
+            
+            texture->handle = handle;
             texture->uploaded = true;
         }
 
@@ -713,18 +732,15 @@ namespace chisel::render
             }
 
             HandleBGFX* handle = static_cast<HandleBGFX*>(texture->handle);
-            bgfx::setTexture(slot, handle->sampler, handle->texture);
+            state.textures[slot] = { handle->texture, handle->sampler };
         }
 
         void SetUniform(std::string_view name, void* value, uint stride, uint count)
         {
-            bgfx::UniformHandle uniform;
             if (!state.uniforms.contains(name)) {
                 state.uniforms[name] = bgfx::createUniform(name.data(), stride <= 4 ? bgfx::UniformType::Vec4 : bgfx::UniformType::Mat4, count);
-            } else {
-                uniform = state.uniforms[name];
             }
-            bgfx::setUniform(state.uniforms[name], value, count);
+            state.uniforms[name].value = value;
         }
 
     // State Recording //
@@ -773,6 +789,7 @@ namespace chisel::render
 
             bgfx::setState(state.state);
 
+            // FIXME: Ensure all state is preserved across submesh drawcalls
             for (auto& group : mesh->groups)
             {
                 if (group.vertices.handle == nullptr)
@@ -786,6 +803,21 @@ namespace chisel::render
                     bgfx::setIndexBuffer(ib);
                 }
 
+                for (auto& [name, uniform] : state.uniforms)
+                {
+                    if (uniform.value != nullptr)
+                    {
+                        bgfx::setUniform(uniform.handle, uniform.value);
+                        uniform.value = nullptr;
+                    }
+                }
+
+                for (auto& [slot, texture] : state.textures)
+                {
+                    bgfx::setTexture(slot, texture.sampler, texture.texture);
+                }
+                state.textures.clear();
+                    
                 bgfx::submit(state.view, state.currentProgram);
             }
         }
