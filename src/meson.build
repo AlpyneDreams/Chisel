@@ -46,6 +46,10 @@ chisel_deps = [
     glaze_dep,
 ]
 
+if not windows
+    chisel_deps += [dependency('x11'), dependency('gl')]
+endif
+
 chisel = executable('chisel', chisel_src,
     dependencies    : chisel_deps,
     install         : true,

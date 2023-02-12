@@ -63,8 +63,8 @@ bgfx_dep = declare_dependency(
         'submodules/bx/include/compat/msvc'
     ] : [])),
     compile_args: [
-        '-DBX_CONFIG_DEBUG=0',
-        '-DBGFX_CONFIG_RENDERER_OPENGL=0',
+        '-DBX_CONFIG_DEBUG=1',
+        '-DBGFX_CONFIG_RENDERER_OPENGL=1',
         '-DBGFX_CONFIG_RENDERER_VULKAN=1',
     ] + (windows ? [
         '-DPRIxPTR="llx"', # This should not be needed

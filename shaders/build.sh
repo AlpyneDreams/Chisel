@@ -6,15 +6,17 @@ BGFX_SHADERC="../submodules/bgfx/.build/linux64_gcc/bin/shadercRelease"
     fi
 fi
 
-ARGS="--platform linux -p spirv"
+ARGS="--platform linux"
 
 for f in *.vert; do
     echo $f
-    $BGFX_SHADERC -f $f -o ../runtime/core/shaders/spirv/$f.bin --type v $ARGS
+    $BGFX_SHADERC -f $f -o ../runtime/core/shaders/spirv/$f.bin --type v -p spirv $ARGS
+    $BGFX_SHADERC -f $f -o ../runtime/core/shaders/glsl/$f.bin --type v -p 440 $ARGS
 done
 
 for f in *.frag; do
     echo $f
-    $BGFX_SHADERC -f $f -o ../runtime/core/shaders/spirv/$f.bin --type f $ARGS
+    $BGFX_SHADERC -f $f -o ../runtime/core/shaders/spirv/$f.bin --type f -p spirv $ARGS
+    $BGFX_SHADERC -f $f -o ../runtime/core/shaders/glsl/$f.bin --type f -p 440 $ARGS
 done
 

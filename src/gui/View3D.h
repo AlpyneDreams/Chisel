@@ -214,7 +214,7 @@ namespace chisel
             ImGui::GetWindowDrawList()->AddImage(
                 GetTexture(drawMode),
                 pos, max,
-                ImVec2(0, 0), ImVec2(1, 1)
+                ImVec2(0, 1), ImVec2(1, 0)
             );
 
             viewport = Rect(pos.x, pos.y, size.x, size.y);
@@ -266,7 +266,7 @@ namespace chisel
                 }
             }
         }
-        
+
         void MouseLook(int2 mouse)
         {
             Camera& camera = GetCamera();
