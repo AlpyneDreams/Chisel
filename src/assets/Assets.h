@@ -21,13 +21,11 @@ namespace chisel
 
     inline struct Assets
     {
-        // TODO: Path class, iterable, normalization, etc.
-        using Path = std::string_view;
+        using Path = fs::Path;
 
-        std::vector<std::string> searchPaths;
+        std::vector<Path> searchPaths;
         std::vector<std::unique_ptr<libvpk::VPKSet>> pakFiles;
-        // TODO: Hashing...
-        std::unordered_map<std::string, void*> loadedAssets;
+        std::unordered_map<Path, void*> loadedAssets;
 
         Assets()
         {
@@ -39,22 +37,19 @@ namespace chisel
 
     // Asset Loading //
 
-        bool IsLoaded(const std::string& path)
+        bool IsLoaded(const Path& path)
         {
             return loadedAssets.contains(path);
         }
 
         template <class T, FixedString Ext>
-        T* Load(std::string_view path)
+        T* Load(const Path& path)
         {
-            // Ugh.
-            auto pathStr = std::string(path);
-
             // Cache hit
-            if (IsLoaded(pathStr))
-                return (T*)loadedAssets[pathStr];
+            if (IsLoaded(path))
+                return (T*)loadedAssets[path];
 
-            auto data = ReadFile(pathStr);
+            auto data = ReadFile(path);
             if (!data)
                 return nullptr;
 
@@ -66,12 +61,12 @@ namespace chisel
             }
 
             // Cache loaded asset
-            loadedAssets[pathStr] = ptr;
+            loadedAssets[path] = ptr;
 
             return ptr;
         }
 
-        std::optional<std::vector<uint8_t>> ReadFile(const std::string& path)
+        std::optional<std::vector<uint8_t>> ReadFile(const Path& path)
         {
             auto loose_data = ReadLooseFile(path);
             if (loose_data)
@@ -85,22 +80,20 @@ namespace chisel
             return std::nullopt;
         }
 
-        std::optional<std::vector<uint8_t>> ReadLooseFile(const std::string& path)
+        std::optional<std::vector<uint8_t>> ReadLooseFile(const Path& path)
         {
             for (const auto& dir : searchPaths)
             {
-                fs::Path fullPath = fs::Path(dir) / fs::Path(path);
+                Path fullPath = dir / path;
                 if (fs::exists(fullPath))
                     return fs::readFileBinary(fullPath);
             }
             return std::nullopt;
         }
 
-        std::optional<std::vector<uint8_t>> ReadPakFile(const std::string& path)
+        std::optional<std::vector<uint8_t>> ReadPakFile(const Path& path)
         {
-            std::string lower_string = path;
-            std::transform(lower_string.begin(), lower_string.end(), lower_string.begin(),
-                [](char c){ return std::tolower(c); });
+            std::string lower_string = str::toLower(path);
 
             for (const auto& pak : pakFiles)
             {
@@ -121,27 +114,26 @@ namespace chisel
 
         // TODO: Dynamic extension
         template <class T>
-        T* Load(std::string_view path) {
+        T* Load(const Path& path) {
             return nullptr;
         }
 
         // TODO: Map ext -> type
-        void* Load(std::string_view path) {
+        void* Load(const Path& path) {
             return nullptr;
         }
 
     // Search Paths //
 
-        void AddSearchPath(std::string_view path)
+        void AddSearchPath(const Path& path)
         {
-            if (!fs::exists(fs::Path(path))) {
-                Console.Error("[Assets] Failed to find search path '{}'", path);
-                return;
+            if (!fs::exists(path)) {
+                return Console.Error("[Assets] Failed to find search path '{}'", path);
             }
-            searchPaths.push_back(std::string(path));
+            searchPaths.push_back(path);
         }
 
-        void AddPakFile(std::string_view path)
+        void AddPakFile(const Path& path)
         {
             try
             {
