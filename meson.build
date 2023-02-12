@@ -68,6 +68,7 @@ bgfx_dep = declare_dependency(
         '-DBGFX_CONFIG_RENDERER_VULKAN=1',
     ] + (windows ? [
         '-DPRIxPTR="llx"', # This should not be needed
+        '-DPRIx64="llx"', # This should not be needed
         '/Zc:__cplusplus',
     ] : [])
 )
