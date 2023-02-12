@@ -5,7 +5,7 @@
 
 #include <fstream>
 #include <iterator>
-#include <stdexcept>
+#include <type_traits>
 #include <string>
 #include <tuple>
 #include <filesystem>
@@ -26,12 +26,13 @@ namespace chisel::fs
 {
     using std::filesystem::exists;
 
-    template <typename T>
-    inline std::optional<T> readFileImpl(const Path& path, bool binary)
+    template <typename T = std::vector<byte>, bool Binary = !std::is_same_v<T, std::string>>
+    inline std::optional<T> readFile(const Path& path)
     {
         using namespace std;
         std::ios::openmode flags = ios::in;
-        if (binary) flags |= ios::binary;
+        if constexpr (Binary)
+            flags |= ios::binary;
 
         ifstream file(std::filesystem::path(path), flags);
         if (!file || file.bad())
@@ -51,14 +52,9 @@ namespace chisel::fs
         return buffer;
     }
 
-    inline std::optional<std::string> readFileText(const Path& path)
+    inline std::optional<std::string> readTextFile(const Path& path)
     {
-        return readFileImpl<std::string>(path, false);
-    }
-
-    inline std::optional<std::vector<uint8_t>> readFileBinary(const Path& path)
-    {
-        return readFileImpl<std::vector<uint8_t>>(path, true);
+        return readFile<std::string>(path);
     }
 }
 

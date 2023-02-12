@@ -1,6 +1,7 @@
 #pragma once
 
 #include "console/Console.h"
+#include "common/Common.h"
 #include "common/String.h"
 #include "common/Filesystem.h"
 #include "core/Mesh.h"
@@ -22,6 +23,7 @@ namespace chisel
     inline struct Assets
     {
         using Path = fs::Path;
+        using Buffer = std::vector<byte>;
 
         std::vector<Path> searchPaths;
         std::vector<std::unique_ptr<libvpk::VPKSet>> pakFiles;
@@ -66,7 +68,7 @@ namespace chisel
             return ptr;
         }
 
-        std::optional<std::vector<uint8_t>> ReadFile(const Path& path)
+        std::optional<Buffer> ReadFile(const Path& path)
         {
             auto loose_data = ReadLooseFile(path);
             if (loose_data)
@@ -80,18 +82,18 @@ namespace chisel
             return std::nullopt;
         }
 
-        std::optional<std::vector<uint8_t>> ReadLooseFile(const Path& path)
+        std::optional<Buffer> ReadLooseFile(const Path& path)
         {
             for (const auto& dir : searchPaths)
             {
                 Path fullPath = dir / path;
                 if (fs::exists(fullPath))
-                    return fs::readFileBinary(fullPath);
+                    return fs::readFile(fullPath);
             }
             return std::nullopt;
         }
 
-        std::optional<std::vector<uint8_t>> ReadPakFile(const Path& path)
+        std::optional<Buffer> ReadPakFile(const Path& path)
         {
             std::string lower_string = str::toLower(path);
 
@@ -103,7 +105,7 @@ namespace chisel
 
                 auto stream = libvpk::VPKFileStream(*file);
 
-                std::vector<uint8_t> data;
+                Buffer data;
                 data.resize(file->length());
                 stream.read((char*)data.data(), file->length());
 

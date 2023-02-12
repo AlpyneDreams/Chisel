@@ -45,7 +45,7 @@ namespace chisel
     
     bool Chisel::LoadVMF(std::string_view path)
     {
-        auto text = fs::readFileText(path);
+        auto text = fs::readTextFile(path);
         if (!text)
             return false;
         
