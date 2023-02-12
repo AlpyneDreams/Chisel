@@ -66,8 +66,7 @@ namespace chisel
 
                     // Draw wireframe of the brush's mesh
                     r.SetTransform(glm::identity<mat4x4>());
-                    for (auto& mesh : brush.GetMeshes())
-                        Tools.DrawSelectionOutline(&mesh.mesh);
+                    Tools.DrawSelectionOutline(&mesh.mesh);
 
                     // Draw the actual mesh faces in red
                     r.SetUniform("u_color", Color(1, 0, 0));
