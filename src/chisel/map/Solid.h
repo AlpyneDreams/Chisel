@@ -82,13 +82,14 @@ namespace chisel
         void UpdateMesh()
         {
             meshes.clear();
+            static const SideData defaultSide;
 
             // Create one mesh for each unique material
             size_t textureCount = 0;
             std::unordered_map<Texture*, size_t> uniqueTextures;
             for (auto& face : brush->GetFaces())
             {
-                const SideData& data = m_sides[face.side->userdata];
+                const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
                 if (!uniqueTextures.contains(data.texture))
                     uniqueTextures.emplace(data.texture, textureCount++);
             }
@@ -97,7 +98,7 @@ namespace chisel
 
             for (auto& face : brush->GetFaces())
             {
-                const SideData& data = m_sides[face.side->userdata];
+                const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
 
                 BrushMesh& brushmesh = meshes[uniqueTextures[data.texture]];
                 brushmesh.texture = data.texture;
