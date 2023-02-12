@@ -19,6 +19,7 @@ void main()
 	// Half lambert
 	NoL = 0.5 + (0.5 * NoL);
 
-    gl_FragColor.rgb = color * texture2D(s_texColor, uv).rgb * NoL;
+	// FIXME: Uniforms are broken
+    gl_FragColor.rgb = /*color * */ texture2D(s_texColor, uv).rgb * NoL;
 	gl_FragColor.a = 1;
 }
