@@ -314,7 +314,7 @@ namespace chisel::render
 
             bgfx::Init init;
 
-            init.type = bgfx::RendererType::Vulkan;
+            init.type = bgfx::RendererType::Direct3D11;
 
             init.platformData.ndt = window->GetNativeDisplay();
             init.platformData.nwh = window->GetNativeWindow();

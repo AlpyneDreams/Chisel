@@ -65,7 +65,7 @@ bgfx_dep = declare_dependency(
     compile_args: [
         '-DBX_CONFIG_DEBUG=0',
         '-DBGFX_CONFIG_RENDERER_OPENGL=0',
-        '-DBGFX_CONFIG_RENDERER_VULKAN=1',
+        '-DBGFX_CONFIG_RENDERER_DIRECT3D11=1',
     ] + (windows ? [
         '-DPRIxPTR="llx"', # This should not be needed
         '-DPRIx64="llx"', # This should not be needed
