@@ -103,19 +103,9 @@ namespace chisel
         if (!bounds)
             return;
 
-        // TODO: seperately configured rotation snap
-
-        auto mtx = bounds->ComputeMatrix();
-        auto inv = glm::inverse(mtx);
-
-        AABB localBounds = { vec3(-0.5), vec3(0.5) };
-        vec3 boundsSnap = snapSize / bounds->Dimensions();
-
-        if (Handles.Manipulate(mtx, view, proj, tool, space, snap, snapSize, &localBounds.min[0], boundsSnap))
+        if (auto transform = Handles.Manipulate(bounds.value(), view, proj, tool, space, snap, snapSize))
         {
-            auto transform = mtx * inv;
-
-            Selection.Transform(transform);
+            Selection.Transform(transform.value());
             // TODO: Align to grid fights with the gizmo rn :s
             //brush->GetBrush().AlignToGrid(map.gridSize);
         }

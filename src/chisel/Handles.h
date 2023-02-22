@@ -4,6 +4,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "math/Math.h"
 #include "math/Color.h"
+#include "math/AABB.h"
 #include "render/Render.h"
 #include "core/Transform.h"
 
@@ -90,6 +91,40 @@ namespace chisel
             }
 
             return changed;
+        }
+
+        // Transform using a matrix generated from an AABB. Automatically prevents scaling to 0.
+        // Bounds are snapped on the same scale as translations. Returns a new matrix if any transformation was made.
+        std::optional<mat4x4> Manipulate(const AABB& bounds, const mat4x4& view, const mat4x4& proj, Tool tool, Space space,
+                        bool snap, const vec3& snapSize)
+        {
+            auto mtx = bounds.ComputeMatrix();
+            auto inv = glm::inverse(mtx);
+
+            vec3 dims = bounds.Dimensions();
+
+            // Local bounds stay the same regardless of the actual bounds
+            AABB localBounds = { vec3(-0.5), vec3(0.5) };
+
+            // Snap size has to be scaled based on the size of the selection
+            vec3 boundsSnap = snapSize / dims;
+
+            if (Manipulate(mtx, view, proj, tool, space, snap, snapSize, &localBounds.min[0], boundsSnap))
+            {
+                auto transform = mtx * inv;
+
+                // If any of the new dimensions are 0, ignore the transformation.
+                // This can happen when snapping with the bounds scaling tool.
+                AABB newBounds = transform * bounds;
+                vec3 newDims = newBounds.Dimensions();
+                if ((dims.x != 0 && newDims.x == 0)
+                ||  (dims.y != 0 && newDims.y == 0)
+                ||  (dims.z != 0 && newDims.z == 0))
+                    return std::nullopt;
+
+                return transform;
+            }
+            else return std::nullopt;
         }
 
         bool IsMouseOver() { return ImGuizmo::IsOver(); }
