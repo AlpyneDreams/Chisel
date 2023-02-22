@@ -7,6 +7,7 @@
 #include "math/AABB.h"
 #include "render/Render.h"
 #include "core/Transform.h"
+#include "console/ConVar.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -15,6 +16,8 @@
 
 namespace chisel
 {
+    inline ConVar<int> view_grid_max_radius("view_grid_max_radius", 4, "Maximum radius multiplier to extend the grid at small scales");
+
     inline struct Handles
     {
     private:
@@ -148,16 +151,41 @@ namespace chisel
 
     // Grid //
 
-        // TODO: Scale grid based on snap increment. View based fade. Infinite grid
-        void DrawGrid(render::Render& r, render::Shader* shader, vec3 gridSize)
+        static constexpr int gridChunkSize = 200;
+
+        void DrawGrid(render::Render& r, vec3 cameraPos, render::Shader* shader, vec3 gridSize)
         {
-            mat4x4 matrix = glm::scale(glm::identity<mat4x4>(), gridSize);
-            r.SetTransform(matrix);
             r.SetBlendFunc(render::BlendFuncs::Alpha);
             r.SetDepthTest(render::CompareFunc::LessEqual);
             r.SetPrimitiveType(render::PrimitiveType::Lines);
             r.SetShader(shader);
-            r.DrawMesh(&grid);
+
+            // Determine center of grid based on camera position
+            vec3 chunk = gridSize * float(gridChunkSize);
+            vec3 cameraCell = glm::floor((cameraPos / chunk) + vec3(0.5));
+            cameraCell.z = 0;
+
+            mat4x4 mtx = glm::translate(mat4x4(1), cameraCell * chunk);
+            mtx = glm::scale(mtx, gridSize);
+
+            // Determine number of grid chunks to draw
+            int3 radius = glm::min(int3(view_grid_max_radius), int3(64) / int3(gridSize));
+
+            // Set far Z based on radius
+            vec3 farZ = vec3(radius) * chunk * 0.8f;
+            r.SetUniform("u_gridFarZ", vec4(glm::min(farZ.x, farZ.y), 0, 0, 0));
+
+            // Draw each cell
+            for (int x = -radius.x; x <= radius.x; x++)
+            {
+                for (int y = -radius.y; y <= radius.y; y++)
+                {
+                    vec3 translation = vec3(x, y, 0) * vec3(gridChunkSize);
+                    r.SetTransform(glm::translate(mtx, translation));
+                    r.DrawMesh(&grid);
+                }
+            }
+
             r.SetPrimitiveType(render::PrimitiveType::Triangles);
             r.SetDepthTest(render::CompareFunc::Less);
             r.SetBlendFunc(render::BlendFuncs::Normal);
@@ -165,19 +193,18 @@ namespace chisel
 
         Handles()
         {
-            int gridSize = 100;
-            int radius = gridSize / 2;
+            int radius = gridChunkSize / 2;
             int gridMajor = 10;
-            gridVertices.resize((gridSize + 1) * 4);
+            gridVertices.resize((gridChunkSize + 1) * 4);
 
             uint i = 0;
-            for (int x = -radius; x <= radius; x++, i += 2)
+            for (int x = -radius; x < radius; x++, i += 2)
             {
                 gridVertices[i] = vec4(x, -radius, 0, x % gridMajor == 0);
                 gridVertices[i+1] = vec4(x, +radius, 0, x % gridMajor == 0);
             }
 
-            for (int z = -radius; z <= radius; z++, i += 2)
+            for (int z = -radius; z < radius; z++, i += 2)
             {
                 gridVertices[i] = vec4(-radius, z, 0, z % gridMajor == 0);
                 gridVertices[i+1] = vec4(+radius, z, 0, z % gridMajor == 0);

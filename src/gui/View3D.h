@@ -149,7 +149,7 @@ namespace chisel
 
             // Draw grid
             if (view_grid_show)
-                Handles.DrawGrid(r, Tools.sh_Grid, gridSize);
+                Handles.DrawGrid(r, camera.position, Tools.sh_Grid, gridSize);
 
             OnPostDraw();
         }
