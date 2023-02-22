@@ -55,4 +55,15 @@ namespace chisel
             return Extend(*this, aabb);
         }
     };
+
+    inline AABB operator*(const mat4x4& mtx, const AABB& bounds)
+    {
+        // min and max are points so w=1
+        return AABB { mtx * vec4(bounds.min, 1), mtx * vec4(bounds.max, 1) };
+    }
+
+    inline AABB operator*(const mat3x3& mtx, const AABB& bounds)
+    {
+        return AABB { mtx * bounds.min, mtx * bounds.max };
+    }
 }
