@@ -33,7 +33,7 @@ namespace chisel
         static Selectable* Find(SelectionID id);
     private:
         static SelectionID s_lastId;
-        static std::unordered_map<SelectionID, Selectable*> s_map;
+        static inline std::unordered_map<SelectionID, Selectable*> s_map;
 
         SelectionID m_id = 0;
         bool m_selected = false;

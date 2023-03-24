@@ -3,7 +3,6 @@
 namespace chisel
 {
     SelectionID Selectable::s_lastId = 0;
-    std::unordered_map<SelectionID, Selectable*> Selectable::s_map;
 
 //-------------------------------------------------------------------------------------------------
 
