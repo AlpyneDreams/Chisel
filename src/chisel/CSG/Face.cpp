@@ -1,6 +1,5 @@
 #include "../CSG/Face.h"
 #include "../CSG/Edge.h"
-#include "../CSG/Plane.h"
 #include "../CSG/Fragment.h"
 
 #include "../CSG/CSGTree.h"

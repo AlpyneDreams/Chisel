@@ -10,11 +10,12 @@
 #include <vector>
 
 #include "math/Math.h"
+#include "math/Plane.h"
 #include <glm/gtc/matrix_access.hpp>
 
 namespace chisel::CSG
 {
-    struct Plane;
+    using Plane = chisel::Plane;
     class Brush;
     struct Face;
     struct Fragment;
