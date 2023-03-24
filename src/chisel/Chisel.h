@@ -9,6 +9,10 @@ namespace chisel
 {
     struct MapRender;
 
+    enum class Tool {
+        Select, Translate, Rotate, Scale, Universal, Bounds
+    };
+
     enum class SelectMode {
         Groups, Objects, Solids
     };
@@ -19,6 +23,7 @@ namespace chisel
     // Editing //
         Map map;
 
+        Tool activeTool = Tool::Translate;
         SelectMode selectMode = SelectMode::Groups;
 
         /*

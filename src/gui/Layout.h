@@ -10,6 +10,7 @@
 namespace chisel
 {
     enum class SelectMode;
+    enum class Tool;
 
     struct SelectionModeToolbar final : Toolbar
     {
@@ -17,6 +18,14 @@ namespace chisel
 
         void DrawToolbar() override;
         void Option(const char* name, SelectMode mode);
+    };
+
+    struct MainToolbar final : Toolbar
+    {
+        MainToolbar();
+
+        void DrawToolbar() override;
+        void Option(const char* icon, const char* name, Tool mode);
     };
 
     struct Layout : System

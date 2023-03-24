@@ -188,8 +188,6 @@ namespace chisel
 
         viewport = Rect(pos.x, pos.y, size.x, size.y);
 
-        Toolbar();
-
         // If mouse is over viewport,
         if (ImGui::IsWindowHovered() && IsMouseOver(viewport))
         {
@@ -326,38 +324,5 @@ namespace chisel
             }
             ImGui::EndMenu();
         }
-    }
-
-// Toolbar //
-
-    void View3D::Toolbar()
-    {
-        ImGui::Spacing();
-
-        ImGui::Indent(5.f);
-        ToolbarButton(ICON_MC_ARROW_ALL, Tool::Translate);
-        ToolbarButton(ICON_MC_AUTORENEW, Tool::Rotate);
-        ToolbarButton(ICON_MC_RESIZE, Tool::Scale);
-        ToolbarButton(ICON_MC_ALPHA_U_BOX_OUTLINE, Tool::Universal);
-        ToolbarButton(ICON_MC_VECTOR_SQUARE, Tool::Bounds);
-        ImGui::Unindent(5.f);
-
-    }
-
-    void View3D::ToolbarButton(const char* label, Tool tool)
-    {
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
-        ImGuiCol col = activeTool == tool ? ImGuiCol_TabActive : ImGuiCol_WindowBg;
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(col));
-
-        if (ImGui::Button(label)) {
-            activeTool = tool;
-        }
-        if (ImGui::IsItemHovered()) {
-            popupOpen = true;
-        }
-
-        ImGui::PopStyleColor();
-        ImGui::PopStyleVar();
     }
 }

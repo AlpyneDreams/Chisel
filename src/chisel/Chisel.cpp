@@ -27,6 +27,7 @@ namespace chisel
         Renderer = &Tools.systems.AddSystem<MapRender>();
         Tools.systems.AddSystem<Keybinds>();
         Tools.systems.AddSystem<Layout>();
+        Tools.systems.AddSystem<MainToolbar>();
         Tools.systems.AddSystem<SelectionModeToolbar>();
         viewport = &Tools.systems.AddSystem<Viewport>();
 
@@ -38,6 +39,8 @@ namespace chisel
             Tools.BeginSelectionPass(ctx);
             Chisel.Renderer->DrawSelectionPass();
         };
+
+        map.AddCube(glm::translate(mat4x4(1), vec3(0, 0, 64)));
 
         Tools.Loop();
         Tools.Shutdown();

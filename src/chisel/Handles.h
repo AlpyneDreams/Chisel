@@ -8,6 +8,7 @@
 #include "render/Render.h"
 #include "core/Transform.h"
 #include "console/ConVar.h"
+#include "chisel/Chisel.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -26,9 +27,6 @@ namespace chisel
         static inline std::vector<vec4> gridVertices;
 
     public:
-        enum class Tool {
-            Translate, Rotate, Scale, Universal, Bounds
-        };
 
     // ImGuizmo //
         void Begin(const Rect& viewport, bool allowAxisFlip)

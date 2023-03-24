@@ -20,6 +20,7 @@ namespace chisel
             ImVec2 size = ImGui::GetContentRegionAvail();
             horizontal = size.y <= size.x;
 
+            ImGui::PopStyleVar(1); // WindowPadding
             ImGui::BeginGroup();
             DrawToolbar();
             ImGui::EndGroup();
@@ -28,15 +29,15 @@ namespace chisel
         void PreDraw() override
         {
             //ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(100.f, 32.f));
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(horizontal ? 0.f : 8.f, 0.f));
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.f, 8.f));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(horizontal ? 0.f : 4.f, 0.f));
             ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
         }
 
         void PostDraw() override
         {
             ImGui::PopStyleColor();
-            ImGui::PopStyleVar(2);
+            ImGui::PopStyleVar(1); // FramePadding
         }
 
         bool RadioButton(const char* name, bool selected = false)

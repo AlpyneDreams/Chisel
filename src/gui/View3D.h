@@ -16,9 +16,6 @@ namespace chisel
     {
         View3D(auto... args) : GUI::Window(args..., ImGuiWindowFlags_MenuBar) {}
 
-        using Tool = Handles::Tool;
-
-        Tool  activeTool    = Tool::Translate;
         Space space         = Space::World;
         Rect  viewport;
 

@@ -22,9 +22,12 @@ namespace chisel
     void Viewport::DrawHandles(mat4x4& view, mat4x4& proj)
     {
         // Draw transform handles
-        bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
-        vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : gridSize;
-        Chisel.Renderer->DrawHandles(view, proj, activeTool, space, snap, snapSize);
+        if (activeTool >= Tool::Translate && activeTool <= Tool::Bounds)
+        {
+            bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
+            vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : gridSize;
+            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, snap, snapSize);
+        }
         
         // Draw view cube
         {

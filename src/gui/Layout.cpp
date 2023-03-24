@@ -10,6 +10,10 @@ namespace chisel
 {
     extern ConVar<bool> gui_demo;
 
+    //--------------------------------------------------
+    //  Selection Mode Toolbar
+    //--------------------------------------------------
+
     SelectionModeToolbar::SelectionModeToolbar() : Toolbar(
         ICON_MC_CURSOR_DEFAULT, "Select", 500, 32, true) {}
 
@@ -34,6 +38,45 @@ namespace chisel
         if (RadioButton(name, selected))
             Chisel.selectMode = mode;
     }
+
+    //--------------------------------------------------
+    //  Main Toolbar
+    //--------------------------------------------------
+
+    MainToolbar::MainToolbar() : Toolbar(
+        ICON_MC_CURSOR_DEFAULT, "Tools", 39, 500, true) {}
+
+    void MainToolbar::DrawToolbar()
+    {
+        ImGui::Spacing();
+
+        Option(ICON_MC_CURSOR_DEFAULT, "Select", Tool::Select);
+        Option(ICON_MC_ARROW_ALL, "Translate", Tool::Translate);
+        Option(ICON_MC_AUTORENEW, "Rotate", Tool::Rotate);
+        Option(ICON_MC_RESIZE, "Scale", Tool::Scale);
+        Option(ICON_MC_ALPHA_U_BOX_OUTLINE, "Transform (All)", Tool::Universal);
+        Option(ICON_MC_VECTOR_SQUARE, "Bounds", Tool::Bounds);
+        ImGui::Separator();
+    }
+
+    void MainToolbar::Option(const char* icon, const char* name, Tool tool)
+    {
+        ImGuiCol col = Chisel.activeTool == tool ? ImGuiCol_TabActive : ImGuiCol_WindowBg;
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(col));
+
+        if (ImGui::Button(icon)) {
+            Chisel.activeTool = tool;
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip(name);
+        }
+
+        ImGui::PopStyleColor();
+    }
+
+    //--------------------------------------------------
+    //  Layout
+    //--------------------------------------------------
 
     void Layout::Start()
     {

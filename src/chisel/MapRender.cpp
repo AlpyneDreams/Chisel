@@ -93,7 +93,7 @@ namespace chisel
         }
     }
 
-    void MapRender::DrawHandles(mat4x4& view, mat4x4& proj, Handles::Tool tool, Space space, bool snap, const vec3& snapSize)
+    void MapRender::DrawHandles(mat4x4& view, mat4x4& proj, Tool tool, Space space, bool snap, const vec3& snapSize)
     {
         if (Selection.Empty())
             return;
