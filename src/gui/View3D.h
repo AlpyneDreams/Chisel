@@ -16,14 +16,14 @@ namespace chisel
     {
         View3D(auto... args) : GUI::Window(args..., ImGuiWindowFlags_MenuBar) {}
 
-        Space space         = Space::World;
+        Space space          = Space::World;
         Rect  viewport;
 
         vec3  gridSize       = vec3(64.f);
         bool  gridUniform    = true;
         float rotationSnap   = 15.f;
 
-        bool  popupOpen     = false;
+        bool  popupOpen      = false;
 
     // Virtual Methods //
 
@@ -32,7 +32,9 @@ namespace chisel
         virtual void DrawHandles(mat4x4& view, mat4x4& proj) {}
         virtual void OnPostDraw() {}
 
-        Camera& GetCamera();
+        Camera& GetCamera() const;
+        uint2 GetMousePos() const;
+        Ray GetMouseRay() const;
 
     // Draw Modes //
 

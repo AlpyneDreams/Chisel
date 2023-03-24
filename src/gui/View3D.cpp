@@ -13,6 +13,8 @@
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 
+#include <glm/gtc/matrix_inverse.hpp>
+
 #include "gui/IconsMaterialCommunity.h"
 #include "render/Render.h"
 
@@ -26,7 +28,18 @@ namespace chisel
     inline ConVar<float> m_pitch      ("m_pitch",       0.022f, "Mouse pitch factor.");
     inline ConVar<float> m_yaw        ("m_yaw",         0.022f, "Mouse yaw factor.");
 
-    Camera& View3D::GetCamera() { return Tools.editorCamera.camera; }
+    Camera& View3D::GetCamera() const { return Tools.editorCamera.camera; }
+
+    uint2 View3D::GetMousePos() const
+    {
+        ImVec2 absolute = ImGui::GetMousePos();
+        return uint2(absolute.x - viewport.x, absolute.y - viewport.y);
+    }
+
+    Ray View3D::GetMouseRay() const
+    {
+        return GetCamera().ScreenPointToRay(GetMousePos(), viewport);
+    }
 
 // Draw Modes //
 
@@ -194,9 +207,7 @@ namespace chisel
             // Left-click: Select (or transform selection)
             if (Mouse.GetButtonDown(Mouse::Left) && !popupOpen && !Handles.IsMouseOver())
             {
-                ImVec2 absolute = ImGui::GetMousePos();
-                uint2 mouse = uint2(absolute.x - pos.x, absolute.y - pos.y);
-                OnClick(mouse);
+                OnClick(GetMousePos());
             }
 
             if (!ImGui::GetIO().KeyCtrl)

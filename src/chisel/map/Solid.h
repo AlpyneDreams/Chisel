@@ -176,7 +176,7 @@ namespace chisel
         void SetVolume(Volume volume) final override { brush->SetVolumeOperation(CSG::CreateFillOperation(volume)); }
     };
 
-    inline Solid CubeBrush(CSG::Brush& brush, Volume volume, const mat4x4& transform = glm::identity<mat4x4>())
+    inline Solid CubeBrush(CSG::Brush& brush, Volume volume, vec3 size = vec3(64.f), const mat4x4& transform = glm::identity<mat4x4>())
     {
         Solid cube = Solid(brush, volume);
         
@@ -192,7 +192,7 @@ namespace chisel
         
         std::array<CSG::Side, 6> sides;
         for (size_t i = 0; i < 6; i++)
-            sides[i].plane = kUnitCubePlanes[i].Transformed(glm::scale(transform, vec3(64.f)));
+            sides[i].plane = kUnitCubePlanes[i].Transformed(glm::scale(transform, size));
         
         cube.GetBrush().SetSides(&sides.front(), &sides.back() + 1);
         

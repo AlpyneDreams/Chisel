@@ -55,6 +55,8 @@ namespace chisel
         Option(ICON_MC_ALPHA_U_BOX_OUTLINE, "Transform (All)", Tool::Universal);
         Option(ICON_MC_VECTOR_SQUARE, "Bounds", Tool::Bounds);
         ImGui::Separator();
+        Option(ICON_MC_LIGHTBULB, "Entity", Tool::Entity);
+        Option(ICON_MC_CUBE_OUTLINE, "Block", Tool::Block);
     }
 
     void MainToolbar::Option(const char* icon, const char* name, Tool tool)

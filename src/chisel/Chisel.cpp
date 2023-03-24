@@ -40,8 +40,6 @@ namespace chisel
             Chisel.Renderer->DrawSelectionPass();
         };
 
-        map.AddCube(glm::translate(mat4x4(1), vec3(0, 0, 64)));
-
         Tools.Loop();
         Tools.Shutdown();
     }

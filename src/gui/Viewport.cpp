@@ -2,6 +2,9 @@
 #include "chisel/Gizmos.h"
 #include "chisel/MapRender.h"
 
+#include "math/Plane.h"
+#include "math/Ray.h"
+
 #include "gui/IconsMaterialCommunity.h"
 
 namespace chisel
@@ -10,8 +13,17 @@ namespace chisel
 
     void Viewport::OnClick(uint2 mouse)
     {
-        // Left-click: Select (or transform selection)
-        Tools.PickObject(mouse);
+        switch (activeTool)
+        {
+            default:
+            case Tool::Select:
+                Tools.PickObject(mouse);
+                break;
+            
+            case Tool::Entity:
+            case Tool::Block:
+                break;
+        }
     }
 
     void Viewport::OnResizeGrid(vec3& gridSize)
@@ -22,11 +34,72 @@ namespace chisel
     void Viewport::DrawHandles(mat4x4& view, mat4x4& proj)
     {
         // Draw transform handles
-        if (activeTool >= Tool::Translate && activeTool <= Tool::Bounds)
+        switch (activeTool)
         {
-            bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
-            vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : gridSize;
-            Chisel.Renderer->DrawHandles(view, proj, activeTool, space, snap, snapSize);
+            case Tool::Select: default: break;
+
+            case Tool::Translate:
+            case Tool::Rotate:
+            case Tool::Scale:
+            case Tool::Universal:
+            case Tool::Bounds:
+            {
+                bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
+                vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : gridSize;
+                Chisel.Renderer->DrawHandles(view, proj, activeTool, space, snap, snapSize);
+                break;
+            }
+
+            case Tool::Entity:
+            case Tool::Block:
+            {
+                Plane grid = Plane(Vectors.Zero, Vectors.Up);
+                Ray ray    = GetMouseRay();
+                if (float dist; grid.Intersects(ray, dist))
+                {
+                    vec3 point = ray.GetPoint(dist);
+                    point = math::Snap(point, gridSize);
+                    Handles.DrawPoint(point);
+
+                    if (activeTool == Tool::Entity)
+                        break;
+
+                    if (Mouse.GetButtonDown(MouseButton::Left))
+                    {
+                        draggingBlock = true;
+                        dragStartPos  = point;
+                    }
+                    else if (Mouse.GetButtonUp(MouseButton::Left))
+                    {
+                        draggingBlock = false;
+                        if (point != dragStartPos)
+                        {
+                            vec3 vec = glm::abs(point - dragStartPos);
+                            vec3 center = (dragStartPos + point) / 2.f;
+                            mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xy, gridSize.z * 0.5f));
+                            auto& cube = map.AddCube(mtx, vec3(vec.xy, gridSize.z) * 0.5f);
+                            Selection.Select(&cube);
+                            //Chisel.activeTool = Tool::Select;
+                        }
+                    }
+
+                    if (draggingBlock)
+                    {
+                        vec3 direction = point - dragStartPos;
+                        vec3 corner1 = vec3(point.x, dragStartPos.y, point.z);
+                        vec3 corner2 = vec3(dragStartPos.x, point.yz);
+                        
+                        Handles.DrawPoint(dragStartPos);
+                        Handles.DrawPoint(corner1);
+                        Handles.DrawPoint(corner2);
+                        Gizmos.DrawLine(dragStartPos, corner1);
+                        Gizmos.DrawLine(dragStartPos, corner2);
+                        Gizmos.DrawLine(corner1, point);
+                        Gizmos.DrawLine(corner2, point);
+                    }
+                }
+                break;
+            }
         }
         
         // Draw view cube

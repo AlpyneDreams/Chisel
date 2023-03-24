@@ -10,7 +10,8 @@ namespace chisel
     struct MapRender;
 
     enum class Tool {
-        Select, Translate, Rotate, Scale, Universal, Bounds
+        Select, Translate, Rotate, Scale, Universal, Bounds,
+        Entity, Block
     };
 
     enum class SelectMode {
