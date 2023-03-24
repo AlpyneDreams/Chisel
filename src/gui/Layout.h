@@ -9,6 +9,7 @@
 
 #include "imgui.h"
 #include "gui/Common.h"
+#include "gui/Toolbar.h"
 
 #include "gui/IconsMaterialCommunity.h"
 
@@ -16,52 +17,31 @@ namespace chisel
 {
     extern ConVar<bool> gui_demo;
 
-    struct SelectionModeToolbar : GUI::Window
+    struct SelectionModeToolbar final : Toolbar
     {
-        SelectionModeToolbar() : GUI::Window(
-            ICON_MC_CURSOR_DEFAULT, "Select", 500, 32, true,
-            ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar) {}
+        SelectionModeToolbar() : Toolbar(
+            ICON_MC_CURSOR_DEFAULT, "Select", 500, 32, true) {}
 
-        void PreDraw() override
-        {
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(500.f, 32.f));
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.f, 8.f));
-        }
-
-        void PostDraw() override
-        {
-            ImGui::PopStyleVar(3);
-        }
-
-        void Draw() override
+        void DrawToolbar() override
         {
             using enum SelectMode;
-            ImGui::BeginMenuBar();
-            ImGui::TextUnformatted("Select:");
             ImGui::BeginDisabled();
-            RadioButton(ICON_MC_VECTOR_POINT " Vertices", SelectMode(-1));
-            RadioButton(ICON_MC_VECTOR_POLYLINE " Edges", SelectMode(-1));
-            RadioButton(ICON_MC_VECTOR_SQUARE " Faces", SelectMode(-1));
+            Option("Select:", SelectMode(-1));
+            Option(ICON_MC_VECTOR_POINT " Vertices", SelectMode(-1));
+            Option(ICON_MC_VECTOR_POLYLINE " Edges", SelectMode(-1));
+            Option(ICON_MC_VECTOR_SQUARE " Faces", SelectMode(-1));
             ImGui::EndDisabled();
-            RadioButton(ICON_MC_VECTOR_TRIANGLE " Solids", Solids);
-            RadioButton(ICON_MC_CUBE_OUTLINE " Objects", Objects);
-            RadioButton(ICON_MC_GROUP " Groups", Groups);
-            ImGui::EndMenuBar();
+            Option(ICON_MC_VECTOR_TRIANGLE " Solids", Solids);
+            Option(ICON_MC_CUBE_OUTLINE " Objects", Objects);
+            Option(ICON_MC_GROUP " Groups", Groups);
         }
 
-        void RadioButton(const char* name, SelectMode mode)
+        void Option(const char* name, SelectMode mode)
         {
             bool selected = Chisel.selectMode == mode;
 
-            if (selected)
-                ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
-
-            if (bool clicked = GUI::MenuBarButton(name))
+            if (RadioButton(name, selected))
                 Chisel.selectMode = mode;
-
-            if (selected)
-                ImGui::PopStyleColor();
         }
     };
 
