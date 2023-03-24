@@ -78,8 +78,10 @@ namespace chisel
                             vec3 center = (dragStartPos + point) / 2.f;
                             mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xy, gridSize.z * 0.5f));
                             auto& cube = map.AddCube(mtx, vec3(vec.xy, gridSize.z) * 0.5f);
-                            Selection.Select(&cube);
-                            //Chisel.activeTool = Tool::Select;
+                            if (!ImGui::GetIO().KeyShift) {
+                                Selection.Select(&cube);
+                                Chisel.activeTool = Tool::Bounds;
+                            }
                         }
                     }
 
