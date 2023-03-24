@@ -34,17 +34,5 @@ namespace chisel::CSG
     using ObjectID = uint32_t;
     using Order = uint32_t;
 
-    static constexpr Unit EQUAL_EPSILON = 0.001f;
-
-    inline bool CloseEnough(Unit a, Unit b, Unit epsilon = EQUAL_EPSILON)
-    {
-        return std::abs(a - b) <= epsilon;
-    }
-
-    inline bool CloseEnough(const Vector3& a, const Vector3& b, Unit epsilon = EQUAL_EPSILON)
-    {
-        return std::abs(a.x - b.x) <= epsilon &&
-               std::abs(a.y - b.y) <= epsilon &&
-               std::abs(a.z - b.z) <= epsilon;
-    }
+    using math::CloseEnough;
 }

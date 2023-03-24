@@ -77,16 +77,30 @@ namespace chisel
         
         // Convert degrees to radians (scalar or vector)
         using glm::radians;
-    }
 
-    inline float Snap(float value, float snap)
-    {
-        return std::round(value / snap) * snap;
-    }
+        static constexpr float EQUAL_EPSILON = 0.001f;
 
-    inline glm::vec3 Snap(glm::vec3 value, glm::vec3 snap)
-    {
-        return glm::round(value / snap) * snap;
+        inline bool CloseEnough(float a, float b, float epsilon = EQUAL_EPSILON)
+        {
+            return std::abs(a - b) <= epsilon;
+        }
+
+        inline bool CloseEnough(const vec3& a, const vec3& b, float epsilon = EQUAL_EPSILON)
+        {
+            return std::abs(a.x - b.x) <= epsilon &&
+                std::abs(a.y - b.y) <= epsilon &&
+                std::abs(a.z - b.z) <= epsilon;
+        }
+
+        inline float Snap(float value, float snap)
+        {
+            return std::round(value / snap) * snap;
+        }
+
+        inline glm::vec3 Snap(glm::vec3 value, glm::vec3 snap)
+        {
+            return glm::round(value / snap) * snap;
+        }
     }
 
     struct Rect
