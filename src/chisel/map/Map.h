@@ -38,7 +38,7 @@ namespace chisel
     struct BrushEntity : Entity
     {
     protected:
-        std::list<Solid>    brushes;
+        std::list<Solid>    solids;
         CSG::CSGTree        tree;
 
     public:
@@ -49,23 +49,23 @@ namespace chisel
 
         ~BrushEntity()
         {
-            brushes.clear();
+            solids.clear();
         }
 
         Solid& AddBrush(Volume volume = Volumes::Solid)
         {
-            return brushes.emplace_back(tree.CreateBrush(), volume);
+            return solids.emplace_back(tree.CreateBrush(), volume);
         }
 
         Solid& AddCube(mat4x4 transform = glm::identity<mat4x4>(), Volume volume = Volumes::Solid)
         {
-            brushes.push_back(CubeBrush(tree.CreateBrush(), volume, transform));
-            return brushes.back();
+            solids.push_back(CubeBrush(tree.CreateBrush(), volume, transform));
+            return solids.back();
         }
 
         void RemoveBrush(const Solid& brush)
         {
-            brushes.remove(brush);
+            solids.remove(brush);
         }
 
         virtual void Rebuild()
@@ -75,15 +75,15 @@ namespace chisel
                 brush->GetUserdata<Solid*>()->UpdateMesh();
         }
 
-        auto begin() { return brushes.begin(); }
-        auto end() { return brushes.end(); }
+        auto begin() { return solids.begin(); }
+        auto end() { return solids.end(); }
 
     // Selectable Interface //
 
         std::optional<AABB> GetBounds() const final override
         {
             std::optional<AABB> bounds;
-            for (const Solid& selectable : brushes)
+            for (const Solid& selectable : solids)
             {
                 auto selectedBounds = selectable.GetBounds();
                 if (!selectedBounds)
@@ -97,9 +97,9 @@ namespace chisel
             return bounds;
         }
 
-        void Transform(const mat4x4& matrix) final override { for (auto& b : brushes) b.Transform(matrix); }
-        void AlignToGrid(vec3 gridSize) final override { for (auto& b : brushes) b.AlignToGrid(gridSize); }
-        void SetVolume(Volume volume) final override { for (auto& b : brushes) b.SetVolume(volume); }
+        void Transform(const mat4x4& matrix) final override { for (auto& b : solids) b.Transform(matrix); }
+        void AlignToGrid(vec3 gridSize) final override { for (auto& b : solids) b.AlignToGrid(gridSize); }
+        void SetVolume(Volume volume) final override { for (auto& b : solids) b.SetVolume(volume); }
 
     };
 
@@ -124,10 +124,10 @@ namespace chisel
 
         Map() : BrushEntity()
         {
-            //brushes.push_back(CubeBrush(tree.CreateBrush(), Volumes::Solid));
-            //brushes.push_back(CubeBrush(tree.CreateBrush(), Volumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(0.25, 2.0, 0.25))));
-            //brushes.push_back(CubeBrush(tree.CreateBrush(), Volumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.25f, 0.25))));
-            //brushes.push_back(CubeBrush(tree.CreateBrush(), Volumes::Solid, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.10f, 0.10))));
+            //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Solid));
+            //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(0.25, 2.0, 0.25))));
+            //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.25f, 0.25))));
+            //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Solid, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.10f, 0.10))));
 
             // Per-frame test
             /*if (tunnel && tunnel2)
