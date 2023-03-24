@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/Math.h"
+#include "math/Ray.h"
 
 namespace chisel
 {
@@ -21,6 +22,18 @@ namespace chisel
         Plane(vec3 a, vec3 b, vec3 c)
             : Plane(a, NormalFromPoints(a, b, c)) {}
 
+
+        bool Intersects(Ray ray, float& distance) const
+        {
+            const float denom = glm::dot(normal, ray.direction);
+            if (math::CloseEnough(denom, 0.0f))
+            {
+                return false;
+            }
+
+            distance = -(glm::dot(normal, ray.origin) + offset) / denom;
+            return distance >= 0.0f;
+        }
 
         float SignedDistance(const vec3& point) const
         {
