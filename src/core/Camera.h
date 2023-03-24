@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/Math.h"
+#include "math/Ray.h"
 #include "core/Transform.h"
 
 #include "platform/Window.h"
@@ -57,6 +58,17 @@ namespace chisel
             const float z = std::cos(angles.x) * std::sin(angles.y);
 
             return glm::normalize(vec3(x, z, y));
+        }
+
+
+        // TODO: Store viewport rect in camera?
+        Ray ScreenPointToRay(vec2 pos, Rect viewport)
+        {
+            vec2 rayNDC     = vec2(pos) / vec2(viewport.size * 0.5f) - 1.0f;
+            vec4 rayClip    = vec4(rayNDC.x, -rayNDC.y, -1, 1);
+            vec4 rayView    = glm::inverse(ProjMatrix()) * rayClip;
+            vec4 rayWorld   = glm::inverse(ViewMatrix()) * vec4(rayView.xyz, 0);
+            return Ray(position, rayWorld.xyz);
         }
 
     public:
