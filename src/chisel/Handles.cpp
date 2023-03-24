@@ -1,4 +1,5 @@
 #include "chisel/Handles.h"
+#include "chisel/Gizmos.h"
 #include "glm/ext/matrix_transform.hpp"
 
 #include <imgui.h>
@@ -144,6 +145,11 @@ namespace chisel
         ImGuizmo::DrawCubes(&view[0][0], &proj[0][0], &cube[0][0], 1);
     }
 
+    void Handles::DrawPoint(vec3 pos)
+    {
+        Gizmos.DrawIcon(pos, Gizmos.icnHandle, vec3(16.f));
+    }
+
     //--------------------------------------------------
     //  Grid
     //--------------------------------------------------
@@ -208,6 +214,7 @@ namespace chisel
         auto& g = grid.AddGroup();
         g.vertices.layout.Add<float>(3, VertexAttribute::Position);
         g.vertices.layout.Add<float>(1, VertexAttribute::TexCoord);
-        g.vertices.pointer = &gridVertices[0].x; g.vertices.count = gridVertices.size();
+        g.vertices.pointer = &gridVertices[0].x;
+        g.vertices.count = gridVertices.size();
     }
 }

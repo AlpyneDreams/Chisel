@@ -11,5 +11,18 @@ namespace chisel
         static inline Mesh Teapot = *Assets.Load<Mesh, ".OBJ">("models/teapot.obj");
         static inline Mesh Plane  = *Assets.Load<Mesh, ".OBJ">("models/plane.obj");
         static inline Mesh Quad   = *Assets.Load<Mesh, ".OBJ">("models/quad.obj");
+        static inline Mesh Line;
+
+        Primitives()
+        {
+            auto& g = Line.AddGroup();
+            g.vertices.layout.Add<float>(3, VertexAttribute::Position);
+            g.vertices.pointer = &lineStart;
+            g.vertices.count = 2;
+        }
+
+    private:
+        vec3 lineStart = Vectors.Zero;
+        vec3 lineEnd   = Vectors.Forward;
     } Primitives;
 }

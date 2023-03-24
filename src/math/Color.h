@@ -98,10 +98,11 @@ namespace chisel
     using Color32 = ColorRGBA<byte>;
 
     // List of common colors
-    const struct {
+    const inline struct {
         Color Transparent   = Color(0, 0, 0, 0);
         Color Black         = Color(0, 0, 0, 1);
         Color White         = Color(1, 1, 1, 1);
+        Color Green         = Color(0, 1, 0, 1);
     } Colors;
 
 }
