@@ -1,5 +1,3 @@
-#pragma once
-
 #include "gui/Layout.h"
 #include "chisel/Chisel.h"
 #include "platform/Platform.h"

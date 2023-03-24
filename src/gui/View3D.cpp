@@ -1,5 +1,3 @@
-#pragma once
-
 #include "gui/View3D.h"
 #include "chisel/Tools.h"
 #include "chisel/Selection.h"
