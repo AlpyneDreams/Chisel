@@ -13,6 +13,7 @@
 #include <ImGuizmo.h>
 
 #include <vector>
+#include <optional>
 
 namespace chisel
 {

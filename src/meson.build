@@ -17,6 +17,9 @@ chisel_src = files(
     'render/bgfx/RenderBGFX.cpp',
 
     'gui/Common.cpp',
+    'gui/Layout.cpp',
+    'gui/View3D.cpp',
+    'gui/Viewport.cpp',
     'gui/impl/imgui_impl_sdl.cpp',
     'gui/impl/imgui_impl_bgfx.cpp',
 
