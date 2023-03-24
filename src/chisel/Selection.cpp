@@ -53,7 +53,8 @@ namespace chisel
             return;
 
         ent->SetSelected(false);
-        std::erase(m_selection, ent);
+        if (m_selection.size() > 0)
+            std::erase(m_selection, ent);
     }
 
     void Selection::Toggle(Selectable* ent)
