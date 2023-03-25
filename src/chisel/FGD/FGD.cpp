@@ -251,6 +251,8 @@ namespace chisel
                 cur++;
                 if (*cur == ':')
                     return "";
+                if (*cur == Tokens.StringLiteral)
+                    return ParseString();
                 return *cur++;
             }
             return "";
@@ -259,10 +261,12 @@ namespace chisel
 
         String ParseString()
         {
-            String str = Expect(Tokens.StringLiteral);
+            std::string part = Expect(Tokens.StringLiteral);
+            String str = String(str::trim(part, "\""));
             while (*cur == '+') {
                 cur++;
-                str += Expect(Tokens.StringLiteral);
+                part = Expect(Tokens.StringLiteral);
+                str += String(str::trim(part, "\""));
             }
             return str;
         }
