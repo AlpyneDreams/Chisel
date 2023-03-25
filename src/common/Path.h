@@ -13,6 +13,8 @@ namespace chisel::fs
     public:
         Path(auto... args) : m_path(args...), m_text(m_path.string()) {}
 
+        Path dirname() { return m_path.parent_path(); }
+
         // Append a subpath with a separator
         Path& operator /=(const Path& path)
         {

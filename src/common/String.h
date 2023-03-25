@@ -61,7 +61,7 @@ namespace chisel::str
     // Trim characters surrounding string
     constexpr std::string_view trim(std::string_view str, std::string_view chars = " \n\r")
     {
-        return trimEnd(trimStart(str));
+        return trimEnd(trimStart(str, chars), chars);
     }
 
     // Split string at one or more delimiters
