@@ -357,6 +357,10 @@ bool ImGui_ImplSDL2_ProcessEvent(const SDL_Event* event)
 // Get native window handle (viewport->PlatformHandleRaw)
 static void* ImGui_ImplSDL2_GetNWH(SDL_Window* window)
 {
+#if !defined( _WIN32 ) // JOSH: DXVK HACK HACK
+    return window;
+#endif
+
     SDL_SysWMinfo info;
     SDL_VERSION(&info.version);
     if (SDL_GetWindowWMInfo(window, &info)) {
@@ -751,6 +755,9 @@ static void ImGui_ImplSDL2_CreateWindow(ImGuiViewport* viewport)
 #if !defined(_WIN32)
     // See SDL hack in ImGui_ImplSDL2_ShowWindow().
     sdl_flags |= (viewport->Flags & ImGuiViewportFlags_NoTaskBarIcon) ? SDL_WINDOW_SKIP_TASKBAR : 0;
+#endif
+#if !defined( _WIN32 ) // JOSH: DXVK HACK HACK
+    sdl_flags |= SDL_WINDOW_VULKAN;
 #endif
 #if SDL_HAS_ALWAYS_ON_TOP
     sdl_flags |= (viewport->Flags & ImGuiViewportFlags_TopMost) ? SDL_WINDOW_ALWAYS_ON_TOP : 0;

@@ -35,6 +35,10 @@ namespace chisel
                 y = SDL_WINDOWPOS_CENTERED;
             int flags = SDL_WINDOW_SHOWN | (resizable ? SDL_WINDOW_RESIZABLE : 0) | (borderless ? SDL_WINDOW_BORDERLESS : 0);
 
+#if !defined( _WIN32 ) // JOSH: DXVK HACK HACK
+            flags |= SDL_WINDOW_VULKAN;
+#endif
+
             // Create window!
             window = SDL_CreateWindow(name, x, y, width, height, flags);
 
@@ -151,8 +155,10 @@ namespace chisel
 
         void* GetHandle() { return window; }
     #if PLATFORM_X11
-        void* GetNativeDisplay() { return GetSysWMInfo().info.x11.display; }
-        void* GetNativeWindow() { return (void*)(uintptr_t)GetSysWMInfo().info.x11.window; }
+        //void* GetNativeDisplay() { return GetSysWMInfo().info.x11.display; }
+        //void* GetNativeWindow() { return (void*)(uintptr_t)GetSysWMInfo().info.x11.window; }
+        void* GetNativeDisplay() { return window; }
+        void* GetNativeWindow() { return window; }
     #elif PLATFORM_WINDOWS
         void* GetNativeDisplay() { return GetSysWMInfo().info.win.window; }
         void* GetNativeWindow() { return GetSysWMInfo().info.win.window; }

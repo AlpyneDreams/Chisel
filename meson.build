@@ -7,6 +7,7 @@ project('engine', 'cpp',
 add_global_arguments('-DIMGUI_USE_WCHAR32', language: 'cpp')
 
 windows    = build_machine.system() == 'windows'
+linux      = build_machine.system() == 'linux'
 
 # Force use local WrapDB SDL2 version on Windows
 sdl_dep    = dependency(windows ? 'libsdl2' : 'sdl2', fallback: 'sdl2', default_options: ['with_main=false'], static: true)
@@ -19,6 +20,32 @@ imguizmo_dep  = dependency('imguizmo')
 cmake = import('cmake')
 glaze_proj = cmake.subproject('glaze')
 glaze_dep = glaze_proj.dependency('glaze_glaze')
+
+bgfx_inc = [
+    'submodules/bgfx/include',
+    'submodules/bgfx/3rdparty',
+    'submodules/bgfx/3rdparty/khronos',
+    'submodules/bx/include',
+    'submodules/bx/3rdparty',
+    'submodules/bimg/include',
+    'submodules/bimg/3rdparty/astc-encoder',
+    'submodules/bimg/3rdparty/astc-encoder/include',
+]
+
+if windows
+    bgfx_inc += [
+        'submodules/bx/include/compat/msvc'
+    ]
+endif
+
+if linux
+    bgfx_inc += [
+        'submodules/bgfx/3rdparty/directx-headers/include/directx',
+        'submodules/bgfx/3rdparty/directx-headers/include',
+        'submodules/bgfx/3rdparty/directx-headers/include/wsl/stubs',
+        'submodules/bx/include/compat/linux',
+    ]
+endif
 
 bgfx_dep = declare_dependency(
     sources: files(
@@ -50,18 +77,7 @@ bgfx_dep = declare_dependency(
         'submodules/bimg/3rdparty/astc-encoder/source/astcenc_weight_align.cpp',
         'submodules/bimg/3rdparty/astc-encoder/source/astcenc_weight_quant_xfer_tables.cpp',
     ),
-    include_directories: include_directories([
-        'submodules/bgfx/include',
-        'submodules/bgfx/3rdparty',
-        'submodules/bgfx/3rdparty/khronos',
-        'submodules/bx/include',
-        'submodules/bx/3rdparty',
-        'submodules/bimg/include',
-        'submodules/bimg/3rdparty/astc-encoder',
-        'submodules/bimg/3rdparty/astc-encoder/include',
-    ] + (windows ? [
-        'submodules/bx/include/compat/msvc'
-    ] : [])),
+    include_directories: include_directories(bgfx_inc),
     compile_args: [
         '-DBX_CONFIG_DEBUG=0',
         '-DBGFX_CONFIG_RENDERER_OPENGL=0',
