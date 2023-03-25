@@ -79,6 +79,8 @@ namespace chisel
             std::string defaultValue;
             bool report = false;
             bool readOnly = false;
+            bool intChoices = false;
+            Dict<std::string> choices;
         };
 
         struct InputOutput : Base

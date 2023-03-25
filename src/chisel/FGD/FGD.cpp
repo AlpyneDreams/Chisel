@@ -58,7 +58,7 @@ namespace chisel
                     case "include"_h:
                     {
                         cur++;
-                        auto filename = Expect(Tokens.StringLiteral).text.str;
+                        auto filename = ParseString();
                         filename = str::trim(filename, "\"");
                         fs::Path dirname = fs::Path(fgd.path).dirname();
                         fs::Path path = dirname / filename;
@@ -97,7 +97,7 @@ namespace chisel
                     {
                         cur++;
                         Expect('=');
-                        Expect(Tokens.StringLiteral);
+                        ParseString();
                         Expect('[');
                         while (*cur == Tokens.StringLiteral)
                         {
@@ -219,7 +219,23 @@ namespace chisel
             {
                 Expect('=');
                 Expect('[');
-                while (*cur != ']') cur++;
+                if (*cur == Tokens.Number || *cur == Tokens.StringLiteral)
+                {
+                    auto type = cur->type;
+                    var.intChoices = true;
+                    do
+                    {
+                        auto num = Expect(type);
+                        Expect(':');
+                        var.choices[num] = ParseString();
+                        if (var.type == FGD::Flags)
+                        {
+                            // TODO: Default flags...
+                            Expect(':');
+                            Expect(Tokens.Number);
+                        }
+                    } while (*cur == type);
+                }
                 Expect(']');
             }
             printdbg("    {}({})", var.name, var.type);
