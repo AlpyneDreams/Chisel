@@ -23,6 +23,7 @@ namespace chisel
         bool  gridUniform    = true;
         float rotationSnap   = 15.f;
 
+        bool  mouseOver      = false;
         bool  popupOpen      = false;
 
     // Virtual Methods //

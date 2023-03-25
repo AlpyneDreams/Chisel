@@ -64,12 +64,12 @@ namespace chisel
                     if (activeTool == Tool::Entity)
                         break;
 
-                    if (Mouse.GetButtonDown(MouseButton::Left))
+                    if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
                     {
                         draggingBlock = true;
                         dragStartPos  = point;
                     }
-                    else if (Mouse.GetButtonUp(MouseButton::Left))
+                    else if (draggingBlock && Mouse.GetButtonUp(MouseButton::Left))
                     {
                         draggingBlock = false;
                         if (point != dragStartPos)

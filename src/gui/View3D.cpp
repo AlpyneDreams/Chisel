@@ -200,7 +200,7 @@ namespace chisel
         viewport = Rect(pos.x, pos.y, size.x, size.y);
 
         // If mouse is over viewport,
-        if (ImGui::IsWindowHovered() && IsMouseOver(viewport))
+        if (mouseOver = ImGui::IsWindowHovered(ImGuiHoveredFlags_None) && IsMouseOver(viewport))
         {
             Camera& camera = GetCamera();
 
