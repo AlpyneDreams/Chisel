@@ -15,6 +15,16 @@ struct fmt::formatter<chisel::Token> : fmt::ostream_formatter {};
 
 namespace chisel
 {
+    static inline std::string ReadFGDFile(const char* path)
+    {
+        auto str = fs::readTextFile(path);
+        if (!str) {
+            Console.Warn("Could not read FGD file: {}", path);
+            str = "";
+        }
+        return *str;
+    }
+
     struct FGDParser : BaseParser
     {
         using String = FGD::String;
@@ -36,6 +46,28 @@ namespace chisel
                 auto hash = HashedString(name);
                 switch (hash)
                 {
+                    case "baseclass"_h:
+                    case "pointclass"_h:
+                    case "solidclass"_h:
+                    case "npcclass"_h:
+                    case "keyframeclass"_h:
+                    case "moveclass"_h:
+                    case "filterclass"_h:
+                        ParseClass();
+                        continue;
+                    case "include"_h:
+                    {
+                        cur++;
+                        auto filename = Expect(Tokens.StringLiteral).text.str;
+                        filename = str::trim(filename, "\"");
+                        fs::Path dirname = fs::Path(fgd.path).dirname();
+                        fs::Path path = dirname / filename;
+                        auto str = ReadFGDFile(path);
+                        Lexer lexer(str, false);
+                        FGDParser parser(fgd, lexer.tokens);
+                        parser.Parse();
+                        break;
+                    }
                     case "mapsize"_h:
                     {
                         cur++;
@@ -49,17 +81,38 @@ namespace chisel
                         fgd.maxSize = stoi(max);
                         break;
                     }
-                    case "baseclass"_h:
-                    case "pointclass"_h:
-                    case "solidclass"_h:
-                    case "npcclass"_h:
-                    case "keyframeclass"_h:
-                    case "moveclass"_h:
-                    case "filterclass"_h:
-                        ParseClass();
-                        continue;
+                    case "materialexclusion"_h:
+                    {
+                        cur++;
+                        Expect('[');
+                        while (*cur == Tokens.StringLiteral)
+                        {
+                            fgd.materialExclusion.push_back(*cur++);
+                        }
+                        Expect(']');
+                        printdbg("@MaterialExclusion");
+                        break;
+                    }
+                    case "autovisgroup"_h:
+                    {
+                        cur++;
+                        Expect('=');
+                        Expect(Tokens.StringLiteral);
+                        Expect('[');
+                        while (*cur == Tokens.StringLiteral)
+                        {
+                            cur++;
+                            Expect('[');
+                            while (*cur == Tokens.StringLiteral) cur++;
+                            Expect(']');
+                        }
+                        Expect(']');
+                        printdbg("@MaterialExclusion");
+                        break;
+                    }
+
                     default:
-                        printdbg(name);
+                        Console.Warn(name);
                 }
             } while (*cur);
         }
@@ -194,13 +247,11 @@ namespace chisel
         }
     };
 
-    FGD::FGD(const char* path)
+    FGD::FGD(const char* path) : path(path)
     {
-        auto str = fs::readTextFile(path);
-        if (!str)
-            return;
-        auto tokens = Lexer(*str, false).tokens;
-        FGDParser parser(*this, tokens);
+        auto str = ReadFGDFile(path);
+        Lexer lexer(str, false);
+        FGDParser parser(*this, lexer.tokens);
         parser.Parse();
     }
 }

@@ -57,7 +57,10 @@ namespace chisel
             List<Helper> helpers;
         };
 
+        String path;
+
         List<Class> classes;
+        List<String> materialExclusion;
 
         int minSize = -16384;
         int maxSize = 16384;
