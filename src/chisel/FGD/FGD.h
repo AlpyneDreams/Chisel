@@ -59,7 +59,7 @@ namespace chisel
 
         String path;
 
-        List<Class> classes;
+        Dict<Class> classes;
         List<String> materialExclusion;
 
         int minSize = -16384;

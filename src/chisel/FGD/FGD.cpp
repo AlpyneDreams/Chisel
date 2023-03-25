@@ -119,7 +119,7 @@ namespace chisel
 
         void ParseClass()
         {
-            FGD::Class& cls = fgd.classes.emplace_back();
+            FGD::Class cls;
 
             auto type = Expect(Tokens.Name);
             while (*cur == Tokens.Name)
@@ -165,6 +165,8 @@ namespace chisel
                 cur++;
             }
             Expect(']');
+
+            fgd.classes.insert({ cls.name, cls });
         }
 
         void ParseVar(FGD::Class& cls)
