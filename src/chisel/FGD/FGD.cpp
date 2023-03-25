@@ -127,14 +127,36 @@ namespace chisel
                 FGD::Helper& helper = cls.helpers.emplace_back();
                 helper.name = *cur;
                 cur++;
+
+                // Parse helper args
                 if (*cur == '(')
                 {
-                    // TODO: Helper args
                     cur++;
-                    while (*cur != ')') cur++;
+                    while (*cur != ')')
+                    {
+                        String& str = helper.params.emplace_back();
+                        while (*cur != ',' && *cur != ')')
+                        {
+                            str += *cur++;
+                        }
+                        if (*cur == ',')
+                            cur++;
+                    }
                     Expect(')');
                 }
+                /*String str = "";
+                for (auto& param : helper.params)
+                    str += param + ", ";
+                printdbg("Helper: {}({})", helper.name, str);*/
                 printdbg("Helper: {}", helper.name);
+
+                // Base classes
+                if (str::toLower(helper.name) == "base")
+                {
+                    for (auto& param : helper.params)
+                        if (fgd.classes.contains(param))
+                            cls.bases.push_back(&fgd.classes.at(param));
+                }
             }
             Expect('=');
             cls.name = Expect(Tokens.Name);
@@ -188,6 +210,8 @@ namespace chisel
                 cur++;
             }
             var.displayName = ParseDescription();
+            if (var.displayName.empty())
+                var.displayName = var.name;
             var.defaultValue = ParseDefault();
             var.description = ParseDescription();
             if (var.type == "choices" || var.type == "flags")
