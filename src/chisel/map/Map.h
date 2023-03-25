@@ -16,6 +16,7 @@ namespace chisel
         std::string classname;
         std::string targetname;
 
+        // TODO: Variants...
         std::unordered_map<std::string, std::string> kv;
         std::unordered_map<std::string, std::string> connections;
 

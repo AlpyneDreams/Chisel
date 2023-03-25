@@ -44,7 +44,7 @@ namespace chisel
         //constexpr HashedString(HashedString& copy) : hash(copy.hash), str(copy.str) {}
 
         constexpr operator Hash() const { return hash; }
-        constexpr operator std::string_view() const { return str; }
+        operator std::string_view() const { return str; }
 
         template <size_t N>
         constexpr bool operator==(const char (&other)[N]) const { return str == other; }
@@ -53,6 +53,11 @@ namespace chisel
     constexpr HashedString operator""_h(const char* str, size_t size) {
         return HashedString(str, size);
     }
+
+    constexpr Hash operator""_hash(const char* str, size_t size) {
+        return HashedString(str, size).hash;
+    }
+
 }
 
 template<>

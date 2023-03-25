@@ -27,7 +27,7 @@ namespace chisel
 
     struct FGDParser : BaseParser
     {
-        using String = FGD::String;
+        using String = std::string;
 
         FGD& fgd;
         FGDParser(FGD& fgd, std::vector<Token>& tokens) : BaseParser(tokens), fgd(fgd) {}
@@ -197,7 +197,8 @@ namespace chisel
             FGD::Var& var = cls.variables.try_emplace(name).first->second;
             var.name = name;
             Expect('(');
-            var.type = str::toLower(Expect(Tokens.Name).text);
+            auto typeName = str::toLower(Expect(Tokens.Name).text);
+            var.type = FGD::VarType(HashedString(typeName).hash);
             Expect(')');
             if (cur->text == "report"_h)
             {
@@ -214,7 +215,7 @@ namespace chisel
                 var.displayName = var.name;
             var.defaultValue = ParseDefault();
             var.description = ParseDescription();
-            if (var.type == "choices" || var.type == "flags")
+            if (var.type == FGD::Choices || var.type == FGD::Flags)
             {
                 Expect('=');
                 Expect('[');
