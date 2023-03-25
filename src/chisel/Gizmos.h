@@ -26,13 +26,13 @@ namespace chisel
             r.SetTexture(0, icon);
             r.SetBlendFunc(render::BlendFuncs::Alpha);
             r.SetDepthWrite(false);
-            //mat4x4 mtx = glm::translate(glm::scale(mat4x4(1.0f), glm::vec3(64.0f)), pos);
             mat4x4 mtx = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
             r.SetTransform(mtx);
             r.DrawMesh(&Primitives.Quad);
             r.SetDepthWrite(true);
         }
 
+        // TODO: These could be batched.
         void DrawLine(vec3 start, vec3 end, Color color = Colors.White)
         {
             auto& r = Tools.Render;
