@@ -4,10 +4,12 @@
 #include "common/String.h"
 #include "chisel/VMF/KeyValues.h"
 #include "chisel/VMF/VMF.h"
+#include "chisel/FGD/FGD.h"
 
 #include "console/Console.h"
 #include "gui/ConsoleWindow.h"
 #include "gui/Layout.h"
+#include "gui/Inspector.h"
 #include "gui/Viewport.h"
 #include "gui/Keybinds.h"
 
@@ -21,6 +23,8 @@ namespace chisel
 {
     void Chisel::Run()
     {
+        fgd = new FGD("core/test.fgd");
+
         Tools.Init();
 
         // Add chisel systems...
@@ -29,6 +33,7 @@ namespace chisel
         Tools.systems.AddSystem<Layout>();
         Tools.systems.AddSystem<MainToolbar>();
         Tools.systems.AddSystem<SelectionModeToolbar>();
+        Tools.systems.AddSystem<Inspector>();
         viewport = &Tools.systems.AddSystem<Viewport>();
 
         // Setup Object ID pass
@@ -42,6 +47,11 @@ namespace chisel
 
         Tools.Loop();
         Tools.Shutdown();
+    }
+
+    Chisel::~Chisel()
+    {
+        delete fgd;
     }
     
     bool Chisel::LoadVMF(std::string_view path)

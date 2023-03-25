@@ -21,6 +21,9 @@ namespace chisel
     inline class Chisel
     {
     public:
+    // Game Data //
+        class FGD* fgd;
+
     // Editing //
         Map map;
 
@@ -55,5 +58,6 @@ namespace chisel
 
         void Run();
 
+        ~Chisel();
     } Chisel;
 }

@@ -45,6 +45,7 @@ namespace chisel
         Selection();
 
         bool Empty() const;
+        uint Count() const { return m_selection.size(); }
         void Select(Selectable* ent);
         void Unselect(Selectable* ent);
         void Toggle(Selectable* ent);
@@ -53,6 +54,7 @@ namespace chisel
 
         Selectable** begin() { return m_selection.size() > 0 ? &m_selection.front() : nullptr; }
         Selectable** end()   { return m_selection.size() > 0 ? &m_selection.back() + 1 : nullptr; }
+        Selectable* operator [](size_t index) { return m_selection[index]; }
 
     public:
     // Selectable Interface //
