@@ -123,6 +123,14 @@ namespace chisel
                     brush->Rebuild();
         }
 
+        PointEntity* AddPointEntity(const char* classname)
+        {
+            PointEntity* ent = new PointEntity();
+            ent->classname = classname;
+            entities.push_back(ent);
+            return ent;
+        }
+
         Map() : BrushEntity()
         {
             //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Solid));

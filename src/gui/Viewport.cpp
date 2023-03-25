@@ -62,7 +62,17 @@ namespace chisel
                     Handles.DrawPoint(point);
 
                     if (activeTool == Tool::Entity)
+                    {
+                        if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
+                        {
+                            // TODO: Entity type selection popup
+                            PointEntity* pt = map.AddPointEntity("npc_personality_core");
+                            pt->origin = point;
+                            Selection.Clear();
+                            Selection.Select(pt);
+                        }
                         break;
+                    }
 
                     if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
                     {
