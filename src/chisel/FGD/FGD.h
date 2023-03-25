@@ -10,10 +10,6 @@ namespace chisel
 {
     class FGD
     {
-        /*enum ClassType
-        {
-            BaseClass, PointClass, SolidClass, NPCClass, KeyframeClass, MoveClass, FilterClass
-        };*/
         template <class T>
         using Dict = std::map<std::string, T>;
 
@@ -22,6 +18,11 @@ namespace chisel
 
         friend struct FGDParser;
     public:
+        enum ClassType
+        {
+            BaseClass, PointClass, SolidClass, NPCClass, KeyframeClass, MoveClass, FilterClass
+        };
+
         enum VarType : Hash
         {
             BadType = 0,
@@ -41,8 +42,8 @@ namespace chisel
             Sprite              = "sprite"_hash,
             Sound               = "sound"_hash,
             Vector              = "vector"_hash,
-            NPCClass            = "npcclass"_hash,
-            FilterClass         = "filterclass"_hash,
+            NPCEntityClass      = "npcclass"_hash,
+            FilterEntityClass   = "filterclass"_hash,
             Float               = "float"_hash,
             Material            = "material"_hash,
             Scene               = "scene"_hash,
@@ -97,7 +98,7 @@ namespace chisel
 
         struct Class : Base
         {
-            Dict<Var> variables;
+            ClassType type;
             List<Var> variables;
             Dict<InputOutput> inputs;
             Dict<InputOutput> outputs;

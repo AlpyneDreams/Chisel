@@ -46,15 +46,13 @@ namespace chisel
                 auto hash = HashedString(name);
                 switch (hash)
                 {
-                    case "baseclass"_h:
-                    case "pointclass"_h:
-                    case "solidclass"_h:
-                    case "npcclass"_h:
-                    case "keyframeclass"_h:
-                    case "moveclass"_h:
-                    case "filterclass"_h:
-                        ParseClass();
-                        continue;
+                    case "baseclass"_h:         ParseClass(FGD::BaseClass); continue;
+                    case "pointclass"_h:        ParseClass(FGD::PointClass); continue;
+                    case "solidclass"_h:        ParseClass(FGD::SolidClass); continue;
+                    case "npcclass"_h:          ParseClass(FGD::NPCClass); continue;
+                    case "keyframeclass"_h:     ParseClass(FGD::KeyframeClass); continue;
+                    case "moveclass"_h:         ParseClass(FGD::MoveClass); continue;
+                    case "filterclass"_h:       ParseClass(FGD::FilterClass); continue;
                     case "include"_h:
                     {
                         cur++;
@@ -117,11 +115,11 @@ namespace chisel
             } while (*cur);
         }
 
-        void ParseClass()
+        void ParseClass(FGD::ClassType type)
         {
             FGD::Class cls;
-
-            auto type = Expect(Tokens.Name);
+            cls.type = type;
+            Expect(Tokens.Name); // type name
             while (*cur == Tokens.Name)
             {
                 FGD::Helper& helper = cls.helpers.emplace_back();

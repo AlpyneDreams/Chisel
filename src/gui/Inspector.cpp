@@ -68,6 +68,9 @@ namespace chisel
         {
             for (auto& [name, cls] : Chisel.fgd->classes)
             {
+                if (cls.type == FGD::BaseClass)
+                    continue;
+
                 bool selected = ent->classname == name;
                 if (ImGui::Selectable(name.c_str(), selected)) {
                     ent->classname = name;
