@@ -6,6 +6,7 @@
 #include <cctype>
 #include <map>
 #include <set>
+#include <initializer_list>
 
 #include "common/Common.h"
 #include "common/Hash.h"
@@ -97,9 +98,9 @@ namespace chisel
 
         explicit operator TokenType() const { return type; }
 
-        operator HashedString() const { return text; }
+        explicit operator HashedString() const { return text; }
 
-        constexpr operator bool() const { return type != Tokens.End && type != Tokens.None; }
+        explicit constexpr operator bool() const { return type != Tokens.End && type != Tokens.None; }
 
         constexpr bool operator ==(const Type& t) const { return type == t; }
         constexpr bool operator ==(const Token& t) const { return type == t.type && text == t.text; }
@@ -133,6 +134,8 @@ namespace chisel
         bool IsDelim() const {
             return IsOpenDelim() || IsCloseDelim();
         }
+
+        operator std::string() const { return String(); }
 
         friend std::ostream& operator << (std::ostream& os, const Token& t) {
             return os << t.String(); //t.ToString();

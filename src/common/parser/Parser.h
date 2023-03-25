@@ -28,24 +28,26 @@ namespace chisel
                 // TODO: Exception?
                 std::cerr << "err"/*cur->location*/ << ": Unexpected token '" << *cur << "'.\n";
                 std::cerr << "err"/*cur->location*/ << ": Expected '" << prototype << "'.\n";
-                std::cerr << cur;
+                //std::cerr << cur;
                 exit(1);
             }
             return cur++;
         }
 
+        /*
         Token Expect(auto... tokens)
         {
-            TokenSet set { tokens... };
+            TokenSet set = TokenSet { (TokenType(tokens), ...) };
             if (!set.contains(cur->type)) {
                 // TODO: Exception?
-                std::cerr << "err"/*cur->location*/ << ": Unexpected token '" <<  *cur << "'.\n";
+                //std::cerr << cur->location << ": Unexpected token '" <<  *cur << "'.\n";
+                std::cerr << "err" << ": Unexpected token '" <<  *cur << "'.\n";
                 // TODO: Expected...
                 std::cerr << cur;
                 exit(1);
             }
             return cur++;
-        }
+        }*/
 
         int Skip(auto... args) { return Skip(TokenSet { args... }); }
 

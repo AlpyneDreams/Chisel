@@ -24,11 +24,13 @@ namespace chisel
         //Location location = { "input", 1, 0 };
         std::vector<Token> tokens;
 
-        Lexer(String& input) : text(input), cur(std::string_view(text))
+        Lexer(String& input, bool newlines = true) : text(input), cur(std::string_view(text))
         {
             for (Token t = GetToken(); t; t = GetToken()) {
                 //if (!t.location.line)
                     //t.location = location;
+                if (!newlines && t == Tokens.Newline)
+                    continue;
                 tokens.push_back(t);
             }
             tokens.push_back(Tokens.End);
@@ -66,8 +68,8 @@ namespace chisel
                 return Token(name);
             }
 
-            // Number: [0-9.]+
-            if (isdigit(cur) || (cur == '.' && isdigit(cur+1)))
+            // Number: [+-.]?[0-9.]+
+            if (isdigit(cur) || ((cur == '.' || cur == '+' || cur == '-') && isdigit(cur+1)))
             {
                 const char* start = cur;
 
