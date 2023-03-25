@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <string>
 
 #include "common/Hash.h"
@@ -15,7 +15,8 @@ namespace chisel
             BaseClass, PointClass, SolidClass, NPCClass, KeyframeClass, MoveClass, FilterClass
         };*/
         template <class T>
-        using Dict = std::unordered_map<std::string, T>;
+        using Dict = std::map<std::string, T>;
+
         template <class T>
         using List = std::vector<T>;
 
@@ -97,6 +98,7 @@ namespace chisel
         struct Class : Base
         {
             Dict<Var> variables;
+            List<Var> variables;
             Dict<InputOutput> inputs;
             Dict<InputOutput> outputs;
             List<Class*> bases;

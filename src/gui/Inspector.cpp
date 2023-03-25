@@ -15,8 +15,6 @@ namespace chisel
 {
     Inspector::Inspector() : GUI::Window(ICON_MC_INFORMATION, "Inspector", 512, 512, true, ImGuiWindowFlags_MenuBar)
     {
-        for (auto& [name, cls] : Chisel.fgd->classes)
-            classNameList.push_back(name.c_str());
     }
 
     void Inspector::Draw()
@@ -66,11 +64,19 @@ namespace chisel
 
     void Inspector::DrawEntityInspector(Entity* ent)
     {
-        int classIndex = 0;
-        for (int i = 0; i < classNameList.size(); i++)
-            if (ent->classname == classNameList[i])
-                classIndex = i;
-        ImGui::Combo("Class", &classIndex, classNameList.data(), classNameList.size());
+        if (ImGui::BeginCombo("Class", ent->classname.c_str()))
+        {
+            for (auto& [name, cls] : Chisel.fgd->classes)
+            {
+                bool selected = ent->classname == name;
+                if (ImGui::Selectable(name.c_str(), selected)) {
+                    ent->classname = name;
+                }
+                if (selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
 
         FGD::Class cls = Chisel.fgd->classes[ent->classname];
 
@@ -90,6 +96,9 @@ namespace chisel
             case Integer:   return ImGui::InputInt(name, &i);
             case Float:     return ImGui::InputFloat(name, &v[0]);
             case Boolean:   return ImGui::Checkbox(name, &b);
+            case TargetSrc:
+            case TargetDest:
+            case TargetNameOrClass: // TODO: Entity pickers
             case String:    return ImGui::InputText(name, value);
             case Choices:
             {
@@ -124,7 +133,8 @@ namespace chisel
             case Vector:
             case Origin:    return ImGui::InputFloat3(name, v);
 
-            case Script:    return ImGui::Button(ICON_MC_SCRIPT " Scripts");
+            case ScriptList:    return ImGui::Button(ICON_MC_SCRIPT " Scripts");
+            case Script:        return ImGui::Button(ICON_MC_SCRIPT " Script");
         }
     }
 
@@ -177,7 +187,7 @@ namespace chisel
         //ImGui::TableSetupColumn("Value");
         //ImGui::TableHeadersRow();
 
-        for (int varNum = 0, varCount = cls->variables.size(); auto& [name, var] : cls->variables)
+        for (int varNum = 0, varCount = cls->variables.size(); auto& var : cls->variables)
         {
             ImGui::TableNextRow(); ImGui::TableNextColumn();
 

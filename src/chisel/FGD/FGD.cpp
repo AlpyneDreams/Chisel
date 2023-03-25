@@ -194,7 +194,7 @@ namespace chisel
         void ParseVar(FGD::Class& cls)
         {
             auto name = Expect(Tokens.Name);
-            FGD::Var& var = cls.variables.try_emplace(name).first->second;
+            FGD::Var& var = cls.variables.emplace_back();
             var.name = name;
             Expect('(');
             auto typeName = str::toLower(Expect(Tokens.Name).text);
@@ -225,7 +225,7 @@ namespace chisel
                     var.intChoices = true;
                     do
                     {
-                        auto num = Expect(type);
+                        auto num = type == Tokens.StringLiteral ? ParseString() : Expect(type);
                         Expect(':');
                         var.choices[num] = ParseString();
                         if (var.type == FGD::Flags)

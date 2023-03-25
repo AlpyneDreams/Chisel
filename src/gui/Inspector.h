@@ -18,7 +18,5 @@ namespace chisel
 
         void Draw() override;
         void DrawEntityInspector(Entity* ent);
-    
-        std::vector<const char*> classNameList;
     };
 }
