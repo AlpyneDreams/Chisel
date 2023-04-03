@@ -2,6 +2,7 @@
 
 #include "common/Common.h"
 #include "common/Filesystem.h"
+#include "assets/Asset.h"
 #include "core/GraphicsBuffer.h"
 #include "render/TextureFormat.h"
 #include "console/Console.h"
@@ -11,7 +12,7 @@
 
 namespace chisel
 {
-    struct Texture : GraphicsBuffer
+    struct Texture : GraphicsBuffer, Asset
     {
         using Format = render::TextureFormat;
 

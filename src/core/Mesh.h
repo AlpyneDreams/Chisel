@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Common.h"
+#include "assets/Asset.h"
 #include "math/Math.h"
 #include "VertexLayout.h"
 #include "VertexBuffer.h"
@@ -10,7 +11,7 @@
 
 namespace chisel
 {
-    struct Mesh
+    struct Mesh : Asset
     {
         struct Group {
             VertexBuffer vertices = VertexBuffer();
