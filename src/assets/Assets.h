@@ -12,7 +12,6 @@
 #include "../submodules/libvpk-plusplus/libvpk++.h"
 
 #include <vector>
-#include <map>
 
 namespace chisel
 {
@@ -25,7 +24,8 @@ namespace chisel
 
         std::vector<Path> searchPaths;
         std::vector<std::unique_ptr<libvpk::VPKSet>> pakFiles;
-        std::unordered_map<Path, void*> loadedAssets;
+
+        static inline AssetTable& AssetDB = Asset::AssetDB;
 
         Assets()
         {
@@ -39,7 +39,7 @@ namespace chisel
 
         bool IsLoaded(const Path& path)
         {
-            return loadedAssets.contains(path);
+            return AssetDB.contains(path);
         }
 
         template <class T>
@@ -47,7 +47,7 @@ namespace chisel
         {
             // Cache hit
             if (IsLoaded(path)) [[likely]]
-                return (T*)loadedAssets[path];
+                return (T*)AssetDB[path];
 
             // Lookup file extension
             auto ext = str::toUpper(path.ext());
@@ -77,9 +77,6 @@ namespace chisel
                 Console.Error("[Assets] Exception: '{}'", err.what());
                 return nullptr;
             }
-
-            // Cache loaded asset
-            loadedAssets[path] = ptr;
 
             return ptr;
         }

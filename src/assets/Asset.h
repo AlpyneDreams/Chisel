@@ -5,6 +5,9 @@
 
 namespace chisel
 {
+    
+    using AssetTable = std::unordered_map<fs::Path, struct Asset*>;
+
     struct Asset
     {
         using Path = fs::Path;
@@ -31,7 +34,7 @@ namespace chisel
             AssetDB[path] = this;
         }
 
-        static inline std::unordered_map<Path, Asset*> AssetDB;
+        static inline AssetTable AssetDB;
     };
 }
 
