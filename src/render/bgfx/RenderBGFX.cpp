@@ -500,7 +500,7 @@ namespace chisel::render
                 return;
 
             if (!texture->Valid()) {
-                Console.Error("Tried to upload texture '{}' but it has no data!", texture->path);
+                Console.Error("Tried to upload texture '{}' but it has no data!", texture->GetPath());
                 return;
             }
 
@@ -526,7 +526,7 @@ namespace chisel::render
             handle->texture = tex;
 
             // TODO: Should we really create one sampler for each texture?
-            std::string samplerName = std::string("texture_") + std::to_string(std::hash<fs::Path>()(texture->path));
+            std::string samplerName = std::string("texture_") + std::to_string(std::hash<fs::Path>()(texture->GetPath()));
             handle->sampler = bgfx::createUniform(samplerName.c_str(), bgfx::UniformType::Sampler);
             
             texture->handle = handle;

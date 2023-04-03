@@ -48,8 +48,8 @@ namespace chisel
 
         void Init()
         {
-            icnLight = Assets.Load<Texture, ".PNG" >("textures/ui/light.png");
-            icnHandle = Assets.Load<Texture, ".PNG" >("textures/ui/handle.png");
+            icnLight = Assets.Load<Texture>("textures/ui/light.png");
+            icnHandle = Assets.Load<Texture>("textures/ui/handle.png");
             sh_Sprite = Tools.Render.LoadShader("billboard", "sprite");
         }
     } Gizmos;

@@ -1,9 +1,12 @@
 #pragma once
 
+#include "assets/Asset.h"
+#include "assets/AssetLoader.h"
 #include "assets/SearchPaths.h"
 #include "console/Console.h"
 #include "common/Common.h"
 #include "common/String.h"
+#include "common/Span.h"
 #include "common/Filesystem.h"
 #include "core/Mesh.h"
 #include "../submodules/libvpk-plusplus/libvpk++.h"
@@ -13,13 +16,7 @@
 
 namespace chisel
 {
-    // TODO: Better way to define asset loaders.
     // TODO: Exceptions or Result<T> for FindFile, Load, etc...
-
-    // Override this to support different asset formats.
-    // Ext - all uppercase, starts with a dot
-    template <class Asset, FixedString Ext>
-    Asset* ImportAsset(std::string_view path, std::vector<uint8_t> data);
 
     inline struct Assets
     {
@@ -45,21 +42,39 @@ namespace chisel
             return loadedAssets.contains(path);
         }
 
-        template <class T, FixedString Ext>
+        template <class T>
         T* Load(const Path& path)
         {
             // Cache hit
-            if (IsLoaded(path))
+            if (IsLoaded(path)) [[likely]]
                 return (T*)loadedAssets[path];
 
+            // Lookup file extension
+            auto ext = str::toUpper(path.ext());
+            auto hash = HashedString(ext);
+            if (!AssetLoader<T>::Extensions.contains(hash)) {
+                Console.Error("[Assets] No importer for {} file: {}", ext, path);
+                return nullptr;
+            }
+
+            // Read asset file
             auto data = ReadFile(path);
             if (!data)
                 return nullptr;
 
+            // TODO: Memory-manage the asset
+            T* ptr = new T();
+            ptr->SetPath(path);
+
             // Attempt to load asset for first time
-            T* ptr = ImportAsset<T, Ext>(path, std::move(*data));
-            if (!ptr) {
-                Console.Error("[Assets] Failed to import {} asset: {}", Ext.value, path);
+            try
+            {
+                AssetLoader<T>::Extensions[hash]->Load(*ptr, *data);
+            }
+            catch (std::exception& err)
+            {
+                Console.Error("[Assets] Failed to import {} asset: {}", ext, path);
+                Console.Error("[Assets] Exception: '{}'", err.what());
                 return nullptr;
             }
 
@@ -113,17 +128,6 @@ namespace chisel
                 return data;
             }
             return std::nullopt;
-        }
-
-        // TODO: Dynamic extension
-        template <class T>
-        T* Load(const Path& path) {
-            return nullptr;
-        }
-
-        // TODO: Map ext -> type
-        void* Load(const Path& path) {
-            return nullptr;
         }
 
     // Search Paths //

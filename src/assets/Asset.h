@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/Path.h"
+#include "common/Path.h"
 #include <unordered_map>
 
 namespace chisel

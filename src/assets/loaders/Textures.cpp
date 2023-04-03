@@ -13,7 +13,7 @@
 
 namespace chisel
 {
-    static Texture* LoadTexture(std::string_view path, std::vector<uint8_t> data)
+    static void LoadTexture(Texture& tex, const Buffer& data)
     {
         int width, height, channels;
 
@@ -22,24 +22,18 @@ namespace chisel
         owned_data.reset(stbi_load_from_memory(data.data(), int(data.size()), &width, &height, &channels, STBI_rgb_alpha));
 
         if (!owned_data)
-            return nullptr;
+            throw std::runtime_error("STB failed to load texture.");
 
-        Texture* texture = new Texture(uint16_t(width), uint16_t(height), 1u, Texture::Format::RGBA8, std::move(owned_data), width * height * 4);
-        texture->path = path;
+        tex = Texture(uint16_t(width), uint16_t(height), 1u, Texture::Format::RGBA8, std::move(owned_data), width * height * 4);
 
         // This frees data when the upload completes.
         // TODO: This requires renderer to be initialized.
         // Ideally we should upload the texture on first use like with meshes.
-        chisel::Tools.Render.UploadTexture(texture);
-
-        return texture;
+        chisel::Tools.Render.UploadTexture(&tex);
     }
 
-    template <>
-    Texture* ImportAsset<Texture, FixedString(".PNG")>(std::string_view path, std::vector<uint8_t> data) { return LoadTexture(path, std::move(data)); }
-
-    template <>
-    Texture* ImportAsset<Texture, FixedString(".TGA")>(std::string_view path, std::vector<uint8_t> data) { return LoadTexture(path, std::move(data)); }
+    static AssetLoader<Texture, FixedString(".PNG")> PNGLoader = &LoadTexture;
+    static AssetLoader<Texture, FixedString(".TGA")> TGALoader = &LoadTexture;
 
     static render::TextureFormat RemapVTFImageFormat(libvtf::ImageFormat format) {
         switch (format) {
@@ -58,22 +52,19 @@ namespace chisel
         }
     }
 
-    template <>
-    Texture* ImportAsset<Texture, FixedString(".VTF")>(std::string_view path, std::vector<uint8_t> data) {
+    static AssetLoader<Texture, FixedString(".VTF")> VTFLoader = [](Texture& tex, const Buffer& data)
+    {
         // TODO: Make copy-less.
         libvtf::VTFData vtfData(data);
 
         const auto& header = vtfData.getHeader();
         std::span<const uint8_t> imageData = vtfData.imageData(0, 0, 0);
 
-        Console.Log("Loading {}: {} {}", path, (void*)imageData.data(), imageData.size());
+        Console.Log("Loading {}: {} {}", tex.GetPath(), (void*)imageData.data(), imageData.size());
 
         std::unique_ptr<uint8_t[]> owned_data{ new uint8_t[imageData.size()] };
         std::memcpy(owned_data.get(), imageData.data(), imageData.size());
 
-        Texture* texture = new Texture(uint16_t(header.width), uint16_t(header.height), uint16_t(header.depth), RemapVTFImageFormat(header.format), std::move(owned_data), imageData.size());
-        texture->path = path;
-
-        return texture;
-    }
+        tex = Texture(uint16_t(header.width), uint16_t(header.height), uint16_t(header.depth), RemapVTFImageFormat(header.format), std::move(owned_data), imageData.size());
+    };
 }

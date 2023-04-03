@@ -7,10 +7,10 @@ namespace chisel
 {
     inline struct Primitives
     {
-        static inline Mesh Cube   = *Assets.Load<Mesh, ".OBJ">("models/cube.obj");
-        static inline Mesh Teapot = *Assets.Load<Mesh, ".OBJ">("models/teapot.obj");
-        static inline Mesh Plane  = *Assets.Load<Mesh, ".OBJ">("models/plane.obj");
-        static inline Mesh Quad   = *Assets.Load<Mesh, ".OBJ">("models/quad.obj");
+        static inline Mesh Cube   = *Assets.Load<Mesh>("models/cube.obj");
+        static inline Mesh Teapot = *Assets.Load<Mesh>("models/teapot.obj");
+        static inline Mesh Plane  = *Assets.Load<Mesh>("models/plane.obj");
+        static inline Mesh Quad   = *Assets.Load<Mesh>("models/quad.obj");
         static inline Mesh Line;
 
         Primitives()

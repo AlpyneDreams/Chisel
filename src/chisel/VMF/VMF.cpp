@@ -113,7 +113,7 @@ namespace chisel::VMF
 
             SideData data =
             {
-                .texture       = Assets.Load<Texture, ".VTF">(material_path),
+                .texture       = Assets.Load<Texture>(material_path),
                 .textureAxes   = {{ side.axis[0],  side.axis[1] }},
                 .scale         = {{ side.scale[0], side.scale[1] }},
                 .rotate        = side.rotation,

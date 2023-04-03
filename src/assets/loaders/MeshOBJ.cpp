@@ -22,8 +22,7 @@ namespace chisel
 
     };
 
-    template <>
-    Mesh* ImportAsset<Mesh, FixedString(".OBJ")>(std::string_view path, std::vector<uint8_t> file_data)
+    static AssetLoader<Mesh, FixedString(".OBJ")> OBJLoader = [](Mesh& mesh, const Buffer& file_data)
     {
         static VertexLayout LayoutOBJ = VertexLayout {
             VertexAttribute::For<float>(3, VertexAttribute::Position),
@@ -37,24 +36,20 @@ namespace chisel
         ObjReader obj;
 
         if (!obj.ParseFromString(string, "")) {
-            if (!obj.Error().empty()) {
-                Console.Error("[OBJ Loader] Failed to load '{}': {}", path, obj.Error());
-            }
-            return new Mesh();
+            Console.Error("[OBJ Loader] Failed to load '{}': {}", mesh.GetPath(), obj.Error());
+            throw std::runtime_error(obj.Error());
         }
 
         if (!obj.Warning().empty()) {
-            Console.Warning("[OBJ Loader] Warning while loading '{}': {}", path, obj.Warning());
+            Console.Warning("[OBJ Loader] Warning while loading '{}': {}", mesh.GetPath(), obj.Warning());
         }
-
-        Mesh* mesh = new Mesh();
 
         auto& data      = obj.GetAttrib();
         auto& shapes    = obj.GetShapes();
         //auto& materials = obj.GetMaterials();
 
         for (auto& shape : shapes) {
-            auto& group = mesh->AddGroup();
+            auto& group = mesh.AddGroup();
 
             // TODO: buffer ownership
             std::vector<VertexOBJ>& verts = *new std::vector<VertexOBJ>;
@@ -123,8 +118,6 @@ namespace chisel
             group.vertices = VertexBuffer(LayoutOBJ, &verts[0], verts.size() * sizeof(VertexOBJ));
             group.indices = IndexBuffer(&indices[0], indices.size() * sizeof(uint32));
         }
-
-        return mesh;
-    }
+    };
 
 }
