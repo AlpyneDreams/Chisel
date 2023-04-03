@@ -35,6 +35,13 @@ namespace chisel
             AddPakFile("$STEAMAPPS/Half-Life 2/hl1/hl1_pak");
         }
 
+        ~Assets()
+        {
+            // Delete all remaining assets on the heap
+            for (auto& [path, asset] : AssetDB)
+                delete asset;
+        }
+
     // Asset Loading //
 
         bool IsLoaded(const Path& path)
@@ -62,7 +69,7 @@ namespace chisel
             if (!data)
                 return nullptr;
 
-            // TODO: Memory-manage the asset
+            // Create the asset
             T* ptr = new T();
             ptr->SetPath(path);
 
