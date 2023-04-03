@@ -38,8 +38,12 @@ namespace chisel
         ~Assets()
         {
             // Delete all remaining assets on the heap
+            std::vector<Asset*> assets;
             for (auto& [path, asset] : AssetDB)
+                assets.push_back(asset);
+            for (Asset* asset : assets)
                 delete asset;
+            AssetDB.clear();
         }
 
     // Asset Loading //
