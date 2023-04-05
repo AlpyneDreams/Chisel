@@ -36,5 +36,6 @@ namespace chisel
         void Update() override;
 
         static void OpenFilePicker();
+        static void SaveFilePicker();
     };
 }

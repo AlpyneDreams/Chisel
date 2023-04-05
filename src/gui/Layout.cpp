@@ -3,6 +3,7 @@
 #include "platform/Platform.h"
 #include "console/ConVar.h"
 #include "gui/IconsMaterialCommunity.h"
+#include "gui/Modal.h"
 
 namespace chisel
 {
@@ -91,47 +92,97 @@ namespace chisel
             ConCommand::Execute(fmt::format("open_vmf {}", file));
     }
 
+    void Layout::SaveFilePicker()
+    {
+        std::string file = Platform.FilePicker();
+        // TODO
+        Chisel.Save();
+    }
+
     void Layout::Update()
     {
-        if (ImGui::BeginMainMenuBar())
+        using namespace ImGui;
+
+        bool unsaved = Chisel.HasUnsavedChanges();
+        static enum FileAction {
+            None, New, Open, Close, Exit
+        } action = None;
+
+        if (BeginMainMenuBar())
         {
-            if (ImGui::BeginMenu("File"))
+            if (BeginMenu("File"))
             {
-                if (ImGui::MenuItem("New")) {
-
-                }
-                if (ImGui::MenuItem("Open", "Ctrl+O")) {
-                    OpenFilePicker();
-                }
-                if (ImGui::MenuItem("Quit")) {
-                    Console.Execute("quit");
-                }
-                ImGui::EndMenu();
+                if (MenuItem("New",   "Ctrl+N"))                  action = New;
+                if (MenuItem("Open",  "Ctrl+O"))                  action = Open;
+                if (MenuItem("Save",  "Ctrl+S", false, unsaved))  Chisel.Save();
+                if (MenuItem("Save as...",  "Ctrl+Shift+S"))      SaveFilePicker();
+                Separator();
+                if (MenuItem("Close", "Ctrl+W"))                  action = Close;
+                if (MenuItem("Exit",  "Alt+F4"))                  action = Exit;
+                EndMenu();
             }
 
-            if (ImGui::BeginMenu("Window"))
+            if (BeginMenu("Window"))
             {
-                ImGui::MenuItem(chisel::Tools.console->name.c_str(), "`", &chisel::Tools.console->open);
-                ImGui::MenuItem(Chisel.viewport->name.c_str(), "", &Chisel.viewport->open);
-                ImGui::MenuItem(ICON_MC_APPLICATION_OUTLINE " GUI Demo", "", &gui_demo.value);
-                ImGui::EndMenu();
+                MenuItem(chisel::Tools.console->name.c_str(), "`", &chisel::Tools.console->open);
+                MenuItem(Chisel.viewport->name.c_str(), "", &Chisel.viewport->open);
+                MenuItem(ICON_MC_APPLICATION_OUTLINE " GUI Demo", "", &gui_demo.value);
+                EndMenu();
             }
 
-            ImGui::EndMainMenuBar();
+            EndMainMenuBar();
         }
 
-        if (ImGui::BeginViewportSideBar("BottomBar", ImGui::GetMainViewport(), ImGuiDir_Down, 20.0f, ImGuiWindowFlags_MenuBar))
+        if (action)
         {
-            if (ImGui::BeginMenuBar())
+            static bool popup = false;
+            if (unsaved && !popup)
+            {
+                Console.Log("Opening popup...");
+                popup = true;
+                OpenPopup("Save Changes");
+            }
+
+            enum { Waiting = -1, NoPopup, Save = 1, Dont, Cancel };
+            int choice = GUI::ModalChoices(
+                "Save Changes",
+                "Do you want to save the changes you made to the current map?",
+                "Save", "Don't Save", "Cancel");
+
+            switch (choice)
+            {
+                case Waiting: break;
+                case Save:    Chisel.Save();
+                case Dont:
+                case NoPopup:
+                    popup = false;
+                default:
+                {
+                    Console.Log("Closing map...");
+                    Chisel.CloseMap();
+                    switch (action) {
+                        case Open: OpenFilePicker(); break;
+                        case Exit: Console.Execute("quit"); default: break;
+                    }
+                }
+                case Cancel:
+                    action = None;
+                    popup = false;
+            }
+        }
+
+        if (BeginViewportSideBar("BottomBar", GetMainViewport(), ImGuiDir_Down, 20.0f, ImGuiWindowFlags_MenuBar))
+        {
+            if (BeginMenuBar())
             {
                 GUI::WindowToggleButton(chisel::Tools.console, 72.0f, "`");
-                ImGui::EndMenuBar();
+                EndMenuBar();
             }
-            ImGui::End();
+            End();
         }
 
         // ImGuiDockNodeFlags_PassthruCentralNode   - Show viewport under windows. We use a rendertarget instead for 3D views.
         // ImGuiDockNodeFlags_AutoHideTabBar        - Hide tab bar if there is only one window docked in a space.
-        ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_AutoHideTabBar);
+        DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_AutoHideTabBar);
     }
 }

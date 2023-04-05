@@ -123,6 +123,20 @@ namespace chisel
                     brush->Rebuild();
         }
 
+        bool Empty() const {
+            return solids.empty() && entities.empty();
+        }
+
+        void Clear()
+        {
+            solids.clear();
+            for (Entity* ent : entities)
+                delete ent;
+            entities.clear();
+        }
+
+        ~Map() { Clear(); }
+
         PointEntity* AddPointEntity(const char* classname)
         {
             PointEntity* ent = new PointEntity();

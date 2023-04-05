@@ -53,6 +53,12 @@ namespace chisel
     {
         delete fgd;
     }
+
+    void Chisel::CloseMap()
+    {
+        Selection.Clear();
+        map.Clear();
+    }
     
     bool Chisel::LoadVMF(std::string_view path)
     {

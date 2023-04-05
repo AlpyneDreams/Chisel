@@ -25,6 +25,7 @@ namespace chisel
         class FGD* fgd;
 
     // Editing //
+        // TODO: Multiple maps.
         Map map;
 
         Tool activeTool = Tool::Translate;
@@ -46,6 +47,9 @@ namespace chisel
         */
 
     // File I/O //
+        bool HasUnsavedChanges() { return !map.Empty(); }
+        void Save() {} // TODO
+        void CloseMap();
         bool LoadVMF(std::string_view path);
 
     // Systems //
