@@ -123,11 +123,30 @@ namespace chisel
             while (*cur == Tokens.Name)
             {
                 FGD::Helper& helper = cls.helpers.emplace_back();
-                helper.name = *cur;
+                helper.name = str::toLower(cur->text);
+                helper.type = FGD::HelperType(HashedString(helper.name).hash);
+
                 cur++;
 
-                // Parse helper args
-                if (*cur == '(')
+                if (helper.type == FGD::HelperType::BBox)
+                {
+                    Expect('(');
+                    cls.bbox[0] = ParseInt3();
+                    Expect(',');
+                    cls.bbox[1] = ParseInt3();
+                    Expect(')');
+                    continue;
+                }
+
+                else if (helper.type == FGD::HelperType::Color)
+                {
+                    Expect('(');
+                    cls.color = ParseInt3();
+                    Expect(')');
+                }
+
+                // Parse helper args generically
+                else if (*cur == '(')
                 {
                     cur++;
                     while (*cur != ')')
@@ -135,10 +154,13 @@ namespace chisel
                         String& str = helper.params.emplace_back();
                         while (*cur != ',' && *cur != ')')
                         {
-                            str += *cur++;
+                            str += std::string(*cur++) + " ";
                         }
                         if (*cur == ',')
                             cur++;
+                        // Remove quotes and trailing spaces
+                        str = str::trimEnd(str, " ");
+                        str = str::trim(str, "\"");
                     }
                     Expect(')');
                 }
@@ -273,6 +295,14 @@ namespace chisel
             return "";
         }
 
+        int3 ParseInt3()
+        {
+            return int3(
+                std::stoi(std::string(Expect(Tokens.Number).text.str)),
+                std::stoi(std::string(Expect(Tokens.Number).text.str)),
+                std::stoi(std::string(Expect(Tokens.Number).text.str))
+            );
+        }
 
         String ParseString()
         {

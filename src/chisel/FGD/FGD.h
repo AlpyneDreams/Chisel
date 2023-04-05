@@ -5,6 +5,7 @@
 #include <string>
 
 #include "common/Hash.h"
+#include "math/Math.h"
 
 namespace chisel
 {
@@ -66,6 +67,40 @@ namespace chisel
             AngleLocal,
         };
 
+        enum class HelperType : uint32
+        {
+            Base            = "base"_hash,
+            Axis            = "axis"_hash,
+            BBox            = "bbox"_hash,
+            Color           = "color"_hash,
+            Cylinder        = "cylinder"_hash,
+            Frustum         = "frustum"_hash,
+            HalfGridSnap    = "halfgridsnap"_hash,
+            IconSprite      = "iconsprite"_hash,
+            LightCone       = "lightcone"_hash,
+            LightProp       = "lightprop"_hash,
+            Line            = "line"_hash,
+            OBB             = "obb"_hash,
+            Origin          = "origin"_hash,
+            SideList        = "sidelist"_hash,
+            Size            = "size"_hash,
+            Sphere          = "sphere"_hash,
+            Studio          = "studio"_hash,
+            StudioProp      = "studioprop"_hash,
+            VecLine         = "vecline"_hash,
+            WireBox         = "wirebox"_hash,
+
+            Decal               = "decal"_hash,
+            Overlay             = "overlay"_hash,
+            OverlayTransition   = "overlay_transition"_hash,
+            Light               = "light"_hash,
+            Sprite              = "sprite"_hash,
+            SweptPlayerHull     = "sweptplayerhull"_hash,
+            Instance            = "instance"_hash,
+            QuadBounds          = "quadbounds"_hash,
+            WorldText           = "worldtext"_hash,
+        };
+
         FGD(const char* path);
 
         struct Base
@@ -92,8 +127,10 @@ namespace chisel
 
         struct Helper
         {
+            HelperType type;
             std::string name;
             List<std::string> params;
+            void* userdata = nullptr;
         };
 
         struct Class : Base
@@ -104,6 +141,8 @@ namespace chisel
             Dict<InputOutput> outputs;
             List<Class*> bases;
             List<Helper> helpers;
+            int3 bbox[2] = {int3(-8, -8, -8), int3(8, 8, 8)};
+            int3 color = int3(255, 255, 255);
         };
 
         std::string path;
