@@ -259,7 +259,8 @@ namespace chisel::render
             UniformInfo(bgfx::UniformHandle h) : handle(h) {}
 
             bgfx::UniformHandle handle = BGFX_INVALID_HANDLE;
-            void* value = nullptr;
+            bool hasValue = false;
+            std::vector<float> values;
         };
 
         struct TextureInfo
@@ -740,7 +741,8 @@ namespace chisel::render
             if (!state.uniforms.contains(name)) {
                 state.uniforms[name] = bgfx::createUniform(name.data(), stride <= 4 ? bgfx::UniformType::Vec4 : bgfx::UniformType::Mat4, count);
             }
-            state.uniforms[name].value = value;
+            state.uniforms[name].values = std::vector<float>((float*)value, (float*)value + stride * count);
+            state.uniforms[name].hasValue = true;
         }
 
     // State Recording //
@@ -805,10 +807,10 @@ namespace chisel::render
 
                 for (auto& [name, uniform] : state.uniforms)
                 {
-                    if (uniform.value != nullptr)
+                    if (uniform.hasValue)
                     {
-                        bgfx::setUniform(uniform.handle, uniform.value);
-                        uniform.value = nullptr;
+                        bgfx::setUniform(uniform.handle, uniform.values.data());
+                        uniform.hasValue = false;
                     }
                 }
 
