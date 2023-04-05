@@ -16,7 +16,7 @@ namespace chisel::VMF
 {
     struct Editor : KeyValues
     {
-        Color32 color;
+        Color255 color;
         int visgroupid;
         int groupid;
         bool visgroupshown;
@@ -97,7 +97,7 @@ namespace chisel::VMF
     {
         std::string name;
         int id;
-        Color32 color;
+        Color255 color;
         std::vector<Visgroup> children;
 
         Visgroup(KeyValues& visgroup);
