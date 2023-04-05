@@ -16,6 +16,8 @@ namespace chisel::fs
         Path dirname() const { return m_path.parent_path(); }
         Path ext() const { return m_path.extension(); }
 
+        void setExt(auto ext) { m_path.replace_extension(ext); m_text = m_path.string(); }
+
         // Append a subpath with a separator
         Path& operator /=(const Path& path)
         {

@@ -25,11 +25,6 @@ namespace chisel
             throw std::runtime_error("STB failed to load texture.");
 
         tex = Texture(uint16_t(width), uint16_t(height), 1u, Texture::Format::RGBA8, std::move(owned_data), width * height * 4);
-
-        // This frees data when the upload completes.
-        // TODO: This requires renderer to be initialized.
-        // Ideally we should upload the texture on first use like with meshes.
-        chisel::Tools.Render.UploadTexture(&tex);
     }
 
     static AssetLoader<Texture, FixedString(".PNG")> PNGLoader = &LoadTexture;

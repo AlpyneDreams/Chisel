@@ -6,6 +6,8 @@
 #include "console/Console.h"
 #include "common/Filesystem.h"
 #include "common/String.h"
+#include "assets/Assets.h"
+#include "render/Texture.h"
 
 template <>
 struct fmt::formatter<chisel::Token> : fmt::ostream_formatter {};
@@ -128,41 +130,58 @@ namespace chisel
 
                 cur++;
 
-                if (helper.type == FGD::HelperType::BBox || helper.type == FGD::HelperType::Size)
-                {
-                    Expect('(');
-                    cls.bbox[0] = ParseInt3().zyx; // weird
-                    Expect(',');
-                    cls.bbox[1] = ParseInt3().zyx;
-                    Expect(')');
-                    continue;
-                }
+                using enum FGD::HelperType;
 
-                else if (helper.type == FGD::HelperType::Color)
+                switch (helper.type)
                 {
-                    Expect('(');
-                    cls.color = ParseInt3();
-                    Expect(')');
-                }
-
-                // Parse helper args generically
-                else if (*cur == '(')
-                {
-                    cur++;
-                    while (*cur != ')')
+                    case BBox:
+                    case Size:
                     {
-                        String& str = helper.params.emplace_back();
-                        while (*cur != ',' && *cur != ')')
-                        {
-                            str += std::string(*cur++) + " ";
-                        }
-                        if (*cur == ',')
-                            cur++;
-                        // Remove quotes and trailing spaces
-                        str = str::trimEnd(str, " ");
-                        str = str::trim(str, "\"");
+                        Expect('(');
+                        cls.bbox[0] = ParseInt3().zyx; // weird
+                        Expect(',');
+                        cls.bbox[1] = ParseInt3().zyx;
+                        Expect(')');
+                        break;
                     }
-                    Expect(')');
+                    case IconSprite:
+                    {
+                        Expect('(');
+                        fs::Path path = fs::Path("materials") / ParseString();
+                        path.setExt(".png");
+                        cls.texture = Assets.Load<Texture>(path);
+                        if (!cls.texture) {
+                            path.setExt(".vtf");
+                            cls.texture = Assets.Load<Texture>(path);
+                        }
+                        Expect(')');
+                        break;
+                    }
+                    case Color:
+                    {
+                        Expect('(');
+                        cls.color = ParseInt3();
+                        Expect(')');
+                        break;
+                    }
+                    // Parse generic helper args
+                    default:
+                    if (*cur == '(') {
+                        while (*cur != ')')
+                        {
+                            String& str = helper.params.emplace_back();
+                            while (*cur != ',' && *cur != ')')
+                            {
+                                str += std::string(*cur++) + " ";
+                            }
+                            if (*cur == ',')
+                                cur++;
+                            // Remove quotes and trailing spaces
+                            str = str::trimEnd(str, " ");
+                            str = str::trim(str, "\"");
+                        }
+                        Expect(')');
+                    }
                 }
                 /*String str = "";
                 for (auto& param : helper.params)
