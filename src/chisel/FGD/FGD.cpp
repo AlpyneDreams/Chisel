@@ -128,12 +128,12 @@ namespace chisel
 
                 cur++;
 
-                if (helper.type == FGD::HelperType::BBox)
+                if (helper.type == FGD::HelperType::BBox || helper.type == FGD::HelperType::Size)
                 {
                     Expect('(');
-                    cls.bbox[0] = ParseInt3();
+                    cls.bbox[0] = ParseInt3().zyx; // weird
                     Expect(',');
-                    cls.bbox[1] = ParseInt3();
+                    cls.bbox[1] = ParseInt3().zyx;
                     Expect(')');
                     continue;
                 }
@@ -171,12 +171,19 @@ namespace chisel
                 printdbg("Helper: {}", helper.name);
 
                 // Base classes
-                if (str::toLower(helper.name) == "base")
+                if (helper.type == FGD::HelperType::Base)
                 {
                     for (auto& param : helper.params)
                         if (fgd.classes.contains(param))
                             cls.bases.push_back(&fgd.classes.at(param));
                 }
+                else if (helper.type == FGD::HelperType::SweptPlayerHull)
+                {
+                    // TODO: Second bbox
+                    cls.bbox[0] = {-16, -16, 0};
+                    cls.bbox[1] = {16, 16, 72};
+                }
+                
             }
             Expect('=');
             cls.name = Expect(Tokens.Name);
