@@ -120,6 +120,7 @@ namespace chisel
         std::optional<Buffer> ReadPakFile(const Path& path)
         {
             std::string lower_string = str::toLower(path);
+            lower_string = str::replace(lower_string, "\\", "/");
 
             for (const auto& pak : pakFiles)
             {
