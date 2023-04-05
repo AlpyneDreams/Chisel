@@ -51,6 +51,7 @@ namespace chisel
         void Save() {} // TODO
         void CloseMap();
         bool LoadVMF(std::string_view path);
+        void CreateEntityGallery();
 
     // Systems //
         MapRender* Renderer;

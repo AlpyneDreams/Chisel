@@ -75,6 +75,21 @@ namespace chisel
 
         return true;
     }
+
+    void Chisel::CreateEntityGallery()
+    {
+        vec3 origin = vec3(-8, -8, 0);
+        for (auto& [name, cls] : fgd->classes)
+        {
+            PointEntity* ent = map.AddPointEntity(name.c_str());
+            ent->origin = origin * 128.f;
+            if (++origin.x > 8)
+            {
+                origin.x = -8;
+                origin.y++;
+            }
+        }
+    }
 }
 
 namespace chisel::commands

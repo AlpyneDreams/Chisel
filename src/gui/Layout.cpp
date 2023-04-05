@@ -105,7 +105,7 @@ namespace chisel
 
         bool unsaved = Chisel.HasUnsavedChanges();
         static enum FileAction {
-            None, New, Open, Close, Exit
+            None, New, Open, Close, Exit, EntityGallery
         } action = None;
 
         if (BeginMainMenuBar())
@@ -119,6 +119,12 @@ namespace chisel
                 Separator();
                 if (MenuItem("Close", "Ctrl+W"))                  action = Close;
                 if (MenuItem("Exit",  "Alt+F4"))                  action = Exit;
+                EndMenu();
+            }
+
+            if (BeginMenu("Map"))
+            {
+                if (MenuItem("Entity Gallery")) action = EntityGallery;
                 EndMenu();
             }
 
@@ -163,6 +169,7 @@ namespace chisel
                     switch (action) {
                         case Open: OpenFilePicker(); break;
                         case Exit: Console.Execute("quit"); default: break;
+                        case EntityGallery: Chisel.CreateEntityGallery(); break;
                     }
                 }
                 case Cancel:
