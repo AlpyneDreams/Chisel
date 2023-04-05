@@ -50,8 +50,12 @@ namespace chisel
                 break;
             }
 
-            case Tool::Entity:
             case Tool::Block:
+                // User can edit block bounds while adding blocks
+                Chisel.Renderer->DrawHandles(view, proj, Tool::Bounds, space, view_grid_snap, gridSize);
+                if (Handles.IsMouseOver())
+                    break;
+            case Tool::Entity:
             {
                 Plane grid = Plane(Vectors.Zero, Vectors.Up);
                 Ray ray    = GetMouseRay();
@@ -88,10 +92,8 @@ namespace chisel
                             vec3 center = (dragStartPos + point) / 2.f;
                             mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xy, gridSize.z * 0.5f));
                             auto& cube = map.AddCube(mtx, vec3(vec.xy, gridSize.z) * 0.5f);
-                            if (!ImGui::GetIO().KeyShift) {
-                                Selection.Select(&cube);
-                                Chisel.activeTool = Tool::Bounds;
-                            }
+                            Selection.Clear();
+                            Selection.Select(&cube);
                         }
                     }
 
