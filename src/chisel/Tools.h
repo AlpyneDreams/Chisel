@@ -40,6 +40,8 @@ namespace chisel
         render::RenderTarget* rt_SceneView;
         render::RenderTarget* rt_ObjectID;
 
+        Texture* tex_White;
+
         void ResizeViewport(uint width, uint height)
         {
             rt_SceneView->Resize(width, height);

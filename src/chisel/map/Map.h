@@ -30,8 +30,9 @@ namespace chisel
     {
         glm::vec3 origin;
 
-        std::optional<AABB> GetBounds() const final override { return AABB(origin, origin); }
-        void Transform(const mat4x4& matrix) final override { origin = matrix * vec4(origin, 0); }
+        // TODO: Bounds from model or FGD
+        std::optional<AABB> GetBounds() const final override { return AABB(origin - vec3(32), origin + vec3(32)); }
+        void Transform(const mat4x4& matrix) final override { origin = matrix * vec4(origin, 1); }
         void AlignToGrid(vec3 gridSize) final override { origin = math::Snap(origin, gridSize); }
         void SetVolume(Volume volume) final override { /* Do Nothing */ }
     };

@@ -2,6 +2,7 @@
 
 #include "console/ConVar.h"
 #include "core/Transform.h"
+#include "fgd/FGD.h"
 
 namespace chisel
 {
@@ -22,6 +23,8 @@ namespace chisel
         r.SetClearDepth(true, 1.0f);
         r.SetRenderTarget(Tools.rt_SceneView);
         r.SetShader(shader);
+        r.SetUniform("u_color", Colors.White);
+        r.SetTexture(0, Tools.tex_White);
         r.SetTransform(glm::identity<mat4x4>());
 
         if (r_rebuildworld)
@@ -40,12 +43,56 @@ namespace chisel
             }
         }
 
-        if (r_drawsprites)
+        for (const auto* entity : map.entities)
         {
-            for (const auto* entity : map.entities)
+            const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
+            if (!point) continue;
+
+            auto& classname = entity->classname;
+            if (Chisel.fgd->classes.contains(classname))
             {
-                if (const PointEntity* point = dynamic_cast<const PointEntity*>(entity))
-                    Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
+                auto& cls = Chisel.fgd->classes[classname];
+
+                Color255 color = Color255(cls.color.r, cls.color.g, cls.color.g, 255);
+
+                if (point->IsSelected())
+                    color = Color255(255, 0, 0, 255);
+                
+                AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
+
+                if (cls.texture)
+                {
+                    if (point->IsSelected())
+                    {
+                        r.SetTransform(glm::scale(glm::translate(mat4x4(1), point->origin), vec3(64.f)));
+                        Tools.DrawSelectionOutline(&Primitives.Cube);
+                    }
+                    
+                    if (!r_drawsprites)
+                        continue;
+
+                    if (cls.texture)
+                        Gizmos.DrawIcon(point->origin, cls.texture);
+                    else
+                        Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
+                }
+                else
+                {
+                    AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
+                    r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
+
+                    if (point->IsSelected())
+                        Tools.DrawSelectionOutline(&Primitives.Cube);
+
+                    r.SetShader(shader);
+                    r.SetTexture(0, Tools.tex_White);
+                    r.SetUniform("u_color", color);
+                    r.DrawMesh(&Primitives.Cube);
+                }
+            }
+            else if (r_drawsprites)
+            {
+                Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
             }
         }
     }
@@ -89,6 +136,34 @@ namespace chisel
             {
                 Tools.PreDrawSelection(r, brush.GetSelectionID());
                 r.DrawMesh(&mesh.mesh);
+            }
+        }
+
+        for (const auto* entity : map.entities)
+        {
+            const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
+            if (!point) continue;
+
+            auto& classname = entity->classname;
+            if (Chisel.fgd->classes.contains(classname))
+            {
+                auto& cls = Chisel.fgd->classes[classname];
+
+                if (cls.texture)
+                {
+                    mat4x4 mtx = glm::scale(glm::translate(mat4x4(1.0f), point->origin), vec3(64.f));
+                    Tools.PreDrawSelection(r, point->GetSelectionID());
+                    r.SetTransform(mtx);
+                    r.DrawMesh(&Primitives.Quad);
+                }
+                else
+                {
+                    AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
+
+                    Tools.PreDrawSelection(r, point->GetSelectionID());
+                    r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
+                    r.DrawMesh(&Primitives.Cube);
+                }
             }
         }
     }

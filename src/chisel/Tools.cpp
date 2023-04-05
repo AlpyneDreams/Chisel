@@ -4,6 +4,7 @@
 #include "chisel/Gizmos.h"
 #include "chisel/Selection.h"
 #include "gui/ConsoleWindow.h"
+#include "assets/Assets.h"
 
 #include <bit>
 
@@ -23,6 +24,9 @@ namespace chisel
 
         // Initialize gizmos
         Gizmos.Init();
+
+        // Load builtin textures
+        tex_White = Assets.Load<Texture>("textures/white.png");
 
         // Load editor shaders
         sh_Color  = r.LoadShader("basic", "color");
