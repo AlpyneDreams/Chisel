@@ -81,6 +81,9 @@ namespace chisel
         vec3 origin = vec3(-8, -8, 0);
         for (auto& [name, cls] : fgd->classes)
         {
+            if (cls.type == FGD::SolidClass || cls.type == FGD::BaseClass)
+                continue;
+
             PointEntity* ent = map.AddPointEntity(name.c_str());
             ent->origin = origin * 128.f;
             if (++origin.x > 8)
