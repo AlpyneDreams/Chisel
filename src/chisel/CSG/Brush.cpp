@@ -71,7 +71,7 @@ namespace chisel::CSG
         return m_faceCache->GetBounds();
     }
 
-    const std::vector<Brush*>& Brush::GetIntersectingBrushes() const
+    const std::list<Brush*>& Brush::GetIntersectingBrushes() const
     {
         return m_intersectingBrushes;
     }
@@ -140,7 +140,7 @@ namespace chisel::CSG
 
         m_intersectingBrushes = m_tree->QueryIntersectingBrushes(*bounds, this);
         // Sort so we always split in the same way.
-        std::sort(m_intersectingBrushes.begin(), m_intersectingBrushes.end(), SortFunc);
+        m_intersectingBrushes.sort(SortFunc);
     }
 
 //-------------------------------------------------------------------------------------------------

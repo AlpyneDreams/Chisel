@@ -36,7 +36,7 @@ namespace chisel::CSG
         ObjectID GetObjectID() const;
         std::optional<AABB> GetBounds() const;
 
-        const std::vector<Brush*>& GetIntersectingBrushes() const;
+        const std::list<Brush*>& GetIntersectingBrushes() const;
 
         bool ComesBefore(const Brush& other) const;
 
@@ -62,7 +62,7 @@ namespace chisel::CSG
         std::vector<Side> m_sides;
         std::optional<FaceCache> m_faceCache;
 
-        std::vector<Brush*> m_intersectingBrushes;
+        std::list<Brush*> m_intersectingBrushes;
         VolumeOperation m_volumeOperation = std::identity{};
         Order m_order = 0;
     };

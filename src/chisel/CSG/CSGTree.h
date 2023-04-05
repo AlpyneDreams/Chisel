@@ -27,7 +27,7 @@ namespace chisel::CSG
         void MarkDirtyFaceCache(Brush& brush);
         void MarkDirtyFragments(Brush& brush);
     private:
-        std::vector<Brush*> QueryIntersectingBrushes(const AABB& aabb, const Brush* ignore);
+        std::list<Brush*> QueryIntersectingBrushes(const AABB& aabb, const Brush* ignore);
         ObjectID GetNewObjectID();
 
         std::list<Brush> m_brushes;

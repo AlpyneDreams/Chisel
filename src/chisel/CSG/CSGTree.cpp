@@ -20,6 +20,8 @@ namespace chisel::CSG
 
     void CSGTree::DestroyBrush(Brush& brush)
     {
+        for (Brush* neighbor : brush.m_intersectingBrushes)
+            neighbor->m_intersectingBrushes.remove(&brush);
         std::erase_if(m_dirtyFaceCacheBrushes, [ptr = &brush](Brush* val){ return val == ptr ; });
         std::erase_if(m_dirtyFragmentBrushes, [ptr = &brush](Brush* val){ return val == ptr ; });
         m_brushes.remove_if([ptr = &brush](Brush& val){ return &val == ptr ; });
@@ -89,9 +91,9 @@ namespace chisel::CSG
 
 //-------------------------------------------------------------------------------------------------
 
-    std::vector<Brush*> CSGTree::QueryIntersectingBrushes(const AABB& aabb, const Brush* ignore = nullptr)
+    std::list<Brush*> CSGTree::QueryIntersectingBrushes(const AABB& aabb, const Brush* ignore = nullptr)
     {
-        std::vector<Brush*> result;
+        std::list<Brush*> result;
         for (auto& brush : m_brushes)
         {
             if (!brush.GetBounds())
