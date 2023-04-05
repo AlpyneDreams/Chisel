@@ -195,7 +195,7 @@ namespace chisel
     Handles::Handles()
     {
         int radius = gridChunkSize / 2;
-        int gridMajor = 10;
+        int gridMajor = 8;
         gridVertices.resize((gridChunkSize + 1) * 4);
 
         uint i = 0;
