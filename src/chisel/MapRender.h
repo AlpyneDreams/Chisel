@@ -21,6 +21,8 @@ namespace chisel
     private:
         Map& map = Chisel.map;
     public:
+        render::RenderContext& r = Tools.rctx;
+        render::Shader shader;
 
         void Start() final override;
         void Update() final override;

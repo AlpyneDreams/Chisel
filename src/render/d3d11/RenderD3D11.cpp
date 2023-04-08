@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "gui/Common.h"
 #include "gui/impl/imgui_impl_dx11.h"
+#include "common/Filesystem.h"
 
 namespace chisel::render
 {
@@ -77,6 +78,16 @@ namespace chisel::render
         device = nullptr;
     }
 
+    void RenderContext::SetShader(const Shader& shader)
+    {
+        if (shader.inputLayout != nullptr)
+            ctx->IASetInputLayout(shader.inputLayout.ptr());
+        if (shader.vs != nullptr)
+            ctx->VSSetShader(shader.vs.ptr(), nullptr, 0);
+        if (shader.ps != nullptr)
+            ctx->PSSetShader(shader.ps.ptr(), nullptr, 0);
+    }
+
     void RenderContext::BeginFrame()
     {
         D3D11_TEXTURE2D_DESC desc;
@@ -102,6 +113,49 @@ namespace chisel::render
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
         swapchain->Present(0, 0);
+    }
+
+    Shader::Shader(Com<ID3D11Device1> device, std::string_view name)
+    {
+        fs::Path path = fs::Path("core/shaders") / name;
+        path.setExt(".vsc");
+        auto vsFile = fs::readFile(path);
+        if (!vsFile) {
+            Console.Error("[D3D11] Failed to find vertex shader 'shaders/{}.vsc'", name);
+            return;
+        }
+
+        path.setExt(".psc");
+        auto psFile = fs::readFile(path);
+        if (!psFile) {
+            Console.Error("[D3D11] Failed to find pixel shader 'shaders/{}.psc'", name);
+            return;
+        }
+
+        HRESULT hr = device->CreateVertexShader(vsFile->data(), vsFile->size(), NULL, &vs);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create vertex shader '{}'", name);
+            return;
+        }
+
+        hr = device->CreatePixelShader(psFile->data(), psFile->size(), NULL, &ps);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create pixel shader '{}'", name);
+            return;
+        }
+
+        // TODO: Way to define this for shaders?
+        D3D11_INPUT_ELEMENT_DESC desc[] = {
+            { "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            //{ "COL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            //{ "NOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            //{ "TEX", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        };
+        hr = device->CreateInputLayout(desc, ARRAYSIZE(desc), vsFile->data(), vsFile->size(), &inputLayout);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create input layout for shader '{}'", name);
+            return;
+        }
     }
 
 }

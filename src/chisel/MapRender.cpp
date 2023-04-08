@@ -14,6 +14,7 @@ namespace chisel
 
     void MapRender::Start()
     {
+        shader = render::Shader(r.device, "brush");
     }
 
     void MapRender::Update()

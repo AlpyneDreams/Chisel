@@ -1,11 +1,7 @@
 @echo off
-for %%F in (*.vert) do (
+for %%F in (*.hlsl) do (
     echo %%F
-    ..\tools\bgfx\shaderc -f %%F -o ..\runtime\core\shaders\dx11\%%F.bin --type v --platform windows -p s_5_0
-)
-
-for %%F in (*.frag) do (
-    echo %%F
-    ..\tools\bgfx\shaderc -f %%F -o ..\runtime\core\shaders\dx11\%%F.bin --type f --platform windows -p s_5_0
+    fxc /nologo /T vs_5_0 /E vs_main /Fo "../runtime/core/shaders/%%~nF.vsc" "%%F" > nul
+    fxc /nologo /T ps_5_0 /E ps_main /Fo "../runtime/core/shaders/%%~nF.psc" "%%F" > nul
 )
 pause

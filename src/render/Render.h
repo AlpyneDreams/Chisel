@@ -32,6 +32,16 @@ namespace chisel::render
         Com<ID3D11RenderTargetView>   rtv;
     };
 
+    struct Shader
+    {
+        Com<ID3D11VertexShader> vs;
+        Com<ID3D11PixelShader>  ps;
+        Com<ID3D11InputLayout>  inputLayout;
+
+        Shader() {}
+        Shader(Com<ID3D11Device1> device, std::string_view name);
+    };
+
     struct RenderContext
     {
         void Init(Window* window);
@@ -39,6 +49,8 @@ namespace chisel::render
 
         void BeginFrame();
         void EndFrame();
+
+        void SetShader(const Shader& shader);
 
         Com<ID3D11Device1> device;
         Com<ID3D11DeviceContext1> ctx;
