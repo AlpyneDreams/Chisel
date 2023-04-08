@@ -39,7 +39,7 @@ namespace chisel
     void GUI::Setup()
     {
         ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = "engine.ui.ini";
+        io.IniFilename = "chisel.ui.ini";
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 

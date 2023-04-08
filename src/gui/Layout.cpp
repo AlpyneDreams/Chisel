@@ -79,12 +79,6 @@ namespace chisel
     //  Layout
     //--------------------------------------------------
 
-    void Layout::Start()
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = "chisel.ui.ini";
-    }
-
     void Layout::OpenFilePicker()
     {
         std::string file = Platform.FilePicker();

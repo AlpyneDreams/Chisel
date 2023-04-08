@@ -32,7 +32,6 @@ namespace chisel
     {
         Space space = Space::World;
 
-        void Start() override;
         void Update() override;
 
         static void OpenFilePicker();
