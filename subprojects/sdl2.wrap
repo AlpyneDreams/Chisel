@@ -3,11 +3,8 @@ directory = SDL2-2.0.20
 source_url = https://libsdl.org/release/SDL2-2.0.20.tar.gz
 source_filename = SDL2-2.0.20.tar.gz
 source_hash = c56aba1d7b5b0e7e999e4a7698c70b63a3394ff9704b5f6e1c57e0c16f04dd06
-patch_filename = sdl2_2.0.20-6_patch.zip
-patch_url = https://wrapdb.mesonbuild.com/v2/sdl2_2.0.20-6/get_patch
-patch_hash = 2fb2f89098cf46c1593ab2c35018532329c98a9b360cb58bc7348d3215568729
+patch_directory = SDL2-2.0.20
 wrapdb_version = 2.0.20-6
 
 [provide]
 sdl2 = sdl2_dep
-libsdl2 = sdl2_dep

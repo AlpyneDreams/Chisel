@@ -1,4 +1,4 @@
-project('engine', 'cpp',
+project('chisel', 'cpp',
     version: 'latest',
     default_options: ['cpp_std=c++20']
 )
@@ -9,8 +9,7 @@ add_global_arguments('-DIMGUI_USE_WCHAR32', language: 'cpp')
 windows    = build_machine.system() == 'windows'
 linux      = build_machine.system() == 'linux'
 
-# Force use local WrapDB SDL2 version on Windows
-sdl_dep    = dependency(windows ? 'libsdl2' : 'sdl2', fallback: 'sdl2', default_options: ['with_main=false'], static: true)
+sdl_dep    = dependency('sdl2', default_options: ['with_main=false'], static: true)
 
 fmt_dep    = dependency('fmt', static: true)
 glm_dep    = dependency('glm', static: true)
