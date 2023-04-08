@@ -5,6 +5,7 @@
 #include "math/Color.h"
 #include "render/TextureFormat.h"
 #include "render/BlendMode.h"
+#include "core/Mesh.h"
 
 #include <functional>
 #include <string_view>
@@ -51,6 +52,10 @@ namespace chisel::render
         void EndFrame();
 
         void SetShader(const Shader& shader);
+
+
+        // Compatability with existing Mesh class
+        void DrawMesh(Mesh* mesh);
 
         Com<ID3D11Device1> device;
         Com<ID3D11DeviceContext1> ctx;

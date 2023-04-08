@@ -4,6 +4,7 @@
 #include "gui/Common.h"
 #include "gui/impl/imgui_impl_dx11.h"
 #include "common/Filesystem.h"
+#include "core/Mesh.h"
 
 namespace chisel::render
 {
@@ -113,6 +114,31 @@ namespace chisel::render
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
         swapchain->Present(0, 0);
+    }
+
+    void RenderContext::DrawMesh(Mesh* mesh)
+    {
+        if (!mesh->uploaded) {
+            for (auto& group : mesh->groups) {
+                D3D11_BUFFER_DESC desc = {};
+                desc.ByteWidth  = group.vertices.Size();
+                desc.Usage      = D3D11_USAGE_DEFAULT;
+                desc.BindFlags  = D3D11_BIND_VERTEX_BUFFER;
+
+                D3D11_SUBRESOURCE_DATA data = {};
+                data.pSysMem    = group.vertices.pointer;
+
+                HRESULT hr = device->CreateBuffer(&desc, &data, (ID3D11Buffer**)&group.vertices.handle);
+                if (FAILED(hr)) {
+                    Console.Error("[D3D11] Failed to create vertex buffer");
+                    return;
+                }
+            }
+        }
+        uint strides[] = {(uint)mesh->groups[0].vertices.Stride()};
+        uint offsets[] = {0};
+        ctx->IASetVertexBuffers(0, 1, (ID3D11Buffer**)&mesh->groups[0].vertices.handle, strides, offsets);
+        ctx->Draw(mesh->groups[0].vertices.count, 0);
     }
 
     Shader::Shader(Com<ID3D11Device1> device, std::string_view name)

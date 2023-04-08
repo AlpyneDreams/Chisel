@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Common.h"
-#include "render/Render.h"
 #include "GraphicsBuffer.h"
 #include "VertexLayout.h"
 
