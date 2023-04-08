@@ -28,7 +28,7 @@ namespace chisel::VMF
     {}
 
     MapEntity::MapEntity(KeyValues& ent) : MapClass(ent),
-        //solids              (ent["solid"]),
+        solids              (ent["solid"]),
         classname           (ent["classname"]),
         targetname          (ent["targetname"])
     {
@@ -68,8 +68,8 @@ namespace chisel::VMF
     Visgroup::Visgroup(KeyValues& visgroup) : KeyValues(visgroup),
         name                (visgroup["name"]),
         id                  (visgroup["visgroupid"]),
-        color               (visgroup["color"])
-        //children            (visgroup["visgroup"])
+        color               (visgroup["color"]),
+        children            (visgroup["visgroup"])
     {}
 
     VMF::VMF(KeyValues &vmf)
