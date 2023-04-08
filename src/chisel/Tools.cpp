@@ -142,7 +142,7 @@ namespace chisel
                         Selectable* selection = Selection.Find(id);
                         if (selection)
                         {
-                            if (Keyboard.GetKey(Key::LeftCTRL))
+                            if (Keyboard.ctrl)
                             {
                                 Selection.Toggle(selection);
                             }

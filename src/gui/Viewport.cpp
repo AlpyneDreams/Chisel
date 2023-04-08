@@ -176,9 +176,9 @@ namespace chisel
             }
         }
 
-        if (Keyboard.GetKeyUp(Key::OpenBracket) || Keyboard.GetKeyUp(Key::CloseBracket))
+        if (Keyboard.GetKeyUp(Key::LeftBracket) || Keyboard.GetKeyUp(Key::RightBracket))
         {
-            const bool up = Keyboard.GetKeyUp(Key::CloseBracket);
+            const bool up = Keyboard.GetKeyUp(Key::RightBracket);
             if (up)
                 gridSize *= 2.0f;
             else

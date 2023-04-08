@@ -13,7 +13,7 @@ namespace chisel
     {
         void Update() override
         {
-            if (ImGui::GetIO().KeyCtrl)
+            if (Keyboard.ctrl)
             {
                 if (Keyboard.GetKeyDown(Key::O)) {
                     Layout::OpenFilePicker();

@@ -85,8 +85,13 @@ namespace chisel
                 {
                     case SDL_KEYDOWN:
                     case SDL_KEYUP:
-                        Keyboard.SetKey(Key(e.key.keysym.sym & ~0x40000000), e.key.state == SDL_PRESSED);
+                    {
+                        SDL_Keycode code = e.key.keysym.sym;
+                        if (code & SDLK_SCANCODE_MASK)
+                            code = (code & ~SDLK_SCANCODE_MASK) + int(Key::Scancode);
+                        Keyboard.SetKey(Key(code), e.key.state == SDL_PRESSED);
                         break;
+                    }
                     case SDL_MOUSEBUTTONDOWN:
                     case SDL_MOUSEBUTTONUP:
                         Mouse.SetButton(GetMouseButton(e.button.button), e.button.state == SDL_PRESSED);

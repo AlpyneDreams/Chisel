@@ -210,27 +210,27 @@ namespace chisel
                 OnClick(GetMousePos());
             }
 
-            if (!ImGui::GetIO().KeyCtrl)
+            // Right-click and hold (or press Z) to mouselook
+            // TODO: Make Z toggle instead of hold
+            if (Mouse.GetButtonDown(Mouse::Right) || (!Keyboard.ctrl && Keyboard.GetKeyDown(Key::Z)))
             {
-                // Right-click and hold (or press Z) to mouselook
-                // TODO: Make Z toggle instead of hold
-                if (Mouse.GetButtonDown(Mouse::Right) || Keyboard.GetKeyDown(Key::Z))
-                {
-                    Cursor.SetMode(Cursor::Locked);
-                    Cursor.SetVisible(false);
-                }
+                Cursor.SetMode(Cursor::Locked);
+                Cursor.SetVisible(false);
+            }
 
-                if (Mouse.GetButton(Mouse::Right) || Keyboard.GetKey(Key::Z))
-                {
-                    MouseLook(Mouse.GetMotion());
-                }
+            if (Mouse.GetButton(Mouse::Right) || (!Keyboard.ctrl && Keyboard.GetKey(Key::Z)))
+            {
+                MouseLook(Mouse.GetMotion());
+            }
 
-                if (Mouse.GetButtonUp(Mouse::Right) || Keyboard.GetKeyUp(Key::Z))
-                {
-                    Cursor.SetMode(Cursor::Normal);
-                    Cursor.SetVisible(true);
-                }
+            if (Mouse.GetButtonUp(Mouse::Right) || (!Keyboard.ctrl && Keyboard.GetKeyUp(Key::Z)))
+            {
+                Cursor.SetMode(Cursor::Normal);
+                Cursor.SetVisible(true);
+            }
 
+            if (!Keyboard.ctrl)
+            {
                 // WASD. TODO: Virtual axes, arrow keys
                 float w = Keyboard.GetKey(Key::W) ? 1.f : 0.f;
                 float s = Keyboard.GetKey(Key::S) ? 1.f : 0.f;
