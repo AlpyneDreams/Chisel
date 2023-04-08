@@ -47,7 +47,7 @@ namespace chisel
 
         DrawMode drawMode = DrawMode::Shaded;
 
-        auto GetTexture(DrawMode mode);
+        ID3D11ShaderResourceView* GetTexture(DrawMode mode);
 
     // UI //
 

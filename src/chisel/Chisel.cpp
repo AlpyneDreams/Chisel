@@ -37,6 +37,7 @@ namespace chisel
         viewport = &Tools.systems.AddSystem<Viewport>();
 
         // Setup Object ID pass
+#if 0
         Tools.Renderer.OnEndCamera += [](render::RenderContext& ctx)
         {
             extern class chisel::Chisel Chisel;
@@ -44,6 +45,7 @@ namespace chisel
             Tools.BeginSelectionPass(ctx);
             Chisel.Renderer->DrawSelectionPass();
         };
+#endif
 
         Tools.Loop();
         Tools.Shutdown();

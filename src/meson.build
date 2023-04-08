@@ -14,7 +14,7 @@ chisel_src = files(
         'platform/linux/PlatformLinux.cpp',
     'platform/sdl/WindowSDL.cpp',
     'platform/sdl/CursorSDL.cpp',
-    'render/bgfx/RenderBGFX.cpp',
+    'render/d3d11/RenderD3D11.cpp',
 
     'gui/Common.cpp',
     'gui/Layout.cpp',
@@ -22,7 +22,7 @@ chisel_src = files(
     'gui/View3D.cpp',
     'gui/Viewport.cpp',
     'gui/impl/imgui_impl_sdl.cpp',
-    'gui/impl/imgui_impl_bgfx.cpp',
+    'gui/impl/imgui_impl_dx11.cpp',
 
     'chisel/Tools.cpp',
     'chisel/Selection.cpp',
@@ -43,7 +43,8 @@ chisel_src = files(
 
 chisel_deps = [
     sdl_dep,
-    bgfx_dep,
+    d3d11_dep,
+    dxgi_dep,
 
     fmt_dep,
     glm_dep,

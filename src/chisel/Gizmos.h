@@ -17,10 +17,13 @@ namespace chisel
     {
         static inline Texture* icnLight = nullptr;
         static inline Texture* icnHandle = nullptr;
+#if 0
         static inline render::Shader* sh_Sprite = nullptr;
+#endif
 
         void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(64.f))
         {
+#if 0
             auto& r = Tools.Render;
             r.SetShader(sh_Sprite);
             r.SetTexture(0, icon);
@@ -30,11 +33,13 @@ namespace chisel
             r.SetTransform(mtx);
             r.DrawMesh(&Primitives.Quad);
             r.SetDepthWrite(true);
+#endif
         }
 
         // TODO: These could be batched.
         void DrawLine(vec3 start, vec3 end, Color color = Colors.White)
         {
+#if 0
             auto& r = Tools.Render;
             r.SetShader(Tools.sh_Color);
             r.SetUniform("u_color", color);
@@ -44,13 +49,16 @@ namespace chisel
             r.SetTransform(mtx);
             r.SetPrimitiveType(render::PrimitiveType::Lines);
             r.DrawMesh(&Primitives.Line);
+#endif
         }
 
         void Init()
         {
             icnLight = Assets.Load<Texture>("textures/ui/light.png");
             icnHandle = Assets.Load<Texture>("textures/ui/handle.png");
+#if 0
             sh_Sprite = Tools.Render.LoadShader("billboard", "sprite");
+#endif
         }
     } Gizmos;
 }

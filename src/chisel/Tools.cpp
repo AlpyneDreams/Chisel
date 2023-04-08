@@ -10,10 +10,12 @@
 
 namespace chisel
 {
+#if 0
     extern ConVar<render::MSAA> r_msaa;
+#endif
 
     static RenderSystem& Renderer   = Tools.Renderer;
-    static render::Render& r        = Tools.Render;
+    static render::RenderContext& r = Tools.Renderer.rctx;
 
     void Tools::Init()
     {
@@ -29,17 +31,40 @@ namespace chisel
         tex_White = Assets.Load<Texture>("textures/white.png");
 
         // Load editor shaders
+#if 0
         sh_Color  = r.LoadShader("basic", "color");
         sh_Grid   = r.LoadShader("grid");
+#endif
 
         // Setup editor render targets
         auto [width, height] = window->GetSize();
         
-        rt_SceneView = r.CreateRenderTarget(width, height);
-        rt_SceneView->SetMSAA(r_msaa);
-        
+        D3D11_TEXTURE2D_DESC desc =
+        {
+            .Width = width,
+            .Height = height,
+            .MipLevels = 1,
+            .ArraySize = 1,
+            .Format = DXGI_FORMAT_B8G8R8A8_UNORM,
+            .SampleDesc =
+            {
+                .Count = 1,
+                .Quality = 0,
+            },
+            .Usage = D3D11_USAGE_DEFAULT,
+            .BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+            .CPUAccessFlags = 0,
+            .MiscFlags = 0,
+        };
+        r.device->CreateTexture2D(&desc, nullptr, &rt_SceneView.texture);
+        r.device->CreateRenderTargetView(rt_SceneView.texture.ptr(), nullptr, &rt_SceneView.rtv);
+        r.device->CreateShaderResourceView(rt_SceneView.texture.ptr(), nullptr, &rt_SceneView.srv);
+        float debugColor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
+        r.ctx->ClearRenderTargetView(rt_SceneView.rtv.ptr(), debugColor);
+#if 0
         rt_ObjectID = r.CreateRenderTarget(width, height, render::TextureFormats::R32F, render::TextureFormats::D32F);
         rt_ObjectID->SetReadBack(true);
+#endif
 
         // Setup editor camera
         editorCamera.camera.position = vec3(-64.0f, -32.0f, 32.0f) * 32.0f;
@@ -47,9 +72,11 @@ namespace chisel
         editorCamera.camera.renderTarget = rt_SceneView;
 
         // Setup camera renderer
+#if 0
         chisel::Renderer.OnBeginFrame += [](render::Render& r) {
             chisel::Renderer.DrawCamera(chisel::Tools.editorCamera.camera);
         };
+#endif
     }
 
     void Tools::Loop()
@@ -111,20 +138,13 @@ namespace chisel
         Window::Shutdown();
     }
 
-    void Tools::BeginSelectionPass(render::RenderContext &ctx)
+    void Tools::BeginSelectionPass(render::RenderContext &rctx)
     {
-        ctx.SetupCamera();
-        ctx.r.SetRenderTarget(chisel::Tools.rt_ObjectID);
-        ctx.r.SetClearColor(true, Colors.Black);
-        ctx.r.SetBlendFunc(render::BlendFuncs::Normal);
-        ctx.r.SetClearDepth(true, 1.0f);
-        ctx.r.SetBlendFunc(render::BlendFuncs::Normal);
-        ctx.r.SetDepthTest(render::CompareFunc::LessEqual);
-        ctx.r.SetDepthWrite(true);
     }
 
     void Tools::PickObject(uint2 mouse)
     {
+#if 0
         rt_ObjectID->ReadTexture([=](float* data, size_t size, size_t width)
         {
             for (float* ptr = data; ptr < data + size;)
@@ -156,26 +176,10 @@ namespace chisel
                 }
             }
         });
+#endif
     }
 
-    void Tools::DrawSelectionOutline(Mesh* mesh)
-    {
-        r.PushState();
-        r.SetDepthTest(render::CompareFunc::LessEqual);
-        r.SetPolygonMode(render::PolygonMode::Wireframe);
-        r.SetShader(sh_Color);
-        r.SetUniform("u_color", vec4(1, 0.6, 0.25, 1));
-        r.DrawMesh(mesh);
-        r.PopState();
-    }
-
-    void Tools::DrawSelectionOutline(Mesh* mesh, Transform& transform)
-    {
-        mat4x4 matrix = transform.GetTransformMatrix();
-        r.SetTransform(matrix);
-        DrawSelectionOutline(mesh);
-    }
-
+#if 0
     ConVar<render::MSAA> r_msaa("r_msaa", render::MSAA::x4, "Set MSAA level", [](render::MSAA& value)
     {
         if (!IsValid(value))
@@ -184,4 +188,5 @@ namespace chisel
         if (Tools.rt_SceneView)
             Tools.rt_SceneView->SetMSAA(value);
     });
+#endif
 }

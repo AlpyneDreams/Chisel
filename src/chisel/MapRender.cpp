@@ -14,11 +14,11 @@ namespace chisel
 
     void MapRender::Start()
     {
-        shader = Tools.Render.LoadShader("brush");
     }
 
     void MapRender::Update()
     {
+#if 0
         r.SetClearColor(true, Color(0.2, 0.2, 0.2));
         r.SetClearDepth(true, 1.0f);
         r.SetRenderTarget(Tools.rt_SceneView);
@@ -95,10 +95,12 @@ namespace chisel
                 Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
             }
         }
+#endif
     }
     
     void MapRender::DrawBrushEntity(BrushEntity& ent)
     {
+#if 0
         for (Solid& brush : ent)
         {
             for (auto& mesh : brush.GetMeshes())
@@ -125,10 +127,12 @@ namespace chisel
                 r.DrawMesh(&mesh.mesh);
             }
         }
+#endif
     }
 
     void MapRender::DrawSelectionPass()
     {
+#if 0
         // TODO: Cull!
         for (Solid& brush : map)
         {
@@ -166,6 +170,7 @@ namespace chisel
                 }
             }
         }
+#endif
     }
 
     void MapRender::DrawHandles(mat4x4& view, mat4x4& proj, Tool tool, Space space, bool snap, const vec3& snapSize)

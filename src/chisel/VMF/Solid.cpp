@@ -68,8 +68,8 @@ namespace chisel::VMF
     }
 
 
-    Solid::Solid(KeyValues& solid) : MapClass(solid),
-        sides(solid["side"])
+    Solid::Solid(KeyValues& solid) : MapClass(solid)
+        //sides(solid["side"])
     {
     }
 

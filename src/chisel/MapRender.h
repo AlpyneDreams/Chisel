@@ -22,9 +22,6 @@ namespace chisel
         Map& map = Chisel.map;
     public:
 
-        render::Render& r = Tools.Render;
-        render::Shader* shader;
-
         void Start() final override;
         void Update() final override;
 

@@ -154,7 +154,8 @@ namespace chisel
     //  Grid
     //--------------------------------------------------
 
-    void Handles::DrawGrid(render::Render& r, vec3 cameraPos, render::Shader* shader, vec3 gridSize)
+#if 0
+    void Handles::DrawGrid(render::RenderContext& r, vec3 cameraPos, vec3 gridSize)
     {
         r.SetBlendFunc(render::BlendFuncs::Alpha);
         r.SetDepthTest(render::CompareFunc::LessEqual);
@@ -191,6 +192,7 @@ namespace chisel
         r.SetDepthTest(render::CompareFunc::Less);
         r.SetBlendFunc(render::BlendFuncs::Normal);
     }
+#endif
 
     Handles::Handles()
     {

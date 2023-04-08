@@ -3,6 +3,8 @@ project('chisel', 'cpp',
     default_options: ['cpp_std=c++20']
 )
 
+cpp = meson.get_compiler('cpp')
+
 # ImGui: Use 32-bit Wchar to support planes 1-16
 add_global_arguments('-DIMGUI_USE_WCHAR32', language: 'cpp')
 
@@ -20,72 +22,7 @@ cmake = import('cmake')
 glaze_proj = cmake.subproject('glaze')
 glaze_dep = glaze_proj.dependency('glaze_glaze')
 
-bgfx_inc = [
-    'submodules/bgfx/include',
-    'submodules/bgfx/3rdparty',
-    'submodules/bgfx/3rdparty/khronos',
-    'submodules/bx/include',
-    'submodules/bx/3rdparty',
-    'submodules/bimg/include',
-    'submodules/bimg/3rdparty/astc-encoder',
-    'submodules/bimg/3rdparty/astc-encoder/include',
-]
-
-if windows
-    bgfx_inc += [
-        'submodules/bx/include/compat/msvc'
-    ]
-endif
-
-if linux
-    bgfx_inc += [
-        'submodules/bgfx/3rdparty/directx-headers/include/directx',
-        'submodules/bgfx/3rdparty/directx-headers/include',
-        'submodules/bgfx/3rdparty/directx-headers/include/wsl/stubs',
-        'submodules/bx/include/compat/linux',
-    ]
-endif
-
-bgfx_dep = declare_dependency(
-    sources: files(
-        'submodules/bgfx/src/amalgamated.cpp',
-        'submodules/bx/src/amalgamated.cpp',
-        'submodules/bimg/src/image.cpp',
-        'submodules/bimg/src/image_gnf.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_averages_and_directions.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_block_sizes.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_color_quantize.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_color_unquantize.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_compress_symbolic.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_compute_variance.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_decompress_symbolic.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_diagnostic_trace.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_entry.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_find_best_partitioning.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_ideal_endpoints_and_weights.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_image.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_integer_sequence.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_mathlib.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_mathlib_softfloat.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_partition_tables.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_percentile_tables.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_pick_best_endpoint_format.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_platform_isa_detection.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_quantization.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_symbolic_physical.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_weight_align.cpp',
-        'submodules/bimg/3rdparty/astc-encoder/source/astcenc_weight_quant_xfer_tables.cpp',
-    ),
-    include_directories: include_directories(bgfx_inc),
-    compile_args: [
-        '-DBX_CONFIG_DEBUG=0',
-        '-DBGFX_CONFIG_RENDERER_OPENGL=0',
-        '-DBGFX_CONFIG_RENDERER_DIRECT3D11=1',
-    ] + (windows ? [
-        '-DPRIxPTR="llx"', # This should not be needed
-        '-DPRIx64="llx"', # This should not be needed
-        '/Zc:__cplusplus',
-    ] : [])
-)
+d3d11_dep = cpp.find_library('d3d11')
+dxgi_dep = cpp.find_library('dxgi')
 
 subdir('src')

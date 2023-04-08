@@ -51,14 +51,17 @@ namespace chisel
 
     DrawMode drawMode = DrawMode::Shaded;
 
-    auto View3D::GetTexture(DrawMode mode)
+    ID3D11ShaderResourceView* View3D::GetTexture(DrawMode mode)
     {
         switch (mode) {
             default: case DrawMode::Shaded:
-                return Tools.rt_SceneView->GetTexture();
+                return Tools.rt_SceneView.srv.ptr();
+#if 0
             case DrawMode::Depth:
                 return Tools.rt_SceneView->GetDepthTexture();
+#endif
         }
+        return nullptr;
     }
 
 // UI //
@@ -123,6 +126,7 @@ namespace chisel
         // HACK: Reset hovered window
         g.HoveredWindow = hovered;
 
+#if 0
         // Begin scene view extra rendering
         render::Render& r = Tools.Render;
         r.SetRenderTarget(Tools.rt_SceneView);
@@ -130,6 +134,7 @@ namespace chisel
         // Draw grid
         if (view_grid_show)
             Handles.DrawGrid(r, camera.position, Tools.sh_Grid, gridSize);
+#endif
 
         OnPostDraw();
     }

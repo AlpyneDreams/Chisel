@@ -188,8 +188,10 @@ namespace chisel
         }
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - itemSize.y);
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + iconPadding);
+#if 0
         if (icon != nullptr)
             ImGui::Image(icon->handle->Value(), {iconSize, iconSize});
+#endif
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textPadding);
         ImGui::TextUnformatted(name);
         ImGui::EndGroup();

@@ -48,7 +48,7 @@ namespace chisel
 
         static constexpr int gridChunkSize = 200;
 
-        void DrawGrid(render::Render& r, vec3 cameraPos, render::Shader* shader, vec3 gridSize);
+        void DrawGrid(render::RenderContext& r, vec3 cameraPos, vec3 gridSize);
 
         Handles();
 

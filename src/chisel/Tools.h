@@ -8,7 +8,8 @@
 #include "core/Camera.h"
 #include "core/Transform.h"
 #include "render/RenderSystem.h"
-#include "render/RenderContext.h"
+#include "render/Render.h"
+#include "core/Mesh.h"
 
 #include <charconv>
 #include <type_traits>
@@ -26,7 +27,7 @@ namespace chisel
         SystemGroup systems;
 
         RenderSystem Renderer   = RenderSystem(window);
-        render::Render& Render  = *Renderer.render;
+        render::RenderContext& rctx  = Renderer.rctx;
 
     public:
     // Viewport //
@@ -34,18 +35,15 @@ namespace chisel
             Camera camera;
         } editorCamera;
 
-        render::Shader* sh_Color;
-        render::Shader* sh_Grid;
-
-        render::RenderTarget* rt_SceneView;
-        render::RenderTarget* rt_ObjectID;
+        render::RenderTarget rt_SceneView;
+        render::RenderTarget rt_ObjectID;
 
         Texture* tex_White;
 
         void ResizeViewport(uint width, uint height)
         {
-            rt_SceneView->Resize(width, height);
-            rt_ObjectID->Resize(width, height);
+            //rt_SceneView->Resize(width, height);
+            //rt_ObjectID->Resize(width, height);
         }
 
         // Read object ID from scene view render target and update selection
@@ -53,7 +51,7 @@ namespace chisel
 
         // Draw object ID to the selection buffer
         static void BeginSelectionPass(render::RenderContext& ctx);
-        static void PreDrawSelection(render::Render& r, uint id);
+        static void PreDrawSelection(render::RenderContext& r, uint id);
 
         // Draw wireframe outline of selected object
         void DrawSelectionOutline(Mesh* mesh);
@@ -69,15 +67,16 @@ namespace chisel
         void Shutdown();
 
     private:
-        render::Render& r = Render;
 
     } Tools;
 
-    inline void Tools::PreDrawSelection(render::Render& r, uint id)
+    inline void Tools::PreDrawSelection(render::RenderContext& r, uint id)
     {
+#if 0
         r.SetShader(chisel::Tools.sh_Color);
         float f = std::bit_cast<float>(id);
         r.SetUniform("u_color", vec4(f, 0.f, 0.f, 1.0f));
+#endif
     }
 
     inline ConCommand getpos("getpos", "Prints current camera position", [](ConCmd& cmd) {

@@ -113,13 +113,13 @@ namespace chisel
                 Separator();
                 if (MenuItem("Close", "Ctrl+W"))                  action = Close;
                 if (MenuItem("Exit",  "Alt+F4"))                  action = Exit;
-                EndMenu();
+                ImGui::EndMenu();
             }
 
             if (BeginMenu("Map"))
             {
                 if (MenuItem("Entity Gallery")) action = EntityGallery;
-                EndMenu();
+                ImGui::EndMenu();
             }
 
             if (BeginMenu("Window"))
@@ -127,7 +127,7 @@ namespace chisel
                 MenuItem(chisel::Tools.console->name.c_str(), "`", &chisel::Tools.console->open);
                 MenuItem(Chisel.viewport->name.c_str(), "", &Chisel.viewport->open);
                 MenuItem(ICON_MC_APPLICATION_OUTLINE " GUI Demo", "", &gui_demo.value);
-                EndMenu();
+                ImGui::EndMenu();
             }
 
             EndMainMenuBar();

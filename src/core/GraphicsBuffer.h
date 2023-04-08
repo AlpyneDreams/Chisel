@@ -11,7 +11,7 @@ namespace chisel
     struct GraphicsBuffer
     {
         // GPU buffer handle
-        render::Handle* handle = nullptr;
+        void* handle = nullptr;
 
         GraphicsBuffer() {}
 
