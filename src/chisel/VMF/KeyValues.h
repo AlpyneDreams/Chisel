@@ -6,6 +6,7 @@
 
 #include "math/Color.h"
 #include "common/String.h"
+#include "console/Console.h"
 
 #include <map>
 #include <memory>
