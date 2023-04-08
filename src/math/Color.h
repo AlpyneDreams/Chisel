@@ -92,6 +92,11 @@ namespace chisel
                 float(a) / float(NormalMax)
             );
         }
+
+        operator const float*() const
+        {
+            return &data[0];
+        }
     };
 
     using Color   = ColorRGBA<float>;

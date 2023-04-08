@@ -18,8 +18,8 @@ namespace chisel
 
     void MapRender::Update()
     {
+        r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2));
 #if 0
-        r.SetClearColor(true, Color(0.2, 0.2, 0.2));
         r.SetClearDepth(true, 1.0f);
         r.SetRenderTarget(Tools.rt_SceneView);
         r.SetShader(shader);
