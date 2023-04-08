@@ -34,7 +34,7 @@ namespace chisel
 #if 0
         sh_Color  = r.LoadShader("basic", "color");
 #endif
-        sh_Grid = render::Shader(r.device.ptr(), "grid");
+        sh_Grid = render::Shader(r.device.ptr(), VertexGrid::Layout, "grid");
 
         // Setup editor render targets
         auto [width, height] = window->GetSize();

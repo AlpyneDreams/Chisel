@@ -25,4 +25,6 @@ glaze_dep = glaze_proj.dependency('glaze_glaze')
 d3d11_dep = cpp.find_library('d3d11')
 dxgi_dep = cpp.find_library('dxgi')
 
+offsetallocator_src = files( 'submodules/OffsetAllocator/offsetAllocator.cpp' )
+
 subdir('src')

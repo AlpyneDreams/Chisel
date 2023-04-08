@@ -7,3 +7,6 @@
 [submodule "submodules/libvtf-plusplus"]
 	path = submodules/libvtf-plusplus
 	url = https://github.com/Joshua-Ashton/libvtf-plusplus
+[submodule "submodules/OffsetAllocator"]
+	path = submodules/OffsetAllocator
+	url = https://github.com/sebbbi/OffsetAllocator

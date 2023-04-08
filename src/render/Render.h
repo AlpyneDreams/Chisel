@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <string_view>
+#include <span>
 
 #include "D3D11Include.h"
 
@@ -40,7 +41,7 @@ namespace chisel::render
         Com<ID3D11InputLayout>  inputLayout;
 
         Shader() {}
-        Shader(ID3D11Device1* device, std::string_view name);
+        Shader(ID3D11Device1* device, std::span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name);
     };
 
     struct GlobalCBuffers

@@ -23,6 +23,9 @@ namespace chisel
     public:
         render::RenderContext& r = Tools.rctx;
         render::Shader shader;
+        BrushGPUAllocator brushAllocator;
+
+        MapRender();
 
         void Start() final override;
         void Update() final override;

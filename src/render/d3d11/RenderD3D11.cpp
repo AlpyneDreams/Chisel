@@ -152,7 +152,7 @@ namespace chisel::render
         ctx->Draw(mesh->groups[0].vertices.count, 0);
     }
 
-    Shader::Shader(ID3D11Device1* device, std::string_view name)
+    Shader::Shader(ID3D11Device1* device, std::span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name)
     {
         fs::Path path = fs::Path("core/shaders") / name;
         path.setExt(".vsc");
@@ -181,14 +181,7 @@ namespace chisel::render
             return;
         }
 
-        // TODO: Way to define this for shaders?
-        D3D11_INPUT_ELEMENT_DESC desc[] = {
-            { "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            //{ "COL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            //{ "NOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            //{ "TEX", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        };
-        hr = device->CreateInputLayout(desc, ARRAYSIZE(desc), vsFile->data(), vsFile->size(), &inputLayout);
+        hr = device->CreateInputLayout(ia.data(), ia.size(), vsFile->data(), vsFile->size(), &inputLayout);
         if (FAILED(hr)) {
             Console.Error("[D3D11] Failed to create input layout for shader '{}'", name);
             return;

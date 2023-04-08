@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/Mesh.h"
 #include "../CSG/Brush.h"
 #include "../CSG/CSGTree.h"
 #include "chisel/Selection.h"
@@ -28,7 +27,10 @@ namespace chisel
 
     struct BrushMesh
     {
-        MeshBuffer<VertexCSG> mesh = MeshBuffer<VertexCSG>();
+        std::vector<VertexCSG> vertices;
+        std::vector<uint32_t>  indices;
+
+        std::optional<BrushGPUAllocator::Allocation> alloc;
         Texture *texture = nullptr;
     };
 
@@ -79,9 +81,19 @@ namespace chisel
             m_sides = std::vector<SideData>(begin_data, end_data);
         }
 
-        void UpdateMesh()
+        void UpdateMesh(BrushGPUAllocator& a)
         {
+            // TODO: Avoid clearing meshes out every time.
+            for (auto& mesh : meshes)
+            {
+                if (mesh.alloc)
+                {
+                    a.free(*mesh.alloc);
+                    mesh.alloc = std::nullopt;
+                }
+            }
             meshes.clear();
+
             static const SideData defaultSide;
 
             // Create one mesh for each unique material
@@ -96,13 +108,14 @@ namespace chisel
 
             meshes.resize(textureCount);
 
+            render::RenderContext& r = a.rctx();
+
             for (auto& face : brush->GetFaces())
             {
                 const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
 
-                BrushMesh& brushmesh = meshes[uniqueTextures[data.texture]];
-                brushmesh.texture = data.texture;
-                auto& mesh = brushmesh.mesh;
+                BrushMesh& mesh = meshes[uniqueTextures[data.texture]];
+                mesh.texture = data.texture;
 
                 for (auto& fragment : face.fragments)
                 {
@@ -145,17 +158,20 @@ namespace chisel
                             mesh.indices.push_back(startIndex + tri[1]);
                             mesh.indices.push_back(startIndex + tri[2]);
                         }
-                        /*fprintf(stderr, "Adding triangle: (%g %g %g), (%g %g %g), (%g %g %g)\n",
-                            mesh.vertices[startIndex + tri[0]].position.x, mesh.vertices[startIndex + tri[0]].position.y, mesh.vertices[startIndex + tri[0]].position.z,
-                            mesh.vertices[startIndex + tri[1]].position.x, mesh.vertices[startIndex + tri[1]].position.y, mesh.vertices[startIndex + tri[1]].position.z,
-                            mesh.vertices[startIndex + tri[2]].position.x, mesh.vertices[startIndex + tri[2]].position.y, mesh.vertices[startIndex + tri[2]].position.z);*/
                     }
                 }
             }
 
             // Upload all meshes after they're complete
-            for (auto& submesh : meshes)
-                submesh.mesh.Update();
+            for (auto& mesh : meshes)
+            {
+                uint32_t verticesSize = sizeof(VertexCSG) * mesh.vertices.size();
+                uint32_t indicesSize = sizeof(uint32_t) * mesh.indices.size();
+                mesh.alloc = a.alloc(verticesSize + indicesSize);
+                // Store vertices then indices.
+                memcpy(&a.data()[mesh.alloc->offset + 0],            mesh.vertices.data(), verticesSize);
+                memcpy(&a.data()[mesh.alloc->offset + verticesSize], mesh.indices.data(),  indicesSize);
+            }
         }
 
         std::vector<SideData> m_sides;

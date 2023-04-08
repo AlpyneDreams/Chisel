@@ -53,7 +53,7 @@ chisel_deps = [
     glaze_dep,
 ]
 
-chisel = executable('chisel', chisel_src,
+chisel = executable('chisel', chisel_src, offsetallocator_src,
     dependencies    : chisel_deps,
     install         : true,
     include_directories: include_directories('../submodules'),

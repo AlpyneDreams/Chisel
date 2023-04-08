@@ -12,24 +12,37 @@ namespace chisel
     static ConVar<bool> r_drawworld("r_drawworld", true, "Draw world");
     static ConVar<bool> r_drawsprites("r_drawsprites", true, "Draw sprites");
 
+    MapRender::MapRender()
+        : System()
+        , brushAllocator(r)
+    {
+    }
+
     void MapRender::Start()
     {
-        shader = render::Shader(r.device.ptr(), "brush");
+        shader = render::Shader(r.device.ptr(), VertexCSG::Layout, "brush");
     }
 
     void MapRender::Update()
     {
         r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2));
+        r.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, nullptr);
 #if 0
         r.SetClearDepth(true, 1.0f);
-        r.SetRenderTarget(Tools.rt_SceneView);
         r.SetShader(shader);
         r.SetUniform("u_color", Colors.White);
         r.SetTexture(0, Tools.tex_White);
         r.SetTransform(glm::identity<mat4x4>());
+#endif
 
         if (r_rebuildworld)
-            map.Rebuild();
+        {
+            // TODO: Refactor so we can rebuild but not upload
+            // Return bool if rebuild changed to open allocator etc.
+            brushAllocator.open();
+            map.Rebuild(brushAllocator);
+            brushAllocator.close();
+        }
 
         // TODO: Cull!
         if (r_drawbrushes)
@@ -44,6 +57,7 @@ namespace chisel
             }
         }
 
+#if 0
         for (const auto* entity : map.entities)
         {
             const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
@@ -101,13 +115,14 @@ namespace chisel
     
     void MapRender::DrawBrushEntity(BrushEntity& ent)
     {
-#if 0
+        r.SetShader(shader);
         for (Solid& brush : ent)
         {
             for (auto& mesh : brush.GetMeshes())
             {
-                r.SetUniform("u_color", Color(1, 1, 1));//brush.GetTempColor());
+                //r.SetUniform("u_color", Color(1, 1, 1));//brush.GetTempColor());
 
+#if 0
                 if (brush.IsSelected())
                 {
                     // Draw a wire box around the brush
@@ -124,11 +139,18 @@ namespace chisel
 
                 if (mesh.texture)
                     r.SetTexture(0, mesh.texture);
+#endif
+                assert(mesh.alloc);
 
-                r.DrawMesh(&mesh.mesh);
+                UINT stride = sizeof(VertexCSG);
+                UINT vertexOffset = mesh.alloc->offset;
+                UINT indexOffset = vertexOffset + mesh.vertices.size() * sizeof(VertexCSG);
+                ID3D11Buffer* buffer = brushAllocator.buffer();
+                r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
+                r.ctx->IASetIndexBuffer(brushAllocator.buffer(), DXGI_FORMAT_R32_UINT, indexOffset);
+                r.ctx->DrawIndexed(mesh.indices.size(), 0, 0);
             }
         }
-#endif
     }
 
     void MapRender::DrawSelectionPass()

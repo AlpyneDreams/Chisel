@@ -3,6 +3,7 @@
 #include <list>
 
 #include "core/Mesh.h"
+#include "Common.h"
 #include "../CSG/Brush.h"
 #include "../CSG/CSGTree.h"
 
@@ -70,11 +71,11 @@ namespace chisel
             solids.remove(brush);
         }
 
-        virtual void Rebuild()
+        virtual void Rebuild(BrushGPUAllocator& a)
         {
             auto rebuilt = tree.Rebuild();
             for (CSG::Brush* brush : rebuilt)
-                brush->GetUserdata<Solid*>()->UpdateMesh();
+                brush->GetUserdata<Solid*>()->UpdateMesh(a);
         }
 
         auto begin() { return solids.begin(); }
@@ -115,13 +116,14 @@ namespace chisel
         // TODO: Polymorphic linked list
         std::vector<Entity*> entities;
 
-        void Rebuild() final override
+
+        void Rebuild(BrushGPUAllocator& a) final override
         {
-            BrushEntity::Rebuild();
+            BrushEntity::Rebuild(a);
 
             for (Entity* ent : entities)
                 if (BrushEntity* brush = dynamic_cast<BrushEntity*>(ent))
-                    brush->Rebuild();
+                    brush->Rebuild(a);
         }
 
         bool Empty() const {
