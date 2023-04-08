@@ -31,7 +31,12 @@ namespace chisel::render
 
     struct RenderTarget : public Texture
     {
-        Com<ID3D11RenderTargetView>   rtv;
+        Com<ID3D11RenderTargetView> rtv;
+    };
+
+    struct DepthStencil : public Texture
+    {
+        Com<ID3D11DepthStencilView> dsv;
     };
 
     struct Shader

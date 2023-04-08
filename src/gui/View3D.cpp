@@ -135,7 +135,7 @@ namespace chisel
         rctx.UpdateDynamicBuffer(rctx.cbuffers.camera.ptr(), data);
 
         rctx.ctx->VSSetConstantBuffers1(0, 1, &rctx.cbuffers.camera, nullptr, nullptr);
-        rctx.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, nullptr);
+        rctx.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, Tools.ds_SceneView.dsv.ptr());
 
         // Draw grid
         if (view_grid_show)

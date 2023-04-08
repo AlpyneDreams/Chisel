@@ -26,7 +26,8 @@ namespace chisel
     void MapRender::Update()
     {
         r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2));
-        r.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, nullptr);
+        r.ctx->ClearDepthStencilView(Tools.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        r.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, Tools.ds_SceneView.dsv.ptr());
 #if 0
         r.SetClearDepth(true, 1.0f);
         r.SetShader(shader);

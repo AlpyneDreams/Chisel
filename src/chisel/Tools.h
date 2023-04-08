@@ -51,6 +51,7 @@ namespace chisel
         } editorCamera;
 
         render::RenderTarget rt_SceneView;
+        render::DepthStencil ds_SceneView;
         render::RenderTarget rt_ObjectID;
 
         Texture* tex_White;
