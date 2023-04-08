@@ -111,10 +111,8 @@ namespace chisel
         float AspectRatio()
         {
             vec2 size;
-            if (renderTarget.texture != nullptr) {
-                D3D11_TEXTURE2D_DESC desc;
-                renderTarget.texture->GetDesc(&desc);
-                size = vec2(desc.Width, desc.Height);
+            if (renderTarget) {
+                size = renderTarget.GetSize();
             } else {
                 size = Window::main->GetSize();
             }

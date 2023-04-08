@@ -17,6 +17,14 @@ namespace chisel::render
     {
         Com<ID3D11Texture2D>          texture;
         Com<ID3D11ShaderResourceView> srv;
+
+        operator bool() const { return texture != nullptr; }
+        virtual uint2 GetSize()
+        {
+            D3D11_TEXTURE2D_DESC desc;
+            texture->GetDesc(&desc);
+            return uint2(desc.Width, desc.Height);
+        }
     };
 
     struct RenderTarget : public Texture
