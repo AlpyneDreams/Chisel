@@ -29,6 +29,8 @@ namespace chisel
         RenderSystem Renderer   = RenderSystem(window);
         render::RenderContext& rctx  = Renderer.rctx;
 
+        render::Shader sh_Grid;
+
     public:
     // Viewport //
         struct EditorCamera {

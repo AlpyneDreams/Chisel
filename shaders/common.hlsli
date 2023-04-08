@@ -12,13 +12,7 @@ struct vs_out
 
 // See src/render/CBuffers.h
 
-cbuffer Scene : register(b0)
+cbuffer CameraState : register(b0)
 {
-    float g_farZ;
-};
-
-cbuffer Object : register(b1)
-{
-    float4x4 g_modelViewProj;
-    float4x4 g_modelView;
+    float4x4 g_viewProj;
 };

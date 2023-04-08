@@ -40,7 +40,12 @@ namespace chisel::render
         Com<ID3D11InputLayout>  inputLayout;
 
         Shader() {}
-        Shader(Com<ID3D11Device1> device, std::string_view name);
+        Shader(ID3D11Device1* device, std::string_view name);
+    };
+
+    struct GlobalCBuffers
+    {
+        Com<ID3D11Buffer> camera;
     };
 
     struct RenderContext
@@ -53,14 +58,29 @@ namespace chisel::render
 
         void SetShader(const Shader& shader);
 
-
         // Compatability with existing Mesh class
         void DrawMesh(Mesh* mesh);
+
+        template <typename T>
+        void UpdateDynamicBuffer(ID3D11Resource* res, const T& data)
+        {
+            D3D11_MAPPED_SUBRESOURCE mapped;
+            HRESULT hr = ctx->Map(res, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+            if (FAILED(hr))
+            {
+                // fuck.
+                return;
+            }
+            memcpy(mapped.pData, &data, sizeof(T));
+            ctx->Unmap(res, 0);
+        }
 
         Com<ID3D11Device1> device;
         Com<ID3D11DeviceContext1> ctx;
         Com<IDXGISwapChain> swapchain;
 
         RenderTarget backbuffer;
+
+        GlobalCBuffers cbuffers;
     };
 }

@@ -6,6 +6,7 @@
 #include "input/Keyboard.h"
 #include "platform/Cursor.h"
 #include "common/Time.h"
+#include "render/CBuffers.h"
 
 #include "core/Transform.h"
 
@@ -120,21 +121,25 @@ namespace chisel
         // Get camera matrices
         mat4x4 view = camera.ViewMatrix();
         mat4x4 proj = camera.ProjMatrix();
+        mat4x4 viewProj = proj * view;
 
         DrawHandles(view, proj);
 
         // HACK: Reset hovered window
         g.HoveredWindow = hovered;
 
-#if 0
         // Begin scene view extra rendering
-        render::Render& r = Tools.Render;
-        r.SetRenderTarget(Tools.rt_SceneView);
+        render::RenderContext& rctx = Tools.rctx;
+        cbuffers::CameraState data;
+        data.viewProj = proj * view;
+        rctx.UpdateDynamicBuffer(rctx.cbuffers.camera.ptr(), data);
+
+        rctx.ctx->VSSetConstantBuffers1(0, 1, &rctx.cbuffers.camera, nullptr, nullptr);
+        rctx.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, nullptr);
 
         // Draw grid
         if (view_grid_show)
-            Handles.DrawGrid(r, camera.position, Tools.sh_Grid, gridSize);
-#endif
+            Handles.DrawGrid(rctx, camera.position, gridSize);
 
         OnPostDraw();
     }

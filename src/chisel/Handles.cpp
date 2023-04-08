@@ -154,13 +154,12 @@ namespace chisel
     //  Grid
     //--------------------------------------------------
 
-#if 0
     void Handles::DrawGrid(render::RenderContext& r, vec3 cameraPos, vec3 gridSize)
     {
-        r.SetBlendFunc(render::BlendFuncs::Alpha);
-        r.SetDepthTest(render::CompareFunc::LessEqual);
-        r.SetPrimitiveType(render::PrimitiveType::Lines);
-        r.SetShader(shader);
+        //r.SetBlendFunc(render::BlendFuncs::Alpha);
+        //r.SetDepthTest(render::CompareFunc::LessEqual);
+        r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+        r.SetShader(Tools.sh_Grid);
 
         // Determine center of grid based on camera position
         vec3 chunk = gridSize * float(gridChunkSize);
@@ -175,24 +174,26 @@ namespace chisel
 
         // Set far Z based on radius
         vec3 farZ = vec3(radius) * chunk * 0.8f;
-        r.SetUniform("u_gridFarZ", vec4(glm::min(farZ.x, farZ.y), 0, 0, 0));
+        //r.SetUniform("u_gridFarZ", vec4(glm::min(farZ.x, farZ.y), 0, 0, 0));
 
+#if 0
         // Draw each cell
         for (int x = -radius.x; x <= radius.x; x++)
         {
             for (int y = -radius.y; y <= radius.y; y++)
             {
                 vec3 translation = vec3(x, y, 0) * vec3(gridChunkSize);
-                r.SetTransform(glm::translate(mtx, translation));
+                //r.SetTransform(glm::translate(mtx, translation));
                 r.DrawMesh(&grid);
             }
         }
-
-        r.SetPrimitiveType(render::PrimitiveType::Triangles);
-        r.SetDepthTest(render::CompareFunc::Less);
-        r.SetBlendFunc(render::BlendFuncs::Normal);
-    }
 #endif
+        r.DrawMesh(&grid);
+
+        r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        //r.SetDepthTest(render::CompareFunc::Less);
+        //r.SetBlendFunc(render::BlendFuncs::Normal);
+    }
 
     Handles::Handles()
     {

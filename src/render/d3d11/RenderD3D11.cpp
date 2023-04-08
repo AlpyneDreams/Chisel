@@ -5,6 +5,7 @@
 #include "gui/impl/imgui_impl_dx11.h"
 #include "common/Filesystem.h"
 #include "core/Mesh.h"
+#include "render/CBuffers.h"
 
 namespace chisel::render
 {
@@ -65,6 +66,16 @@ namespace chisel::render
 
         ImGui_ImplDX11_Init(device.ptr(), ctx.ptr());
         ImGui_ImplDX11_NewFrame();
+
+        // Global CBuffers
+        D3D11_BUFFER_DESC desc =
+        {
+            .ByteWidth = sizeof(cbuffers::CameraState),
+            .Usage = D3D11_USAGE_DYNAMIC,
+            .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
+            .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+        };
+        device->CreateBuffer(&desc, nullptr, &cbuffers.camera);
     }
 
     void RenderContext::Shutdown()
@@ -141,7 +152,7 @@ namespace chisel::render
         ctx->Draw(mesh->groups[0].vertices.count, 0);
     }
 
-    Shader::Shader(Com<ID3D11Device1> device, std::string_view name)
+    Shader::Shader(ID3D11Device1* device, std::string_view name)
     {
         fs::Path path = fs::Path("core/shaders") / name;
         path.setExt(".vsc");

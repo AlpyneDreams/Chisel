@@ -43,19 +43,13 @@ void main()
 vs_out vs_main(vs_in input)
 {
     vs_out output = (vs_out)0;
-    output.position = float4(input.position, 1.0);//mul(g_modelViewProj, float4(input.position, 1.0));
 
-    float major = input.uv.x;
-
-    // Fade out major gridlines further than minor ones
-    output.v_farZ  = g_farZ.x * (major ? 1.0 : 0.5);
-    output.v_alpha = 0.1 + (major * 0.1);
-    output.v_z     = -mul(g_modelView, float4(input.position, 1.0)).z;
+    output.position = mul(g_viewProj, float4(input.position, 1.0));
 
     return output;
 }
 
 float4 ps_main(vs_out input) : SV_TARGET
 {
-    return float4( 1.0, 0.0, 1.0, 1.0 );
+    return float4( 1.0, 1.0, 1.0, 1.0 );
 }

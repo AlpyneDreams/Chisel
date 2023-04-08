@@ -33,8 +33,8 @@ namespace chisel
         // Load editor shaders
 #if 0
         sh_Color  = r.LoadShader("basic", "color");
-        sh_Grid   = r.LoadShader("grid");
 #endif
+        sh_Grid = render::Shader(r.device.ptr(), "grid");
 
         // Setup editor render targets
         auto [width, height] = window->GetSize();
