@@ -6,6 +6,7 @@
 
 #include "core/Camera.h"
 #include "common/System.h"
+#include "common/Event.h"
 
 namespace chisel
 {
@@ -14,6 +15,8 @@ namespace chisel
     {
         Window* window;
         render::RenderContext rctx;
+
+        Event<render::RenderContext&> OnEndFrame;
 
         RenderSystem(Window* win) : window(win) {}
 
@@ -31,6 +34,7 @@ namespace chisel
 
             rctx.BeginFrame();
             rctx.EndFrame();
+            OnEndFrame(rctx);
 
             GUI::Render();
         }
