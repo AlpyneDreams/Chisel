@@ -1,12 +1,12 @@
 #include "common.hlsli"
 
-struct vs_in
+struct Input
 {
     float3 position : POSITION;
     float  major    : TEXCOORD0;
 };
 
-struct vs_out
+struct Varyings
 {
     float4 position : SV_POSITION;
     float  farZ     : TEXCOORD0;
@@ -14,23 +14,22 @@ struct vs_out
     float  z        : TEXCOORD2;
 };
 
-vs_out vs_main(vs_in i)
+Varyings vs_main(Input i)
 {
-    vs_out o = (vs_out)0;
+    Varyings v = (Varyings)0;
 
-    o.position = mul(Object.modelViewProj, float4(i.position, 1.0));
+    v.position = mul(Object.modelViewProj, float4(i.position, 1.0));
 
     // Fade out major gridlines further than minor ones
-    o.farZ  = Camera.farZ * (i.major ? 1.0 : 0.5);
-    o.alpha = 0.1 + (i.major * 0.1);
-    o.z     = -mul(Object.modelView, float4(i.position, 1.0)).z;
+    v.farZ  = Camera.farZ * (i.major ? 1.0 : 0.5);
+    v.alpha = 0.1 + (i.major * 0.1);
+    v.z     = -mul(Object.modelView, float4(i.position, 1.0)).z;
 
-    return o;
+    return v;
 }
 
-float4 ps_main(vs_out i) : SV_TARGET
+float4 ps_main(Varyings v) : SV_TARGET
 {
-    float alpha = i.alpha * saturate(1 - (i.z / i.farZ));
-    return float4( 1, 1, 1, alpha );
+    float alpha = v.alpha * saturate(1 - (v.z / v.farZ));
+    return float4(1, 1, 1, alpha);
 }
-
