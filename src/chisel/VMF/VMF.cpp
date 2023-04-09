@@ -106,14 +106,14 @@ namespace chisel::VMF
             // WIP, good enough for now.
             std::string material_path = "materials/";
             material_path += side.material;
-            material_path += ".vtf";
+            material_path += ".vmt";
 
             if (!Assets.IsLoaded(material_path))
                 Console.Log("Loading material: {}", material_path);
 
             SideData data =
             {
-                .texture       = Assets.Load<Texture>(material_path),
+                .material      = Assets.Load<Material>(material_path),
                 .textureAxes   = {{ side.axis[0],  side.axis[1] }},
                 .scale         = {{ side.scale[0], side.scale[1] }},
                 .rotate        = side.rotation,

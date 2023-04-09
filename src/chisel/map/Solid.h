@@ -18,7 +18,7 @@ namespace chisel
 {
     struct SideData
     {
-        Texture *texture{};
+        Material *material{};
         std::array<vec4, 2> textureAxes{};
         std::array<float, 2> scale{ 1.0f, 1.0f };
         float rotate = 0;
@@ -32,7 +32,7 @@ namespace chisel
         std::vector<uint32_t>  indices;
 
         std::optional<BrushGPUAllocator::Allocation> alloc;
-        Texture *texture = nullptr;
+        Material *material = nullptr;
     };
 
     // TODO: Move to some transform state?
@@ -100,16 +100,16 @@ namespace chisel
             static const SideData defaultSide;
 
             // Create one mesh for each unique material
-            size_t textureCount = 0;
-            std::unordered_map<Texture*, size_t> uniqueTextures;
+            size_t materialCount = 0;
+            std::unordered_map<Material*, size_t> uniqueMaterial;
             for (auto& face : brush->GetFaces())
             {
                 const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
-                if (!uniqueTextures.contains(data.texture))
-                    uniqueTextures.emplace(data.texture, textureCount++);
+                if (!uniqueMaterial.contains(data.material))
+                    uniqueMaterial.emplace(data.material, materialCount++);
             }
 
-            meshes.resize(textureCount);
+            meshes.resize(materialCount);
 
             render::RenderContext& r = a.rctx();
 
@@ -117,8 +117,8 @@ namespace chisel
             {
                 const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
 
-                BrushMesh& mesh = meshes[uniqueTextures[data.texture]];
-                mesh.texture = data.texture;
+                BrushMesh& mesh = meshes[uniqueMaterial[data.material]];
+                mesh.material = data.material;
 
                 for (auto& fragment : face.fragments)
                 {
@@ -136,10 +136,10 @@ namespace chisel
                     {
                         float mappingWidth = 32.0f;
                         float mappingHeight = 32.0f;
-                        if (data.texture != nullptr)
+                        if (data.material != nullptr && data.material->baseTexture != nullptr)
                         {
                             D3D11_TEXTURE2D_DESC desc;
-                            data.texture->texture->GetDesc(&desc);
+                            data.material->baseTexture->texture->GetDesc(&desc);
 
                             mappingWidth = float(desc.Width);
                             mappingHeight = float(desc.Height);

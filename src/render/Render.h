@@ -13,6 +13,7 @@
 
 #include "D3D11Include.h"
 #include "render/BlendState.h"
+#include "core/Flags.h"
 
 namespace chisel
 {
@@ -28,6 +29,11 @@ namespace chisel
             texture->GetDesc(&desc);
             return uint2(desc.Width, desc.Height);
         }
+    };
+
+    struct Material : Asset
+    {
+        Texture* baseTexture;
     };
 }
 

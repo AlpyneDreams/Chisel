@@ -7,6 +7,7 @@
 #include "assets/Assets.h"
 #include "render/Render.h"
 #include "chisel/Tools.h"
+#include "chisel/VMF/KeyValues.h"
 #include "libvtf-plusplus/libvtf++.hpp"
 
 #include <span>
@@ -130,5 +131,29 @@ namespace chisel
         };
         Tools.rctx.device->CreateTexture2D(&desc, &initialData, &tex.texture);
         Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), nullptr, &tex.srv);
+    };
+
+    static AssetLoader <Material, FixedString(".VMT")> VMTLoader = [](Material& mat, const Buffer& data)
+    {
+        // TODO: This sucks.
+        auto str = std::string((const char*)data.data(), data.size());
+        auto r_kv = KeyValues::Parse(str);
+        if (!r_kv)
+            return;
+
+        KeyValues &kv = *r_kv;
+
+        KeyValues& basetexture = kv["$basetexture"];
+        if (basetexture.type != KeyValues::Null)
+        {
+            std::string val = basetexture;
+
+            // stupid bodge. using std string here sucks too. should just use fixed size strings of MAX_PATH on stack.
+            if (!val.starts_with("materials"))
+                val = "materials/" + val;
+            if (!val.ends_with(".vtf"))
+                val += ".vtf";
+            mat.baseTexture = Assets.Load<Texture>(val);
+        }
     };
 }
