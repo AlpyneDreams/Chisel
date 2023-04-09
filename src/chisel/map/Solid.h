@@ -17,7 +17,7 @@ namespace chisel
 {
     struct SideData
     {
-        render::Texture *texture{};
+        Texture *texture{};
         std::array<vec4, 2> textureAxes{};
         std::array<float, 2> scale{ 1.0f, 1.0f };
         float rotate = 0;
@@ -31,7 +31,7 @@ namespace chisel
         std::vector<uint32_t>  indices;
 
         std::optional<BrushGPUAllocator::Allocation> alloc;
-        render::Texture *texture = nullptr;
+        Texture *texture = nullptr;
     };
 
     struct Solid : Atom
@@ -96,7 +96,7 @@ namespace chisel
 
             // Create one mesh for each unique material
             size_t textureCount = 0;
-            std::unordered_map<render::Texture*, size_t> uniqueTextures;
+            std::unordered_map<Texture*, size_t> uniqueTextures;
             for (auto& face : brush->GetFaces())
             {
                 const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];

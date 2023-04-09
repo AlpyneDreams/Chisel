@@ -5,7 +5,6 @@
 #include "stb/stb_image_write.h"
 
 #include "assets/Assets.h"
-#include "assets/AssetTypes.h"
 #include "render/Render.h"
 #include "chisel/Tools.h"
 #include "libvtf-plusplus/libvtf++.hpp"
@@ -14,7 +13,7 @@
 
 namespace chisel
 {
-    static void LoadTexture(TextureAsset& tex, const Buffer& data)
+    static void LoadTexture(Texture& tex, const Buffer& data)
     {
         int width, height, channels;
 
@@ -46,8 +45,8 @@ namespace chisel
         Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), nullptr, &tex.srv);
     }
 
-    static AssetLoader<TextureAsset, FixedString(".PNG")> PNGLoader = &LoadTexture;
-    static AssetLoader<TextureAsset, FixedString(".TGA")> TGALoader = &LoadTexture;
+    static AssetLoader<Texture, FixedString(".PNG")> PNGLoader = &LoadTexture;
+    static AssetLoader<Texture, FixedString(".TGA")> TGALoader = &LoadTexture;
 
     static DXGI_FORMAT RemapVTFImageFormat(libvtf::ImageFormat format) {
         switch (format) {
@@ -100,7 +99,7 @@ namespace chisel
         }
     }
 
-    static AssetLoader<TextureAsset, FixedString(".VTF")> VTFLoader = [](TextureAsset& tex, const Buffer& data)
+    static AssetLoader<Texture, FixedString(".VTF")> VTFLoader = [](Texture& tex, const Buffer& data)
     {
         // TODO: Make copy-less.
         libvtf::VTFData vtfData(data);

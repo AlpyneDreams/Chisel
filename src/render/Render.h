@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assets/Asset.h"
 #include "platform/Window.h"
 #include "math/Math.h"
 #include "math/Color.h"
@@ -13,9 +14,9 @@
 #include "D3D11Include.h"
 #include "render/BlendState.h"
 
-namespace chisel::render
+namespace chisel
 {
-    struct Texture
+    struct Texture : Asset
     {
         Com<ID3D11Texture2D>          texture;
         Com<ID3D11ShaderResourceView> srv;
@@ -28,7 +29,10 @@ namespace chisel::render
             return uint2(desc.Width, desc.Height);
         }
     };
+}
 
+namespace chisel::render
+{
     struct RenderTarget : public Texture
     {
         Com<ID3D11RenderTargetView> rtv;

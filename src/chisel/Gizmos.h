@@ -2,7 +2,6 @@
 
 #include "chisel/Tools.h"
 #include "assets/Assets.h"
-#include "assets/AssetTypes.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "render/Render.h"
 #include "render/CBuffers.h"
@@ -17,11 +16,11 @@ namespace chisel
 {
     inline struct Gizmos
     {
-        static inline TextureAsset* icnLight;
-        static inline TextureAsset* icnHandle;
+        static inline Texture* icnLight;
+        static inline Texture* icnHandle;
         static inline render::Shader sh_Sprite;
 
-        void DrawIcon(vec3 pos, render::Texture* icon, vec3 size = vec3(64.f))
+        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(64.f))
         {
             auto& r = Tools.rctx;
             r.SetShader(sh_Sprite);
@@ -60,8 +59,8 @@ namespace chisel
 
         void Init()
         {
-            icnLight = Assets.Load<TextureAsset>("textures/ui/light.png");
-            icnHandle = Assets.Load<TextureAsset>("textures/ui/handle.png");
+            icnLight = Assets.Load<Texture>("textures/ui/light.png");
+            icnHandle = Assets.Load<Texture>("textures/ui/handle.png");
             sh_Sprite = render::Shader(Tools.rctx.device.ptr(), Primitives::Vertex::Layout, "sprite");
         }
     } Gizmos;

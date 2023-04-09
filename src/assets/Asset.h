@@ -1,40 +1,47 @@
 #pragma once
 
+#include "common/Common.h"
 #include "common/Path.h"
 #include <unordered_map>
+#include <memory>
 
 namespace chisel
 {
-    
+    using AssetID = uint;
     using AssetTable = std::unordered_map<fs::Path, struct Asset*>;
 
     struct Asset
     {
         using Path = fs::Path;
 
+        AssetID id = NextID++;
+
         virtual ~Asset()
         {
-            if (path)
-                AssetDB.erase(path);
+            if (AssetPaths.contains(id))
+            {
+                AssetDB.erase(AssetPaths[id]);
+                AssetPaths.erase(id);
+            }
         }
 
         const Path& GetPath() const
         {
-            return path;
+            return AssetPaths.contains(id) ? AssetPaths.at(id) : fs::Path();
         }
 
     private:
         friend struct Assets;
 
-        Path path;
-
         void SetPath(const Path& p)
         {
-            path = p;
-            AssetDB[path] = this;
+            AssetDB[p] = this;
+            AssetPaths[id] = p;
         }
 
         static inline AssetTable AssetDB;
+        static inline std::unordered_map<AssetID, Path> AssetPaths;
+        static inline AssetID NextID = 0;
     };
 }
 

@@ -173,7 +173,7 @@ namespace chisel
             ImGui::SetTooltip("%s", tooltip);
     }
 
-    bool GUI::Thumbnail(const char* name, render::Texture* icon, bool selected)
+    bool GUI::Thumbnail(const char* name, Texture* icon, bool selected)
     {
         bool clicked = false;
         ImVec2 itemSize = {80, 80};

@@ -39,7 +39,7 @@ namespace chisel
         render::DepthStencil ds_SceneView;
         render::RenderTarget rt_ObjectID;
 
-        render::Texture* tex_White;
+        Texture* tex_White;
 
         void ResizeViewport(uint width, uint height)
         {

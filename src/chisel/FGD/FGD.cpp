@@ -7,7 +7,6 @@
 #include "common/Filesystem.h"
 #include "common/String.h"
 #include "assets/Assets.h"
-#include "assets/AssetTypes.h"
 #include "render/Render.h"
 
 template <>
@@ -150,10 +149,10 @@ namespace chisel
                         Expect('(');
                         fs::Path path = fs::Path("materials") / ParseString();
                         path.setExt(".png");
-                        cls.texture = Assets.Load<TextureAsset>(path);
+                        cls.texture = Assets.Load<Texture>(path);
                         if (!cls.texture) {
                             path.setExt(".vtf");
-                            cls.texture = Assets.Load<TextureAsset>(path);
+                            cls.texture = Assets.Load<Texture>(path);
                         }
                         Expect(')');
                         break;
