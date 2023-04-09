@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Event.h"
 #include "platform/Window.h"
 #include "render/Render.h"
 #include "gui/Common.h"
@@ -15,9 +14,6 @@ namespace chisel
     {
         Window* window;
         render::RenderContext rctx;
-
-        Event<render::RenderContext&> OnBeginFrame;
-        Event<render::RenderContext&> OnEndFrame;
 
         RenderSystem(Window* win) : window(win) {}
 
@@ -34,9 +30,6 @@ namespace chisel
             GUI::Update();
 
             rctx.BeginFrame();
-            OnBeginFrame(rctx);
-            
-            OnEndFrame(rctx);
             rctx.EndFrame();
 
             GUI::Render();

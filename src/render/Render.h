@@ -4,7 +4,6 @@
 #include "platform/Window.h"
 #include "math/Math.h"
 #include "math/Color.h"
-#include "render/TextureFormat.h"
 #include "core/Mesh.h"
 
 #include <functional>
