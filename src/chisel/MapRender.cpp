@@ -141,50 +141,63 @@ namespace chisel
     
     void MapRender::DrawBrushEntity(BrushEntity& ent)
     {
+        static std::vector<BrushMesh*> opaqueMeshes;
+        static std::vector<BrushMesh*> transMeshes;
+        opaqueMeshes.clear();
+        transMeshes.clear();
+
         r.SetShader(shader);
         for (Solid& brush : ent)
         {
+            for (auto& mesh : brush.GetMeshes())
+            {
+                assert(mesh.alloc);
+
+                if (mesh.material)
+                {
+                    if (mesh.material->translucent)
+                        transMeshes.push_back(&mesh);
+                    else
+                        opaqueMeshes.push_back(&mesh);
+                }
+            }
+        }
+
+        auto DrawMesh = [&](BrushMesh* mesh)
+        {
             cbuffers::BrushState data;
-            data.id = brush.GetSelectionID();
+            data.id = mesh->brush->GetSelectionID();
 
             r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
             r.ctx->PSSetConstantBuffers(1, 1, &r.cbuffers.brush);
 
-            for (auto& mesh : brush.GetMeshes())
+            UINT stride = sizeof(VertexCSG);
+            UINT vertexOffset = mesh->alloc->offset;
+            UINT indexOffset = vertexOffset + mesh->vertices.size() * sizeof(VertexCSG);
+            ID3D11Buffer* buffer = brushAllocator.buffer();
+            ID3D11ShaderResourceView *srv = nullptr;
+            if (mesh->material)
             {
-                //r.SetUniform("u_color", Color(1, 1, 1));//brush.GetTempColor());
-
-#if 0
-                if (brush.IsSelected())
-                {
-                    // Draw a wire box around the brush
-                    //r.SetTransform(brush.GetBounds()->ComputeMatrix());
-                    //Tools.DrawSelectionOutline(&Primitives.Cube);
-
-                    // Draw wireframe of the brush's mesh
-                    r.SetTransform(glm::identity<mat4x4>());
-                    Tools.DrawSelectionOutline(&mesh.mesh);
-
-                    // Draw the actual mesh faces in red
-                    r.SetUniform("u_color", Color(1, 0, 0));
-                }
-#endif
-                assert(mesh.alloc);
-
-                UINT stride = sizeof(VertexCSG);
-                UINT vertexOffset = mesh.alloc->offset;
-                UINT indexOffset = vertexOffset + mesh.vertices.size() * sizeof(VertexCSG);
-                ID3D11Buffer* buffer = brushAllocator.buffer();
-                ID3D11ShaderResourceView *srv = nullptr;
-                if (mesh.material && mesh.material->baseTexture)
-                    srv = mesh.material->baseTexture->srv.ptr();
-
-                r.ctx->PSSetShaderResources(0, 1, &srv);
-                r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
-                r.ctx->IASetIndexBuffer(brushAllocator.buffer(), DXGI_FORMAT_R32_UINT, indexOffset);
-                r.ctx->DrawIndexed(mesh.indices.size(), 0, 0);
+                if (mesh->material->baseTexture)
+                    srv = mesh->material->baseTexture->srv.ptr();
             }
-        }
+            r.ctx->PSSetShaderResources(0, 1, &srv);
+            r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
+            r.ctx->IASetIndexBuffer(brushAllocator.buffer(), DXGI_FORMAT_R32_UINT, indexOffset);
+            r.ctx->DrawIndexed(mesh->indices.size(), 0, 0);
+        };
+
+        // Draw opaque meshes.
+        r.SetBlendState(render::BlendFuncs::Normal);
+        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
+        for (auto* mesh : opaqueMeshes)
+            DrawMesh(mesh);
+
+        // Draw trans meshes.
+        r.SetBlendState(render::BlendFuncs::Alpha);
+        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
+        for (auto* mesh : transMeshes)
+            DrawMesh(mesh);
     }
 
     void MapRender::DrawSelectionPass()

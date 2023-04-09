@@ -26,6 +26,8 @@ namespace chisel
         uint32_t smoothing = 0;
     };
 
+    struct Solid;
+
     struct BrushMesh
     {
         std::vector<VertexCSG> vertices;
@@ -33,26 +35,47 @@ namespace chisel
 
         std::optional<BrushGPUAllocator::Allocation> alloc;
         Material *material = nullptr;
+        Solid *brush = nullptr;
     };
 
     // TODO: Move to some transform state?
     extern ConVar<bool>  trans_texture_lock;
     extern ConVar<bool>  trans_texture_scale_lock;
 
+    inline CSG::VolumeOperation CreateSourceContentsVolumeOperation(Volume target)
+    {
+        return [=](CSG::VolumeID _current)
+        {
+            Volume current = static_cast<Volume>(_current);
+            assert(current != Volume::Auto && target != Volume::Auto);
+
+            if (current == Volume::Window || target == Volume::Window)
+            {
+                if (current == Volume::Air)
+                    return static_cast<CSG::VolumeID>(target);
+
+                return static_cast<CSG::VolumeID>(current);
+            }
+
+            return static_cast<CSG::VolumeID>(target);
+        };
+    }
+
     struct Solid : Atom
     {
     protected:
         CSG::Brush*             brush;
-        Volume                  volume;
+        Volume                  m_volume     = Volume::Auto;
+        Volume                  m_realVolume = Volume::Auto;
 
         std::vector<BrushMesh>  meshes;
         Color                   tempcolor;
 
     public:
         Solid(CSG::Brush& brush, Volume volume)
-            : brush(&brush), volume(volume)
+            : brush(&brush), m_volume(volume)
         {
-            brush.SetVolumeOperation(CSG::CreateFillOperation(volume));
+            UpdateVolume();
             brush.userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
 
             srand(brush.GetObjectID());
@@ -60,7 +83,7 @@ namespace chisel
         }
 
         Solid(Solid&& that)
-            : Solid(*that.brush, that.volume)
+            : Solid(*that.brush, that.m_volume)
         {
             that.brush = nullptr;
         }
@@ -82,6 +105,7 @@ namespace chisel
         {
             GetBrush().SetSides(begin_side, end_side);
             m_sides = std::vector<SideData>(begin_data, end_data);
+            UpdateVolume();
         }
 
         void UpdateMesh(BrushGPUAllocator& a)
@@ -119,6 +143,7 @@ namespace chisel
 
                 BrushMesh& mesh = meshes[uniqueMaterial[data.material]];
                 mesh.material = data.material;
+                mesh.brush = this;
 
                 for (auto& fragment : face.fragments)
                 {
@@ -273,7 +298,25 @@ namespace chisel
             }
         }
         void AlignToGrid(vec3 gridSize) final override { brush->AlignToGrid(gridSize); }
-        void SetVolume(Volume volume) final override { brush->SetVolumeOperation(CSG::CreateFillOperation(volume)); }
+        void SetVolume(Volume volume) final override { m_volume = volume; UpdateVolume(); }
+
+        void UpdateVolume()
+        {
+            Volume volume = m_volume;
+            if (volume == Volume::Auto)
+            {
+                bool translucent = false;
+                for (const auto& side : m_sides)
+                    translucent |= side.material && side.material->translucent;
+                volume = translucent ? Volume::Window : Volume::Solid;
+            }
+
+            if (m_realVolume == volume)
+                return;
+
+            m_realVolume = volume;
+            brush->SetVolumeOperation(CreateSourceContentsVolumeOperation(volume));
+        }
     };
 
     inline Solid CubeBrush(CSG::Brush& brush, Volume volume, vec3 size = vec3(64.f), const mat4x4& transform = glm::identity<mat4x4>())

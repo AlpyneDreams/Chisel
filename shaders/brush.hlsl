@@ -51,9 +51,11 @@ Output ps_main(Varyings v)
 
 	// Half lambert
 	NoL = 0.5 + (0.5 * NoL);
+    
+    float4 baseColor = s_texture.Sample(s_sampler, v.uv);
 
-    o.color.rgb = color * NoL * s_texture.Sample(s_sampler, v.uv).rgb;
-    o.color.a   = 1;
+    o.color.rgb = color * NoL * baseColor.rgb;
+    o.color.a   = baseColor.a;
     o.id = Brush.id;
     return o;
 }

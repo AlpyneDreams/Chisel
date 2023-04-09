@@ -155,5 +155,8 @@ namespace chisel
                 val += ".vtf";
             mat.baseTexture = Assets.Load<Texture>(val);
         }
+
+        mat.translucent = kv["$translucent"];
+        mat.alphatest = kv["$alphatest"];
     };
 }

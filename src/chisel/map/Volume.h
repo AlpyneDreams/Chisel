@@ -6,7 +6,7 @@ namespace chisel
     {
         enum Volume
         {
-            Air, Solid
+            Auto, Air, Solid, Window
         };
     }
     

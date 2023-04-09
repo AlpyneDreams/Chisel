@@ -55,12 +55,12 @@ namespace chisel
             solids.clear();
         }
 
-        Solid& AddBrush(Volume volume = Volumes::Solid)
+        Solid& AddBrush(Volume volume = Volumes::Auto)
         {
             return solids.emplace_back(tree.CreateBrush(), volume);
         }
 
-        Solid& AddCube(mat4x4 transform = glm::identity<mat4x4>(), vec3 size = vec3(64.f), Volume volume = Volumes::Solid)
+        Solid& AddCube(mat4x4 transform = glm::identity<mat4x4>(), vec3 size = vec3(64.f), Volume volume = Volumes::Auto)
         {
             solids.push_back(CubeBrush(tree.CreateBrush(), volume, size, transform));
             return solids.back();
