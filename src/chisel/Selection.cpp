@@ -84,6 +84,9 @@ namespace chisel
         std::optional<AABB> bounds;
         for (Selectable* selectable : m_selection)
         {
+            if (selectable == this)
+                continue;
+
             auto selectedBounds = selectable->GetBounds();
             if (!selectedBounds)
                 continue;
