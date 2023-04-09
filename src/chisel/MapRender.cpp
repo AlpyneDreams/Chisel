@@ -101,7 +101,7 @@ namespace chisel
                     if (point->IsSelected())
                     {
                         cbuffers::ObjectState data;
-                        data.model = glm::scale(glm::translate(mat4x4(1), point->origin), vec3(64.f));
+                        data.model = glm::scale(glm::translate(mat4x4(1), point->origin), vec3(32.0f));
 
                         r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
                         r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);

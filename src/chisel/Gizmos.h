@@ -20,7 +20,7 @@ namespace chisel
         static inline Texture* icnHandle;
         static inline render::Shader sh_Sprite;
 
-        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(64.f))
+        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(32.0f))
         {
             auto& r = Tools.rctx;
             r.SetShader(sh_Sprite);

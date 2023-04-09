@@ -33,6 +33,7 @@ namespace chisel
             AddSearchPath("core");
             AddPakFile("$STEAMAPPS/Half-Life 2/hl2/hl2_textures");
             AddPakFile("$STEAMAPPS/Half-Life 2/hl1/hl1_pak");
+            AddPakFile("$STEAMAPPS/Counter-Strike Source/cstrike/cstrike_pak");
         }
 
         ~Assets()
