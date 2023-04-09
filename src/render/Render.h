@@ -68,7 +68,6 @@ namespace chisel::render
         void EndFrame();
 
         void CreateBlendState(const BlendState& state);
-
         void SetBlendState(const BlendState& state, vec4 factor = vec4(1), uint32 sampleMask = 0xFFFFFFFF);
 
         void SetShader(const Shader& shader);
@@ -103,5 +102,9 @@ namespace chisel::render
         GlobalCBuffers cbuffers;
         Com<ID3D11SamplerState> sampler;
         Com<ID3D11RasterizerState> rsState;
+
+        Com<ID3D11DepthStencilState> DepthDefault = nullptr;
+        Com<ID3D11DepthStencilState> DepthNoWrite;
+        Com<ID3D11DepthStencilState> DepthLessEqual;
     };
 }

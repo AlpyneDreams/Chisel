@@ -26,7 +26,7 @@ namespace chisel
             r.SetShader(sh_Sprite);
             r.ctx->PSSetShaderResources(0, 1, &icon->srv);
             r.SetBlendState(render::BlendFuncs::Alpha);
-            // r.SetDepthWrite(false);
+            r.ctx->OMSetDepthStencilState(r.DepthNoWrite.ptr(), 0);
 
             cbuffers::ObjectState data;
             data.model = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
@@ -38,7 +38,7 @@ namespace chisel
             r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             r.ctx->IASetVertexBuffers(0, 1, &Primitives.Quad, &stride, &offset);
             r.ctx->Draw(6, 0);
-            //r.SetDepthWrite(true);
+            r.ctx->OMSetDepthStencilState(r.DepthDefault.ptr(), 0);
         }
 
         // TODO: These could be batched.

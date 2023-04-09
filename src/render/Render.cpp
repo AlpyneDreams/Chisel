@@ -72,6 +72,43 @@ namespace chisel::render
         cbuffers.camera = CreateCBuffer<cbuffers::CameraState>();
         cbuffers.object = CreateCBuffer<cbuffers::ObjectState>();
 
+        // Global blend states
+        CreateBlendState(BlendFuncs::Normal);
+        CreateBlendState(BlendFuncs::Add);
+        CreateBlendState(BlendFuncs::Alpha);
+
+        // Global depth stencil states
+        D3D11_DEPTH_STENCIL_DESC dssDefault = { // Same as you'd get with nullptr
+            .DepthEnable = TRUE,
+            .DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL,
+            .DepthFunc = D3D11_COMPARISON_LESS,
+            .StencilEnable = FALSE,
+            .StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK,
+            .StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK,
+            .FrontFace =
+            {
+                .StencilFailOp = D3D11_STENCIL_OP_KEEP,
+                .StencilDepthFailOp = D3D11_STENCIL_OP_KEEP,
+                .StencilPassOp = D3D11_STENCIL_OP_KEEP,
+                .StencilFunc = D3D11_COMPARISON_ALWAYS,
+            },
+            .BackFace =
+            {
+                .StencilFailOp = D3D11_STENCIL_OP_KEEP,
+                .StencilDepthFailOp = D3D11_STENCIL_OP_KEEP,
+                .StencilPassOp = D3D11_STENCIL_OP_KEEP,
+                .StencilFunc = D3D11_COMPARISON_ALWAYS,
+            },
+        };
+
+        D3D11_DEPTH_STENCIL_DESC dssNoWrite = dssDefault;
+        dssNoWrite.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+        device->CreateDepthStencilState(&dssNoWrite, &DepthNoWrite);
+
+        D3D11_DEPTH_STENCIL_DESC dssLessEqual = dssDefault;
+        dssLessEqual.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+        device->CreateDepthStencilState(&dssLessEqual, &DepthLessEqual);
+
         // Initial sampler... May want to change this down the line
         D3D11_SAMPLER_DESC samplerDesc =
         {
