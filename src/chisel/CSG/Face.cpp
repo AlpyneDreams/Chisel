@@ -294,24 +294,26 @@ namespace chisel::CSG
                         }
                         case FragmentFaceRelations::Aligned:
                         {
-                            if (beforeIntersecting)
+                            VolumeID intersectingVolume = intersecting->PerformVolumeOperation(voidVolume);
+                            VolumeID ourVolume = piece.front.volume;
+
+                            if (beforeIntersecting && ourVolume == intersectingVolume)
                                 keepPiece = false;
                             break;
                         }
                         case FragmentFaceRelations::ReverseAligned:
                         {
-                            if (beforeIntersecting)
+                            VolumeID intersectingVolume = intersecting->PerformVolumeOperation(voidVolume);
+                            VolumeID ourVolume = piece.front.volume;
+
+                            piece.front = FragmentDirData
                             {
+                                .volume = intersecting->PerformVolumeOperation(piece.front.volume),
+                                .brush  = intersecting,
+                            };
+
+                            if (beforeIntersecting && ourVolume == intersectingVolume)
                                 keepPiece = false;
-                            }
-                            else
-                            {
-                                piece.front = FragmentDirData
-                                {
-                                    .volume = intersecting->PerformVolumeOperation(piece.front.volume),
-                                    .brush  = intersecting,
-                                };
-                            }
                             break;
                         }
                         default:
