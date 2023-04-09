@@ -7,7 +7,8 @@
 #include "common/Filesystem.h"
 #include "common/String.h"
 #include "assets/Assets.h"
-#include "render/Texture.h"
+#include "assets/AssetTypes.h"
+#include "render/Render.h"
 
 template <>
 struct fmt::formatter<chisel::Token> : fmt::ostream_formatter {};
@@ -149,10 +150,10 @@ namespace chisel
                         Expect('(');
                         fs::Path path = fs::Path("materials") / ParseString();
                         path.setExt(".png");
-                        cls.texture = Assets.Load<Texture>(path);
+                        cls.texture = Assets.Load<TextureAsset>(path);
                         if (!cls.texture) {
                             path.setExt(".vtf");
-                            cls.texture = Assets.Load<Texture>(path);
+                            cls.texture = Assets.Load<TextureAsset>(path);
                         }
                         Expect(')');
                         break;

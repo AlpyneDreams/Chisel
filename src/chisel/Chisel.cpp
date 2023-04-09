@@ -23,9 +23,9 @@ namespace chisel
 {
     void Chisel::Run()
     {
-        fgd = new FGD("core/test.fgd");
-
         Tools.Init();
+
+        fgd = new FGD("core/test.fgd");
 
         // Add chisel systems...
         Renderer = &Tools.systems.AddSystem<MapRender>();

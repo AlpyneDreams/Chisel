@@ -2,9 +2,9 @@
 
 #include "chisel/Tools.h"
 #include "assets/Assets.h"
+#include "assets/AssetTypes.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "render/Render.h"
-#include "render/Texture.h"
 #include "core/Mesh.h"
 #include "core/Primitives.h"
 
@@ -15,13 +15,13 @@ namespace chisel
 {
     inline struct Gizmos
     {
-        static inline Texture* icnLight = nullptr;
-        static inline Texture* icnHandle = nullptr;
+        static inline render::Texture* icnLight = nullptr;
+        static inline render::Texture* icnHandle = nullptr;
 #if 0
         static inline render::Shader* sh_Sprite = nullptr;
 #endif
 
-        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(64.f))
+        void DrawIcon(vec3 pos, render::Texture* icon, vec3 size = vec3(64.f))
         {
 #if 0
             auto& r = Tools.Render;
@@ -54,8 +54,8 @@ namespace chisel
 
         void Init()
         {
-            icnLight = Assets.Load<Texture>("textures/ui/light.png");
-            icnHandle = Assets.Load<Texture>("textures/ui/handle.png");
+            icnLight = Assets.Load<TextureAsset>("textures/ui/light.png");
+            icnHandle = Assets.Load<TextureAsset>("textures/ui/handle.png");
 #if 0
             sh_Sprite = Tools.Render.LoadShader("billboard", "sprite");
 #endif

@@ -5,6 +5,7 @@
 
 #include "chisel/map/Map.h"
 #include "assets/Assets.h"
+#include "assets/AssetTypes.h"
 
 #include <string_view>
 
@@ -113,7 +114,7 @@ namespace chisel::VMF
 
             SideData data =
             {
-                .texture       = Assets.Load<Texture>(material_path),
+                .texture       = Assets.Load<TextureAsset>(material_path),
                 .textureAxes   = {{ side.axis[0],  side.axis[1] }},
                 .scale         = {{ side.scale[0], side.scale[1] }},
                 .rotate        = side.rotation,

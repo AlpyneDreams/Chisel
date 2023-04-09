@@ -137,9 +137,6 @@ namespace chisel
                     // Draw the actual mesh faces in red
                     r.SetUniform("u_color", Color(1, 0, 0));
                 }
-
-                if (mesh.texture)
-                    r.SetTexture(0, mesh.texture);
 #endif
                 assert(mesh.alloc);
 
@@ -147,6 +144,8 @@ namespace chisel
                 UINT vertexOffset = mesh.alloc->offset;
                 UINT indexOffset = vertexOffset + mesh.vertices.size() * sizeof(VertexCSG);
                 ID3D11Buffer* buffer = brushAllocator.buffer();
+                if (mesh.texture)
+                    r.ctx->PSSetShaderResources(0, 1, &mesh.texture->srv);
                 r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
                 r.ctx->IASetIndexBuffer(brushAllocator.buffer(), DXGI_FORMAT_R32_UINT, indexOffset);
                 r.ctx->DrawIndexed(mesh.indices.size(), 0, 0);

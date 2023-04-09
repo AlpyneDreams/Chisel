@@ -88,5 +88,7 @@ namespace chisel::render
         RenderTarget backbuffer;
 
         GlobalCBuffers cbuffers;
+        Com<ID3D11SamplerState> sampler;
+        Com<ID3D11RasterizerState> rsState;
     };
 }

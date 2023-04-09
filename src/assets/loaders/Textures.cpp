@@ -5,7 +5,8 @@
 #include "stb/stb_image_write.h"
 
 #include "assets/Assets.h"
-#include "render/Texture.h"
+#include "assets/AssetTypes.h"
+#include "render/Render.h"
 #include "chisel/Tools.h"
 #include "libvtf-plusplus/libvtf++.hpp"
 
@@ -13,7 +14,7 @@
 
 namespace chisel
 {
-    static void LoadTexture(Texture& tex, const Buffer& data)
+    static void LoadTexture(TextureAsset& tex, const Buffer& data)
     {
         int width, height, channels;
 
@@ -24,30 +25,82 @@ namespace chisel
         if (!owned_data)
             throw std::runtime_error("STB failed to load texture.");
 
-        tex = Texture(uint16_t(width), uint16_t(height), 1u, Texture::Format::RGBA8, std::move(owned_data), width * height * 4);
+        D3D11_TEXTURE2D_DESC desc =
+        {
+            .Width = UINT(width),
+            .Height = UINT(height),
+            .MipLevels = 1,
+            .ArraySize = 1,
+            .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            .SampleDesc = { 1, 0 },
+            .Usage = D3D11_USAGE_IMMUTABLE,
+            .BindFlags = D3D11_BIND_SHADER_RESOURCE,
+        };
+        D3D11_SUBRESOURCE_DATA initialData =
+        {
+            .pSysMem = owned_data.get(),
+            .SysMemPitch = UINT(width) * 4u,
+            .SysMemSlicePitch = 0,
+        };
+        Tools.rctx.device->CreateTexture2D(&desc, &initialData, &tex.texture);
+        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), nullptr, &tex.srv);
     }
 
-    static AssetLoader<Texture, FixedString(".PNG")> PNGLoader = &LoadTexture;
-    static AssetLoader<Texture, FixedString(".TGA")> TGALoader = &LoadTexture;
+    static AssetLoader<TextureAsset, FixedString(".PNG")> PNGLoader = &LoadTexture;
+    static AssetLoader<TextureAsset, FixedString(".TGA")> TGALoader = &LoadTexture;
 
-    static render::TextureFormat RemapVTFImageFormat(libvtf::ImageFormat format) {
+    static DXGI_FORMAT RemapVTFImageFormat(libvtf::ImageFormat format) {
         switch (format) {
-            case libvtf::ImageFormats::RGBA8888:       return render::TextureFormats::RGBA8;
-            case libvtf::ImageFormats::BGRA8888:       return render::TextureFormats::BGRA8;
-            case libvtf::ImageFormats::BGR565:         return render::TextureFormats::B5G6R5;
-            case libvtf::ImageFormats::RGB565:         return render::TextureFormats::R5G6B5;
-            case libvtf::ImageFormats::DXT1_RUNTIME: [[fallthrough]];
-            case libvtf::ImageFormats::DXT1:           return render::TextureFormats::BC1;
-            case libvtf::ImageFormats::DXT3:           return render::TextureFormats::BC2;
-            case libvtf::ImageFormats::DXT5:           return render::TextureFormats::BC3;
-            case libvtf::ImageFormats::R32F:           return render::TextureFormats::R32F;
-            case libvtf::ImageFormats::RG3232F:        return render::TextureFormats::RG32F;
-            case libvtf::ImageFormats::RGBA32323232F:  return render::TextureFormats::RGBA32F;
-            default: throw std::runtime_error("Cannot remap format!");
+        case libvtf::ImageFormats::RGBA8888:       return DXGI_FORMAT_R8G8B8A8_UNORM;
+        case libvtf::ImageFormats::BGRA8888:       return DXGI_FORMAT_B8G8R8A8_UNORM;
+        case libvtf::ImageFormats::BGR565:         return DXGI_FORMAT_B5G6R5_UNORM;
+        case libvtf::ImageFormats::DXT1_RUNTIME: [[fallthrough]];
+        case libvtf::ImageFormats::DXT1:           return DXGI_FORMAT_BC1_UNORM;
+        case libvtf::ImageFormats::DXT3:           return DXGI_FORMAT_BC2_UNORM;
+        case libvtf::ImageFormats::DXT5:           return DXGI_FORMAT_BC3_UNORM;
+        case libvtf::ImageFormats::R32F:           return DXGI_FORMAT_R32_FLOAT;
+        case libvtf::ImageFormats::RG3232F:        return DXGI_FORMAT_R32G32_FLOAT;
+        case libvtf::ImageFormats::RGBA32323232F:  return DXGI_FORMAT_R32G32B32A32_FLOAT;
+        default: throw std::runtime_error("Cannot remap format!");
         }
     }
 
-    static AssetLoader<Texture, FixedString(".VTF")> VTFLoader = [](Texture& tex, const Buffer& data)
+    inline std::pair<uint32_t, uint32_t> GetBlockSize(DXGI_FORMAT format)
+    {
+        switch (format)
+        {
+        case DXGI_FORMAT_BC3_UNORM:
+        case DXGI_FORMAT_BC2_UNORM:
+        case DXGI_FORMAT_BC1_UNORM:
+            return std::make_pair<uint32_t, uint32_t>(4, 4);
+        default:
+            return std::make_pair<uint32_t, uint32_t>(1, 1);
+        }
+    }
+
+    inline uint32_t GetElementSize(DXGI_FORMAT format)
+    {
+        switch (format)
+        {
+        case DXGI_FORMAT_B5G6R5_UNORM:
+            return 2;
+        case DXGI_FORMAT_B8G8R8A8_UNORM:
+        case DXGI_FORMAT_R8G8B8A8_UNORM:
+        case DXGI_FORMAT_R32_FLOAT:
+            return 4;
+        case DXGI_FORMAT_R32G32_FLOAT:
+        case DXGI_FORMAT_BC1_UNORM:
+            return 8;
+        case DXGI_FORMAT_R32G32B32A32_FLOAT:
+        case DXGI_FORMAT_BC2_UNORM:
+        case DXGI_FORMAT_BC3_UNORM:
+            return 16;
+        default:
+            throw std::runtime_error("Cannot remap format!");
+        }
+    }
+
+    static AssetLoader<TextureAsset, FixedString(".VTF")> VTFLoader = [](TextureAsset& tex, const Buffer& data)
     {
         // TODO: Make copy-less.
         libvtf::VTFData vtfData(data);
@@ -57,9 +110,26 @@ namespace chisel
 
         Console.Log("Loading {}: {} {}", tex.GetPath(), (void*)imageData.data(), imageData.size());
 
-        std::unique_ptr<uint8_t[]> owned_data{ new uint8_t[imageData.size()] };
-        std::memcpy(owned_data.get(), imageData.data(), imageData.size());
-
-        tex = Texture(uint16_t(header.width), uint16_t(header.height), uint16_t(header.depth), RemapVTFImageFormat(header.format), std::move(owned_data), imageData.size());
+        D3D11_TEXTURE2D_DESC desc =
+        {
+            .Width      = header.width,
+            .Height     = header.height,
+            .MipLevels  = 1,//header.numMipLevels,
+            .ArraySize  = 1,//header.depth,
+            .Format     = RemapVTFImageFormat(header.format),
+            .SampleDesc = { 1, 0 },
+            .Usage      = D3D11_USAGE_IMMUTABLE,
+            .BindFlags  = D3D11_BIND_SHADER_RESOURCE,
+        };
+        // TODO: Mips
+        // TODO Pitch proper
+        D3D11_SUBRESOURCE_DATA initialData =
+        {
+            .pSysMem          = imageData.data(),
+            .SysMemPitch      = (header.width / GetBlockSize(desc.Format).first) * GetElementSize(desc.Format),
+            .SysMemSlicePitch = 0,
+        };
+        Tools.rctx.device->CreateTexture2D(&desc, &initialData, &tex.texture);
+        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), nullptr, &tex.srv);
     };
 }

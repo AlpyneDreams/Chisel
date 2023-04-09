@@ -5,6 +5,7 @@
 #include "gui/impl/imgui_impl_dx11.h"
 #include "common/Filesystem.h"
 #include "core/Mesh.h"
+#include "console/Console.h"
 #include "render/CBuffers.h"
 
 namespace chisel::render
@@ -68,14 +69,40 @@ namespace chisel::render
         ImGui_ImplDX11_NewFrame();
 
         // Global CBuffers
-        D3D11_BUFFER_DESC desc =
+        D3D11_BUFFER_DESC bufferDesc =
         {
             .ByteWidth = sizeof(cbuffers::CameraState),
             .Usage = D3D11_USAGE_DYNAMIC,
             .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
             .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
         };
-        device->CreateBuffer(&desc, nullptr, &cbuffers.camera);
+        device->CreateBuffer(&bufferDesc, nullptr, &cbuffers.camera);
+
+        // Initial sampler... May want to change this down the line
+        D3D11_SAMPLER_DESC samplerDesc =
+        {
+            .Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+            .AddressU = D3D11_TEXTURE_ADDRESS_WRAP,
+            .AddressV = D3D11_TEXTURE_ADDRESS_WRAP,
+            .AddressW = D3D11_TEXTURE_ADDRESS_WRAP,
+            .MipLODBias = 0.0f,
+            .MaxAnisotropy = 0,
+            .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
+            .MinLOD = 0.0f,
+            .MaxLOD = FLT_MAX,
+        };
+        device->CreateSamplerState(&samplerDesc, &sampler);
+        ctx->PSSetSamplers(0, 1, &sampler);
+
+        D3D11_RASTERIZER_DESC desc =
+        {
+            .FillMode = D3D11_FILL_SOLID,
+            .CullMode = D3D11_CULL_NONE,
+            .FrontCounterClockwise = TRUE,
+            .DepthClipEnable = TRUE,
+        };
+        device->CreateRasterizerState(&desc, &rsState);
+        ctx->RSSetState(rsState.ptr());
     }
 
     void RenderContext::Shutdown()

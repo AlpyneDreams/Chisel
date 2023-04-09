@@ -9,7 +9,9 @@
 
 namespace chisel
 {
-    struct Texture;
+    namespace render {
+        struct Texture;
+    }
 
     class FGD
     {
@@ -142,7 +144,7 @@ namespace chisel
             Dict<InputOutput> outputs;
             List<Class*> bases;
             List<Helper> helpers;
-            Texture* texture = nullptr;
+            render::Texture* texture = nullptr;
             int3 bbox[2] = {int3(-8, -8, -8), int3(8, 8, 8)};
             int3 color = int3(255, 255, 255);
         };

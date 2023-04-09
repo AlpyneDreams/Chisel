@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#include "render/Texture.h"
+#include "render/Render.h"
 #include "Window.h"
 
 struct ImFont;
@@ -24,6 +24,6 @@ namespace chisel
 
         void WindowToggleButton(Window* window, float width = 64.0f, const char* tooltip = nullptr);
 
-        bool Thumbnail(const char* name, Texture* icon = nullptr, bool selected = false);
+        bool Thumbnail(const char* name, render::Texture* icon = nullptr, bool selected = false);
     }
 }

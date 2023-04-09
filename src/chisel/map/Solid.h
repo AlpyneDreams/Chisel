@@ -4,7 +4,7 @@
 #include "../CSG/CSGTree.h"
 #include "chisel/Selection.h"
 #include "assets/Assets.h"
-#include "render/Texture.h"
+#include "render/Render.h"
 
 #include "math/Color.h"
 
@@ -17,7 +17,7 @@ namespace chisel
 {
     struct SideData
     {
-        Texture *texture{};
+        render::Texture *texture{};
         std::array<vec4, 2> textureAxes{};
         std::array<float, 2> scale{ 1.0f, 1.0f };
         float rotate = 0;
@@ -31,7 +31,7 @@ namespace chisel
         std::vector<uint32_t>  indices;
 
         std::optional<BrushGPUAllocator::Allocation> alloc;
-        Texture *texture = nullptr;
+        render::Texture *texture = nullptr;
     };
 
     struct Solid : Atom
@@ -42,8 +42,6 @@ namespace chisel
 
         std::vector<BrushMesh>  meshes;
         Color                   tempcolor;
-
-        Texture* gridTexture = nullptr;
 
     public:
         Solid(CSG::Brush& brush, Volume volume)
@@ -98,7 +96,7 @@ namespace chisel
 
             // Create one mesh for each unique material
             size_t textureCount = 0;
-            std::unordered_map<Texture*, size_t> uniqueTextures;
+            std::unordered_map<render::Texture*, size_t> uniqueTextures;
             for (auto& face : brush->GetFaces())
             {
                 const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
@@ -131,8 +129,16 @@ namespace chisel
 
                     for (const auto& vert : fragment.vertices)
                     {
-                        const float mappingWidth = data.texture ? data.texture->width : 32.0f;
-                        const float mappingHeight = data.texture ? data.texture->height : 32.0f;
+                        float mappingWidth = 32.0f;
+                        float mappingHeight = 32.0f;
+                        if (data.texture != nullptr)
+                        {
+                            D3D11_TEXTURE2D_DESC desc;
+                            data.texture->texture->GetDesc(&desc);
+
+                            mappingWidth = float(desc.Width);
+                            mappingHeight = float(desc.Height);
+                        }
 
                         float u = glm::dot(glm::vec3(data.textureAxes[0].xyz), glm::vec3(vert.position)) / data.scale[0] + data.textureAxes[0].w;
                         float v = glm::dot(glm::vec3(data.textureAxes[1].xyz), glm::vec3(vert.position)) / data.scale[1] + data.textureAxes[1].w;
