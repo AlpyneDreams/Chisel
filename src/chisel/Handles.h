@@ -16,9 +16,11 @@ namespace chisel
 {
     inline struct Handles
     {
+        struct GridVertex;
     private:
         static inline Mesh grid;
-        static inline std::vector<vec4> gridVertices;
+        static std::vector<GridVertex> gridVertices;
+        render::Shader sh_Grid;
 
     public:
 
@@ -51,6 +53,8 @@ namespace chisel
         void DrawGrid(render::RenderContext& r, vec3 cameraPos, vec3 gridSize);
 
         Handles();
+
+        void Init();
 
     } Handles;
 }

@@ -7,6 +7,8 @@ namespace chisel::cbuffers
     struct CameraState
     {
         mat4x4 viewProj;
+        float farZ;
+        float padding[3];
     };
 
     struct ObjectState

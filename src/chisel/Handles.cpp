@@ -1,5 +1,6 @@
 #include "chisel/Handles.h"
 #include "chisel/Gizmos.h"
+#include "render/CBuffers.h"
 #include "glm/ext/matrix_transform.hpp"
 
 #include <imgui.h>
@@ -8,6 +9,21 @@
 namespace chisel
 {
     inline ConVar<int> view_grid_max_radius("view_grid_max_radius", 4, "Maximum radius multiplier to extend the grid at small scales");
+
+    struct Handles::GridVertex
+    {
+        glm::vec3 pos;
+        float     major;
+
+        static constexpr D3D11_INPUT_ELEMENT_DESC Layout[] =
+        {
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,                            D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        };
+    };
+    static_assert(sizeof(Handles::GridVertex) == sizeof(float) * 4);
+
+    std::vector<Handles::GridVertex> Handles::gridVertices;
 
     //--------------------------------------------------
     //  ImGuizmo
@@ -156,10 +172,10 @@ namespace chisel
 
     void Handles::DrawGrid(render::RenderContext& r, vec3 cameraPos, vec3 gridSize)
     {
-        //r.SetBlendFunc(render::BlendFuncs::Alpha);
+        r.SetBlendState(render::BlendFuncs::Alpha);
         //r.SetDepthTest(render::CompareFunc::LessEqual);
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-        r.SetShader(Tools.sh_Grid);
+        r.SetShader(sh_Grid);
 
         // Determine center of grid based on camera position
         vec3 chunk = gridSize * float(gridChunkSize);
@@ -174,25 +190,40 @@ namespace chisel
 
         // Set far Z based on radius
         vec3 farZ = vec3(radius) * chunk * 0.8f;
-        //r.SetUniform("u_gridFarZ", vec4(glm::min(farZ.x, farZ.y), 0, 0, 0));
 
-#if 0
+        Camera& cam = Tools.editorCamera.camera;
+        mat4x4 view = cam.ViewMatrix();
+        mat4x4 proj = cam.ProjMatrix();
+
+        // Set camera state
+        cbuffers::CameraState camState;
+        camState.viewProj = proj * view;
+        camState.farZ = glm::min(farZ.x, farZ.y);
+        r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), camState);
+        r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
+
         // Draw each cell
         for (int x = -radius.x; x <= radius.x; x++)
         {
             for (int y = -radius.y; y <= radius.y; y++)
             {
                 vec3 translation = vec3(x, y, 0) * vec3(gridChunkSize);
-                //r.SetTransform(glm::translate(mtx, translation));
+                mat4x4 model = glm::translate(mtx, translation);
+
+                cbuffers::ObjectState data;
+                data.modelViewProj = proj * view * model;
+                data.modelView = view * model;
+
+                r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
+                r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+
                 r.DrawMesh(&grid);
             }
         }
-#endif
-        r.DrawMesh(&grid);
 
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         //r.SetDepthTest(render::CompareFunc::Less);
-        //r.SetBlendFunc(render::BlendFuncs::Normal);
+        r.SetBlendState(nullptr);
     }
 
     Handles::Handles()
@@ -204,20 +235,25 @@ namespace chisel
         uint i = 0;
         for (int x = -radius; x < radius; x++, i += 2)
         {
-            gridVertices[i] = vec4(x, -radius, 0, x % gridMajor == 0);
-            gridVertices[i+1] = vec4(x, +radius, 0, x % gridMajor == 0);
+            gridVertices[i] = {vec3(x, -radius, 0), x % gridMajor == 0 ? 1.f : 0.f};
+            gridVertices[i+1] = {vec3(x, +radius, 0), x % gridMajor == 0 ? 1.f : 0.f};
         }
 
         for (int z = -radius; z < radius; z++, i += 2)
         {
-            gridVertices[i] = vec4(-radius, z, 0, z % gridMajor == 0);
-            gridVertices[i+1] = vec4(+radius, z, 0, z % gridMajor == 0);
+            gridVertices[i] = {vec3(-radius, z, 0), z % gridMajor == 0 ? 1.f : 0.f};
+            gridVertices[i+1] = {vec3(+radius, z, 0), z % gridMajor == 0 ? 1.f : 0.f};
         }
 
         auto& g = grid.AddGroup();
         g.vertices.layout.Add<float>(3, VertexAttribute::Position);
         g.vertices.layout.Add<float>(1, VertexAttribute::TexCoord);
-        g.vertices.pointer = &gridVertices[0].x;
+        g.vertices.pointer = &gridVertices[0];
         g.vertices.count = gridVertices.size();
+    }
+
+    void Handles::Init()
+    {
+        sh_Grid = render::Shader(Tools.Renderer.rctx.device.ptr(), GridVertex::Layout, "grid");
     }
 }

@@ -9,18 +9,28 @@ struct vs_in
 struct vs_out
 {
     float4 position : SV_POSITION;
+    float  farZ     : TEXCOORD0;
+    float  alpha    : TEXCOORD1;
+    float  z        : TEXCOORD2;
 };
 
-vs_out vs_main(vs_in input)
+vs_out vs_main(vs_in i)
 {
-    vs_out output = (vs_out)0;
+    vs_out o = (vs_out)0;
 
-    output.position = mul(g_viewProj, float4(input.position, 1.0));
+    o.position = mul(g_modelViewProj, float4(i.position, 1.0));
 
-    return output;
+    // Fade out major gridlines further than minor ones
+    o.farZ  = g_farZ * (i.major ? 1.0 : 0.5);
+    o.alpha = 0.1 + (i.major * 0.1);
+    o.z     = -mul(g_modelView, float4(i.position, 1.0)).z;
+
+    return o;
 }
 
-float4 ps_main(vs_out input) : SV_TARGET
+float4 ps_main(vs_out i) : SV_TARGET
 {
-    return float4( 1.0, 1.0, 1.0, 1.0 );
+    float alpha = i.alpha * saturate(1 - (i.z / i.farZ));
+    return float4( 1, 1, 1, alpha );
 }
+

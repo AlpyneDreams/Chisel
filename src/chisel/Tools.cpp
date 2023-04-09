@@ -2,6 +2,7 @@
 #include "Tools.h"
 #include "common/Time.h"
 #include "chisel/Gizmos.h"
+#include "chisel/Handles.h"
 #include "chisel/Selection.h"
 #include "gui/ConsoleWindow.h"
 #include "assets/Assets.h"
@@ -25,8 +26,9 @@ namespace chisel
         // Initialize render system
         Renderer.Start();
 
-        // Initialize gizmos
+        // Setup gizmos and handles
         Gizmos.Init();
+        Handles.Init();
 
         // Load builtin textures
         tex_White = Assets.Load<TextureAsset>("textures/white.png");
@@ -35,7 +37,6 @@ namespace chisel
 #if 0
         sh_Color  = r.LoadShader("basic", "color");
 #endif
-        sh_Grid = render::Shader(r.device.ptr(), VertexGrid::Layout, "grid");
 
         // Setup editor render targets
         auto [width, height] = window->GetSize();
