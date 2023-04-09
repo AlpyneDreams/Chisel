@@ -272,6 +272,122 @@ namespace chisel::render
         swapchain->Present(0, 0);
     }
 
+    void ComputeShaderBuffer::AddStagingBuffer(ID3D11Device1* device)
+    {
+        D3D11_BUFFER_DESC desc;
+        buffer->GetDesc(&desc);
+        D3D11_BUFFER_DESC bufferDesc = {
+            .ByteWidth = desc.ByteWidth,
+            .Usage = D3D11_USAGE_STAGING,
+            .BindFlags = 0,
+            .CPUAccessFlags = D3D11_CPU_ACCESS_READ,
+            .MiscFlags = 0
+        };
+        HRESULT hr = device->CreateBuffer(&bufferDesc, nullptr, &stagingBuffer);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create compute shader staging buffer");
+        }
+    }
+
+    void ComputeShaderBuffer::QueueDownload()
+    {
+        ID3D11Device* device;
+        buffer->GetDevice(&device);
+        if (stagingBuffer == nullptr)
+            AddStagingBuffer((ID3D11Device1*)device);
+        ID3D11DeviceContext* ctx;
+        device->GetImmediateContext(&ctx);
+        ctx->CopyResource(stagingBuffer.ptr(), buffer.ptr());
+    }
+
+    void ComputeShaderBuffer::Download(void callback(void*))
+    {
+        ID3D11Device* device;
+        buffer->GetDevice(&device);
+        if (stagingBuffer == nullptr)
+            AddStagingBuffer((ID3D11Device1*)device);
+        ID3D11DeviceContext* ctx;
+        device->GetImmediateContext(&ctx);
+        ctx->CopyResource(stagingBuffer.ptr(), buffer.ptr());
+
+        // Unfortunately, we need to wait here. There is no way to fence.
+        // We could potentially wait a frame or two if this causes hangs.
+        D3D11_MAPPED_SUBRESOURCE map; 
+        if (FAILED(ctx->Map(stagingBuffer.ptr(), 0, D3D11_MAP_READ, 0, &map)))
+            return;
+
+        callback(map.pData);
+        ctx->Unmap(stagingBuffer.ptr(), 0);
+    }
+
+    ComputeShaderBuffer RenderContext::CreateCSOutputBuffer(uint size)
+    {
+        ComputeShaderBuffer rwsb;
+        D3D11_BUFFER_DESC bufferDesc = {
+            .ByteWidth = size,
+            .Usage = D3D11_USAGE_DEFAULT,
+            .BindFlags = D3D11_BIND_UNORDERED_ACCESS,
+            .CPUAccessFlags = 0,
+        };
+        HRESULT hr = device->CreateBuffer(&bufferDesc, nullptr, &rwsb.buffer);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create compute shader output buffer");
+            return rwsb;
+        }
+
+        D3D11_UNORDERED_ACCESS_VIEW_DESC desc = {
+            .Format = DXGI_FORMAT_R32_UINT,
+            .ViewDimension = D3D11_UAV_DIMENSION_BUFFER,
+            .Buffer = {
+                .FirstElement = 0,
+                .NumElements = size / sizeof(uint),
+                .Flags = 0,
+            }
+        };
+        hr = device->CreateUnorderedAccessView(rwsb.buffer.ptr(), &desc, &rwsb.uav);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create compute shader output buffer view");
+            return rwsb;
+        }
+
+        return rwsb;
+    }
+
+    ComputeShaderBuffer RenderContext::CreateCSInputBuffer(uint size)
+    {
+        ComputeShaderBuffer rwsb;
+        D3D11_BUFFER_DESC bufferDesc = {
+            .ByteWidth = size, // * count
+            .Usage = D3D11_USAGE_DYNAMIC,
+            .BindFlags = D3D11_BIND_SHADER_RESOURCE,
+            .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+            .MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+            .StructureByteStride = size,
+        };
+        HRESULT hr = device->CreateBuffer(&bufferDesc, nullptr, &rwsb.buffer);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create compute shader input buffer");
+            return rwsb;
+        }
+
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvd = {
+            .Format = DXGI_FORMAT_UNKNOWN,
+            .ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX,
+            .BufferEx = {
+                .FirstElement = 0,
+                .NumElements = 1, // count 
+                .Flags = 0,
+            }
+        };
+        hr = device->CreateShaderResourceView(rwsb.buffer.ptr(), &srvd, &rwsb.srv);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create compute shader input buffer view");
+            return rwsb;
+        }
+
+        return rwsb;
+    }
+
     template <typename T>
     Com<ID3D11Buffer> RenderContext::CreateCBuffer()
     {

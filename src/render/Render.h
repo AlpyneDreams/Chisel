@@ -9,7 +9,7 @@
 
 #include <functional>
 #include <string_view>
-#include <span>
+#include <vector>
 
 #include "D3D11Include.h"
 #include "render/BlendState.h"
@@ -53,10 +53,22 @@ namespace chisel::render
         Shader(ID3D11Device1* device, Span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name);
     };
 
+    struct ComputeShaderBuffer
+    {
+        Com<ID3D11Buffer> buffer;
+        Com<ID3D11UnorderedAccessView> uav;
+        Com<ID3D11ShaderResourceView> srv;
+        Com<ID3D11Buffer> stagingBuffer = nullptr;
+
+        void AddStagingBuffer(ID3D11Device1* device);
+        void QueueDownload();
+        void Download(void callback(void*));
+    };
 
     struct ComputeShader
     {
         Com<ID3D11ComputeShader> cs;
+        std::vector<ComputeShaderBuffer> buffers;
 
         ComputeShader() {}
         ComputeShader(ID3D11Device1* device, std::string_view name);
@@ -88,6 +100,14 @@ namespace chisel::render
 
         // Compatability with existing Mesh class
         void DrawMesh(Mesh* mesh);
+
+        template <class T>
+        ComputeShaderBuffer CreateCSOutputBuffer() { return CreateCSOutputBuffer(uint(sizeof(T))); }
+        ComputeShaderBuffer CreateCSOutputBuffer(uint);
+
+        template <class T>
+        ComputeShaderBuffer CreateCSInputBuffer() { return CreateCSInputBuffer(uint(sizeof(T))); }
+        ComputeShaderBuffer CreateCSInputBuffer(uint);
 
         template <typename T>
         Com<ID3D11Buffer> CreateCBuffer();
