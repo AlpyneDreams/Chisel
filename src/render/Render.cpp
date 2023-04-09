@@ -91,7 +91,7 @@ namespace chisel::render
         D3D11_RASTERIZER_DESC desc =
         {
             .FillMode = D3D11_FILL_SOLID,
-            .CullMode = D3D11_CULL_NONE,
+            .CullMode = D3D11_CULL_BACK,
             .FrontCounterClockwise = TRUE,
             .DepthClipEnable = TRUE,
         };
@@ -100,7 +100,7 @@ namespace chisel::render
     }
 
     void RenderContext::Shutdown()
-    {
+    {   
         ImGui_ImplDX11_Shutdown();
         ImGui::DestroyContext();
 
@@ -166,6 +166,8 @@ namespace chisel::render
             .TopLeftY = 0,
             .Width    = float(desc.Width),
             .Height   = float(desc.Height),
+            .MinDepth = 0.0f,
+            .MaxDepth = 1.0f,
         };
         ctx->RSSetViewports(1, &viewport);
 
