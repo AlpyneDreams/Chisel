@@ -31,7 +31,7 @@ namespace chisel
             .Height = UINT(height),
             .MipLevels = 1,
             .ArraySize = 1,
-            .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            .Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
             .SampleDesc = { 1, 0 },
             .Usage = D3D11_USAGE_IMMUTABLE,
             .BindFlags = D3D11_BIND_SHADER_RESOURCE,
@@ -43,14 +43,37 @@ namespace chisel
             .SysMemSlicePitch = 0,
         };
         Tools.rctx.device->CreateTexture2D(&desc, &initialData, &tex.texture);
-        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), nullptr, &tex.srv);
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDescLinear =
+        {
+            .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+            .Texture2D =
+            {
+                .MostDetailedMip = 0,
+                .MipLevels = UINT(-1),
+            },
+        };
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDescSRGB =
+        {
+            .Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+            .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+            .Texture2D =
+            {
+                .MostDetailedMip = 0,
+                .MipLevels = UINT(-1),
+            },
+        };
+        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescLinear, &tex.srvLinear);
+        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
     }
 
     static AssetLoader<Texture, FixedString(".PNG")> PNGLoader = &LoadTexture;
     static AssetLoader<Texture, FixedString(".TGA")> TGALoader = &LoadTexture;
 
-    static DXGI_FORMAT RemapVTFImageFormat(libvtf::ImageFormat format) {
-        switch (format) {
+    inline DXGI_FORMAT RemapVTFImageFormat(libvtf::ImageFormat format)
+    {
+        switch (format)
+        {
         case libvtf::ImageFormats::RGBA8888:       return DXGI_FORMAT_R8G8B8A8_UNORM;
         case libvtf::ImageFormats::BGRA8888:       return DXGI_FORMAT_B8G8R8A8_UNORM;
         case libvtf::ImageFormats::BGR565:         return DXGI_FORMAT_B5G6R5_UNORM;
@@ -65,41 +88,6 @@ namespace chisel
         }
     }
 
-    inline std::pair<uint32_t, uint32_t> GetBlockSize(DXGI_FORMAT format)
-    {
-        switch (format)
-        {
-        case DXGI_FORMAT_BC3_UNORM:
-        case DXGI_FORMAT_BC2_UNORM:
-        case DXGI_FORMAT_BC1_UNORM:
-            return std::make_pair<uint32_t, uint32_t>(4, 4);
-        default:
-            return std::make_pair<uint32_t, uint32_t>(1, 1);
-        }
-    }
-
-    inline uint32_t GetElementSize(DXGI_FORMAT format)
-    {
-        switch (format)
-        {
-        case DXGI_FORMAT_B5G6R5_UNORM:
-            return 2;
-        case DXGI_FORMAT_B8G8R8A8_UNORM:
-        case DXGI_FORMAT_R8G8B8A8_UNORM:
-        case DXGI_FORMAT_R32_FLOAT:
-            return 4;
-        case DXGI_FORMAT_R32G32_FLOAT:
-        case DXGI_FORMAT_BC1_UNORM:
-            return 8;
-        case DXGI_FORMAT_R32G32B32A32_FLOAT:
-        case DXGI_FORMAT_BC2_UNORM:
-        case DXGI_FORMAT_BC3_UNORM:
-            return 16;
-        default:
-            throw std::runtime_error("Cannot remap format!");
-        }
-    }
-
     static AssetLoader<Texture, FixedString(".VTF")> VTFLoader = [](Texture& tex, const Buffer& data)
     {
         // TODO: Make copy-less.
@@ -110,13 +98,15 @@ namespace chisel
 
         Console.Log("Loading {}: {} {}", tex.GetPath(), (void*)imageData.data(), imageData.size());
 
+        DXGI_FORMAT format = RemapVTFImageFormat(header.format);
+
         D3D11_TEXTURE2D_DESC desc =
         {
             .Width      = header.width,
             .Height     = header.height,
             .MipLevels  = 1,//header.numMipLevels,
             .ArraySize  = 1,//header.depth,
-            .Format     = RemapVTFImageFormat(header.format),
+            .Format     = LinearToTypeless(format),
             .SampleDesc = { 1, 0 },
             .Usage      = D3D11_USAGE_IMMUTABLE,
             .BindFlags  = D3D11_BIND_SHADER_RESOURCE,
@@ -130,7 +120,28 @@ namespace chisel
             .SysMemSlicePitch = 0,
         };
         Tools.rctx.device->CreateTexture2D(&desc, &initialData, &tex.texture);
-        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), nullptr, &tex.srv);
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDescLinear =
+        {
+            .Format = format,
+            .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+            .Texture2D =
+            {
+                .MostDetailedMip = 0,
+                .MipLevels = UINT(-1),
+            },
+        };
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDescSRGB =
+        {
+            .Format = LinearToSRGB(format),
+            .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+            .Texture2D =
+            {
+                .MostDetailedMip = 0,
+                .MipLevels = UINT(-1),
+            },
+        };
+        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescLinear, &tex.srvLinear);
+        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
     };
 
     static AssetLoader <Material, FixedString(".VMT")> VMTLoader = [](Material& mat, const Buffer& data)

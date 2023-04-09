@@ -24,6 +24,16 @@ namespace chisel
         shader = render::Shader(r.device.ptr(), VertexCSG::Layout, "brush");
     }
 
+    inline float srgb_to_linear( float fVal )
+    {
+        return ( fVal < 0.04045f ) ? fVal / 12.92f : std::pow( ( fVal + 0.055f) / 1.055f, 2.4f );
+    }
+
+    inline float linear_to_srgb( float fVal )
+    {
+        return ( fVal < 0.0031308f ) ? fVal * 12.92f : std::pow( fVal, 1.0f / 2.4f ) * 1.055f - 0.055f;
+    }
+
     void MapRender::Update()
     {
         Camera& camera = Tools.editorCamera.camera;
@@ -40,7 +50,7 @@ namespace chisel
         r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), data);
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
 
-        r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2));
+        r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(srgb_to_linear(0.2), srgb_to_linear(0.2), srgb_to_linear(0.2)));
         r.ctx->ClearRenderTargetView(Tools.rt_ObjectID.rtv.ptr(), Colors.Black);
         r.ctx->ClearDepthStencilView(Tools.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
@@ -179,7 +189,7 @@ namespace chisel
             if (mesh->material)
             {
                 if (mesh->material->baseTexture)
-                    srv = mesh->material->baseTexture->srv.ptr();
+                    srv = mesh->material->baseTexture->srvSRGB.ptr();
             }
             r.ctx->PSSetShaderResources(0, 1, &srv);
             r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);

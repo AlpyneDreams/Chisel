@@ -188,7 +188,7 @@ namespace chisel
 
         // Copy from scene view render target into viewport
         ImGui::GetWindowDrawList()->AddImage(
-            GetTexture(drawMode).srv.ptr(),
+            GetTexture(drawMode).srvLinear.ptr(),
             pos, max,
             ImVec2(0, 0), ImVec2(1, 1)
         );

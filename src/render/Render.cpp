@@ -191,7 +191,7 @@ namespace chisel::render
             .Height = height,
             .MipLevels = 1,
             .ArraySize = 1,
-            .Format = format,
+            .Format = LinearToTypeless(format),
             .SampleDesc =
             {
                 .Count = 1,
@@ -203,8 +203,38 @@ namespace chisel::render
             .MiscFlags = 0,
         };
         device->CreateTexture2D(&rtDesc, nullptr, &rt.texture);
-        device->CreateRenderTargetView(rt.texture.ptr(), nullptr, &rt.rtv);
-        device->CreateShaderResourceView(rt.texture.ptr(), nullptr, &rt.srv);
+        D3D11_RENDER_TARGET_VIEW_DESC rtvDesc =
+        {
+            .Format = LinearToSRGB(format),
+            .ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D,
+            .Texture2D =
+            {
+                .MipSlice = 0,
+            },
+        };
+        device->CreateRenderTargetView(rt.texture.ptr(), &rtvDesc, &rt.rtv);
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDescLinear =
+        {
+            .Format = format,
+            .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+            .Texture2D =
+            {
+                .MostDetailedMip = 0,
+                .MipLevels = UINT(-1),
+            },
+        };
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDescSRGB =
+        {
+            .Format = LinearToSRGB(format),
+            .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+            .Texture2D =
+            {
+                .MostDetailedMip = 0,
+                .MipLevels = UINT(-1),
+            },
+        };
+        device->CreateShaderResourceView(rt.texture.ptr(), &srvDescLinear, &rt.srvLinear);
+        device->CreateShaderResourceView(rt.texture.ptr(), &srvDescSRGB, &rt.srvSRGB);
         return rt;
     }
 

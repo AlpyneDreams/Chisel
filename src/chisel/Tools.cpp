@@ -149,7 +149,7 @@ namespace chisel
             auto bufferOut = Tools.cs_ObjectID.buffers[1];
 
             // Bind the render target, input coords, output value
-            ID3D11ShaderResourceView* srvs[] = { Tools.rt_ObjectID.srv.ptr(), bufferIn.srv.ptr() };
+            ID3D11ShaderResourceView* srvs[] = { Tools.rt_ObjectID.srvLinear.ptr(), bufferIn.srv.ptr() };
             r.ctx->CSSetShaderResources(0, 2, srvs);
             r.ctx->CSSetUnorderedAccessViews(0, 1, &bufferOut.uav, nullptr);
 

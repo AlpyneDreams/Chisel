@@ -24,7 +24,7 @@ namespace chisel
         {
             auto& r = Tools.rctx;
             r.SetShader(sh_Sprite);
-            r.ctx->PSSetShaderResources(0, 1, &icon->srv);
+            r.ctx->PSSetShaderResources(0, 1, &icon->srvSRGB);
             r.SetBlendState(render::BlendFuncs::Alpha);
             r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
 
