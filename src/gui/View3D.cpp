@@ -43,25 +43,16 @@ namespace chisel
 
 // Draw Modes //
 
-    enum class DrawMode {
-        Shaded, Depth
-    };
-
-    static inline const char* drawModes[] = { "Shaded", "Depth" };
-
-    DrawMode drawMode = DrawMode::Shaded;
-
-    ID3D11ShaderResourceView* View3D::GetTexture(DrawMode mode)
+    Texture View3D::GetTexture(DrawMode mode)
     {
         switch (mode) {
             default: case DrawMode::Shaded:
-                return Tools.rt_SceneView.srv.ptr();
+                return Tools.rt_SceneView;
 #if 0
             case DrawMode::Depth:
                 return Tools.rt_SceneView->GetDepthTexture();
 #endif
         }
-        return nullptr;
     }
 
 // UI //
@@ -126,13 +117,9 @@ namespace chisel
         // HACK: Reset hovered window
         g.HoveredWindow = hovered;
 
-        // Begin scene view extra rendering
-        render::RenderContext& rctx = Tools.rctx;
-        rctx.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, Tools.ds_SceneView.dsv.ptr());
-
         // Draw grid
         if (view_grid_show)
-            Handles.DrawGrid(rctx, camera.position, gridSize);
+            Handles.DrawGrid(Tools.rctx, camera.position, gridSize);
 
         OnPostDraw();
     }
@@ -195,7 +182,7 @@ namespace chisel
 
         // Copy from scene view render target into viewport
         ImGui::GetWindowDrawList()->AddImage(
-            GetTexture(drawMode),
+            GetTexture(drawMode).srv.ptr(),
             pos, max,
             ImVec2(0, 0), ImVec2(1, 1)
         );

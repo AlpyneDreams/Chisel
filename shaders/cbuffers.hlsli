@@ -14,3 +14,9 @@ struct ObjectState
 {
     float4x4 model;
 };
+
+struct BrushState
+{
+    uint id;
+    float3 padding;
+};

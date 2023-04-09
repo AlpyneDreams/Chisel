@@ -40,14 +40,14 @@ namespace chisel
     // Draw Modes //
 
         enum class DrawMode {
-            Shaded, Depth
+            Shaded, Depth, ObjectID
         };
 
-        static inline const char* drawModes[] = { "Shaded", "Depth" };
+        static inline const char* drawModes[] = { "Shaded", "Depth", "Object ID" };
 
         DrawMode drawMode = DrawMode::Shaded;
 
-        ID3D11ShaderResourceView* GetTexture(DrawMode mode);
+        Texture GetTexture(DrawMode mode);
 
     // UI //
 

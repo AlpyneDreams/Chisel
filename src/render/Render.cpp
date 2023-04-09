@@ -71,6 +71,7 @@ namespace chisel::render
         // Global CBuffers
         cbuffers.camera = CreateCBuffer<cbuffers::CameraState>();
         cbuffers.object = CreateCBuffer<cbuffers::ObjectState>();
+        cbuffers.brush  = CreateCBuffer<cbuffers::BrushState>();
 
         // Global blend states
         CreateBlendState(BlendFuncs::Normal);

@@ -41,8 +41,10 @@ namespace chisel
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
 
         r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2));
+        r.ctx->ClearRenderTargetView(Tools.rt_ObjectID.rtv.ptr(), Colors.Black);
         r.ctx->ClearDepthStencilView(Tools.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-        r.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, Tools.ds_SceneView.dsv.ptr());
+        ID3D11RenderTargetView* rts[] = {Tools.rt_SceneView.rtv.ptr(), Tools.rt_ObjectID.rtv.ptr()};
+        r.ctx->OMSetRenderTargets(2, rts, Tools.ds_SceneView.dsv.ptr());
 #if 0
         r.SetShader(shader);
         r.SetUniform("u_color", Colors.White);
@@ -136,6 +138,12 @@ namespace chisel
         r.SetShader(shader);
         for (Solid& brush : ent)
         {
+            cbuffers::BrushState data;
+            data.id = brush.GetSelectionID();
+
+            r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
+            r.ctx->PSSetConstantBuffers(1, 1, &r.cbuffers.brush);
+
             for (auto& mesh : brush.GetMeshes())
             {
                 //r.SetUniform("u_color", Color(1, 1, 1));//brush.GetTempColor());

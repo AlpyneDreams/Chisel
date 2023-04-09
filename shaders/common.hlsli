@@ -1,11 +1,5 @@
 #include "cbuffers.hlsli"
 
-cbuffer CBCameraState : register(b0)
-{
-    CameraState Camera;
-};
+#define USE_CBUFFER(Type, Name, Index) cbuffer Type ## Data : register(b ## Index) { Type Name; }
 
-cbuffer CBObjectState : register(b1)
-{
-    ObjectState Object;
-};
+USE_CBUFFER(CameraState, Camera, 0);

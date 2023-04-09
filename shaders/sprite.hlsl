@@ -1,5 +1,7 @@
 #include "common.hlsli"
 
+USE_CBUFFER(ObjectState, Object, 1);
+
 struct Input
 {
     float3 position : POSITION;

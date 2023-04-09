@@ -56,6 +56,7 @@ namespace chisel::render
     {
         Com<ID3D11Buffer> camera;
         Com<ID3D11Buffer> object;
+        Com<ID3D11Buffer> brush;
     };
 
     struct RenderContext
