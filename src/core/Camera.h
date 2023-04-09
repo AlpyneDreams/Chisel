@@ -23,7 +23,7 @@ namespace chisel
         float far  = 16384.f;
 
         // If not null then camera only renders to this texture
-        render::RenderTarget renderTarget;
+        render::RenderTarget* renderTarget;
 
         // TODO: Move all of this stuff to Transform
 
@@ -33,8 +33,6 @@ namespace chisel
         vec3 position;
         vec3 angles;
 
-        // TODO: Update BGFX_STATE_CULL_CW -> BGFX_STATE_CULL_CCW
-        // when we change from rightHanded -> leftHanded.
         bool rightHanded = true;
 
         vec3 Up() const
@@ -112,7 +110,7 @@ namespace chisel
         {
             vec2 size;
             if (renderTarget) {
-                size = renderTarget.GetSize();
+                size = renderTarget->GetSize();
             } else {
                 size = Window::main->GetSize();
             }

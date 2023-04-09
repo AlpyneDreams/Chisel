@@ -58,7 +58,14 @@ namespace chisel
         // Setup editor camera
         editorCamera.camera.position = vec3(-64.0f, -32.0f, 32.0f) * 32.0f;
         editorCamera.camera.angles = math::radians(vec3(-30.0f, 30.0f, 0));
-        editorCamera.camera.renderTarget = rt_SceneView;
+        editorCamera.camera.renderTarget = &rt_SceneView;
+    }
+
+    void Tools::ResizeViewport(uint width, uint height)
+    {
+        rt_SceneView = r.CreateRenderTarget(width, height);
+        ds_SceneView = r.CreateDepthStencil(width, height);
+        rt_ObjectID = r.CreateRenderTarget(width, height, DXGI_FORMAT_R32_UINT);
     }
 
     void Tools::Loop()

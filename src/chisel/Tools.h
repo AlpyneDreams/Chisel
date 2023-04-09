@@ -42,11 +42,7 @@ namespace chisel
 
         Texture* tex_White;
 
-        void ResizeViewport(uint width, uint height)
-        {
-            //rt_SceneView->Resize(width, height);
-            //rt_ObjectID->Resize(width, height);
-        }
+        void ResizeViewport(uint width, uint height);
 
         // Read object ID from scene view render target and update selection
         void PickObject(uint2 mouse);

@@ -43,8 +43,13 @@ namespace chisel
         r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2));
         r.ctx->ClearRenderTargetView(Tools.rt_ObjectID.rtv.ptr(), Colors.Black);
         r.ctx->ClearDepthStencilView(Tools.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
         ID3D11RenderTargetView* rts[] = {Tools.rt_SceneView.rtv.ptr(), Tools.rt_ObjectID.rtv.ptr()};
         r.ctx->OMSetRenderTargets(2, rts, Tools.ds_SceneView.dsv.ptr());
+
+        float2 size = Tools.rt_SceneView.GetSize();
+        D3D11_VIEWPORT viewport = { 0, 0, size.x, size.y, 0.0f, 1.0f };
+        r.ctx->RSSetViewports(1, &viewport);
 #if 0
         r.SetShader(shader);
         r.SetUniform("u_color", Colors.White);
