@@ -5,13 +5,12 @@
 struct CameraState
 {
     float4x4 viewProj;
-    float4x4 invView;
+    float4x4 view;
     float    farZ;
     float3   padding;
 };
 
 struct ObjectState
 {
-    float4x4 modelViewProj;
-    float4x4 modelView;
+    float4x4 model;
 };

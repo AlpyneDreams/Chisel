@@ -28,15 +28,9 @@ namespace chisel
             r.ctx->PSSetShaderResources(0, 1, &icon->srv);
             r.SetBlendState(render::BlendFuncs::Alpha);
             // r.SetDepthWrite(false);
-            mat4x4 mtx = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
-
-            Camera& cam = Tools.editorCamera.camera;
-            mat4x4 view = cam.ViewMatrix();
-            mat4x4 proj = cam.ProjMatrix();
 
             cbuffers::ObjectState data;
-            data.modelViewProj = proj * view * mtx;
-            data.modelView = view * mtx;
+            data.model = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
             r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
             r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
             

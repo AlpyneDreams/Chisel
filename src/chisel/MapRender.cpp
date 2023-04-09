@@ -35,7 +35,7 @@ namespace chisel
         // Update CameraState
         cbuffers::CameraState data;
         data.viewProj = proj * view;
-        data.invView = glm::inverse(view);
+        data.view = view;
 
         r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), data);
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
@@ -93,14 +93,8 @@ namespace chisel
                 {
                     if (point->IsSelected())
                     {
-                        mat4x4 mtx = glm::scale(glm::translate(mat4x4(1), point->origin), vec3(64.f));
-                        Camera& camera = Tools.editorCamera.camera;
-                        mat4x4 view = camera.ViewMatrix();
-                        mat4x4 proj = camera.ProjMatrix();
-
                         cbuffers::ObjectState data;
-                        data.modelViewProj = proj * view * mtx;
-                        data.modelView = view * mtx;
+                        data.model = glm::scale(glm::translate(mat4x4(1), point->origin), vec3(64.f));
 
                         r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
                         r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);

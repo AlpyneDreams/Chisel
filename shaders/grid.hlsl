@@ -16,14 +16,17 @@ struct Varyings
 
 Varyings vs_main(Input i)
 {
+    float4x4 modelViewProj = mul(Camera.viewProj, Object.model);
+    float4x4 modelView = mul(Camera.view, Object.model);
+
     Varyings v = (Varyings)0;
 
-    v.position = mul(Object.modelViewProj, float4(i.position, 1.0));
+    v.position = mul(modelViewProj, float4(i.position, 1.0));
 
     // Fade out major gridlines further than minor ones
     v.farZ  = Camera.farZ * (i.major ? 1.0 : 0.5);
     v.alpha = 0.1 + (i.major * 0.1);
-    v.z     = -mul(Object.modelView, float4(i.position, 1.0)).z;
+    v.z     = -mul(modelView, float4(i.position, 1.0)).z;
 
     return v;
 }

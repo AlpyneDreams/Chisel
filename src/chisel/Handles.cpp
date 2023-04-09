@@ -198,7 +198,7 @@ namespace chisel
         // Set camera state
         cbuffers::CameraState camState;
         camState.viewProj = proj * view;
-        camState.invView = glm::inverse(view);
+        camState.view = view;
         camState.farZ = glm::min(farZ.x, farZ.y);
         r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), camState);
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
@@ -209,11 +209,9 @@ namespace chisel
             for (int y = -radius.y; y <= radius.y; y++)
             {
                 vec3 translation = vec3(x, y, 0) * vec3(gridChunkSize);
-                mat4x4 model = glm::translate(mtx, translation);
 
                 cbuffers::ObjectState data;
-                data.modelViewProj = proj * view * model;
-                data.modelView = view * model;
+                data.model = glm::translate(mtx, translation);
 
                 r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
                 r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
