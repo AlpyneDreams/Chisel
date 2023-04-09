@@ -14,7 +14,7 @@ chisel_src = files(
         'platform/linux/PlatformLinux.cpp',
     'platform/sdl/WindowSDL.cpp',
     'platform/sdl/CursorSDL.cpp',
-    'render/d3d11/RenderD3D11.cpp',
+    'render/Render.cpp',
 
     'gui/Common.cpp',
     'gui/Layout.cpp',
