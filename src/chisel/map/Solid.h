@@ -258,10 +258,7 @@ namespace chisel
                 }
                 else
                 {
-                    // This operation would change scale of textures.
-                    locking = scaleLocking;
-
-                    if (locking)
+                    if (scaleLocking)
                     {
                         side.scale[0] *= scaleU;
                         side.scale[1] *= scaleV;
