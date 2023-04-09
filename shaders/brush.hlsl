@@ -12,7 +12,9 @@ struct Input
 struct Varyings
 {
     float4 position : SV_POSITION;
+    float3 normal   : NORMAL0;
     float2 uv       : TEXCOORD0;
+    float3 view     : TEXCOORD1;
 };
 
 struct Output
@@ -29,6 +31,8 @@ Varyings vs_main(Input i)
     Varyings v = (Varyings)0;
 
     v.position = mul(Camera.viewProj, float4(i.position, 1.0));
+    v.normal   = i.normal;
+    v.view     = mul(Camera.view, float4(i.position, 1.0)).xyz;
     v.uv       = i.uv;
 
     return v;
@@ -37,7 +41,19 @@ Varyings vs_main(Input i)
 Output ps_main(Varyings v)
 {
     Output o = (Output)0;
-    o.color = float4(s_texture.Sample(s_sampler, v.uv).rgb, 1.0);
+
+    float3 light 		= normalize(float3(1.0, 3.0, 2.0));
+	float3 color 		= float3(1, 1, 1); // previously u_color
+	float3 normal		= normalize(v.normal);
+	float3 view 		= normalize(v.view);
+
+	float NoL		    = saturate(dot(normal, light));
+
+	// Half lambert
+	NoL = 0.5 + (0.5 * NoL);
+
+    o.color.rgb = color * NoL * s_texture.Sample(s_sampler, v.uv).rgb;
+    o.color.a   = 1;
     o.id = Brush.id;
     return o;
 }
