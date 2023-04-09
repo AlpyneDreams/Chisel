@@ -6,7 +6,6 @@
 #include "input/Keyboard.h"
 #include "platform/Cursor.h"
 #include "common/Time.h"
-#include "render/CBuffers.h"
 
 #include "core/Transform.h"
 
@@ -121,7 +120,6 @@ namespace chisel
         // Get camera matrices
         mat4x4 view = camera.ViewMatrix();
         mat4x4 proj = camera.ProjMatrix();
-        mat4x4 viewProj = proj * view;
 
         DrawHandles(view, proj);
 
@@ -130,11 +128,6 @@ namespace chisel
 
         // Begin scene view extra rendering
         render::RenderContext& rctx = Tools.rctx;
-        cbuffers::CameraState data;
-        data.viewProj = proj * view;
-        rctx.UpdateDynamicBuffer(rctx.cbuffers.camera.ptr(), data);
-
-        rctx.ctx->VSSetConstantBuffers1(0, 1, &rctx.cbuffers.camera, nullptr, nullptr);
         rctx.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, Tools.ds_SceneView.dsv.ptr());
 
         // Draw grid

@@ -3,6 +3,7 @@
 #include "console/ConVar.h"
 #include "core/Transform.h"
 #include "fgd/FGD.h"
+#include "render/CBuffers.h"
 
 namespace chisel
 {
@@ -25,11 +26,23 @@ namespace chisel
 
     void MapRender::Update()
     {
+        Camera& camera = Tools.editorCamera.camera;
+
+        // Get camera matrices
+        mat4x4 view = camera.ViewMatrix();
+        mat4x4 proj = camera.ProjMatrix();
+
+        // Update CameraState
+        cbuffers::CameraState data;
+        data.viewProj = proj * view;
+
+        r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), data);
+        r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
+
         r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2));
         r.ctx->ClearDepthStencilView(Tools.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
         r.ctx->OMSetRenderTargets(1, &Tools.rt_SceneView.rtv, Tools.ds_SceneView.dsv.ptr());
 #if 0
-        r.SetClearDepth(true, 1.0f);
         r.SetShader(shader);
         r.SetUniform("u_color", Colors.White);
         r.SetTexture(0, Tools.tex_White);
