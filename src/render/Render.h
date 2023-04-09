@@ -66,6 +66,9 @@ namespace chisel::render
         void BeginFrame();
         void EndFrame();
 
+        RenderTarget CreateRenderTarget(uint width, uint height, DXGI_FORMAT format = DXGI_FORMAT_B8G8R8A8_UNORM);
+        DepthStencil CreateDepthStencil(uint width, uint height, DXGI_FORMAT format = DXGI_FORMAT_D32_FLOAT);
+
         void CreateBlendState(const BlendState& state);
         void SetBlendState(const BlendState& state, vec4 factor = vec4(1), uint32 sampleMask = 0xFFFFFFFF);
 

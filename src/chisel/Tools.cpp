@@ -40,54 +40,16 @@ namespace chisel
 
         // Setup editor render targets
         auto [width, height] = window->GetSize();
-        
-        D3D11_TEXTURE2D_DESC rtDesc =
-        {
-            .Width = width,
-            .Height = height,
-            .MipLevels = 1,
-            .ArraySize = 1,
-            .Format = DXGI_FORMAT_B8G8R8A8_UNORM,
-            .SampleDesc =
-            {
-                .Count = 1,
-                .Quality = 0,
-            },
-            .Usage = D3D11_USAGE_DEFAULT,
-            .BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-            .CPUAccessFlags = 0,
-            .MiscFlags = 0,
-        };
-        r.device->CreateTexture2D(&rtDesc, nullptr, &rt_SceneView.texture);
-        r.device->CreateRenderTargetView(rt_SceneView.texture.ptr(), nullptr, &rt_SceneView.rtv);
-        r.device->CreateShaderResourceView(rt_SceneView.texture.ptr(), nullptr, &rt_SceneView.srv);
+
         float debugColor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
+        
+        rt_SceneView = r.CreateRenderTarget(width, height);
         r.ctx->ClearRenderTargetView(rt_SceneView.rtv.ptr(), debugColor);
 
-        D3D11_TEXTURE2D_DESC dsDesc =
-        {
-            .Width = width,
-            .Height = height,
-            .MipLevels = 1,
-            .ArraySize = 1,
-            .Format = DXGI_FORMAT_D32_FLOAT,
-            .SampleDesc =
-            {
-                .Count = 1,
-                .Quality = 0,
-            },
-            .Usage = D3D11_USAGE_DEFAULT,
-            .BindFlags = D3D11_BIND_DEPTH_STENCIL,
-            .CPUAccessFlags = 0,
-            .MiscFlags = 0,
-        };
-        r.device->CreateTexture2D(&dsDesc, nullptr, &ds_SceneView.texture);
-        r.device->CreateDepthStencilView(ds_SceneView.texture.ptr(), nullptr, &ds_SceneView.dsv);
+        ds_SceneView = r.CreateDepthStencil(width, height);
         r.ctx->ClearDepthStencilView(ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-#if 0
-        rt_ObjectID = r.CreateRenderTarget(width, height, render::TextureFormats::R32F, render::TextureFormats::D32F);
-        rt_ObjectID->SetReadBack(true);
-#endif
+
+        rt_ObjectID = r.CreateRenderTarget(width, height, DXGI_FORMAT_R32_UINT);
 
         // Setup editor camera
         editorCamera.camera.position = vec3(-64.0f, -32.0f, 32.0f) * 32.0f;

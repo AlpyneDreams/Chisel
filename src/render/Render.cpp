@@ -148,6 +148,57 @@ namespace chisel::render
         device = nullptr;
     }
 
+    RenderTarget RenderContext::CreateRenderTarget(uint width, uint height, DXGI_FORMAT format)
+    {
+        RenderTarget rt;
+        D3D11_TEXTURE2D_DESC rtDesc =
+        {
+            .Width = width,
+            .Height = height,
+            .MipLevels = 1,
+            .ArraySize = 1,
+            .Format = format,
+            .SampleDesc =
+            {
+                .Count = 1,
+                .Quality = 0,
+            },
+            .Usage = D3D11_USAGE_DEFAULT,
+            .BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+            .CPUAccessFlags = 0,
+            .MiscFlags = 0,
+        };
+        device->CreateTexture2D(&rtDesc, nullptr, &rt.texture);
+        device->CreateRenderTargetView(rt.texture.ptr(), nullptr, &rt.rtv);
+        device->CreateShaderResourceView(rt.texture.ptr(), nullptr, &rt.srv);
+        return rt;
+    }
+
+    DepthStencil RenderContext::CreateDepthStencil(uint width, uint height, DXGI_FORMAT format)
+    {
+        DepthStencil ds;
+        D3D11_TEXTURE2D_DESC dsDesc =
+        {
+            .Width = width,
+            .Height = height,
+            .MipLevels = 1,
+            .ArraySize = 1,
+            .Format = format,
+            .SampleDesc =
+            {
+                .Count = 1,
+                .Quality = 0,
+            },
+            .Usage = D3D11_USAGE_DEFAULT,
+            .BindFlags = D3D11_BIND_DEPTH_STENCIL,
+            .CPUAccessFlags = 0,
+            .MiscFlags = 0,
+        };
+        device->CreateTexture2D(&dsDesc, nullptr, &ds.texture);
+        device->CreateDepthStencilView(ds.texture.ptr(), nullptr, &ds.dsv);
+        return ds;
+    }
+
     void RenderContext::CreateBlendState(const BlendState& state)
     {
         if (state.handle == nullptr && state.Enabled())
