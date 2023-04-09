@@ -149,6 +149,35 @@ namespace chisel::render
         device = nullptr;
     }
 
+    void RenderContext::BeginFrame()
+    {
+        D3D11_TEXTURE2D_DESC desc;
+        backbuffer.texture->GetDesc(&desc);
+
+        ctx->OMSetRenderTargets(1, &backbuffer.rtv, nullptr);
+        D3D11_VIEWPORT viewport =
+        {
+            .TopLeftX = 0,
+            .TopLeftY = 0,
+            .Width    = float(desc.Width),
+            .Height   = float(desc.Height),
+            .MinDepth = 0.0f,
+            .MaxDepth = 1.0f,
+        };
+        ctx->RSSetViewports(1, &viewport);
+
+        float debugColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+        ctx->ClearRenderTargetView(backbuffer.rtv.ptr(), debugColor);
+    }
+
+    void RenderContext::EndFrame()
+    {
+        ImGui::Render();
+        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+        swapchain->Present(0, 0);
+    }
+
     RenderTarget RenderContext::CreateRenderTarget(uint width, uint height, DXGI_FORMAT format)
     {
         RenderTarget rt;
@@ -233,44 +262,9 @@ namespace chisel::render
         ctx->OMSetBlendState(state.handle.ptr(), &factor.x, sampleMask);
     }
 
-    void RenderContext::SetShader(const Shader& shader)
-    {
-        if (shader.inputLayout != nullptr)
-            ctx->IASetInputLayout(shader.inputLayout.ptr());
-        if (shader.vs != nullptr)
-            ctx->VSSetShader(shader.vs.ptr(), nullptr, 0);
-        if (shader.ps != nullptr)
-            ctx->PSSetShader(shader.ps.ptr(), nullptr, 0);
-    }
-
-    void RenderContext::BeginFrame()
-    {
-        D3D11_TEXTURE2D_DESC desc;
-        backbuffer.texture->GetDesc(&desc);
-
-        ctx->OMSetRenderTargets(1, &backbuffer.rtv, nullptr);
-        D3D11_VIEWPORT viewport =
-        {
-            .TopLeftX = 0,
-            .TopLeftY = 0,
-            .Width    = float(desc.Width),
-            .Height   = float(desc.Height),
-            .MinDepth = 0.0f,
-            .MaxDepth = 1.0f,
-        };
-        ctx->RSSetViewports(1, &viewport);
-
-        float debugColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-        ctx->ClearRenderTargetView(backbuffer.rtv.ptr(), debugColor);
-    }
-
-    void RenderContext::EndFrame()
-    {
-        ImGui::Render();
-        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
-        swapchain->Present(0, 0);
-    }
+    //--------------------------------------------------
+    //  ComputeShaderBuffer
+    //--------------------------------------------------
 
     void ComputeShaderBuffer::AddStagingBuffer(ID3D11Device1* device)
     {
@@ -388,6 +382,10 @@ namespace chisel::render
         return rwsb;
     }
 
+    //--------------------------------------------------
+    //  CBuffers
+    //--------------------------------------------------
+
     template <typename T>
     Com<ID3D11Buffer> RenderContext::CreateCBuffer()
     {
@@ -403,6 +401,10 @@ namespace chisel::render
             Console.Error("[D3D11] Failed to create constant buffer {}", typeid(T).name());
         return buffer;
     }
+
+    //--------------------------------------------------
+    //  DrawMesh
+    //--------------------------------------------------
 
     void RenderContext::DrawMesh(Mesh* mesh)
     {
@@ -429,6 +431,10 @@ namespace chisel::render
         ctx->Draw(mesh->groups[0].vertices.count, 0);
     }
 
+    //--------------------------------------------------
+    //  ComputeShader
+    //--------------------------------------------------
+
     ComputeShader::ComputeShader(ID3D11Device1* device, std::string_view name)
     {
         fs::Path path = fs::Path("core/shaders") / name;
@@ -444,6 +450,20 @@ namespace chisel::render
             Console.Error("[D3D11] Failed to create compute shader '{}'", name);
             return;
         }
+    }
+
+    //--------------------------------------------------
+    //  Shader
+    //--------------------------------------------------
+
+    void RenderContext::SetShader(const Shader& shader)
+    {
+        if (shader.inputLayout != nullptr)
+            ctx->IASetInputLayout(shader.inputLayout.ptr());
+        if (shader.vs != nullptr)
+            ctx->VSSetShader(shader.vs.ptr(), nullptr, 0);
+        if (shader.ps != nullptr)
+            ctx->PSSetShader(shader.ps.ptr(), nullptr, 0);
     }
 
     Shader::Shader(ID3D11Device1* device, std::span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name)
