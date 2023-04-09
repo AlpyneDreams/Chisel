@@ -1,4 +1,4 @@
-#include "cbuffers.hlsli"
+#include "common.hlsli"
 
 struct vs_in
 {
@@ -18,12 +18,12 @@ vs_out vs_main(vs_in i)
 {
     vs_out o = (vs_out)0;
 
-    o.position = mul(g_modelViewProj, float4(i.position, 1.0));
+    o.position = mul(Object.modelViewProj, float4(i.position, 1.0));
 
     // Fade out major gridlines further than minor ones
-    o.farZ  = g_farZ * (i.major ? 1.0 : 0.5);
+    o.farZ  = Camera.farZ * (i.major ? 1.0 : 0.5);
     o.alpha = 0.1 + (i.major * 0.1);
-    o.z     = -mul(g_modelView, float4(i.position, 1.0)).z;
+    o.z     = -mul(Object.modelView, float4(i.position, 1.0)).z;
 
     return o;
 }

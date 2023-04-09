@@ -1,4 +1,4 @@
-#include "cbuffers.hlsli"
+#include "common.hlsli"
 
 struct vs_in
 {
@@ -20,7 +20,7 @@ vs_out vs_main(vs_in input)
 {
     vs_out output = (vs_out)0;
 
-    output.position = mul(g_viewProj, float4(input.position, 1.0));
+    output.position = mul(Camera.viewProj, float4(input.position, 1.0));
     output.uv = input.uv;
 
     return output;

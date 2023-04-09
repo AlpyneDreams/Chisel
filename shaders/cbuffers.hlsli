@@ -1,11 +1,16 @@
-cbuffer CameraState : register(b0)
+// Shared definitions between C++ and HLSL
+// - See common.hlsli for cbuffer definitions
+// - Make sure your structs are aligned/padded correctly
+
+struct CameraState
 {
-    float4x4 g_viewProj;
-    float g_farZ;
+    float4x4 viewProj;
+    float    farZ;
+    float3   padding;
 };
 
-cbuffer ObjectState : register(b1)
+struct ObjectState
 {
-    float4x4 g_modelViewProj;
-    float4x4 g_modelView;
+    float4x4 modelViewProj;
+    float4x4 modelView;
 };
