@@ -28,6 +28,9 @@ namespace chisel
     inline ConVar<float> m_pitch      ("m_pitch",       0.022f, "Mouse pitch factor.");
     inline ConVar<float> m_yaw        ("m_yaw",         0.022f, "Mouse yaw factor.");
 
+    inline ConVar<bool>  trans_texture_lock("trans_texture_lock", true, "Enable texture lock for transformations.");
+    inline ConVar<bool>  trans_texture_scale_lock("trans_texture_scale_lock", false, "Enable scaling texture lock.");
+
     Camera& View3D::GetCamera() const { return Tools.editorCamera.camera; }
 
     uint2 View3D::GetMousePos() const
@@ -144,6 +147,9 @@ namespace chisel
                 ImGui::InputFloat("Angle Snap", &rotationSnap);
                 ImGui::EndMenu();
             }
+
+            ImGui::Checkbox("Texture Lock", &trans_texture_lock.value);
+            ImGui::Checkbox("Texture Scale Lock", &trans_texture_scale_lock.value);
 
             // Right side
             ImGui::SameLine(ImGui::GetWindowWidth() - 90);
