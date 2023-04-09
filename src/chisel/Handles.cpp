@@ -173,7 +173,7 @@ namespace chisel
     void Handles::DrawGrid(render::RenderContext& r, vec3 cameraPos, vec3 gridSize)
     {
         r.SetBlendState(render::BlendFuncs::Alpha);
-        r.ctx->OMSetDepthStencilState(r.DepthLessEqual.ptr(), 0);
+        r.ctx->OMSetDepthStencilState(r.Depth.LessEqual.ptr(), 0);
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
         r.SetShader(sh_Grid);
 
@@ -221,7 +221,7 @@ namespace chisel
         }
 
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        r.ctx->OMSetDepthStencilState(r.DepthDefault.ptr(), 0);
+        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         r.SetBlendState(nullptr);
     }
 

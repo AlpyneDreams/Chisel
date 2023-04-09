@@ -104,13 +104,13 @@ namespace chisel::render
 
         D3D11_DEPTH_STENCIL_DESC dssNoWrite = dssDefault;
         dssNoWrite.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-        device->CreateDepthStencilState(&dssNoWrite, &DepthNoWrite);
+        device->CreateDepthStencilState(&dssNoWrite, &Depth.NoWrite);
 
         D3D11_DEPTH_STENCIL_DESC dssLessEqual = dssDefault;
         dssLessEqual.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-        device->CreateDepthStencilState(&dssLessEqual, &DepthLessEqual);
+        device->CreateDepthStencilState(&dssLessEqual, &Depth.LessEqual);
 
-        // Initial sampler... May want to change this down the line
+        // Global samplers
         D3D11_SAMPLER_DESC samplerDesc =
         {
             .Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
@@ -123,8 +123,12 @@ namespace chisel::render
             .MinLOD = 0.0f,
             .MaxLOD = FLT_MAX,
         };
-        device->CreateSamplerState(&samplerDesc, &sampler);
-        ctx->PSSetSamplers(0, 1, &sampler);
+        device->CreateSamplerState(&samplerDesc, &Sample.Default);
+        ctx->PSSetSamplers(0, 1, &Sample.Default);
+
+        D3D11_SAMPLER_DESC pointDesc = samplerDesc;
+        pointDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+        device->CreateSamplerState(&pointDesc, &Sample.Point);
 
         D3D11_RASTERIZER_DESC desc =
         {

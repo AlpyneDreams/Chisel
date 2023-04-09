@@ -136,8 +136,15 @@ namespace chisel::render
         Com<ID3D11SamplerState> sampler;
         Com<ID3D11RasterizerState> rsState;
 
-        Com<ID3D11DepthStencilState> DepthDefault = nullptr;
-        Com<ID3D11DepthStencilState> DepthNoWrite;
-        Com<ID3D11DepthStencilState> DepthLessEqual;
+        struct DepthStates {
+            Com<ID3D11DepthStencilState> Default = nullptr;
+            Com<ID3D11DepthStencilState> NoWrite;
+            Com<ID3D11DepthStencilState> LessEqual;
+        } Depth;
+
+        struct SampleStates {
+            Com<ID3D11SamplerState> Default = nullptr;
+            Com<ID3D11SamplerState> Point;
+        } Sample;
     };
 }

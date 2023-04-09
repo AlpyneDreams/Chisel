@@ -112,10 +112,9 @@ namespace chisel
                     if (!r_drawsprites)
                         continue;
 
-                    if (cls.texture)
-                        Gizmos.DrawIcon(point->origin, cls.texture);
-                    else
-                        Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
+                    r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
+                    Gizmos.DrawIcon(point->origin, cls.texture ? cls.texture : Gizmos.icnObsolete);
+                    r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
                 }
                 else
                 {
@@ -133,7 +132,9 @@ namespace chisel
             }
             else if (r_drawsprites)
             {
-                Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
+                r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
+                Gizmos.DrawIcon(point->origin, Gizmos.icnObsolete);
+                r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
             }
         }
     }

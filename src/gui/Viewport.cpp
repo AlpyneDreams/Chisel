@@ -187,6 +187,5 @@ namespace chisel
             gridSize = glm::clamp(gridSize, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
             OnResizeGrid(gridSize);
         }
-        //Gizmos.DrawIcon(vec3(0), Gizmos.icnLight);
     }
 }

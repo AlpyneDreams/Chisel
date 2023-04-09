@@ -80,7 +80,10 @@ namespace chisel
 
     void Chisel::CreateEntityGallery()
     {
-        vec3 origin = vec3(-8, -8, 0);
+        PointEntity* obsolete = map.AddPointEntity("obsolete");
+        obsolete->origin = vec3(-8, -8, 0);
+
+        vec3 origin = vec3(-7, -8, 0);
         for (auto& [name, cls] : fgd->classes)
         {
             if (cls.type == FGD::SolidClass || cls.type == FGD::BaseClass)
