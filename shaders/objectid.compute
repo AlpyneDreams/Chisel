@@ -1,0 +1,21 @@
+#include "common.hlsli"
+
+struct Input
+{
+    uint2 coords;
+};
+
+struct Output
+{
+    uint id;
+};
+
+Texture2D<uint> tex : register(t0);
+StructuredBuffer<Input> input : register(t1);
+RWStructuredBuffer<Output> output : register(u0);
+
+[numthreads(1, 1, 1)]
+void cs_main( uint3 tid : SV_DispatchThreadID )
+{
+    output[tid.x].id = tex[input[tid.x].coords];
+}

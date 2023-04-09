@@ -37,12 +37,16 @@ namespace chisel
 #if 0
         sh_Color  = r.LoadShader("basic", "color");
 #endif
+        cs_ObjectID = render::ComputeShader(r.device.ptr(), "objectid");
+        cs_ObjectID.buffers.push_back(r.CreateCSInputBuffer<uint2>());
+        cs_ObjectID.buffers.push_back(r.CreateCSOutputBuffer<uint>());
+        cs_ObjectID.buffers[1].AddStagingBuffer(r.device.ptr());
 
         // Setup editor render targets
         auto [width, height] = window->GetSize();
 
         float debugColor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
-        
+
         rt_SceneView = r.CreateRenderTarget(width, height);
         r.ctx->ClearRenderTargetView(rt_SceneView.rtv.ptr(), debugColor);
 
@@ -122,39 +126,54 @@ namespace chisel
 
     void Tools::PickObject(uint2 mouse)
     {
-#if 0
-        rt_ObjectID->ReadTexture([=](float* data, size_t size, size_t width)
-        {
-            for (float* ptr = data; ptr < data + size;)
-            {
-                uint x = (ptr - data) % width;
-                uint y = (ptr - data) / width;
-                uint id = std::bit_cast<uint>(*ptr++);
+        auto bufferIn = cs_ObjectID.buffers[0];
 
-                if (mouse.x == x && mouse.y == y)
-                {
-                    if (id == 0)
-                        Selection.Clear();
-                    else
+        // Update input buffer
+        r.UpdateDynamicBuffer(bufferIn.buffer.ptr(), mouse);
+
+        // When rendering completes...
+        Renderer.OnEndFrame.Once([](render::RenderContext& r)
+        {
+            // Unbind render targets
+            r.ctx->OMSetRenderTargets(0, nullptr, nullptr);
+
+            extern class Tools Tools;
+            auto bufferIn = Tools.cs_ObjectID.buffers[0];
+            auto bufferOut = Tools.cs_ObjectID.buffers[1];
+
+            // Bind the render target, input coords, output value
+            ID3D11ShaderResourceView* srvs[] = { Tools.rt_ObjectID.srv.ptr(), bufferIn.srv.ptr() };
+            r.ctx->CSSetShaderResources(0, 2, srvs);
+            r.ctx->CSSetUnorderedAccessViews(0, 1, &bufferOut.uav, nullptr);
+
+            // Run the compute shader
+            r.ctx->CSSetShader(Tools.cs_ObjectID.cs.ptr(), nullptr, 0);
+            r.ctx->Dispatch(1, 1, 1);
+
+            // Download the output value
+            bufferOut.Download([](void* data)
+            {
+                uint id = ((uint*)data)[0];
+
+                if (id == 0) {
+                    Selection.Clear();
+                } else {
+                    Selectable* selection = Selection.Find(id);
+                    if (selection)
                     {
-                        Selectable* selection = Selection.Find(id);
-                        if (selection)
+                        if (Keyboard.ctrl)
                         {
-                            if (Keyboard.ctrl)
-                            {
-                                Selection.Toggle(selection);
-                            }
-                            else
-                            {
-                                Selection.Clear();
-                                Selection.Select(selection);
-                            }
+                            Selection.Toggle(selection);
+                        }
+                        else
+                        {
+                            Selection.Clear();
+                            Selection.Select(selection);
                         }
                     }
                 }
-            }
+            });
         });
-#endif
     }
 
 #if 0

@@ -38,6 +38,7 @@ namespace chisel
         render::RenderTarget rt_SceneView;
         render::DepthStencil ds_SceneView;
         render::RenderTarget rt_ObjectID;
+        render::ComputeShader cs_ObjectID;
 
         Texture* tex_White;
 
