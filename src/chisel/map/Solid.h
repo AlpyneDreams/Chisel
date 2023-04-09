@@ -161,7 +161,7 @@ namespace chisel
                     {
                         float mappingWidth = 32.0f;
                         float mappingHeight = 32.0f;
-                        if (data.material != nullptr && data.material->baseTexture != nullptr)
+                        if (data.material != nullptr && data.material->baseTexture != nullptr && data.material->baseTexture->texture != nullptr)
                         {
                             D3D11_TEXTURE2D_DESC desc;
                             data.material->baseTexture->texture->GetDesc(&desc);

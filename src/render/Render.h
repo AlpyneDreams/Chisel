@@ -242,7 +242,8 @@ namespace chisel::render
         } Depth;
 
         struct SampleStates {
-            Com<ID3D11SamplerState> Default = nullptr;
+            Com<ID3D11SamplerState> Default;
+            Com<ID3D11SamplerState> Anisotropic;
             Com<ID3D11SamplerState> Point;
         } Sample;
     };

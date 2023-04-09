@@ -94,9 +94,6 @@ namespace chisel
         libvtf::VTFData vtfData(data);
 
         const auto& header = vtfData.getHeader();
-        std::span<const uint8_t> imageData = vtfData.imageData(0, 0, 0);
-
-        Console.Log("Loading {}: {} {}", tex.GetPath(), (void*)imageData.data(), imageData.size());
 
         DXGI_FORMAT format = RemapVTFImageFormat(header.format);
 
@@ -104,22 +101,32 @@ namespace chisel
         {
             .Width      = header.width,
             .Height     = header.height,
-            .MipLevels  = 1,//header.numMipLevels,
+            .MipLevels  = header.numMipLevels,
             .ArraySize  = 1,//header.depth,
             .Format     = LinearToTypeless(format),
             .SampleDesc = { 1, 0 },
             .Usage      = D3D11_USAGE_IMMUTABLE,
             .BindFlags  = D3D11_BIND_SHADER_RESOURCE,
         };
-        // TODO: Mips
-        // TODO Pitch proper
-        D3D11_SUBRESOURCE_DATA initialData =
+        std::vector<D3D11_SUBRESOURCE_DATA> mipData;
+        for (uint8_t i = 0; i < header.numMipLevels; i++)
         {
-            .pSysMem          = imageData.data(),
-            .SysMemPitch      = (header.width / GetBlockSize(desc.Format).first) * GetElementSize(desc.Format),
-            .SysMemSlicePitch = 0,
-        };
-        Tools.rctx.device->CreateTexture2D(&desc, &initialData, &tex.texture);
+            const uint32_t blockSize = GetBlockSize(desc.Format).first;
+
+            std::span<const uint8_t> data = vtfData.imageData(0, 0, i);
+
+            auto [width, _, __] = libvtf::adjustImageSizeByMip(header.width, header.height, 1u, i);
+            width = align(width, blockSize);
+
+            D3D11_SUBRESOURCE_DATA initialData =
+            {
+                .pSysMem          = data.data(),
+                .SysMemPitch      = (width / blockSize) * GetElementSize(desc.Format),
+                .SysMemSlicePitch = 0,
+            };
+            mipData.push_back(initialData);
+        }
+        Tools.rctx.device->CreateTexture2D(&desc, mipData.data(), &tex.texture);
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDescLinear =
         {
             .Format = format,
