@@ -117,6 +117,39 @@ namespace chisel::render
         device = nullptr;
     }
 
+    void RenderContext::CreateBlendState(const BlendState& state)
+    {
+        if (state.handle == nullptr && state.Enabled())
+        {
+            D3D11_BLEND_DESC1 desc = {
+                .AlphaToCoverageEnable = state.alphaToCoverage,
+                .IndependentBlendEnable = state.independent
+            };
+            for (uint i = 0; i < 8; i++)
+            {
+                BlendFunc func = state.renderTargets[i];
+                desc.RenderTarget[i] = {
+                    .BlendEnable    = func.Enabled(),
+                    .LogicOpEnable  = false,
+                    .SrcBlend       = D3D11_BLEND(func.src),
+                    .DestBlend      = D3D11_BLEND(func.dst),
+                    .BlendOp        = D3D11_BLEND_OP(func.rgbOp),
+                    .SrcBlendAlpha  = D3D11_BLEND(func.srcAlpha),
+                    .DestBlendAlpha = D3D11_BLEND(func.dstAlpha),
+                    .BlendOpAlpha   = D3D11_BLEND_OP(func.alphaOp),
+                    .RenderTargetWriteMask = func.writeMask.mask
+                };
+            }
+            device->CreateBlendState1(&desc, &state.handle);
+        }
+    }
+
+    void RenderContext::SetBlendState(const BlendState& state, vec4 factor, uint32 sampleMask)
+    {
+        CreateBlendState(state);
+        ctx->OMSetBlendState(state.handle.ptr(), &factor.x, sampleMask);
+    }
+
     void RenderContext::SetShader(const Shader& shader)
     {
         if (shader.inputLayout != nullptr)

@@ -4,7 +4,6 @@
 #include "math/Math.h"
 #include "math/Color.h"
 #include "render/TextureFormat.h"
-#include "render/BlendMode.h"
 #include "core/Mesh.h"
 
 #include <functional>
@@ -12,6 +11,7 @@
 #include <span>
 
 #include "D3D11Include.h"
+#include "render/BlendState.h"
 
 namespace chisel::render
 {
@@ -62,7 +62,12 @@ namespace chisel::render
         void BeginFrame();
         void EndFrame();
 
+        void CreateBlendState(const BlendState& state);
+
+        void SetBlendState(const BlendState& state, vec4 factor = vec4(1), uint32 sampleMask = 0xFFFFFFFF);
+
         void SetShader(const Shader& shader);
+
 
         // Compatability with existing Mesh class
         void DrawMesh(Mesh* mesh);
