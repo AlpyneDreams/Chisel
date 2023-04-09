@@ -12,8 +12,8 @@ namespace chisel
 
     struct Handles::GridVertex
     {
-        glm::vec3 pos;
-        float     major;
+        vec3    pos;
+        float   major;
 
         static constexpr D3D11_INPUT_ELEMENT_DESC Layout[] =
         {
@@ -198,6 +198,7 @@ namespace chisel
         // Set camera state
         cbuffers::CameraState camState;
         camState.viewProj = proj * view;
+        camState.invView = glm::inverse(view);
         camState.farZ = glm::min(farZ.x, farZ.y);
         r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), camState);
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);

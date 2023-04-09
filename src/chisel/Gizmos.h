@@ -5,7 +5,9 @@
 #include "assets/AssetTypes.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "render/Render.h"
+#include "render/CBuffers.h"
 #include "core/Mesh.h"
+#include "math/Math.h"
 #include "core/Primitives.h"
 
 #include <vector>
@@ -15,25 +17,35 @@ namespace chisel
 {
     inline struct Gizmos
     {
-        static inline render::Texture* icnLight = nullptr;
-        static inline render::Texture* icnHandle = nullptr;
-#if 0
-        static inline render::Shader* sh_Sprite = nullptr;
-#endif
+        static inline TextureAsset* icnLight;
+        static inline TextureAsset* icnHandle;
+        static inline render::Shader sh_Sprite;
 
         void DrawIcon(vec3 pos, render::Texture* icon, vec3 size = vec3(64.f))
         {
-#if 0
-            auto& r = Tools.Render;
+            auto& r = Tools.rctx;
             r.SetShader(sh_Sprite);
-            r.SetTexture(0, icon);
-            r.SetBlendFunc(render::BlendFuncs::Alpha);
-            r.SetDepthWrite(false);
+            r.ctx->PSSetShaderResources(0, 1, &icon->srv);
+            r.SetBlendState(render::BlendFuncs::Alpha);
+            // r.SetDepthWrite(false);
             mat4x4 mtx = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
-            r.SetTransform(mtx);
-            r.DrawMesh(&Primitives.Quad);
-            r.SetDepthWrite(true);
-#endif
+
+            Camera& cam = Tools.editorCamera.camera;
+            mat4x4 view = cam.ViewMatrix();
+            mat4x4 proj = cam.ProjMatrix();
+
+            cbuffers::ObjectState data;
+            data.modelViewProj = proj * view * mtx;
+            data.modelView = view * mtx;
+            r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
+            r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+            
+            uint stride = sizeof(Primitives::Vertex);
+            uint offset = 0;
+            r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            r.ctx->IASetVertexBuffers(0, 1, &Primitives.Quad, &stride, &offset);
+            r.ctx->Draw(6, 0);
+            //r.SetDepthWrite(true);
         }
 
         // TODO: These could be batched.
@@ -56,9 +68,7 @@ namespace chisel
         {
             icnLight = Assets.Load<TextureAsset>("textures/ui/light.png");
             icnHandle = Assets.Load<TextureAsset>("textures/ui/handle.png");
-#if 0
-            sh_Sprite = Tools.Render.LoadShader("billboard", "sprite");
-#endif
+            sh_Sprite = render::Shader(Tools.rctx.device.ptr(), Primitives::Vertex::Layout, "sprite");
         }
     } Gizmos;
 }

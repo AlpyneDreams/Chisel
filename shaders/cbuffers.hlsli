@@ -5,6 +5,7 @@
 struct CameraState
 {
     float4x4 viewProj;
+    float4x4 invView;
     float    farZ;
     float3   padding;
 };

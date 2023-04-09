@@ -3,7 +3,6 @@
 struct Input
 {
     float3 position : POSITION;
-    float3 normal   : NORMAL0;
     float2 uv       : TEXCOORD0;
 };
 
@@ -20,7 +19,11 @@ Varyings vs_main(Input i)
 {
     Varyings v = (Varyings)0;
 
-    v.position = mul(Camera.viewProj, float4(i.position, 1.0));
+    float3 camRight = float3(Camera.invView[0][0], Camera.invView[1][0], Camera.invView[2][0]);
+    float3 camUp    = float3(Camera.invView[0][1], Camera.invView[1][1], Camera.invView[2][1]);
+	float3 pos      = (camRight * i.position.x) + (camUp * i.position.y);
+
+    v.position = mul(Object.modelViewProj, float4(pos, 1));
     v.uv       = i.uv;
 
     return v;
@@ -28,5 +31,5 @@ Varyings vs_main(Input i)
 
 float4 ps_main(Varyings v) : SV_TARGET
 {
-    return float4(s_texture.Sample(s_sampler, v.uv).rgb, 1.0);
+    return s_texture.Sample(s_sampler, v.uv);
 }

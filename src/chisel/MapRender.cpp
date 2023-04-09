@@ -35,6 +35,7 @@ namespace chisel
         // Update CameraState
         cbuffers::CameraState data;
         data.viewProj = proj * view;
+        data.invView = glm::inverse(view);
 
         r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), data);
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
@@ -71,7 +72,6 @@ namespace chisel
             }
         }
 
-#if 0
         for (const auto* entity : map.entities)
         {
             const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
@@ -93,8 +93,19 @@ namespace chisel
                 {
                     if (point->IsSelected())
                     {
-                        r.SetTransform(glm::scale(glm::translate(mat4x4(1), point->origin), vec3(64.f)));
-                        Tools.DrawSelectionOutline(&Primitives.Cube);
+                        mat4x4 mtx = glm::scale(glm::translate(mat4x4(1), point->origin), vec3(64.f));
+                        Camera& camera = Tools.editorCamera.camera;
+                        mat4x4 view = camera.ViewMatrix();
+                        mat4x4 proj = camera.ProjMatrix();
+
+                        cbuffers::ObjectState data;
+                        data.modelViewProj = proj * view * mtx;
+                        data.modelView = view * mtx;
+
+                        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
+                        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+
+                        //Tools.DrawSelectionOutline(&Primitives.Cube);
                     }
                     
                     if (!r_drawsprites)
@@ -108,15 +119,15 @@ namespace chisel
                 else
                 {
                     AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
-                    r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
+                    //r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
 
-                    if (point->IsSelected())
-                        Tools.DrawSelectionOutline(&Primitives.Cube);
+                    //if (point->IsSelected())
+                        //Tools.DrawSelectionOutline(&Primitives.Cube);
 
                     r.SetShader(shader);
-                    r.SetTexture(0, Tools.tex_White);
-                    r.SetUniform("u_color", color);
-                    r.DrawMesh(&Primitives.Cube);
+                    //r.SetTexture(0, Tools.tex_White);
+                    //r.SetUniform("u_color", color);
+                   // r.DrawMesh(&Primitives.Cube);
                 }
             }
             else if (r_drawsprites)
@@ -124,7 +135,6 @@ namespace chisel
                 Gizmos.DrawIcon(point->origin, Gizmos.icnLight);
             }
         }
-#endif
     }
     
     void MapRender::DrawBrushEntity(BrushEntity& ent)

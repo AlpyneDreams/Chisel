@@ -27,6 +27,7 @@ namespace chisel
         Renderer.Start();
 
         // Setup gizmos and handles
+        Primitives.Init();
         Gizmos.Init();
         Handles.Init();
 
