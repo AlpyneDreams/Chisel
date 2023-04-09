@@ -313,6 +313,23 @@ namespace chisel::render
         ctx->Draw(mesh->groups[0].vertices.count, 0);
     }
 
+    ComputeShader::ComputeShader(ID3D11Device1* device, std::string_view name)
+    {
+        fs::Path path = fs::Path("core/shaders") / name;
+        path.setExt(".csc");
+        auto csFile = fs::readFile(path);
+        if (!csFile) {
+            Console.Error("[D3D11] Failed to find compute shader 'shaders/{}.csc'", name);
+            return;
+        }
+
+        HRESULT hr = device->CreateComputeShader(csFile->data(), csFile->size(), NULL, &cs);
+        if (FAILED(hr)) {
+            Console.Error("[D3D11] Failed to create compute shader '{}'", name);
+            return;
+        }
+    }
+
     Shader::Shader(ID3D11Device1* device, std::span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name)
     {
         fs::Path path = fs::Path("core/shaders") / name;

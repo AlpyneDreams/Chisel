@@ -4,6 +4,7 @@
 #include "platform/Window.h"
 #include "math/Math.h"
 #include "math/Color.h"
+#include "common/Span.h"
 #include "core/Mesh.h"
 
 #include <functional>
@@ -49,7 +50,16 @@ namespace chisel::render
         Com<ID3D11InputLayout>  inputLayout;
 
         Shader() {}
-        Shader(ID3D11Device1* device, std::span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name);
+        Shader(ID3D11Device1* device, Span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name);
+    };
+
+
+    struct ComputeShader
+    {
+        Com<ID3D11ComputeShader> cs;
+
+        ComputeShader() {}
+        ComputeShader(ID3D11Device1* device, std::string_view name);
     };
 
     struct GlobalCBuffers
