@@ -69,14 +69,8 @@ namespace chisel::render
         ImGui_ImplDX11_NewFrame();
 
         // Global CBuffers
-        D3D11_BUFFER_DESC bufferDesc =
-        {
-            .ByteWidth = sizeof(cbuffers::CameraState),
-            .Usage = D3D11_USAGE_DYNAMIC,
-            .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-            .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-        };
-        device->CreateBuffer(&bufferDesc, nullptr, &cbuffers.camera);
+        cbuffers.camera = CreateCBuffer<cbuffers::CameraState>();
+        cbuffers.object = CreateCBuffer<cbuffers::ObjectState>();
 
         // Initial sampler... May want to change this down the line
         D3D11_SAMPLER_DESC samplerDesc =
@@ -185,6 +179,22 @@ namespace chisel::render
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
         swapchain->Present(0, 0);
+    }
+
+    template <typename T>
+    Com<ID3D11Buffer> RenderContext::CreateCBuffer()
+    {
+        Com<ID3D11Buffer> buffer;
+        D3D11_BUFFER_DESC bufferDesc = {
+            .ByteWidth = sizeof(T),
+            .Usage = D3D11_USAGE_DYNAMIC,
+            .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
+            .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+        };
+        HRESULT hr = device->CreateBuffer(&bufferDesc, nullptr, &buffer);
+        if (!FAILED(hr))
+            Console.Error("[D3D11] Failed to create constant buffer {}", typeid(T).name());
+        return buffer;
     }
 
     void RenderContext::DrawMesh(Mesh* mesh)

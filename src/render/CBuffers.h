@@ -8,4 +8,11 @@ namespace chisel::cbuffers
     {
         mat4x4 viewProj;
     };
+
+    struct ObjectState
+    {
+        mat4x4 modelViewProj;
+        mat4x4 modelView;
+    };
+
 }

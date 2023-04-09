@@ -52,6 +52,7 @@ namespace chisel::render
     struct GlobalCBuffers
     {
         Com<ID3D11Buffer> camera;
+        Com<ID3D11Buffer> object;
     };
 
     struct RenderContext
@@ -71,6 +72,9 @@ namespace chisel::render
 
         // Compatability with existing Mesh class
         void DrawMesh(Mesh* mesh);
+
+        template <typename T>
+        Com<ID3D11Buffer> CreateCBuffer();
 
         template <typename T>
         void UpdateDynamicBuffer(ID3D11Resource* res, const T& data)
