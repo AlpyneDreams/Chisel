@@ -27,7 +27,7 @@ namespace chisel
 
         const Path& GetPath() const
         {
-            return AssetPaths.contains(id) ? AssetPaths.at(id) : fs::Path();
+            return AssetPaths.contains(id) ? AssetPaths.at(id) : nullPath;
         }
 
     private:
@@ -42,6 +42,8 @@ namespace chisel
         static inline AssetTable AssetDB;
         static inline std::unordered_map<AssetID, Path> AssetPaths;
         static inline AssetID NextID = 0;
+
+        static inline const fs::Path nullPath = fs::Path();
     };
 }
 
