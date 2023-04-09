@@ -282,7 +282,7 @@ namespace chisel::render
             .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
         };
         HRESULT hr = device->CreateBuffer(&bufferDesc, nullptr, &buffer);
-        if (!FAILED(hr))
+        if (FAILED(hr))
             Console.Error("[D3D11] Failed to create constant buffer {}", typeid(T).name());
         return buffer;
     }
