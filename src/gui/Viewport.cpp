@@ -59,11 +59,31 @@ namespace chisel
             {
                 Plane grid = Plane(Vectors.Zero, Vectors.Up);
                 Ray ray    = GetMouseRay();
-                if (float dist; grid.Intersects(ray, dist))
+
+                bool hit = false;
+                vec3 normal = vec3(0, 0, 1);
+                vec3 point = vec3(0);
+
+                auto r_hit = map.GetTree().QueryRay(ray);
+                if (r_hit)
                 {
-                    vec3 point = ray.GetPoint(dist);
+                    hit = true;
+                    normal = r_hit->face->side->plane.normal;
+                    point = ray.GetPoint(r_hit->t);
+                }
+
+                if (!hit)
+                {
+                    float t;
+                    hit = ray.Intersects(grid, t);
+                    if (hit)
+                        point = ray.GetPoint(t);
+                }
+
+                if (hit)
+                {
                     point = math::Snap(point, gridSize);
-                    Handles.DrawPoint(point);
+                    Handles.DrawPoint(point, false);
 
                     if (activeTool == Tool::Entity)
                     {
@@ -90,8 +110,12 @@ namespace chisel
                         {
                             vec3 vec = glm::abs(point - dragStartPos);
                             vec3 center = (dragStartPos + point) / 2.f;
-                            mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xy, gridSize.z * 0.5f));
-                            auto& cube = map.AddCube(mtx, vec3(vec.xy, gridSize.z) * 0.5f);
+                            vec3 extrude = vec3(0);
+                            // If we have a degenerate axis, extrude by normal by 1 grid size.
+                            if (math::CloseEnough(vec.x, 0) || math::CloseEnough(vec.y, 0) || math::CloseEnough(vec.z, 0))
+                                extrude = normal * gridSize;
+                            mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xyz) + (extrude * 0.5f));
+                            auto& cube = map.AddCube(mtx, (vec3(vec.xyz) + extrude) * 0.5f);
                             Selection.Clear();
                             Selection.Select(&cube);
                         }

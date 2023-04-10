@@ -104,6 +104,7 @@ namespace chisel
         void AlignToGrid(vec3 gridSize) final override { for (auto& b : solids) b.AlignToGrid(gridSize); }
         void SetVolume(Volume volume) final override { for (auto& b : solids) b.SetVolume(volume); }
 
+        const CSG::CSGTree& GetTree() const { return tree; }
     };
 
     /**

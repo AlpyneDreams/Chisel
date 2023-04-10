@@ -161,9 +161,9 @@ namespace chisel
         ImGuizmo::DrawCubes(&view[0][0], &proj[0][0], &cube[0][0], 1);
     }
 
-    void Handles::DrawPoint(vec3 pos)
+    void Handles::DrawPoint(vec3 pos, bool test)
     {
-        Gizmos.DrawIcon(pos, Gizmos.icnHandle, vec3(16.f));
+        Gizmos.DrawIcon(pos, Gizmos.icnHandle, vec3(16.f), test);
     }
 
     //--------------------------------------------------

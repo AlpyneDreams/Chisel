@@ -110,6 +110,12 @@ namespace chisel::render
         dssLessEqual.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
         device->CreateDepthStencilState(&dssLessEqual, &Depth.LessEqual);
 
+        D3D11_DEPTH_STENCIL_DESC dssIgnore = dssDefault;
+        dssIgnore.DepthEnable = FALSE;
+        dssIgnore.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+        dssIgnore.DepthFunc = D3D11_COMPARISON_NEVER;
+        device->CreateDepthStencilState(&dssIgnore, &Depth.Ignore);
+
         // Global samplers
         D3D11_SAMPLER_DESC samplerDesc =
         {

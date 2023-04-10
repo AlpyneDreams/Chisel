@@ -108,6 +108,44 @@ namespace chisel::CSG
         return result;
     }
 
+    std::optional<RayHit> CSGTree::QueryRay(const Ray& ray) const
+    {
+        std::optional<RayHit> hit;
+
+        for (const auto& brush : m_brushes)
+        {
+            auto bounds = brush.GetBounds();
+            if (!bounds)
+                continue;
+
+            if (!ray.Intersects(*bounds))
+                continue;
+
+            for (const auto& face : brush.GetFaces())
+            {
+                float t;
+                if (!ray.Intersects(face.side->plane, t))
+                    continue;
+
+                CSG::Vector3 intersection = ray.GetPoint(t);
+                if (!PointInsideConvex(intersection, face.vertices))
+                    continue;
+
+                RayHit thisHit =
+                {
+                    .brush    = &brush,
+                    .face     = &face,
+                    .t        = t,
+                };
+
+                if (!hit || t < hit->t)
+                    hit = thisHit;
+            }
+        }
+
+        return hit;
+    }
+
     ObjectID CSGTree::GetNewObjectID()
     {
         return ++m_lastObjectId;

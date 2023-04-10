@@ -11,6 +11,7 @@
 
 #include "math/Math.h"
 #include "math/Plane.h"
+#include "math/Ray.h"
 #include <glm/gtc/matrix_access.hpp>
 
 namespace chisel::CSG

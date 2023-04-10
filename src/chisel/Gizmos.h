@@ -20,13 +20,13 @@ namespace chisel
         static inline Texture* icnHandle;
         static inline render::Shader sh_Sprite;
 
-        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(32.0f))
+        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(32.0f), bool test = true)
         {
             auto& r = Tools.rctx;
             r.SetShader(sh_Sprite);
             r.ctx->PSSetShaderResources(0, 1, &icon->srvSRGB);
             r.SetBlendState(render::BlendFuncs::Alpha);
-            r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
+            r.ctx->OMSetDepthStencilState(test ? r.Depth.NoWrite.ptr() : r.Depth.Ignore.ptr(), 0);
 
             cbuffers::ObjectState data;
             data.model = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
