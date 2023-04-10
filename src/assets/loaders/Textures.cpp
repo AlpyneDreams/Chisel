@@ -6,6 +6,7 @@
 
 #include "assets/Assets.h"
 #include "render/Render.h"
+#include "render/TextureFormat.h"
 #include "common/Bit.h"
 #include "chisel/Tools.h"
 #include "chisel/VMF/KeyValues.h"

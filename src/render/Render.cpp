@@ -7,6 +7,7 @@
 #include "core/Mesh.h"
 #include "console/Console.h"
 #include "render/CBuffers.h"
+#include "render/TextureFormat.h"
 
 namespace chisel::render
 {
