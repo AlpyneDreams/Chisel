@@ -13,7 +13,6 @@
 
 #include "D3D11Include.h"
 #include "render/BlendState.h"
-#include "core/Flags.h"
 
 namespace chisel
 {

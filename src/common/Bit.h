@@ -28,8 +28,6 @@
   #endif
 #endif
 
-#include "Likely.h"
-
 #include <cstdint>
 #include <cstring>
 #include <iterator>
@@ -61,7 +59,7 @@ namespace chisel::bit {
     std::memcpy(&dst, &src, sizeof(T));
     return dst;
   }
-  
+
   template<typename T>
   T extract(T value, uint32_t fst, uint32_t lst) {
     return (value >> fst) & ~(~T(0) << (lst - fst + 1));
@@ -70,7 +68,7 @@ namespace chisel::bit {
   inline uint32_t popcntStep(uint32_t n, uint32_t mask, uint32_t shift) {
     return (n & mask) + ((n & ~mask) >> shift);
   }
-  
+
   inline uint32_t popcnt(uint32_t n) {
     n = popcntStep(n, 0x55555555, 1);
     n = popcntStep(n, 0x33333333, 2);
@@ -79,7 +77,7 @@ namespace chisel::bit {
     n = popcntStep(n, 0x0000FFFF, 16);
     return n;
   }
-  
+
   inline uint32_t tzcnt(uint32_t n) {
     #if defined(_MSC_VER) && !defined(__clang__)
     return _tzcnt_u32(n);
@@ -169,7 +167,7 @@ namespace chisel::bit {
   template<typename T>
   uint32_t pack(T& dst, uint32_t& shift, T src, uint32_t count) {
     constexpr uint32_t Bits = 8 * sizeof(T);
-    if (likely(shift < Bits))
+    if (shift < Bits) [[likely]]
       dst |= src << shift;
     shift += count;
     return shift > Bits ? shift - Bits : 0;
@@ -178,7 +176,7 @@ namespace chisel::bit {
   template<typename T>
   uint32_t unpack(T& dst, T src, uint32_t& shift, uint32_t count) {
     constexpr uint32_t Bits = 8 * sizeof(T);
-    if (likely(shift < Bits))
+    if (shift < Bits) [[likely]]
       dst = (src >> shift) & ((T(1) << count) - 1);
     shift += count;
     return shift > Bits ? shift - Bits : 0;
@@ -343,7 +341,7 @@ namespace chisel::bit {
 
       for (size_t i = 0; i < fullDwords; i++)
         m_dwords[i] = std::numeric_limits<uint32_t>::max();
-     
+
       if (offset > 0)
         m_dwords[fullDwords] = (1u << offset) - 1;
     }
@@ -366,7 +364,7 @@ namespace chisel::bit {
 
     void ensureSize(uint32_t bitCount) {
       uint32_t dword = bitCount / 32;
-      if (unlikely(dword >= m_dwords.size())) {
+      if (dword >= m_dwords.size()) [[unlikely]] {
         m_dwords.resize(dword + 1);
       }
       m_bitCount = std::max(m_bitCount, bitCount);
