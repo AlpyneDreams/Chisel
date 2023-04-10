@@ -2,6 +2,7 @@
 
 #include "common/Span.h"
 #include "common/String.h"
+#include "console/Console.h"
 #include "common/Hash.h"
 #include <unordered_map>
 #include <span>
@@ -30,7 +31,10 @@ namespace chisel
 
     protected:
         friend struct Assets;
-        static inline std::unordered_map<Hash, AssetLoader<Asset>*> Extensions;
+        static inline std::unordered_map<Hash, AssetLoader<Asset>*>& Extensions() {
+            static std::unordered_map<Hash, AssetLoader<Asset>*> map;
+            return map;
+        }
     };
 
     template <class Asset, FixedString Ext>
@@ -40,7 +44,7 @@ namespace chisel
         {
             auto upper = str::toUpper(Ext);
             auto hash  = HashString(upper.data(), upper.size());
-            AssetLoader<Asset>::Extensions.insert({hash, this});
+            AssetLoader<Asset>::Extensions().insert({hash, this});
         }
     };
 }

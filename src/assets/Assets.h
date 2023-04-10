@@ -65,7 +65,7 @@ namespace chisel
             // Lookup file extension
             auto ext = str::toUpper(path.ext());
             auto hash = HashedString(ext);
-            if (!AssetLoader<T>::Extensions.contains(hash)) {
+            if (!AssetLoader<T>::Extensions().contains(hash)) {
                 Console.Error("[Assets] No importer for {} file: {}", ext, path);
                 return nullptr;
             }
@@ -82,7 +82,7 @@ namespace chisel
             // Attempt to load asset for first time
             try
             {
-                AssetLoader<T>::Extensions[hash]->Load(*ptr, *data);
+                AssetLoader<T>::Extensions()[hash]->Load(*ptr, *data);
             }
             catch (std::exception& err)
             {
