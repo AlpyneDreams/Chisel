@@ -14,6 +14,12 @@ struct Varyings
     float2 uv       : TEXCOORD0;
 };
 
+struct Output
+{
+    float4 color : SV_TARGET0;
+    uint   id    : SV_TARGET1;
+};
+
 Texture2D    s_texture : register(t0);
 SamplerState s_sampler : register(s0);
 
@@ -34,7 +40,12 @@ Varyings vs_main(Input i)
     return v;
 }
 
-float4 ps_main(Varyings v) : SV_TARGET
+Output ps_main(Varyings v)
 {
-    return s_texture.Sample(s_sampler, v.uv);
+    Output o = (Output)0;
+    
+    o.color = s_texture.Sample(s_sampler, v.uv) * Object.color;
+    o.id = Object.id;
+    
+    return o;
 }

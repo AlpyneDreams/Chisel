@@ -8,6 +8,7 @@
 #include "core/Mesh.h"
 #include "math/Math.h"
 #include "core/Primitives.h"
+#include "Selection.h"
 
 #include <vector>
 #include <glm/gtx/vector_angle.hpp>
@@ -20,18 +21,24 @@ namespace chisel
         static inline Texture* icnHandle;
         static inline render::Shader sh_Sprite;
 
-        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(32.0f), bool test = true)
+        void DrawIcon(vec3 pos, SelectionID selection, Texture* icon, vec4 color = vec4(1.0f), vec3 size = vec3(32.0f), bool test = true)
         {
             auto& r = Tools.rctx;
             r.SetShader(sh_Sprite);
             r.ctx->PSSetShaderResources(0, 1, &icon->srvSRGB);
-            r.SetBlendState(render::BlendFuncs::Alpha);
+            if (selection == 0)
+                r.SetBlendState(render::BlendFuncs::AlphaFirstWriteOnly);
+            else
+                r.SetBlendState(render::BlendFuncs::AlphaFirstOneRest);
             r.ctx->OMSetDepthStencilState(test ? r.Depth.NoWrite.ptr() : r.Depth.Ignore.ptr(), 0);
 
             cbuffers::ObjectState data;
             data.model = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
+            data.color = color;
+            data.id = selection;
             r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
             r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+            r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
             
             uint stride = sizeof(Primitives::Vertex);
             uint offset = 0;

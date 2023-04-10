@@ -13,10 +13,14 @@ struct CameraState
 struct ObjectState
 {
     float4x4 model;
+    float4 color;
+    uint id;
+    float3 padding;
 };
 
 struct BrushState
 {
+    float4 color;
     uint id;
     float3 padding;
 };

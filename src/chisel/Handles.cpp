@@ -163,7 +163,7 @@ namespace chisel
 
     void Handles::DrawPoint(vec3 pos, bool test)
     {
-        Gizmos.DrawIcon(pos, Gizmos.icnHandle, vec3(16.f), test);
+        Gizmos.DrawIcon(pos, 0, Gizmos.icnHandle, vec4(1.0), vec3(16.f), test);
     }
 
     //--------------------------------------------------
@@ -212,6 +212,7 @@ namespace chisel
 
                 cbuffers::ObjectState data;
                 data.model = glm::translate(mtx, translation);
+                data.id = 0;
 
                 r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
                 r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);

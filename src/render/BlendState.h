@@ -48,7 +48,7 @@ namespace chisel::render
         BlendOp alphaOp = BlendOp::Add;
         RGBAMask writeMask = 0b1111;
 
-        constexpr BlendFunc(BlendMode src, BlendMode dst) : src(src), dst(dst), srcAlpha(src), dstAlpha(dst) {}
+        constexpr BlendFunc(BlendMode src, BlendMode dst, RGBAMask writeMask = 0b1111) : src(src), dst(dst), srcAlpha(src), dstAlpha(dst), writeMask(writeMask) {}
         constexpr BlendFunc() : BlendFunc(BlendMode::Default, BlendMode::Default) {}
 
         constexpr bool Enabled() const { return src != BlendMode::Default; }
@@ -73,8 +73,10 @@ namespace chisel::render
     {
         using enum BlendMode;
     public:
-        static inline BlendState Normal   = BlendFunc();
-        static inline BlendState Add      = BlendFunc(One, One);
-        static inline BlendState Alpha    = BlendFunc(SrcAlpha, OneMinusSrcAlpha);
+        static inline BlendState Normal       = BlendFunc();
+        static inline BlendState Add          = BlendFunc(One, One);
+        static inline BlendState Alpha        = BlendFunc(SrcAlpha, OneMinusSrcAlpha);
+        static inline BlendState AlphaFirstWriteOnly = BlendState(BlendFunc(SrcAlpha, OneMinusSrcAlpha, 0b1111), BlendFunc(Zero, Zero, 0b0000));
+        static inline BlendState AlphaFirstOneRest   = BlendState(BlendFunc(SrcAlpha, OneMinusSrcAlpha, 0b1111), BlendFunc(One, One, 0b1111));
     };
 }

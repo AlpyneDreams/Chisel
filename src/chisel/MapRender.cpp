@@ -13,6 +13,8 @@ namespace chisel
     static ConVar<bool> r_drawworld("r_drawworld", true, "Draw world");
     static ConVar<bool> r_drawsprites("r_drawsprites", true, "Draw sprites");
 
+    static const glm::vec4 SelectionColor = vec4(0.6f, 0.1f, 0.1f, 1.0f);
+
     MapRender::MapRender()
         : System()
         , brushAllocator(r)
@@ -61,12 +63,6 @@ namespace chisel
         float2 size = Tools.rt_SceneView.GetSize();
         D3D11_VIEWPORT viewport = { 0, 0, size.x, size.y, 0.0f, 1.0f };
         r.ctx->RSSetViewports(1, &viewport);
-#if 0
-        r.SetShader(shader);
-        r.SetUniform("u_color", Colors.White);
-        r.SetTexture(0, Tools.tex_White);
-        r.SetTransform(glm::identity<mat4x4>());
-#endif
 
         if (r_rebuildworld)
         {
@@ -99,32 +95,16 @@ namespace chisel
             if (Chisel.fgd->classes.contains(classname))
             {
                 auto& cls = Chisel.fgd->classes[classname];
-
-                Color255 color = Color255(cls.color.r, cls.color.g, cls.color.g, 255);
-
-                if (point->IsSelected())
-                    color = Color255(255, 0, 0, 255);
                 
                 AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
 
                 if (cls.texture)
                 {
-                    if (point->IsSelected())
-                    {
-                        cbuffers::ObjectState data;
-                        data.model = glm::scale(glm::translate(mat4x4(1), point->origin), vec3(32.0f));
-
-                        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
-                        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
-
-                        //Tools.DrawSelectionOutline(&Primitives.Cube);
-                    }
-                    
                     if (!r_drawsprites)
                         continue;
 
                     r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-                    Gizmos.DrawIcon(point->origin, cls.texture ? cls.texture : Gizmos.icnObsolete);
+                    Gizmos.DrawIcon(point->origin, point->GetSelectionID(), cls.texture ? cls.texture : Gizmos.icnObsolete, point->IsSelected() ? SelectionColor : vec4(1.0));
                     r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
                 }
                 else
@@ -144,7 +124,7 @@ namespace chisel
             else if (r_drawsprites)
             {
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-                Gizmos.DrawIcon(point->origin, Gizmos.icnObsolete);
+                Gizmos.DrawIcon(point->origin, point->GetSelectionID(), Gizmos.icnObsolete, point->IsSelected() ? SelectionColor : vec4(1.0));
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
             }
         }
@@ -174,6 +154,7 @@ namespace chisel
         auto DrawMesh = [&](BrushMesh* mesh)
         {
             cbuffers::BrushState data;
+            data.color = mesh->brush->IsSelected() ? SelectionColor : vec4(1.0);
             data.id = mesh->brush->GetSelectionID();
 
             r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
