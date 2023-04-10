@@ -35,7 +35,7 @@ namespace chisel
 
         explicit ColorRGBA(auto r, auto g, auto b)
             : r(T(r)), g(T(g)), b(T(b)), a(T(NormalMax)) {}
-        
+
         static ColorRGBA<T> HSV(double H, double S, double V)
         {
             ColorRGBA<T> RGB;
@@ -61,7 +61,7 @@ namespace chisel
                 RGB = ColorRGBA<T>{0., 0., 0.};
             return RGB;
         }
-        
+
         // Pack RGBA
         uint32 Pack()
         {
@@ -72,7 +72,7 @@ namespace chisel
                     | uint32( clamp(b * packScale, T{0}, T{255}) ) <<  8u
                     | uint32( clamp(a * packScale, T{0}, T{255}) ) <<  0u ;
         }
-        
+
         uint32 PackABGR()
         {
             using std::clamp;
@@ -81,6 +81,26 @@ namespace chisel
                     | uint32( clamp(b * packScale, T{0}, T{255}) ) << 16u
                     | uint32( clamp(g * packScale, T{0}, T{255}) ) <<  8u
                     | uint32( clamp(r * packScale, T{0}, T{255}) ) <<  0u ;
+        }
+
+        static auto SRGBToLinear(auto f)
+        {
+            return (f <= 0.04045f) ? f / 12.92f : std::pow((f + 0.055f) / 1.055f, 2.4f);
+        }
+
+        static auto LinearToSRGB(auto f)
+        {
+            return (f <= 0.0031308f) ? f * 12.92f : std::pow(f, 1.0f / 2.4f) * 1.055f - 0.055f;
+        }
+
+        ColorRGBA Linear()
+        {
+            return ColorRGBA(
+                SRGBToLinear(float(r) / float(NormalMax)) * NormalMax,
+                SRGBToLinear(float(g) / float(NormalMax)) * NormalMax,
+                SRGBToLinear(float(b) / float(NormalMax)) * NormalMax,
+                a
+            );
         }
 
         operator vec4() const
