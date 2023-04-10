@@ -2,7 +2,7 @@
 
 #include "console/ConVar.h"
 #include "core/Transform.h"
-#include "fgd/FGD.h"
+#include "FGD/FGD.h"
 #include "render/CBuffers.h"
 
 namespace chisel
