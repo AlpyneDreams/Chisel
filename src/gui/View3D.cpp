@@ -30,6 +30,7 @@ namespace chisel
 
     inline ConVar<bool>  trans_texture_lock("trans_texture_lock", true, "Enable texture lock for transformations.");
     inline ConVar<bool>  trans_texture_scale_lock("trans_texture_scale_lock", false, "Enable scaling texture lock.");
+    inline ConVar<bool>  trans_texture_face_alignment("trans_texture_face_alignment", true, "Enable texture face alignment.");
 
     Camera& View3D::GetCamera() const { return Tools.editorCamera.camera; }
 

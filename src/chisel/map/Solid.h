@@ -6,6 +6,7 @@
 #include "chisel/Selection.h"
 #include "assets/Assets.h"
 #include "render/Render.h"
+#include "Orientation.h"
 
 #include "math/Color.h"
 
@@ -41,6 +42,7 @@ namespace chisel
     // TODO: Move to some transform state?
     extern ConVar<bool>  trans_texture_lock;
     extern ConVar<bool>  trans_texture_scale_lock;
+    extern ConVar<bool>  trans_texture_face_alignment;
 
     inline CSG::VolumeOperation CreateSourceContentsVolumeOperation(Volume target)
     {
@@ -83,9 +85,23 @@ namespace chisel
         }
 
         Solid(Solid&& that)
-            : Solid(*that.brush, that.m_volume)
         {
+            this->brush = that.brush;
+            this->brush->userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
             that.brush = nullptr;
+
+            this->m_volume = that.m_volume;
+            this->m_realVolume = that.m_realVolume;
+
+            this->meshes = std::move(that.meshes);
+            that.meshes.clear();
+
+            this->m_sides = std::move(that.m_sides);
+            that.m_sides.clear();
+
+            this->tempcolor = that.tempcolor;
+            UpdateVolume();
+
         }
         
         ~Solid()
@@ -319,6 +335,40 @@ namespace chisel
         }
     };
 
+    inline void InitSideData(SideData& localSide, const CSG::Side& csgSide)
+    {
+        localSide.rotate = 0.0f;
+
+        localSide.textureAxes[0].w = 0.0f;
+        localSide.textureAxes[1].w = 0.0f;
+
+        localSide.scale[0] = 0.25f;
+        localSide.scale[1] = 0.25f;
+
+        localSide.textureAxes[0].xyz = vec3(0);
+        localSide.textureAxes[1].xyz = vec3(0);
+
+        Orientation orientation = Orientations::CalcOrientation(csgSide.plane);
+        if (orientation == Orientations::Invalid)
+            return;
+
+        localSide.textureAxes[1].xyz = Orientations::DownVectors[orientation];
+        if (trans_texture_face_alignment)
+        {
+            // Calculate true U axis
+            localSide.textureAxes[0].xyz = glm::normalize(
+                glm::cross(glm::vec3(localSide.textureAxes[1].xyz), csgSide.plane.normal));
+
+            // Now calculate the true V axis
+            localSide.textureAxes[1].xyz = glm::normalize(
+                glm::cross(csgSide.plane.normal, glm::vec3(localSide.textureAxes[0].xyz)));
+        }
+        else
+        {
+            localSide.textureAxes[0].xyz = Orientations::RightVectors[orientation];
+        }
+    }
+
     inline Solid CubeBrush(CSG::Brush& brush, Volume volume, vec3 size = vec3(64.f), const mat4x4& transform = glm::identity<mat4x4>())
     {
         Solid cube = Solid(brush, volume);
@@ -332,12 +382,21 @@ namespace chisel
             CSG::Plane(vec3(0,0,+1), vec3(0,0,+1)),
             CSG::Plane(vec3(0,0,-1), vec3(0,0,-1))
         };
-        
-        std::array<CSG::Side, 6> sides;
+
+        std::array<SideData, 6> localSides{};
+        std::array<CSG::Side, 6> csgSides{};
         for (size_t i = 0; i < 6; i++)
-            sides[i].plane = kUnitCubePlanes[i].Transformed(glm::scale(transform, size));
-        
-        cube.GetBrush().SetSides(&sides.front(), &sides.back() + 1);
+        {
+            SideData& localSide = localSides[i];
+            CSG::Side& csgSide = csgSides[i];
+
+            csgSide.plane = kUnitCubePlanes[i].Transformed(glm::scale(transform, size));
+            csgSide.userdata = i;
+
+            InitSideData(localSide, csgSide);
+        }
+
+        cube.SetSides(&csgSides.front(), &csgSides.back() + 1, &localSides.front(), &localSides.back() + 1);
         
         return cube;
     }
