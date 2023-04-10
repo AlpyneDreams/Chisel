@@ -1,0 +1,9 @@
+[wrap-git]
+directory = dxvk
+url = https://github.com/doitsujin/dxvk.git
+clone-recursive = true
+revision = head
+
+[provide]
+d3d11 = d3d11_dep
+dxgi = dxgi_dep

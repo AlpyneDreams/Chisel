@@ -9,7 +9,6 @@
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/runtime",
-            "environment": [],
             "linux": {
                 "externalConsole": false,
                 "MIMode": "gdb",
@@ -19,7 +18,13 @@
                         "text": "-enable-pretty-printing",
                         "ignoreFailures": true
                     }
-                ],    
+                ],
+                "environment": [
+                    {
+                        "name": "LD_LIBRARY_PATH",
+                        "value": "${workspaceFolder}/build/subprojects/dxvk/src/d3d11;${workspaceFolder}/build/subprojects/dxvk/src/dxgi"
+                    }
+                ]
             },
             "windows": {
                 "type": "cppvsdbg",

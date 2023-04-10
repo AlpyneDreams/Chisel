@@ -22,9 +22,14 @@ cmake = import('cmake')
 glaze_proj = cmake.subproject('glaze')
 glaze_dep = glaze_proj.dependency('glaze_glaze')
 
-d3d11_dep = cpp.find_library('d3d11')
-dxgi_dep = cpp.find_library('dxgi')
+dxvk_opts = [
+    'enable_d3d9=false',
+    'enable_d3d10=false',
+]
 
-offsetallocator_src = files( 'submodules/OffsetAllocator/offsetAllocator.cpp' )
+d3d11_dep = windows ? cpp.find_library('d3d11') : dependency('d3d11', default_options: dxvk_opts)
+dxgi_dep = windows ? cpp.find_library('dxgi') : dependency('dxgi', default_options: dxvk_opts)
+
+offsetallocator_src = files('submodules/OffsetAllocator/offsetAllocator.cpp')
 
 subdir('src')
