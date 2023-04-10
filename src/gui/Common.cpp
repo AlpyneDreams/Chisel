@@ -155,11 +155,22 @@ namespace chisel
             ImGui::SetCursorScreenPos(lineStart);
     }
 
-    bool GUI::MenuBarButton(std::string_view title)
+    bool GUI::MenuBarButton(const char* title, const char* tooltip)
     {
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
-        bool clicked = ImGui::Button(title.data());
+        bool clicked = ImGui::Button(title);
         ImGui::PopStyleColor();
+        if (tooltip && ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", tooltip);
+        return clicked;
+    }
+
+    bool GUI::MenuBarToggle(const char* title, bool* v, const char* tooltip)
+    {
+        ImVec2 size = ImGui::CalcTextSize(title);
+        bool clicked = ImGui::Selectable(title, v, ImGuiSelectableFlags_None, size);
+        if (tooltip && ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", tooltip);
         return clicked;
     }
 

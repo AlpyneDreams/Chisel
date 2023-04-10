@@ -24,12 +24,10 @@ namespace chisel
             if (debug)
                 ImGui::TextUnformatted("Debug");
             
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 60);
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 50);
 
             // Draw lock toggle button
-            if (GUI::MenuBarButton(locked ? ICON_MC_LOCK : ICON_MC_LOCK_OPEN_OUTLINE)) {
-                locked = !locked;
-            }
+            GUI::MenuBarToggle(locked ? ICON_MC_LOCK : ICON_MC_LOCK_OPEN_OUTLINE, &locked, "Lock Selection");
             
             // Draw options menu
             ImGui::SameLine();

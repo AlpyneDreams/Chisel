@@ -149,8 +149,21 @@ namespace chisel
                 ImGui::EndMenu();
             }
 
-            ImGui::Checkbox("Texture Lock", &trans_texture_lock.value);
-            ImGui::Checkbox("Texture Scale Lock", &trans_texture_scale_lock.value);
+            GUI::MenuBarToggle(
+                trans_texture_lock
+                    ? (ICON_MC_TEXTURE " " ICON_MC_LOCK)
+                    : (ICON_MC_TEXTURE " " ICON_MC_LOCK_OPEN_OUTLINE),
+                &trans_texture_lock.value,
+                "Texture Lock"
+            );
+            
+            GUI::MenuBarToggle(
+                trans_texture_scale_lock
+                    ? (ICON_MC_TEXTURE ICON_MC_ARROW_LEFT_RIGHT " " ICON_MC_LOCK)
+                    : (ICON_MC_TEXTURE ICON_MC_ARROW_LEFT_RIGHT " " ICON_MC_LOCK_OPEN_OUTLINE),
+                &trans_texture_scale_lock.value,
+                "Texture Scale Lock"
+            );
 
             // Right side
             ImGui::SameLine(ImGui::GetWindowWidth() - 90);

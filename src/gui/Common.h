@@ -20,7 +20,8 @@ namespace chisel
         // Aligned (left or right) item label (use before input controls)
         void ItemLabel(std::string_view title, bool right = false);
 
-        bool MenuBarButton(std::string_view title);
+        bool MenuBarButton(const char* title, const char* tooltip = nullptr);
+        bool MenuBarToggle(const char* title, bool* v, const char* tooltip = nullptr);
 
         void WindowToggleButton(Window* window, float width = 64.0f, const char* tooltip = nullptr);
 
