@@ -55,9 +55,17 @@ chisel_deps = [
 
 chisel = executable('chisel', chisel_src, offsetallocator_src,
     dependencies    : chisel_deps,
-    install         : true,
     include_directories: include_directories('../submodules'),
-    install_dir     : join_paths(meson.project_source_root(), 'runtime'),
     win_subsystem   : 'console',
     cpp_args        : chisel_args
 )
+
+copy = windows ? 'copy' : 'cp'
+
+if fs.exists(chisel.full_path())
+    run_command(copy,
+        chisel.full_path(),
+        join_paths(meson.project_source_root(), 'runtime', fs.stem(chisel.full_path())),
+        check: true
+    )
+endif

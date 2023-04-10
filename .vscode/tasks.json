@@ -14,7 +14,7 @@
             "label": "Build & Install",
             "detail": "Meson",
             "type": "shell",
-            "command": "meson install -C build",
+            "command": "meson compile -C build",
             "linux": {
                 "problemMatcher": {
                     "base": "$gcc",
