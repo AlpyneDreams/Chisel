@@ -22,6 +22,7 @@ namespace chisel
     void MapRender::Start()
     {
         shader = render::Shader(r.device.ptr(), VertexCSG::Layout, "brush");
+        missingTexture = Assets.Load<Texture>("materials/dev_missing.png");
     }
 
     inline float srgb_to_linear( float fVal )
@@ -163,13 +164,10 @@ namespace chisel
             {
                 assert(mesh.alloc);
 
-                if (mesh.material)
-                {
-                    if (mesh.material->translucent)
-                        transMeshes.push_back(&mesh);
-                    else
-                        opaqueMeshes.push_back(&mesh);
-                }
+                if (mesh.material && mesh.material->translucent)
+                    transMeshes.push_back(&mesh);
+                else
+                    opaqueMeshes.push_back(&mesh);
             }
         }
 
@@ -186,15 +184,30 @@ namespace chisel
             UINT indexOffset = vertexOffset + mesh->vertices.size() * sizeof(VertexCSG);
             ID3D11Buffer* buffer = brushAllocator.buffer();
             ID3D11ShaderResourceView *srv = nullptr;
+            bool pointSample = false;
             if (mesh->material)
             {
                 if (mesh->material->baseTexture)
                     srv = mesh->material->baseTexture->srvSRGB.ptr();
             }
+
+            if (!srv)
+            {
+                srv = missingTexture->srvSRGB.ptr();
+                pointSample = true;
+            }
+            if (pointSample)
+            {
+                r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
+            }
             r.ctx->PSSetShaderResources(0, 1, &srv);
             r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
             r.ctx->IASetIndexBuffer(brushAllocator.buffer(), DXGI_FORMAT_R32_UINT, indexOffset);
             r.ctx->DrawIndexed(mesh->indices.size(), 0, 0);
+            if (pointSample)
+            {
+                r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
+            }
         };
 
         // Draw opaque meshes.
