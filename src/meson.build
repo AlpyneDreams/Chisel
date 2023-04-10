@@ -60,8 +60,8 @@ chisel = executable('chisel', chisel_src, offsetallocator_src,
     cpp_args        : chisel_args
 )
 
-rm = windows ? 'del' : 'rm'
-copy = windows ? 'copy' : ['cp', '-f']
+rm = windows ? ['cmd', '/c', 'del'] : 'rm'
+copy = windows ? ['cmd', '/c', 'copy'] : ['cp', '-f']
 
 if fs.exists(chisel.full_path())
     exe_path = join_paths(meson.project_source_root(), 'runtime', fs.stem(chisel.full_path()))
