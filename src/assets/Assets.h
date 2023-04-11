@@ -166,13 +166,13 @@ namespace chisel
             }
         }
 
-        template <typename T, typename Func>
-        void EnumerateAssets(Func func)
+        template <typename T>
+        void ForEachFile(auto func)
         {
             // Enumerate loose files.
             for (const auto& dir : searchPaths)
             {
-                // TODO.
+                ForEachInDir<T>(dir, func);
             }
 
             // Enumerate files in paks
@@ -192,6 +192,31 @@ namespace chisel
                     func(path);
                 }
             }
+        }
+
+    private:
+        template <typename T>
+        void ForEachInDir(const Path& dir, auto func)
+        {
+            for (auto file : std::filesystem::directory_iterator(dir))
+            {
+                Path path = file.path();
+                bool dir = file.is_directory();
+                if (dir)
+                {
+                    ForEachInDir<T>(path, func);
+                    continue;
+                }
+                
+                auto ext = str::toUpper(path.ext());
+                auto hash = HashedString(ext);
+
+                if (!AssetLoader<T>::Extensions().contains(hash))
+                    continue;
+                
+                func(path);
+            }
+
         }
 
     } Assets;

@@ -39,7 +39,7 @@ namespace chisel
         //ImGui::PushFont(GUI::FontMonospace);
         ImVec2 windowSize = ImGui::GetWindowSize();
         m_LastWindowSize = uint2(windowSize.x, windowSize.y);
-        m_AssetsPerRow = floor(m_LastWindowSize.x / (AssetThumbnailSize.x + AssetPadding.x));
+        m_AssetsPerRow = uint(floor(m_LastWindowSize.x / (AssetThumbnailSize.x + AssetPadding.x)));
 
         float scroll = ImGui::GetScrollY();
         
@@ -47,6 +47,9 @@ namespace chisel
 
         uint xAssetRow = uint(scroll / (AssetThumbnailSize.y + AssetPadding.y));
         uint xAsset = xAssetRow * m_AssetsPerRow;
+
+        if (m_materials.size() == 0)
+            return;
 
         uint currentAsset = xAsset;
         for (uint row = 0; row < numVisibleRows; row++)
@@ -108,7 +111,7 @@ namespace chisel
     {
         m_materials.clear();
 
-        Assets.EnumerateAssets<Material>(
+        Assets.ForEachFile<Material>(
         [&](const fs::Path& path)
         {
             m_materials.emplace_back(std::string(path), nullptr);
