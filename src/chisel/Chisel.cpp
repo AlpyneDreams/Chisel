@@ -8,6 +8,7 @@
 
 #include "console/Console.h"
 #include "gui/ConsoleWindow.h"
+#include "gui/AssetPicker.h"
 #include "gui/Layout.h"
 #include "gui/Inspector.h"
 #include "gui/Viewport.h"
@@ -34,6 +35,7 @@ namespace chisel
         Tools.systems.AddSystem<MainToolbar>();
         Tools.systems.AddSystem<SelectionModeToolbar>();
         Tools.systems.AddSystem<Inspector>();
+        Tools.systems.AddSystem<AssetPicker>();
         viewport = &Tools.systems.AddSystem<Viewport>();
 
         // Setup Object ID pass

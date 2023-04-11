@@ -18,6 +18,7 @@ chisel_src = files(
 
     'gui/Common.cpp',
     'gui/Layout.cpp',
+    'gui/AssetPicker.cpp',
     'gui/Inspector.cpp',
     'gui/View3D.cpp',
     'gui/Viewport.cpp',

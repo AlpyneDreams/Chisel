@@ -51,6 +51,9 @@ namespace chisel::GUI
             }
 
             // Setup window variables
+            ImVec2 contentSize = ImVec2(0, 0);
+            if (OverrideContentSize(contentSize))
+                ImGui::SetNextWindowContentSize(contentSize);
             ImGui::SetNextWindowSize(ImVec2(float(width), float(height)), ImGuiCond_FirstUseEver);
             PreDraw();
 
@@ -93,5 +96,7 @@ namespace chisel::GUI
         // the window is visible, so you should check this->visible in them.
         virtual void PreDraw() {}
         virtual void PostDraw() {}
+
+        virtual bool OverrideContentSize(ImVec2& size) { return false; }
     };
 }

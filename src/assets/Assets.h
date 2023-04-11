@@ -166,5 +166,33 @@ namespace chisel
             }
         }
 
+        template <typename T, typename Func>
+        void EnumerateAssets(Func func)
+        {
+            // Enumerate loose files.
+            for (const auto& dir : searchPaths)
+            {
+                // TODO.
+            }
+
+            // Enumerate files in paks
+            for (const auto& pak : pakFiles)
+            {
+                auto& files = pak->files();
+                for (const auto& file : files)
+                {
+                    auto path = fs::Path(file.first);
+
+                    auto ext = str::toUpper(path.ext());
+                    auto hash = HashedString(ext);
+
+                    if (!AssetLoader<T>::Extensions().contains(hash))
+                        continue;
+
+                    func(path);
+                }
+            }
+        }
+
     } Assets;
 }
