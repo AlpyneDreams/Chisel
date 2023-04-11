@@ -27,6 +27,12 @@ namespace chisel
         explicit ColorRGBA(T r, T g, T b, T a = NormalMax)
             : r(r), g(g), b(b), a(a) {}
 
+        ColorRGBA(glm::vec<4, T> v)
+            : r(v.r), g(v.g), b(v.b), a(v.a) {}
+        
+        ColorRGBA(glm::vec<3, T> v)
+            : r(v.r), g(v.g), b(v.b), a(NormalMax) {}
+
         explicit ColorRGBA(double r, double g, double b, double a = NormalMax)
             : r(r), g(g), b(b), a(a) {}
 

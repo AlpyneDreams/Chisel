@@ -29,6 +29,7 @@ chisel_src = files(
     'chisel/Selection.cpp',
     'chisel/Chisel.cpp',
     'chisel/Handles.cpp',
+    'chisel/Gizmos.cpp',
     'chisel/MapRender.cpp',
     'chisel/FGD/FGD.cpp',
     'chisel/VMF/VMF.cpp',

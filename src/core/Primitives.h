@@ -12,23 +12,11 @@ namespace chisel
         static inline Mesh& Cube   = *Assets.Load<Mesh>("models/cube.obj");
         static inline Mesh& Teapot = *Assets.Load<Mesh>("models/teapot.obj");
         static inline Mesh& Plane  = *Assets.Load<Mesh>("models/plane.obj");
-        static inline Mesh Line;
 
         Com<ID3D11Buffer> Quad;
-
-        Primitives()
-        {
-            auto& g = Line.AddGroup();
-            g.vertices.layout.Add<float>(3, VertexAttribute::Position);
-            g.vertices.pointer = &lineStart;
-            g.vertices.count = 2;
-        }
+        Com<ID3D11Buffer> Line;
 
         void Init();
-
-    private:
-        vec3 lineStart = Vectors.Zero;
-        vec3 lineEnd   = Vectors.Forward;
     } Primitives;
 
     struct Primitives::Vertex
@@ -56,21 +44,46 @@ namespace chisel
             { { +0.5, -0.5, 0.0 }, { 1, 1 } },
         };
 
-        D3D11_BUFFER_DESC desc
-        {
-            .ByteWidth      = 6 * sizeof(Primitives::Vertex),
-            .Usage          = D3D11_USAGE_IMMUTABLE,
-            .BindFlags      = D3D11_BIND_VERTEX_BUFFER,
-            .CPUAccessFlags = 0,
+        const Primitives::Vertex LineVerts[] = {
+            { Vectors.Zero,    { 0, 0 } },
+            { Vectors.Forward, { 0, 1 } }
         };
-        D3D11_SUBRESOURCE_DATA data
+
         {
-            .pSysMem = QuadVerts,
-            .SysMemPitch = 0,
-            .SysMemSlicePitch = 0,
-        };
-        if (FAILED(Tools.rctx.device->CreateBuffer(&desc, &data, &Quad))) {
-            Console.Error("Failed to upload quad mesh.");
+            D3D11_BUFFER_DESC desc
+            {
+                .ByteWidth      = 6 * sizeof(Primitives::Vertex),
+                .Usage          = D3D11_USAGE_IMMUTABLE,
+                .BindFlags      = D3D11_BIND_VERTEX_BUFFER,
+                .CPUAccessFlags = 0,
+            };
+            D3D11_SUBRESOURCE_DATA data
+            {
+                .pSysMem = QuadVerts,
+                .SysMemPitch = 0,
+                .SysMemSlicePitch = 0,
+            };
+            if (FAILED(Tools.rctx.device->CreateBuffer(&desc, &data, &Quad)))
+                Console.Error("Failed to upload quad mesh.");
         }
+
+        {
+            D3D11_BUFFER_DESC desc
+            {
+                .ByteWidth      = 2 * sizeof(Primitives::Vertex),
+                .Usage          = D3D11_USAGE_IMMUTABLE,
+                .BindFlags      = D3D11_BIND_VERTEX_BUFFER,
+                .CPUAccessFlags = 0,
+            };
+            D3D11_SUBRESOURCE_DATA data
+            {
+                .pSysMem = LineVerts,
+                .SysMemPitch = 0,
+                .SysMemSlicePitch = 0,
+            };
+            if (FAILED(Tools.rctx.device->CreateBuffer(&desc, &data, &Line)))
+                Console.Error("Failed to upload line mesh.");
+        }
+
     }
 }

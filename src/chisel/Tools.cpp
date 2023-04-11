@@ -6,6 +6,7 @@
 #include "chisel/Selection.h"
 #include "gui/ConsoleWindow.h"
 #include "assets/Assets.h"
+#include "core/Primitives.h"
 
 #include <bit>
 
@@ -34,9 +35,7 @@ namespace chisel
         tex_White = Assets.Load<Texture>("textures/white.png");
 
         // Load editor shaders
-#if 0
-        sh_Color  = r.LoadShader("basic", "color");
-#endif
+        sh_Color    = render::Shader(r.device.ptr(), Primitives::Vertex::Layout, "color");
         cs_ObjectID = render::ComputeShader(r.device.ptr(), "objectid");
         cs_ObjectID.buffers.push_back(r.CreateCSInputBuffer<uint2>());
         cs_ObjectID.buffers.push_back(r.CreateCSOutputBuffer<uint>());

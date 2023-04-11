@@ -175,8 +175,8 @@ namespace chisel
                 val += ".vtf";
             mat.baseTexture = Assets.Load<Texture>(val);
         }
-        if (!mat.baseTexture)
-            mat.baseTexture = Assets.Load<Texture>("materials/dev_missing.png");
+        if (!mat.baseTexture) // TODO: Automatically load error texture
+            mat.baseTexture = Assets.Load<Texture>("textures/error.png");
 
         mat.translucent = kv["$translucent"];
         mat.alphatest = kv["$alphatest"];

@@ -24,7 +24,7 @@ namespace chisel
     void MapRender::Start()
     {
         shader = render::Shader(r.device.ptr(), VertexCSG::Layout, "brush");
-        missingTexture = Assets.Load<Texture>("materials/dev_missing.png");
+        missingTexture = Assets.Load<Texture>("textures/error.png");
     }
 
     void MapRender::Update()
@@ -94,7 +94,12 @@ namespace chisel
                         continue;
 
                     r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-                    Gizmos.DrawIcon(point->origin, point->GetSelectionID(), cls.texture ? cls.texture : Gizmos.icnObsolete, point->IsSelected() ? SelectionColor : vec4(1.0));
+                    Gizmos.DrawIcon(
+                        point->origin,
+                        cls.texture ? cls.texture : Gizmos.icnObsolete,
+                        point->IsSelected() ? SelectionColor : vec4(1),
+                        point->GetSelectionID()
+                    );
                     r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
                 }
                 else
@@ -114,7 +119,12 @@ namespace chisel
             else if (r_drawsprites)
             {
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-                Gizmos.DrawIcon(point->origin, point->GetSelectionID(), Gizmos.icnObsolete, point->IsSelected() ? SelectionColor : vec4(1.0));
+                Gizmos.DrawIcon(
+                    point->origin,
+                    Gizmos.icnObsolete,
+                    point->IsSelected() ? SelectionColor : vec4(1.0),
+                    point->GetSelectionID()
+                );
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
             }
         }
