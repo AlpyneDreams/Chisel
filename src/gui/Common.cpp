@@ -50,9 +50,10 @@ namespace chisel
         MergeIconFonts(15);
 
         // Named fonts
-        GUI::FontMonospace = AddFontFile("RobotoMono.ttf", 16);
+        GUI::FontMonospace = AddFontFile("CascadiaMono-Regular.ttf", 15);
+        GUI::FontDense     = AddFontFile("SourceSansPro-Regular.ttf", 16);
 
-        io.Fonts->AddFontDefault(); // ImGui Default: ProggyClean, 13px
+        //io.Fonts->AddFontDefault(); // ImGui Default: ProggyClean, 13px
         //AddFontFile("Cousine-Regular.ttf", 15);
         //AddFontFile("DroidSans.ttf", 15);
         //AddFontFile("Karla-Regular.ttf", 15);

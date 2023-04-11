@@ -11,6 +11,7 @@ namespace chisel
     struct AssetPickerAsset
     {
         std::string path;
+        std::string_view name;
         T* thing = nullptr;
         bool triedToLoad = false;
     };

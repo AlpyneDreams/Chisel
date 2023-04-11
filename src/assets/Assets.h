@@ -162,7 +162,7 @@ namespace chisel
             }
             catch (const std::exception& e)
             {
-                Console.Error("[Assets] Failed to load pak file '{}': {}", path, e.what());
+                Console.Error("[Assets] Failed to load pak file '{}': {}", p, e.what());
             }
         }
 

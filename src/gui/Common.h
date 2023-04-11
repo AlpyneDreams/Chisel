@@ -17,6 +17,9 @@ namespace chisel
 
         inline ImFont* FontMonospace = nullptr;
 
+        // Sans-serif (or dense monospace) font with clear distinctions between I, l, 1, O, 0, etc.
+        inline ImFont* FontDense = nullptr;
+
         // Aligned (left or right) item label (use before input controls)
         void ItemLabel(std::string_view title, bool right = false);
 
