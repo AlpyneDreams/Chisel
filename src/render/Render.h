@@ -142,7 +142,6 @@ namespace chisel::render
 
         GlobalCBuffers cbuffers;
         Com<ID3D11SamplerState> sampler;
-        Com<ID3D11RasterizerState> rsState;
 
         struct DepthStates {
             Com<ID3D11DepthStencilState> Default = nullptr;
@@ -155,5 +154,10 @@ namespace chisel::render
             Com<ID3D11SamplerState> Default;
             Com<ID3D11SamplerState> Point;
         } Sample;
+
+        struct RasterStates {
+            Com<ID3D11RasterizerState> Default;
+            Com<ID3D11RasterizerState> SmoothLines;
+        } Raster;
     };
 }

@@ -144,8 +144,11 @@ namespace chisel::render
             .FrontCounterClockwise = TRUE,
             .DepthClipEnable = TRUE,
         };
-        device->CreateRasterizerState(&desc, &rsState);
-        ctx->RSSetState(rsState.ptr());
+        device->CreateRasterizerState(&desc, &Raster.Default);
+        ctx->RSSetState(Raster.Default.ptr());
+
+        desc.AntialiasedLineEnable = TRUE;
+        device->CreateRasterizerState(&desc, &Raster.SmoothLines);
     }
 
     void RenderContext::Shutdown()
