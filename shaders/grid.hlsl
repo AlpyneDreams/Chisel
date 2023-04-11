@@ -22,13 +22,15 @@ Varyings vs_main(Input i)
     float4x4 modelView = mul(Camera.view, Object.model);
 
     Varyings v = (Varyings)0;
-
     v.position = mul(modelViewProj, float4(i.position, 1.0));
 
     // Fade out major gridlines further than minor ones
     v.farZ  = Camera.farZ * (i.major ? 1.0 : 0.5);
-    v.alpha = 0.1 + (i.major * 0.1);
     v.z     = -mul(modelView, float4(i.position, 1.0)).z;
+
+    // Major lines are brighter than minor ones. These values were chosen
+    // to approximate what it looked like in sRGB when they were both 0.1
+    v.alpha = 0.025 + (i.major * 0.035);
 
     return v;
 }

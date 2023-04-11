@@ -1,6 +1,9 @@
 @echo off
 
-call "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Utilities\bin\dx_setenv.cmd"
+if [%DXINCLUDE%] == [] (
+    call "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Utilities\bin\dx_setenv.cmd"
+    set DXINCLUDE=1
+)
 
 for %%F in (*.hlsl) do (
     echo %%F
