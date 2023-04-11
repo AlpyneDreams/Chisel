@@ -167,6 +167,7 @@ namespace chisel
                     // Parse generic helper args
                     default:
                     if (*cur == '(') {
+                        Expect('(');
                         while (*cur != ')')
                         {
                             String& str = helper.params.emplace_back();
