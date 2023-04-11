@@ -33,7 +33,7 @@ namespace chisel
             .Height = UINT(height),
             .MipLevels = 1,
             .ArraySize = 1,
-            .Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+            .Format = DXGI_FORMAT_R8G8B8A8_TYPELESS,
             .SampleDesc = { 1, 0 },
             .Usage = D3D11_USAGE_IMMUTABLE,
             .BindFlags = D3D11_BIND_SHADER_RESOURCE,
