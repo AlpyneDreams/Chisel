@@ -25,7 +25,7 @@ namespace chisel
                 main = this;
         }
 
-        std::function<void(uint, uint)> onResize;
+        std::function<void(uint, uint)> onResize = [](uint, uint) {};
     public:
         virtual ~Window()
         {

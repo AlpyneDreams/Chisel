@@ -62,6 +62,17 @@ namespace chisel::render
         swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backbuffer.texture));
         device->CreateRenderTargetView(backbuffer.texture.ptr(), nullptr, &backbuffer.rtv);
 
+        window->SetResizeCallback([this](uint width, uint height)
+        {
+            backbuffer.rtv = nullptr;
+            backbuffer.texture = nullptr;
+            HRESULT hr = swapchain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+            if (FAILED(hr))
+                Console.Error("Failed to resize swapchain to {} x {} (is something using the backbuffer?)", width, height);
+            swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backbuffer.texture));
+            device->CreateRenderTargetView(backbuffer.texture.ptr(), nullptr, &backbuffer.rtv);
+        });
+
         ImGui::CreateContext();
 
         GUI::Setup();
@@ -348,7 +359,7 @@ namespace chisel::render
         device->GetImmediateContext(&ctx);
         ctx->CopyResource(stagingBuffer.ptr(), buffer.ptr());
 
-        // Unfortunately, we need to wait here. There is no way to fence.
+        // Unfortunately, we need to wait here. There is no way to fence. (TODO: Really?)
         // We could potentially wait a frame or two if this causes hangs.
         D3D11_MAPPED_SUBRESOURCE map; 
         if (FAILED(ctx->Map(stagingBuffer.ptr(), 0, D3D11_MAP_READ, 0, &map)))
