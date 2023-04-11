@@ -44,7 +44,7 @@ namespace chisel::VMF
         lightmapscale       (side["lightmapscale"]),
         smoothing_groups    (side["smoothing_groups"])
     {
-        auto parseAxis = [&](std::string value, vec4& axis, float& scale)
+        auto parseAxis = [&](std::string_view value, vec4& axis, float& scale)
         {
             auto values = str::split(value, "]");
 
@@ -68,9 +68,14 @@ namespace chisel::VMF
     }
 
 
-    Solid::Solid(KeyValues& solid) : MapClass(solid),
-        sides(solid["side"])
+    Solid::Solid(KeyValues& solid) : MapClass(solid)
     {
+        auto range = solid.FindAll("side");
+        while (range.first != range.second)
+        {
+            sides.emplace_back(range.first->second);
+            range.first++;
+        }
     }
 
 }

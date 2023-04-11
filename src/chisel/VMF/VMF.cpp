@@ -1,6 +1,6 @@
 #include "VMF.h"
 
-#include "KeyValues.h"
+#include "formats/KeyValues.h"
 #include "console/Console.h"
 
 #include "chisel/map/Map.h"
@@ -10,14 +10,14 @@
 
 namespace chisel::VMF
 {
-    Editor::Editor(KeyValues& editor) : KeyValues(editor),
-        color               (editor["color"]),
-        visgroupid          (editor["visgroupid"]),
-        groupid             (editor["groupid"]),
-        visgroupshown       (editor["visgroupshown"]),
-        visgroupautoshown   (editor["visgroupautoshown"]),
-        comments            (editor["comments"])
-    {}
+    Editor::Editor(kv::KeyValues& editor)
+        : color               (editor["color"])
+        , visgroupid          (editor["visgroupid"])
+        , groupid             (editor["groupid"])
+        , visgroupshown       (editor["visgroupshown"])
+        , visgroupautoshown   (editor["visgroupautoshown"])
+        , comments            (std::string_view(editor["comments"]))
+    {} 
 
     MapAtom::MapAtom(KeyValues& atom) : KeyValues(atom),
         id                  (atom["id"])
@@ -28,11 +28,17 @@ namespace chisel::VMF
     {}
 
     MapEntity::MapEntity(KeyValues& ent) : MapClass(ent),
-        solids              (ent["solid"]),
-        classname           (ent["classname"]),
-        targetname          (ent["targetname"])
+        classname           (std::string_view(ent["classname"])),
+        targetname          (std::string_view(ent["targetname"]))
     {
-        std::string origin_str = ent["origin"];
+        auto range = ent.FindAll("solid");
+        while (range.first != range.second)
+        {
+            solids.emplace_back(range.first->second);
+            range.first++;
+        }
+
+        std::string_view origin_str = ent["origin"];
         if (!origin_str.empty())
         {
             auto coords = str::split(origin_str, " ");
@@ -44,35 +50,35 @@ namespace chisel::VMF
 
         for (const auto& child : ent)
         {
-            if (ent.name == "id" ||
-                ent.name == "solid" ||
-                ent.name == "classname" ||
-                ent.name == "targetname")
+            if (child.first == "id" ||
+                child.first == "solid" ||
+                child.first == "classname" ||
+                child.first == "targetname")
                 continue;
 
-            if (ent.name == "connections")
+            if (child.first == "connections")
             {
-                for (const auto& connection : ent)
-                    connections.emplace(connection.name, connection);
+                //for (const auto& connection : child.second)
+                //    connections.emplace(connection.name, connection);
                 continue;
             }
 
-            if (child.type == KeyValues::String)
-                kv.emplace(child.name, child);
+            if (child.second.GetType() == kv::Types::String)
+                kv.emplace(child.first, (std::string_view)child.second);
         }
     }
 
     World::World(KeyValues& world) : MapEntity(world)
     {}
 
-    Visgroup::Visgroup(KeyValues& visgroup) : KeyValues(visgroup),
-        name                (visgroup["name"]),
-        id                  (visgroup["visgroupid"]),
-        color               (visgroup["color"]),
-        children            (visgroup["visgroup"])
+    Visgroup::Visgroup(kv::KeyValues& visgroup)
+        : name                ((std::string_view)visgroup["name"])
+        , id                  (visgroup["visgroupid"])
+        , color               (visgroup["color"])
+        , children            (visgroup["visgroup"])
     {}
 
-    VMF::VMF(KeyValues &vmf)
+    VMF::VMF(kv::KeyValues &vmf)
     {
         auto& versioninfo = vmf["versioninfo"];
         editorversion   = versioninfo["editorversion"];
@@ -88,10 +94,25 @@ namespace chisel::VMF
         nGridSpacing      = viewsettings["nGridSpacing"];
         bShow3DGrid       = viewsettings["bShow3DGrid"];
 
-        world       = vmf["world"];
+        world       = World(vmf["world"]);
 
-        entities    = vmf["entity"];
-        visgroups   = vmf["visgroup"];
+        {
+            auto range = vmf.FindAll("entity");
+            while (range.first != range.second)
+            {
+                entities.emplace_back(range.first->second);
+                range.first++;
+            }
+        }
+
+        {
+            auto range = vmf.FindAll("visgroup");
+            while (range.first != range.second)
+            {
+                visgroups.emplace_back(range.first->second);
+                range.first++;
+            }
+        }
     }
 
     static void AddSolid(BrushEntity& ent, const Solid& solid)

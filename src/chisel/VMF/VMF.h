@@ -5,7 +5,7 @@
 
 #include "core/Mesh.h"
 
-#include "KeyValues.h"
+#include "formats/KeyValues.h"
 
 #include <vector>
 #include <array>
@@ -14,7 +14,7 @@ namespace chisel { struct Map; }
 
 namespace chisel::VMF
 {
-    struct Editor : KeyValues
+    struct Editor
     {
         Color255 color;
         int visgroupid;
@@ -25,15 +25,15 @@ namespace chisel::VMF
         // logicalpos
 
         Editor() = default;
-        Editor(KeyValues& editor);
+        Editor(kv::KeyValues& editor);
     };
 
-    struct MapAtom : KeyValues
+    struct MapAtom : kv::KeyValues
     {
         int id;
 
         MapAtom() = default;
-        MapAtom(KeyValues& atom);
+        MapAtom(kv::KeyValues& atom);
     };
 
     struct MapClass : MapAtom
@@ -41,7 +41,7 @@ namespace chisel::VMF
         Editor editor;
 
         MapClass() = default;
-        MapClass(KeyValues& atom);
+        MapClass(kv::KeyValues& atom);
     };
 
     struct Plane
@@ -63,14 +63,16 @@ namespace chisel::VMF
         uint32 smoothing_groups;
         // dispinfo {}
 
-        Side(KeyValues& side);
+        Side() = default;
+        Side(kv::KeyValues& side);
     };
 
     struct Solid : MapClass
     {
         std::vector<Side> sides;
 
-        Solid(KeyValues& solid);
+        Solid() = default;
+        Solid(kv::KeyValues& solid);
     };
 
     struct MapEntity : MapClass
@@ -84,23 +86,24 @@ namespace chisel::VMF
         std::unordered_map<std::string, std::string> connections;
 
         MapEntity() = default;
-        MapEntity(KeyValues& ent);
+        MapEntity(kv::KeyValues& ent);
     };
 
     struct World : MapEntity
     {
         World() = default;
-        World(KeyValues& world);
+        World(kv::KeyValues& world);
     };
 
-    struct Visgroup : KeyValues
+    struct Visgroup
     {
         std::string name;
         int id;
         Color255 color;
         std::vector<Visgroup> children;
 
-        Visgroup(KeyValues& visgroup);
+        Visgroup() = default;
+        Visgroup(kv::KeyValues& visgroup);
     };
 
     struct VMF
@@ -127,7 +130,7 @@ namespace chisel::VMF
         // cordon {}
 
         VMF() = default;
-        VMF(KeyValues &vmf);
+        VMF(kv::KeyValues &vmf);
 
         void Import(Map& map);
     };

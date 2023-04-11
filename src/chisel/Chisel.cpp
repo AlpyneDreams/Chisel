@@ -2,7 +2,7 @@
 #include "chisel/Chisel.h"
 #include "chisel/MapRender.h"
 #include "common/String.h"
-#include "chisel/VMF/KeyValues.h"
+#include "formats/KeyValues.h"
 #include "chisel/VMF/VMF.h"
 #include "chisel/FGD/FGD.h"
 
@@ -59,7 +59,7 @@ namespace chisel
         if (!text)
             return false;
         
-        auto kv = KeyValues::Parse(*text);
+        auto kv = kv::KeyValues::ParseFromUTF8(StringView{ (std::string)*text });
         if (!kv)
             return false;
 

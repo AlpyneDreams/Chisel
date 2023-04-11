@@ -26,7 +26,7 @@ namespace chisel::fs
 {
     using std::filesystem::exists;
 
-    template <typename T = std::vector<byte>, bool Binary = !std::is_same_v<T, std::string>>
+    template <typename T = Buffer, bool Binary = !std::is_same_v<T, std::string>>
     inline std::optional<T> readFile(const Path& path)
     {
         using namespace std;

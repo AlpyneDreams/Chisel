@@ -510,7 +510,7 @@ namespace chisel::render
             ctx->PSSetShader(shader.ps.ptr(), nullptr, 0);
     }
 
-    Shader::Shader(ID3D11Device1* device, std::span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name)
+    Shader::Shader(ID3D11Device1* device, Span<D3D11_INPUT_ELEMENT_DESC const> ia, std::string_view name)
     {
         fs::Path path = fs::Path("core/shaders") / name;
         path.setExt(".vsc");
@@ -539,7 +539,7 @@ namespace chisel::render
             return;
         }
 
-        hr = device->CreateInputLayout(ia.data(), ia.size(), vsFile->data(), vsFile->size(), &inputLayout);
+        hr = device->CreateInputLayout(ia.data, ia.size, vsFile->data(), vsFile->size(), &inputLayout);
         if (FAILED(hr)) {
             Console.Error("[D3D11] Failed to create input layout for shader '{}'", name);
             return;

@@ -20,7 +20,6 @@ namespace chisel
     inline struct Assets
     {
         using Path = fs::Path;
-        using Buffer = std::vector<byte>;
 
         std::vector<Path> searchPaths;
         std::vector<std::unique_ptr<libvpk::VPKSet>> pakFiles;
