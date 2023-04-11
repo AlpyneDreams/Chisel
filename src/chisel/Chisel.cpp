@@ -35,8 +35,8 @@ namespace chisel
         Tools.systems.AddSystem<MainToolbar>();
         Tools.systems.AddSystem<SelectionModeToolbar>();
         Tools.systems.AddSystem<Inspector>();
-        Tools.systems.AddSystem<AssetPicker>();
-        viewport = &Tools.systems.AddSystem<Viewport>();
+        mainAssetPicker = &Tools.systems.AddSystem<AssetPicker>();
+        viewport        = &Tools.systems.AddSystem<Viewport>();
 
         Tools.Loop();
         Tools.Shutdown();

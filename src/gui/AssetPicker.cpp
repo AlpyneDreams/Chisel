@@ -16,7 +16,7 @@ namespace chisel
     static const std::pair<uint32_t, uint32_t> AssetThumbnailSize{ 256, 256 };
     static const std::pair<uint32_t, uint32_t> AssetPadding{ 16, 16 };
 
-    AssetPicker::AssetPicker() : GUI::Window(ICON_MC_INFORMATION, "Asset Picker", 1024, 512, true, 0)
+    AssetPicker::AssetPicker() : GUI::Window(ICON_MC_FOLDER, "Assets", 1024, 512, false, 0)
     {
         m_LastWindowSize = ImVec2(1024, 512);
         m_AssetsPerRow = floor(m_LastWindowSize.x / (AssetThumbnailSize.first + AssetPadding.first));

@@ -176,6 +176,7 @@ namespace chisel
         {
             if (BeginMenuBar())
             {
+                GUI::WindowToggleButton(chisel::Chisel.mainAssetPicker, 64.0f, "Ctrl+Space");
                 GUI::WindowToggleButton(chisel::Tools.console, 72.0f, "`");
                 EndMenuBar();
             }

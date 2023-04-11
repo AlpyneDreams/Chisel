@@ -15,9 +15,11 @@ namespace chisel
         {
             if (Keyboard.ctrl)
             {
-                if (Keyboard.GetKeyDown(Key::O)) {
+                if (Keyboard.GetKeyDown(Key::O))
                     Layout::OpenFilePicker();
-                }
+
+                else if (Keyboard.GetKeyDown(Key::Space))
+                    Chisel.mainAssetPicker->ToggleOrFocus();
             }
             
             Map& map = Chisel.map;

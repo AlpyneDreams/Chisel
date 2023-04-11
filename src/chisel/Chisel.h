@@ -58,6 +58,7 @@ namespace chisel
 
     // GUI //
         GUI::Window* viewport;
+        GUI::Window* mainAssetPicker;
 
     // Chisel Engine Loop //
 
