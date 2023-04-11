@@ -51,9 +51,9 @@ namespace chisel::GUI
             }
 
             // Setup window variables
-            ImVec2 contentSize = ImVec2(0, 0);
+            uint2 contentSize = uint2(0, 0);
             if (OverrideContentSize(contentSize))
-                ImGui::SetNextWindowContentSize(contentSize);
+                ImGui::SetNextWindowContentSize(ImVec2(float(contentSize.x), float(contentSize.y)));
             ImGui::SetNextWindowSize(ImVec2(float(width), float(height)), ImGuiCond_FirstUseEver);
             PreDraw();
 
@@ -97,6 +97,6 @@ namespace chisel::GUI
         virtual void PreDraw() {}
         virtual void PostDraw() {}
 
-        virtual bool OverrideContentSize(ImVec2& size) { return false; }
+        virtual bool OverrideContentSize(uint2& size) { return false; }
     };
 }

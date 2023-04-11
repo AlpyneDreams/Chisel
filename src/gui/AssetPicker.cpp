@@ -13,37 +13,49 @@
 
 namespace chisel
 {
-    static const std::pair<uint32_t, uint32_t> AssetThumbnailSize{ 256, 256 };
-    static const std::pair<uint32_t, uint32_t> AssetPadding{ 16, 16 };
+    static const uint2 AssetPadding { 16, 16 };
 
-    AssetPicker::AssetPicker() : GUI::Window(ICON_MC_FOLDER, "Assets", 1024, 512, false, 0)
+    AssetPicker::AssetPicker() : GUI::Window(ICON_MC_FOLDER, "Assets", 1024, 512, false, ImGuiWindowFlags_MenuBar)
     {
-        m_LastWindowSize = ImVec2(1024, 512);
-        m_AssetsPerRow = floor(m_LastWindowSize.x / (AssetThumbnailSize.first + AssetPadding.first));
+        m_LastWindowSize = uint2(1024, 512);
+        m_AssetsPerRow = uint(floor(m_LastWindowSize.x / (AssetThumbnailSize.x + AssetPadding.x)));
         Refresh();
     }
 
     void AssetPicker::Draw()
     {
+        if (ImGui::BeginMenuBar())
+        {
+            // Right side
+            ImGui::Spacing();
+            ImGui::SameLine(ImGui::GetWindowWidth() - 200);
+            ImGui::SetNextItemWidth(190);
+            if (ImGui::SliderInt("##Zoom", &ThumbnailScale, 8, 32, std::to_string(AssetThumbnailSize.x).c_str()))
+            {
+                AssetThumbnailSize = uint2(16 * ThumbnailScale);
+            }
+            ImGui::EndMenuBar();
+        }
         //ImGui::PushFont(GUI::FontMonospace);
-        m_LastWindowSize = ImGui::GetWindowSize();
-        m_AssetsPerRow = floor(m_LastWindowSize.x / (AssetThumbnailSize.first + AssetPadding.first));
+        ImVec2 windowSize = ImGui::GetWindowSize();
+        m_LastWindowSize = uint2(windowSize.x, windowSize.y);
+        m_AssetsPerRow = floor(m_LastWindowSize.x / (AssetThumbnailSize.x + AssetPadding.x));
 
         float scroll = ImGui::GetScrollY();
         
-        uint32_t numVisibleRows = (uint32_t(ImGui::GetWindowSize().y) / (AssetThumbnailSize.second + AssetPadding.second)) + 2;
+        uint numVisibleRows = uint(uint(ImGui::GetWindowSize().y) / (AssetThumbnailSize.y + AssetPadding.y)) + 2;
 
-        uint32_t firstAssetRow = scroll / (AssetThumbnailSize.second + AssetPadding.second);
-        uint32_t firstAsset = firstAssetRow * m_AssetsPerRow;
+        uint xAssetRow = uint(scroll / (AssetThumbnailSize.y + AssetPadding.y));
+        uint xAsset = xAssetRow * m_AssetsPerRow;
 
-        uint32_t currentAsset = firstAsset;
-        for (uint32_t row = 0; row < numVisibleRows; row++)
+        uint currentAsset = xAsset;
+        for (uint row = 0; row < numVisibleRows; row++)
         {
-            for (uint32_t column = 0; column < m_AssetsPerRow; column++)
+            for (uint column = 0; column < m_AssetsPerRow; column++)
             {
                 const float initialXPadding = 8.0f;
                 const float initialYPadding = 32.0f;
-                ImVec2 basePos = ImVec2(column * (AssetThumbnailSize.first + AssetPadding.first) + initialXPadding, (firstAssetRow + row) * (AssetThumbnailSize.second + AssetPadding.second) + initialYPadding);
+                ImVec2 basePos = ImVec2(column * (AssetThumbnailSize.x + AssetPadding.x) + initialXPadding, (xAssetRow + row) * (AssetThumbnailSize.y + AssetPadding.y) + initialYPadding);
 
                 auto& material = m_materials[currentAsset];
                 if (!material.thing && !material.triedToLoad)
@@ -56,7 +68,7 @@ namespace chisel
                     ImGui::SetCursorPos(basePos);
                     ImVec2 screenPos = ImGui::GetCursorScreenPos();
 
-                    ImVec2 endPos = ImVec2(screenPos.x + AssetThumbnailSize.first, screenPos.y + AssetThumbnailSize.second);
+                    ImVec2 endPos = ImVec2(screenPos.x + AssetThumbnailSize.x, screenPos.y + AssetThumbnailSize.y);
 
                     ImGui::GetWindowDrawList()->AddImage(
                         material.thing->baseTexture->srvLinear.ptr(),
@@ -66,7 +78,7 @@ namespace chisel
                 }
 
 
-                ImVec2 textPos = ImVec2(basePos.x, basePos.y + AssetThumbnailSize.second);
+                ImVec2 textPos = ImVec2(basePos.x, basePos.y + AssetThumbnailSize.y);
                 ImGui::SetCursorPos(textPos);
                 // this sucks
                 std::string path = material.path;
@@ -83,12 +95,12 @@ namespace chisel
         //ImGui::PopFont();
     }
 
-    bool AssetPicker::OverrideContentSize(ImVec2& size)
+    bool AssetPicker::OverrideContentSize(uint2& size)
     {
-        uint32_t count = uint32_t(m_materials.size());
-        uint32_t numRows = count / m_AssetsPerRow;
+        uint count = uint(m_materials.size());
+        uint numRows = count / m_AssetsPerRow;
         // Never have an X scrollbar.
-        size = ImVec2(m_LastWindowSize.x, numRows * (AssetThumbnailSize.second + AssetPadding.second));
+        size = uint2(m_LastWindowSize.x, numRows * (AssetThumbnailSize.y + AssetPadding.y));
         return true;
     }
 

@@ -21,14 +21,16 @@ namespace chisel
 
         void Draw() override;
 
-        bool OverrideContentSize(ImVec2& size) override;
+        bool OverrideContentSize(uint2& size) override;
 
         void Refresh();
 
     private:
         std::vector<AssetPickerAsset<Material>> m_materials;
 
-        ImVec2 m_LastWindowSize;
-        float m_AssetsPerRow;
+        uint2 m_LastWindowSize;
+        int ThumbnailScale = 7; // size = 16 * scale
+        uint2 AssetThumbnailSize = { 128, 128 };
+        uint m_AssetsPerRow;
     };
 }
