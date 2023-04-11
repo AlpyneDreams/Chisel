@@ -60,13 +60,14 @@ chisel = executable('chisel', chisel_src, offsetallocator_src,
     cpp_args        : chisel_args
 )
 
-copy = windows ? ['cmd', '/c', 'copy'] : ['cp', '-f']
+copy = windows ? ['powershell', 'cp'] : ['cp', '-f']
 
 custom_target('copy_exe',
     command: [copy,
         chisel.full_path(),
-        join_paths(meson.project_source_root(), 'runtime', fs.stem(chisel.full_path()))
+        join_paths(meson.project_source_root(), 'runtime', fs.name(chisel.full_path()))
     ],
-    output: 'fake', depends: chisel,
+    output: 'fake',
+    depends: chisel,
     build_by_default: true
 )
