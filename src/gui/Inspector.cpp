@@ -5,6 +5,7 @@
 #include "chisel/FGD/FGD.h"
 #include "chisel/map/Map.h"
 #include "chisel/Selection.h"
+#include "assets/Assets.h"
 #include "gui/IconsMaterialCommunity.h"
 
 #include <misc/cpp/imgui_stdlib.h>
@@ -15,6 +16,8 @@ namespace chisel
 {
     Inspector::Inspector() : GUI::Window(ICON_MC_INFORMATION, "Inspector", 512, 512, true, ImGuiWindowFlags_MenuBar)
     {
+        defaultIcon = Assets.Load<Texture>("textures/ui/entity.png");
+        defaultIconBrush = Assets.Load<Texture>("textures/ui/cube.png");
     }
 
     void Inspector::Draw()
@@ -62,7 +65,26 @@ namespace chisel
 
     void Inspector::DrawEntityInspector(Entity* ent)
     {
-        if (ImGui::BeginCombo("Class", ent->classname.c_str()))
+        FGD::Class cls = Chisel.fgd->classes[ent->classname];
+
+        ImVec2 screenPos = ImGui::GetCursorScreenPos();
+        ImVec2 endPos = ImVec2(screenPos.x + 32, screenPos.y + 32);
+
+        // Draw entity icon
+        Texture* tex = cls.texture;
+        if (!tex)
+            tex = cls.type == FGD::SolidClass ? defaultIconBrush : defaultIcon;
+        if (tex)
+            ImGui::GetWindowDrawList()->AddImage(
+                (cls.texture ? cls.texture : defaultIcon)->srvLinear.ptr(),
+                screenPos, endPos,
+                ImVec2(0, 0), ImVec2(1, 1)
+            );
+
+        ImVec2 cursorPos = ImGui::GetCursorPos();
+        ImGui::SetCursorPos({cursorPos.x + 40, cursorPos.y});
+
+        if (ImGui::BeginCombo("##Class", ent->classname.c_str()))
         {
             for (auto& [name, cls] : Chisel.fgd->classes)
             {
@@ -78,8 +100,7 @@ namespace chisel
             }
             ImGui::EndCombo();
         }
-
-        FGD::Class cls = Chisel.fgd->classes[ent->classname];
+        ImGui::SetCursorPos({cursorPos.x, cursorPos.y + 40});
 
         DrawProperties(&cls, ent);
     }
@@ -126,13 +147,30 @@ namespace chisel
                 ImGui::EndCombo();
                 return modified;
             }
+            case Flags:
+            {
+                if (ImGui::Button(ICON_MC_FLAG " Flags"))
+                    ImGui::OpenPopup("flags");
+
+                bool modified = false;
+
+                if (ImGui::BeginPopup("flags"))
+                {
+                    for (auto& [key, name] : var.choices)
+                    {
+                        ImGui::Checkbox(name.c_str(), &b);
+                    }
+                    ImGui::EndPopup();
+                }
+                return modified;
+            }
 
             case Color255:
             case Color1:    return ImGui::ColorEdit4(name, v);
 
             case Angle:
             case Vector:
-            case Origin:    return ImGui::InputFloat3(name, v);
+            case Origin:    return ImGui::DragFloat3(name, v);
 
             case ScriptList:    return ImGui::Button(ICON_MC_SCRIPT " Scripts");
             case Script:        return ImGui::Button(ICON_MC_SCRIPT " Script");
@@ -178,7 +216,7 @@ namespace chisel
         if (cls->variables.empty())
             return;
 
-        if (!ImGui::CollapsingHeader(cls->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+        if (!root && !ImGui::CollapsingHeader(cls->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             return;
 
         if (!ImGui::BeginTable("properties", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable))
@@ -187,6 +225,18 @@ namespace chisel
         //ImGui::TableSetupColumn("Property Name");
         //ImGui::TableSetupColumn("Value");
         //ImGui::TableHeadersRow();
+
+        if (root && cls->type != FGD::SolidClass)
+        {
+            if (PointEntity* point = dynamic_cast<PointEntity*>(ent))
+            {
+                ImGui::TableNextRow(); ImGui::TableNextColumn();
+                ImGui::TextUnformatted("Position");
+                ImGui::TableNextColumn();
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                ImGui::DragFloat3("##position", &point->origin.x);
+            }
+        }
 
         for (int varNum = 0, varCount = cls->variables.size(); auto& var : cls->variables)
         {
@@ -205,15 +255,14 @@ namespace chisel
                 continue;
             }
 
-            
-            ImGui::TextUnformatted(var.displayName.c_str());
-            ImGui::TableNextColumn();
+            const char* name = var.displayName.c_str();
+            if (var.type == FGD::Flags && var.displayName == "spawnflags")
+                name = "Flags";
 
-            //ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.7);
-            //GUI::ItemLabel(var.displayName.c_str());
+            ImGui::TextUnformatted(name);
+
+            ImGui::TableNextColumn();
             ImGui::SetNextItemWidth(-FLT_MIN);
-            
-            //ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             ValueInput(var, ent);
 
             varNum++;

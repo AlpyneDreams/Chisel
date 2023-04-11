@@ -18,5 +18,8 @@ namespace chisel
 
         void Draw() override;
         void DrawEntityInspector(Entity* ent);
+
+        Texture* defaultIcon;
+        Texture* defaultIconBrush;
     };
 }
