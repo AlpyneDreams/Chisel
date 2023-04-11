@@ -127,10 +127,6 @@ namespace chisel
         Window::Shutdown();
     }
 
-    void Tools::BeginSelectionPass(render::RenderContext &rctx)
-    {
-    }
-
     void Tools::PickObject(uint2 mouse)
     {
         auto bufferIn = cs_ObjectID.buffers[0];

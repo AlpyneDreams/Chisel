@@ -194,49 +194,6 @@ namespace chisel
             DrawMesh(mesh);
     }
 
-    void MapRender::DrawSelectionPass()
-    {
-#if 0
-        // TODO: Cull!
-        for (Solid& brush : map)
-        {
-            for (auto& mesh : brush.GetMeshes())
-            {
-                Tools.PreDrawSelection(r, brush.GetSelectionID());
-                r.DrawMesh(&mesh.mesh);
-            }
-        }
-
-        for (const auto* entity : map.entities)
-        {
-            const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
-            if (!point) continue;
-
-            auto& classname = entity->classname;
-            if (Chisel.fgd->classes.contains(classname))
-            {
-                auto& cls = Chisel.fgd->classes[classname];
-
-                if (cls.texture)
-                {
-                    mat4x4 mtx = glm::scale(glm::translate(mat4x4(1.0f), point->origin), vec3(64.f));
-                    Tools.PreDrawSelection(r, point->GetSelectionID());
-                    r.SetTransform(mtx);
-                    r.DrawMesh(&Primitives.Quad);
-                }
-                else
-                {
-                    AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
-
-                    Tools.PreDrawSelection(r, point->GetSelectionID());
-                    r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
-                    r.DrawMesh(&Primitives.Cube);
-                }
-            }
-        }
-#endif
-    }
-
     void MapRender::DrawHandles(mat4x4& view, mat4x4& proj, Tool tool, Space space, bool snap, const vec3& snapSize)
     {
         if (Selection.Empty())

@@ -47,10 +47,6 @@ namespace chisel
         // Read object ID from scene view render target and update selection
         void PickObject(uint2 mouse);
 
-        // Draw object ID to the selection buffer
-        static void BeginSelectionPass(render::RenderContext& ctx);
-        static void PreDrawSelection(render::RenderContext& r, uint id);
-
         // Draw wireframe outline of selected object
         void DrawSelectionOutline(Mesh* mesh);
         void DrawSelectionOutline(Mesh* mesh, Transform& transform);
@@ -67,15 +63,6 @@ namespace chisel
     private:
 
     } Tools;
-
-    inline void Tools::PreDrawSelection(render::RenderContext& r, uint id)
-    {
-#if 0
-        r.SetShader(chisel::Tools.sh_Color);
-        float f = std::bit_cast<float>(id);
-        r.SetUniform("u_color", vec4(f, 0.f, 0.f, 1.0f));
-#endif
-    }
 
     inline ConCommand getpos("getpos", "Prints current camera position", [](ConCmd& cmd) {
         Camera& camera = Tools.editorCamera.camera;
