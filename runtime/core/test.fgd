@@ -3419,7 +3419,7 @@
 		27: "Haunted"
 		]
 
-	linedivider_snd(string) : "-----------------------" : : "More complex values below."
+	linedivider_snd(string) readonly : "-----------------------" : : "More complex values below."
 	volstart(integer) : "Transition Volume" : 0 : "The Volume to start/end with. Use with Fade In and Out times."
 	fadeinsecs(integer) : "Volume Transition Time - Start (0-100)" : 0 : "Time in seconds for the sound to transition from the Transition Volume to the set volume as it starts playing."
 	fadeoutsecs(integer) : "Volume Transition Time - Stop (0-100)" : 0 : "Time in seconds for the sound to transition from the set volume to the Transition Volume as it stops playing."
@@ -11079,7 +11079,7 @@
 
 @PointClass base(BaseDeferredLight) 
 	sphere(radius)
-	iconsprite("materials/editor/deferred_refcapture.vmt")
+	iconsprite("editor/deferred_refcapture.vmt")
 = light_deferred_reflcapture: "Parallax-corrected reflection sample point for the deferred rendering system."
 	[
 	spawnflags(flags)  =
