@@ -7,6 +7,7 @@ chisel_args = windows ? [] : [
 
 chisel_src = files(
     'console/ConsoleCommands.cpp',
+    'assets/Assets.cpp',
     'assets/loaders/Textures.cpp',
     'assets/loaders/MeshOBJ.cpp',
     windows ?

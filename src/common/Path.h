@@ -16,13 +16,21 @@ namespace chisel::fs
         Path dirname() const { return m_path.parent_path(); }
         Path ext() const { return m_path.extension(); }
 
-        void setExt(auto ext) { m_path.replace_extension(ext); m_text = m_path.string(); }
+        Path& setExt(auto ext) { m_path.replace_extension(ext); m_text = m_path.string(); return *this; }
 
         // Append a subpath with a separator
         Path& operator /=(const Path& path)
         {
             m_path /= path.m_path;
             m_text = m_path.string();
+            return *this;
+        }
+
+        // Append a string with no separator
+        Path& operator +=(const auto& str)
+        {
+            m_path += str;
+            m_text += str;
             return *this;
         }
 
@@ -39,6 +47,12 @@ namespace chisel::fs
         {
             Path temp = lhs;
             return (temp /= rhs);
+        }
+
+        friend Path operator +(const Path& lhs, const auto& rhs)
+        {
+            Path temp = lhs;
+            return (temp += rhs);
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Path& path) {

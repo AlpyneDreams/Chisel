@@ -5,6 +5,7 @@
 #include <string_view>
 #include <cstring>
 #include <ostream>
+#include <cctype>
 
 namespace chisel
 {
@@ -30,13 +31,26 @@ namespace chisel
             : (HashString(str, count - 1) ^ str[count-1]) * FNV_1a<Hash>::prime;
     }
 
+    constexpr Hash HashString(std::string_view str) {
+        return HashString(str.data(), str.size());
+    }
+
+    constexpr Hash HashStringLower(const char* str, size_t count) {
+        return !count
+            ? FNV_1a<Hash>::offset
+            : (HashStringLower(str, count - 1) ^ std::tolower(str[count-1])) * FNV_1a<Hash>::prime;
+    }
+
+    constexpr Hash HashStringLower(std::string_view str) {
+        return HashStringLower(str.data(), str.size());
+    }
 
     struct HashedString
     {
         Hash hash;
         std::string_view str;
         constexpr HashedString() {}
-        constexpr HashedString(std::string_view str) : hash(HashString(str.data(), str.size())), str(str) {}
+        constexpr HashedString(std::string_view str) : hash(HashString(str)), str(str) {}
         constexpr HashedString(const char* str, size_t size) : HashedString(std::string_view(str, size)) {}
         explicit constexpr HashedString(const char* ch) : HashedString(ch, 1) {}
         //explicit HashedString(const char* str) : HashedString(str, std::strlen(str)) {}
