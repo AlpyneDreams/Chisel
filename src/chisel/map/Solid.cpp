@@ -69,7 +69,20 @@ namespace chisel
     {
     }
 
-    void CreateWindingFromPlane(const Plane& plane, std::vector<vec3>& winding)
+    struct Winding
+    {
+        static constexpr uint32_t MaxWindingPoints = 128;
+
+        Winding()
+        {
+            count = 0;
+        }
+
+        vec3 points[MaxWindingPoints];
+        uint32_t count;
+    };
+
+    void CreateWindingFromPlane(const Plane& plane, Winding& winding)
     {
         uint32_t x = ~0u;
         float max = -FLT_MAX;
@@ -104,17 +117,19 @@ namespace chisel
         vec3 org = plane.normal * plane.Dist();
         vec3 right = glm::cross(up, plane.normal);
 
-        up = up * 16384.0f;
-        right = right * 16384.0f;
+        static constexpr float MaxTraceLength = 1.732050807569 * 32768.0f;
 
-        winding.resize(4);
-        winding[0] = (org - right) + up;
-        winding[1] = (org + right) + up;
-        winding[2] = (org + right) - up;
-        winding[3] = (org - right) - up;
+        up = up * MaxTraceLength;
+        right = right * MaxTraceLength;
+
+        winding.count = 4;
+        winding.points[0] = (org - right) + up;
+        winding.points[1] = (org + right) + up;
+        winding.points[2] = (org + right) - up;
+        winding.points[3] = (org - right) - up;
     }
 
-    std::vector<vec3>* ClipWinding(const Plane& split, std::vector<vec3>& inWinding, std::vector<vec3>& scratchWinding)
+    Winding* ClipWinding(const Plane& split, Winding& inWinding, Winding& scratchWinding)
     {
         static constexpr int SIDE_FRONT = 0;
         static constexpr int SIDE_BACK = 1;
@@ -122,16 +137,15 @@ namespace chisel
 
         static constexpr float SplitEpsilion = 0.01f;
 
-        static std::vector<float> dists;
-        static std::vector<int> sides;
-        dists.clear();
-        sides.clear();
-
-        int counts[3]{};
-        for (const vec3& point : inWinding)
+        float dists[Winding::MaxWindingPoints];
+        int sides[Winding::MaxWindingPoints];
+        int counts[3] = { 0, 0, 0 };
+        for (uint32_t i = 0; i < inWinding.count; i++)
         {
+            vec3 point = inWinding.points[i];
+
             float dot = glm::dot(point, split.normal) - split.Dist();
-            dists.emplace_back(dot);
+            dists[i] = dot;
 
             int side;
             if (dot > SplitEpsilion)
@@ -140,12 +154,12 @@ namespace chisel
                 side = SIDE_BACK;
             else
                 side = SIDE_ON;
-            sides.emplace_back(side);
+            sides[i] = side;
 
             counts[side]++;
         }
-        sides.emplace_back(sides[0]);
-        dists.emplace_back(dists[0]);
+        sides[inWinding.count] = sides[0];
+        dists[inWinding.count] = dists[0];
 
         if (!counts[SIDE_FRONT] && !counts[SIDE_BACK])
             return &inWinding;
@@ -156,14 +170,14 @@ namespace chisel
         if (!counts[SIDE_BACK])
             return &inWinding;
 
-        uint32_t maxPoints = inWinding.size() + 4;
-        scratchWinding.resize(maxPoints);
-        uint32_t numPoints = 0;
+        uint32_t maxPoints = inWinding.count + 4;
+        assert(Winding::MaxWindingPoints >= maxPoints);
 
-        for (uint32_t i = 0; i < inWinding.size(); i++)
+        uint32_t numPoints = 0;
+        for (uint32_t i = 0; i < inWinding.count; i++)
         {
-            vec3 *p1 = &inWinding[i];
-            vec3* mid = &scratchWinding[numPoints];
+            vec3 *p1 = &inWinding.points[i];
+            vec3* mid = &scratchWinding.points[numPoints];
 
             if (sides[i] == SIDE_FRONT || sides[i] == SIDE_ON)
             {
@@ -171,14 +185,14 @@ namespace chisel
                 numPoints++;
                 if (sides[i] == SIDE_ON)
                     continue;
-                mid = &scratchWinding[numPoints];
+                mid = &scratchWinding.points[numPoints];
             }
 
             if (sides[i + 1] == SIDE_ON || sides[i + 1] == sides[i])
                 continue;
 
-            vec3* p2 = i == inWinding.size() - 1
-                ? &inWinding[0]
+            vec3* p2 = i == inWinding.count - 1
+                ? &inWinding.points[0]
                 : p1 + 1;
 
             numPoints++;
@@ -195,7 +209,7 @@ namespace chisel
             }
         }
 
-        scratchWinding.resize(numPoints);
+        scratchWinding.count = numPoints;
         return &scratchWinding;
     }
 
@@ -253,10 +267,8 @@ namespace chisel
 
                 Side& side = m_sides[sideIdx];
 
-                static std::vector<vec3> scratchWindings[2];
-                scratchWindings[0].clear();
-                scratchWindings[1].clear();
-                std::vector<vec3>* currentWinding = &scratchWindings[0];
+                Winding scratchWindings[2];
+                auto* currentWinding = &scratchWindings[0];
 
                 CreateWindingFromPlane(side.plane, *currentWinding);
                 for (uint32_t j = 0; j < m_sides.size() && currentWinding; j++)
@@ -274,8 +286,9 @@ namespace chisel
                     // If a point in the winding is close enough to an integer coordinate,
                     // treat it as being at that coordinate.
                     // This matches Hammer's and VBSP's behaviour to combat imprecisions.
-                    for (vec3& point : *currentWinding)
+                    for (uint32_t j = 0; j < currentWinding->count; j++)
                     {
+                        vec3& point = currentWinding->points[j];
                         for (uint32_t k = 0; k < 3; k++)
                         {
                             static constexpr float ROUND_VERTEX_EPSILON = 0.01f;
@@ -287,24 +300,24 @@ namespace chisel
                     }
 
                     // Remove duplicate points.
-                    for (uint32_t i = 0; i < currentWinding->size(); i++)
+                    for (uint32_t i = 0; i < currentWinding->count; i++)
                     {
-                        for (uint32_t j = i + 1; j < currentWinding->size(); j++)
+                        for (uint32_t j = i + 1; j < currentWinding->count; j++)
                         {
                             static constexpr float MIN_EDGE_LENGTH_EPSILON = 0.1f;
-                            vec3 edge = (*currentWinding)[i] - (*currentWinding)[j];
+                            vec3 edge = currentWinding->points[i] - currentWinding->points[j];
                             if (glm::length(edge) < MIN_EDGE_LENGTH_EPSILON)
                             {
-                                if (j + 1 < currentWinding->size())
+                                if (j + 1 < currentWinding->count)
                                 {
-                                    std::memmove(&((*currentWinding)[j]), &((*currentWinding)[j + 1]), (currentWinding->size() - (j + 1)) * sizeof(currentWinding[0]));
-                                    currentWinding->resize(currentWinding->size() - 1);
+                                    std::memmove(&(currentWinding->points[j]), &(currentWinding->points[j + 1]), (currentWinding->count - (j + 1)) * sizeof(currentWinding[0]));
+                                    currentWinding->count = currentWinding->count - 1;
                                 }
                             }
                         }
                     }
                     
-                    m_faces.emplace_back(&side, std::move(*currentWinding));
+                    m_faces.emplace_back(&side, std::vector<vec3>(currentWinding->points, currentWinding->points + currentWinding->count));
                 }
             }
         }
