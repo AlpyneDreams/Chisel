@@ -2,6 +2,7 @@
 #include "assets/SearchPaths.h"
 
 #include <variant>
+#include <vector>
 
 namespace chisel
 {

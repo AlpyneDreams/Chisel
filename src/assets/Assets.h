@@ -9,7 +9,7 @@
 #include "common/Filesystem.h"
 #include "../submodules/libvpk-plusplus/libvpk++.h"
 
-#include <vector>
+#include <list>
 #include <unordered_map>
 
 namespace chisel
@@ -45,11 +45,8 @@ namespace chisel
         void ForEachFile(auto func);
 
     private:
-        template <typename T>
-        void ForEachInDir(const Path& dir, auto func);
-
-        std::vector<Path> searchPaths;
-        std::vector<std::unique_ptr<libvpk::VPKSet>> pakFiles;
+        std::list<Path> searchPaths;
+        std::list<std::unique_ptr<libvpk::VPKSet>> pakFiles;
 
         static inline AssetTable& AssetDB = Asset::AssetDB;
     } Assets;
@@ -62,10 +59,9 @@ namespace chisel
             return (T*)AssetDB[path];
 
         // Lookup file extension
-        auto ext = str::toUpper(path.ext());
-        auto hash = HashedString(ext);
-        if (!AssetLoader<T>::Extensions().contains(hash)) {
-            Console.Error("[Assets] No importer for {} file: {}", ext, path);
+        auto* loader = AssetLoader<T>::ForExtension(path.ext());
+        if (!loader) {
+            Console.Error("[Assets] No importer for {} file: {}", path.ext(), path);
             return nullptr;
         }
 
@@ -81,11 +77,11 @@ namespace chisel
         // Attempt to load asset for first time
         try
         {
-            AssetLoader<T>::Extensions()[hash]->Load(*ptr, *data);
+            loader->Load(*ptr, *data);
         }
         catch (std::exception& err)
         {
-            Console.Error("[Assets] Failed to import {} asset: {}", ext, path);
+            Console.Error("[Assets] Failed to import {} asset: {}", path.ext(), path);
             Console.Error("[Assets] Exception: '{}'", err.what());
             return nullptr;
         }
@@ -99,7 +95,20 @@ namespace chisel
         // Enumerate loose files.
         for (const auto& dir : searchPaths)
         {
-            ForEachInDir<T>(dir, func);
+            for (auto file : std::filesystem::recursive_directory_iterator(dir))
+            {
+                Path path = file.path();
+                if (file.is_directory())
+                    continue;
+                
+                auto ext = str::toUpper(path.ext());
+                auto hash = HashedString(ext);
+
+                if (!AssetLoader<T>::ForExtension(path.ext()))
+                    continue;
+                
+                func(path);
+            }
         }
 
         // Enumerate files in paks
@@ -110,37 +119,11 @@ namespace chisel
             {
                 auto path = fs::Path(file.first);
 
-                auto ext = str::toUpper(path.ext());
-                auto hash = HashedString(ext);
-
-                if (!AssetLoader<T>::Extensions().contains(hash))
+                if (!AssetLoader<T>::ForExtension(path.ext()))
                     continue;
 
                 func(path);
             }
-        }
-    }
-
-    template <typename T>
-    inline void Assets::ForEachInDir(const Path& dir, auto func)
-    {
-        for (auto file : std::filesystem::directory_iterator(dir))
-        {
-            Path path = file.path();
-            bool dir = file.is_directory();
-            if (dir)
-            {
-                ForEachInDir<T>(path, func);
-                continue;
-            }
-            
-            auto ext = str::toUpper(path.ext());
-            auto hash = HashedString(ext);
-
-            if (!AssetLoader<T>::Extensions().contains(hash))
-                continue;
-            
-            func(path);
         }
     }
 }

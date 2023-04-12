@@ -29,9 +29,19 @@ namespace chisel
     private:
         AssetLoadFn* function = nullptr;
 
+    public:
+        static AssetLoader* ForExtension(std::string_view ext)
+        {
+            auto hash = HashStringLower(ext);
+            return AssetLoader::Extensions().contains(hash)
+                 ? AssetLoader::Extensions()[hash]
+                 : nullptr;
+        }
+
     protected:
         friend struct Assets;
-        static inline std::unordered_map<Hash, AssetLoader<Asset>*>& Extensions() {
+        static inline std::unordered_map<Hash, AssetLoader<Asset>*>& Extensions()
+        {
             static std::unordered_map<Hash, AssetLoader<Asset>*> map;
             return map;
         }
@@ -42,9 +52,7 @@ namespace chisel
     {
         AssetLoader(auto fn) : AssetLoader<Asset>(fn)
         {
-            auto upper = str::toUpper(Ext);
-            auto hash  = HashString(upper.data(), upper.size());
-            AssetLoader<Asset>::Extensions().insert({hash, this});
+            AssetLoader<Asset>::Extensions().insert({ HashStringLower(Ext), this });
         }
     };
 }
