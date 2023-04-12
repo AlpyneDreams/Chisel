@@ -409,7 +409,7 @@ namespace chisel::kv
     inline KeyValuesVariant& KeyValuesVariant::operator [](const char *string)
     {
         if (m_type != Types::KeyValues)
-            abort();
+            return s_Nothing;
 
         return Get<kv::KeyValues&>()[string];
     }
@@ -417,7 +417,7 @@ namespace chisel::kv
     inline const KeyValuesVariant& KeyValuesVariant::operator [](const char *string) const
     {
         if (m_type != Types::KeyValues)
-            abort();
+            return s_Nothing;
 
         return Get<const kv::KeyValues&>()[string];
     }

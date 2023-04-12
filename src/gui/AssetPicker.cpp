@@ -49,53 +49,57 @@ namespace chisel
         uint xAssetRow = uint(scroll / (AssetThumbnailSize.y + AssetPadding.y));
         uint xAsset = xAssetRow * m_AssetsPerRow;
 
-        if (m_materials.size() == 0)
-            return;
-
-        uint currentAsset = xAsset;
-        for (uint row = 0; row < numVisibleRows; row++)
+        auto render = [&]()
         {
-            for (uint column = 0; column < m_AssetsPerRow; column++)
+            if (m_materials.size() == 0)
+                return;
+
+            uint currentAsset = xAsset;
+            for (uint row = 0; row < numVisibleRows; row++)
             {
-                const float initialXPadding = 8.0f;
-                const float initialYPadding = 32.0f;
-                ImVec2 basePos = ImVec2(column * (AssetThumbnailSize.x + AssetPadding.x) + initialXPadding, (xAssetRow + row) * (AssetThumbnailSize.y + AssetPadding.y) + initialYPadding);
-
-                auto& material = m_materials[currentAsset];
-                if (!material.thing && !material.triedToLoad)
+                for (uint column = 0; column < m_AssetsPerRow; column++)
                 {
-                    material.thing = Assets.Load<Material>(material.path);
-                    material.triedToLoad = true;
+                    const float initialXPadding = 8.0f;
+                    const float initialYPadding = 32.0f;
+                    ImVec2 basePos = ImVec2(column * (AssetThumbnailSize.x + AssetPadding.x) + initialXPadding, (xAssetRow + row) * (AssetThumbnailSize.y + AssetPadding.y) + initialYPadding);
+
+                    auto& material = m_materials[currentAsset];
+                    if (!material.thing && !material.triedToLoad)
+                    {
+                        material.thing = Assets.Load<Material>(material.path);
+                        material.triedToLoad = true;
+                    }
+                    if (material.thing && material.thing->baseTexture && material.thing->baseTexture->srvLinear != nullptr)
+                    {
+                        ImGui::SetCursorPos(basePos);
+                        ImVec2 screenPos = ImGui::GetCursorScreenPos();
+
+                        ImVec2 endPos = ImVec2(screenPos.x + AssetThumbnailSize.x, screenPos.y + AssetThumbnailSize.y);
+
+                        ImGui::GetWindowDrawList()->AddImage(
+                            material.thing->baseTexture->srvLinear.ptr(),
+                            screenPos, endPos,
+                            ImVec2(0, 0), ImVec2(1, 1)
+                        );
+                    }
+
+                    ImVec2 textPos = ImVec2(basePos.x, basePos.y + AssetThumbnailSize.y);
+                    ImGui::SetCursorPos(textPos);
+
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    ImGui::PushClipRect(pos, ImVec2(pos.x + AssetThumbnailSize.x, pos.y + AssetPadding.y), true);
+
+                    std::string_view name = material.name;
+                    ImGui::Text("%.*s", (int)name.size(), name.data());
+
+                    ImGui::PopClipRect();
+
+                    if (++currentAsset >= m_materials.size())
+                        return;
                 }
-                if (material.thing && material.thing->baseTexture && material.thing->baseTexture->srvLinear != nullptr)
-                {
-                    ImGui::SetCursorPos(basePos);
-                    ImVec2 screenPos = ImGui::GetCursorScreenPos();
-
-                    ImVec2 endPos = ImVec2(screenPos.x + AssetThumbnailSize.x, screenPos.y + AssetThumbnailSize.y);
-
-                    ImGui::GetWindowDrawList()->AddImage(
-                        material.thing->baseTexture->srvLinear.ptr(),
-                        screenPos, endPos,
-                        ImVec2(0, 0), ImVec2(1, 1)
-                    );
-                }
-
-                ImVec2 textPos = ImVec2(basePos.x, basePos.y + AssetThumbnailSize.y);
-                ImGui::SetCursorPos(textPos);
-
-                ImVec2 pos = ImGui::GetCursorScreenPos();
-                ImGui::PushClipRect(pos, ImVec2(pos.x + AssetThumbnailSize.x, pos.y + AssetPadding.y), true);
-
-                std::string_view name = material.name;
-                ImGui::Text("%.*s", (int)name.size(), name.data());
-
-                ImGui::PopClipRect();
-
-                if (++currentAsset >= m_materials.size())
-                    return;
             }
-        }
+        };
+        render();
 
         ImGui::PopFont();
     }
