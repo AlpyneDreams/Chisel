@@ -24,7 +24,6 @@ namespace chisel
         render::RenderContext& r = Tools.rctx;
         render::Shader shader;
         Texture* missingTexture;
-        BrushGPUAllocator brushAllocator;
 
         MapRender();
 

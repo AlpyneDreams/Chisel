@@ -46,5 +46,10 @@ namespace chisel
             const vec3 v2 = c - b;
             return glm::normalize(glm::cross(v1, v2));
         }
+
+        float Dist() const
+        {
+            return -offset;
+        }
     };
 }

@@ -4,7 +4,7 @@
 #include "console/Console.h"
 
 #include "math/AABB.h"
-#include "map/Volume.h"
+#include "math/Math.h"
 #include <optional>
 #include <unordered_map>
 
@@ -25,7 +25,6 @@ namespace chisel
         virtual void Transform(const mat4x4& matrix) = 0;
         virtual void Delete() = 0;
         virtual void AlignToGrid(vec3 gridSize) = 0;
-        virtual void SetVolume(Volume volume) = 0;
     protected:
         friend class Selection;
 
@@ -63,7 +62,6 @@ namespace chisel
         void Transform(const mat4x4& matrix) final override { for (auto* s : m_selection) s->Transform(matrix); }
         void Delete() final override;
         void AlignToGrid(vec3 gridSize) final override { for (auto* s : m_selection) s->AlignToGrid(gridSize); }
-        void SetVolume(Volume volume) final override { for (auto* s : m_selection) s->SetVolume(volume); }
 
     private:
         std::vector<Selectable*> m_selection;

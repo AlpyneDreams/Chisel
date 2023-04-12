@@ -31,6 +31,8 @@ namespace chisel
         Tool activeTool = Tool::Translate;
         SelectMode selectMode = SelectMode::Groups;
 
+        std::unique_ptr<BrushGPUAllocator> brushAllocator;
+
         /*
         uint GetSelectionID(VMF::MapEntity& ent, VMF::Solid& solid)
         {

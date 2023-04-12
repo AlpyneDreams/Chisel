@@ -1,12 +1,11 @@
 #pragma once
 
 #include "core/VertexLayout.h"
+#include "math/Math.h"
 #include "chisel/Selection.h"
 #include "render/Render.h"
 
 #include "../submodules/OffsetAllocator/offsetAllocator.hpp"
-
-#include "Volume.h"
 
 namespace chisel
 {
@@ -16,7 +15,7 @@ namespace chisel
         void Delete() final override { Console.Error("Need a reference to the map in here to kill myself."); }
     };
 
-    struct VertexCSG
+    struct VertexSolid
     {        
         vec3 position;
         vec3 normal;
@@ -54,22 +53,28 @@ namespace chisel
 
         void open()
         {
-            assert(m_base == nullptr);
-            D3D11_MAPPED_SUBRESOURCE mapped;
-            HRESULT hr = m_rctx.ctx->Map(m_buffer.ptr(), 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &mapped);
-            if (FAILED(hr))
+            if (m_refs++ == 0)
             {
-                // fuck.
-                return;
+                assert(m_base == nullptr);
+
+                D3D11_MAPPED_SUBRESOURCE mapped;
+                HRESULT hr = m_rctx.ctx->Map(m_buffer.ptr(), 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &mapped);
+                if (FAILED(hr))
+                {
+                    abort();
+                }
+                m_base = (uint8_t*)mapped.pData;
             }
-            m_base = (uint8_t*)mapped.pData;
         }
 
         void close()
         {
-            assert(m_base != nullptr);
-            m_rctx.ctx->Unmap(m_buffer.ptr(), 0);
-            m_base = nullptr;
+            if (--m_refs == 0)
+            {
+                assert(m_base != nullptr);
+                m_rctx.ctx->Unmap(m_buffer.ptr(), 0);
+                m_base = nullptr;
+            }
         }
 
         uint8_t* data()
@@ -98,6 +103,6 @@ namespace chisel
 
         Com<ID3D11Buffer>          m_buffer;
         uint8_t*                   m_base = nullptr;
-
+        uint32_t                   m_refs = 0;
     };
 }

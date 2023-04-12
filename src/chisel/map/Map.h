@@ -3,9 +3,6 @@
 #include <list>
 
 #include "core/Mesh.h"
-#include "../CSG/Brush.h"
-#include "../CSG/CSGTree.h"
-
 #include "Common.h"
 #include "Solid.h"
 
@@ -23,7 +20,6 @@ namespace chisel
         std::optional<AABB> GetBounds() const override { return std::nullopt; }
         void Transform(const mat4x4& matrix) override { /* Do Nothing */ }
         void AlignToGrid(vec3 gridSize) override { /* Do Nothing */ }
-        void SetVolume(Volume volume) override { /* Do Nothing */ }
     };
 
     struct PointEntity final : Entity
@@ -34,58 +30,43 @@ namespace chisel
         std::optional<AABB> GetBounds() const final override { return AABB(origin - vec3(32), origin + vec3(32)); }
         void Transform(const mat4x4& matrix) final override { origin = matrix * vec4(origin, 1); }
         void AlignToGrid(vec3 gridSize) final override { origin = math::Snap(origin, gridSize); }
-        void SetVolume(Volume volume) final override { /* Do Nothing */ }
     };
 
     struct BrushEntity : Entity
     {
-    protected:
-        std::list<Solid>    solids;
-        CSG::CSGTree        tree;
-
     public:
         BrushEntity()
         {
-            tree.SetVoidVolume(Volumes::Air);
         }
 
         ~BrushEntity()
         {
-            solids.clear();
         }
 
-        Solid& AddBrush(Volume volume = Volumes::Auto)
+        Solid& AddBrush(std::vector<Side> sides)
         {
-            return solids.emplace_back(tree.CreateBrush(), volume);
+            return m_solids.emplace_back(sides);
         }
 
-        Solid& AddCube(mat4x4 transform = glm::identity<mat4x4>(), vec3 size = vec3(64.f), Volume volume = Volumes::Auto)
+        Solid& AddCube(mat4x4 transform = glm::identity<mat4x4>(), vec3 size = vec3(64.f))
         {
-            solids.push_back(CubeBrush(tree.CreateBrush(), volume, size, transform));
-            return solids.back();
+            return AddBrush(CreateCubeBrush(size, transform));
         }
 
         void RemoveBrush(const Solid& brush)
         {
-            solids.remove(brush);
+            m_solids.remove(brush);
         }
 
-        virtual void Rebuild(BrushGPUAllocator& a)
-        {
-            auto rebuilt = tree.Rebuild();
-            for (CSG::Brush* brush : rebuilt)
-                brush->GetUserdata<Solid*>()->UpdateMesh(a);
-        }
-
-        auto begin() { return solids.begin(); }
-        auto end() { return solids.end(); }
+        auto begin() { return m_solids.begin(); }
+        auto end()   { return m_solids.end(); }
 
     // Selectable Interface //
 
         std::optional<AABB> GetBounds() const final override
         {
             std::optional<AABB> bounds;
-            for (const Solid& selectable : solids)
+            for (const Solid& selectable : m_solids)
             {
                 auto selectedBounds = selectable.GetBounds();
                 if (!selectedBounds)
@@ -99,11 +80,10 @@ namespace chisel
             return bounds;
         }
 
-        void Transform(const mat4x4& matrix) final override { for (auto& b : solids) b.Transform(matrix); }
-        void AlignToGrid(vec3 gridSize) final override { for (auto& b : solids) b.AlignToGrid(gridSize); }
-        void SetVolume(Volume volume) final override { for (auto& b : solids) b.SetVolume(volume); }
-
-        const CSG::CSGTree& GetTree() const { return tree; }
+        void Transform(const mat4x4& matrix) final override { for (auto& b : m_solids) b.Transform(matrix); }
+        void AlignToGrid(vec3 gridSize) final override { for (auto& b : m_solids) b.AlignToGrid(gridSize); }
+    protected:
+        std::list<Solid> m_solids;
     };
 
     /**
@@ -116,23 +96,14 @@ namespace chisel
         // TODO: Polymorphic linked list
         std::vector<Entity*> entities;
 
-
-        void Rebuild(BrushGPUAllocator& a) final override
+        bool Empty() const
         {
-            BrushEntity::Rebuild(a);
-
-            for (Entity* ent : entities)
-                if (BrushEntity* brush = dynamic_cast<BrushEntity*>(ent))
-                    brush->Rebuild(a);
-        }
-
-        bool Empty() const {
-            return solids.empty() && entities.empty();
+            return m_solids.empty() && entities.empty();
         }
 
         void Clear()
         {
-            solids.clear();
+            m_solids.clear();
             for (Entity* ent : entities)
                 delete ent;
             entities.clear();
@@ -148,29 +119,9 @@ namespace chisel
             return ent;
         }
 
-        Map() : BrushEntity()
+        Map()
+            : BrushEntity()
         {
-            //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Solid));
-            //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(0.25, 2.0, 0.25))));
-            //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Air, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.25f, 0.25))));
-            //solids.push_back(CubeBrush(tree.CreateBrush(), Volumes::Solid, glm::scale(CSG::Matrix4(1.0), CSG::Vector3(2.0, 0.10f, 0.10))));
-
-            // Per-frame test
-            /*if (tunnel && tunnel2)
-            {
-                static const CSG::Matrix4 tunnelOrigTransform = tunnel->GetTransform();
-                static const CSG::Matrix4 tunnel2OrigTransform = tunnel2->GetTransform();
-                float time = 0.0f;//Time::GetTime();
-                tunnel->SetTransform(
-                    glm::rotate(CSG::Matrix4(1), math::radians(time), CSG::Vector3(0,1,0)) *
-                    tunnelOrigTransform
-                );
-                tunnel2->SetTransform(
-                    glm::rotate(CSG::Matrix4(1), math::radians(time), CSG::Vector3(0,1,0)) *
-                    tunnel2OrigTransform
-                );
-            }*/
-
         }
     };
 }

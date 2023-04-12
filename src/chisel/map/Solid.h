@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../CSG/Brush.h"
-#include "../CSG/CSGTree.h"
 #include "console/ConVar.h"
 #include "chisel/Selection.h"
 #include "assets/Assets.h"
@@ -14,11 +12,14 @@
 
 #include <memory>
 #include <unordered_map>
+#include <array>
 
 namespace chisel
 {
-    struct SideData
+    struct Side
     {
+        Plane plane{};
+
         Material *material{};
         std::array<vec4, 2> textureAxes{};
         std::array<float, 2> scale{ 1.0f, 1.0f };
@@ -31,8 +32,8 @@ namespace chisel
 
     struct BrushMesh
     {
-        std::vector<VertexCSG> vertices;
-        std::vector<uint32_t>  indices;
+        std::vector<VertexSolid> vertices;
+        std::vector<uint32_t>    indices;
 
         std::optional<BrushGPUAllocator::Allocation> alloc;
         Material *material = nullptr;
@@ -44,360 +45,44 @@ namespace chisel
     extern ConVar<bool>  trans_texture_scale_lock;
     extern ConVar<bool>  trans_texture_face_alignment;
 
-    inline CSG::VolumeOperation CreateSourceContentsVolumeOperation(Volume target)
+    struct Face
     {
-        return [=](CSG::VolumeID _current)
-        {
-            Volume current = static_cast<Volume>(_current);
-            assert(current != Volume::Auto && target != Volume::Auto);
-
-            if (current == Volume::Window || target == Volume::Window)
-            {
-                if (current == Volume::Air)
-                    return static_cast<CSG::VolumeID>(target);
-
-                return static_cast<CSG::VolumeID>(current);
-            }
-
-            return static_cast<CSG::VolumeID>(target);
-        };
-    }
+        Side* side;
+        std::vector<vec3> points;
+    };
 
     struct Solid : Atom
     {
-    protected:
-        CSG::Brush*             brush;
-        Volume                  m_volume     = Volume::Auto;
-        Volume                  m_realVolume = Volume::Auto;
-
-        std::vector<BrushMesh>  meshes;
-        Color                   tempcolor;
-
     public:
-        Solid(CSG::Brush& brush, Volume volume)
-            : brush(&brush), m_volume(volume)
-        {
-            UpdateVolume();
-            brush.userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
+        Solid();
+        Solid(std::vector<Side> sides, bool initMesh = true);
+        Solid(Solid&& other);
+        ~Solid();
 
-            srand(brush.GetObjectID());
-            tempcolor = Color::HSV((float)(rand() % 360), 0.7f, 1.0f);
+        // What the fuck, why do I need this?
+        bool operator == (const Solid& other) const
+        {
+            return this == &other;
         }
 
-        Solid(Solid&& that)
-        {
-            this->brush = that.brush;
-            this->brush->userdata = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this));
-            that.brush = nullptr;
+        std::vector<BrushMesh>& GetMeshes() { return m_meshes; }
 
-            this->m_volume = that.m_volume;
-            this->m_realVolume = that.m_realVolume;
-
-            this->meshes = std::move(that.meshes);
-            that.meshes.clear();
-
-            this->m_sides = std::move(that.m_sides);
-            that.m_sides.clear();
-
-            this->tempcolor = that.tempcolor;
-            UpdateVolume();
-
-        }
-        
-        ~Solid()
-        {
-            if (brush)
-                brush->GetTree()->DestroyBrush(*brush);
-        }
-
-        bool operator ==(const Solid& that) const
-        {
-            return brush == that.brush
-                && brush != nullptr
-                && that.brush != nullptr;
-        }
-
-        void SetSides(CSG::Side *begin_side, CSG::Side *end_side, SideData* begin_data, SideData* end_data)
-        {
-            GetBrush().SetSides(begin_side, end_side);
-            m_sides = std::vector<SideData>(begin_data, end_data);
-            UpdateVolume();
-        }
-
-        void UpdateMesh(BrushGPUAllocator& a)
-        {
-            // TODO: Avoid clearing meshes out every time.
-            for (auto& mesh : meshes)
-            {
-                if (mesh.alloc)
-                {
-                    a.free(*mesh.alloc);
-                    mesh.alloc = std::nullopt;
-                }
-            }
-            meshes.clear();
-
-            static const SideData defaultSide;
-
-            // Create one mesh for each unique material
-            size_t materialCount = 0;
-            std::unordered_map<Material*, size_t> uniqueMaterial;
-            for (auto& face : brush->GetFaces())
-            {
-                const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
-                if (!uniqueMaterial.contains(data.material))
-                    uniqueMaterial.emplace(data.material, materialCount++);
-            }
-
-            meshes.resize(materialCount);
-
-            render::RenderContext& r = a.rctx();
-
-            for (auto& face : brush->GetFaces())
-            {
-                const SideData& data = m_sides.empty() ? defaultSide : m_sides[face.side->userdata];
-
-                BrushMesh& mesh = meshes[uniqueMaterial[data.material]];
-                mesh.material = data.material;
-                mesh.brush = this;
-
-                for (auto& fragment : face.fragments)
-                {
-                    if (fragment.back.volume == fragment.front.volume)
-                        continue;
-
-                    const bool flipFace = fragment.back.volume == Volumes::Air;
-                    const vec3 normal = flipFace
-                        ? -face.side->plane.normal
-                        :  face.side->plane.normal;
-
-                    const size_t startIndex = mesh.vertices.size();
-
-                    for (const auto& vert : fragment.vertices)
-                    {
-                        float mappingWidth = 32.0f;
-                        float mappingHeight = 32.0f;
-                        if (data.material != nullptr && data.material->baseTexture != nullptr && data.material->baseTexture->texture != nullptr)
-                        {
-                            D3D11_TEXTURE2D_DESC desc;
-                            data.material->baseTexture->texture->GetDesc(&desc);
-
-                            mappingWidth = float(desc.Width);
-                            mappingHeight = float(desc.Height);
-                        }
-
-                        float u = glm::dot(glm::vec3(data.textureAxes[0].xyz), glm::vec3(vert.position)) / data.scale[0] + data.textureAxes[0].w;
-                        float v = glm::dot(glm::vec3(data.textureAxes[1].xyz), glm::vec3(vert.position)) / data.scale[1] + data.textureAxes[1].w;
-
-                        u = mappingWidth  ? u / float(mappingWidth)  : 0.0f;
-                        v = mappingHeight ? v / float(mappingHeight) : 0.0f;
-
-                        mesh.vertices.emplace_back(vert.position, normal, glm::vec2(u, v));
-                    }
-
-                    std::vector<CSG::TriangleIndices> tris = fragment.Triangulate();
-                    for (const auto& tri : tris)
-                    {
-                        if (flipFace)
-                        {
-                            mesh.indices.push_back(startIndex + tri[0]);
-                            mesh.indices.push_back(startIndex + tri[2]);
-                            mesh.indices.push_back(startIndex + tri[1]);
-                        }
-                        else
-                        {
-                            mesh.indices.push_back(startIndex + tri[0]);
-                            mesh.indices.push_back(startIndex + tri[1]);
-                            mesh.indices.push_back(startIndex + tri[2]);
-                        }
-                    }
-                }
-            }
-
-            // Upload all meshes after they're complete
-            for (auto& mesh : meshes)
-            {
-                uint32_t verticesSize = sizeof(VertexCSG) * mesh.vertices.size();
-                uint32_t indicesSize = sizeof(uint32_t) * mesh.indices.size();
-                mesh.alloc = a.alloc(verticesSize + indicesSize);
-                // Store vertices then indices.
-                memcpy(&a.data()[mesh.alloc->offset + 0],            mesh.vertices.data(), verticesSize);
-                memcpy(&a.data()[mesh.alloc->offset + verticesSize], mesh.indices.data(),  indicesSize);
-            }
-        }
-
-        std::vector<SideData> m_sides;
-
-        CSG::ObjectID GetObjectID() const { return brush->GetObjectID(); }
-        CSG::Brush& GetBrush() { return *brush; }
-
-        std::vector<BrushMesh>& GetMeshes() { return meshes; }
-
-        // TODO: Remove me, debugging.
-        glm::vec4 GetTempColor() const { return tempcolor; }
+        void UpdateMesh();
 
     // Selectable Interface //
 
-        std::optional<AABB> GetBounds() const final override { return brush->GetBounds(); }
-        void Transform(const mat4x4& _matrix) final override
-        {
-            brush->Transform(_matrix);
-            for (auto& side : m_sides)
-            {
-                mat4x4 trans = _matrix;
+        std::optional<AABB> GetBounds() const final override { return m_bounds; }
 
-                bool locking = trans_texture_lock;
-                bool scaleLocking = trans_texture_scale_lock;
+        void Transform(const mat4x4& _matrix) final override;
+        void AlignToGrid(vec3 gridSize) final override;
 
-                vec3 delta = trans[3].xyz;
-                trans[3].xyz = glm::vec3(0.0f, 0.0f, 0.0f);
-                
-                bool moving = glm::length2(delta) > 0.00001f;
+    private:
+        std::vector<BrushMesh> m_meshes;
+        std::vector<Side> m_sides;
+        std::optional<AABB> m_bounds;
 
-                if (trans == glm::identity<glm::mat4x4>())
-                {
-                    if (moving && locking)
-                    {
-                        side.textureAxes[0][3] -= glm::dot(delta, vec3(side.textureAxes[0].xyz)) / side.scale[0];
-                        side.textureAxes[1][3] -= glm::dot(delta, vec3(side.textureAxes[1].xyz)) / side.scale[1];
-                    }
-
-                    continue;
-                }
-
-                vec3 u = side.textureAxes[0];
-                vec3 v = side.textureAxes[1];
-
-                float scaleU = glm::length(u);
-                float scaleV = glm::length(v);
-                if (scaleU <= 0.0f) scaleU = 1.0f;
-                if (scaleV <= 0.0f) scaleV = 1.0f;
-
-                u = glm::mat3(trans) * u;
-                v = glm::mat3(trans) * v;
-
-                scaleU = glm::length(u) / scaleU;
-                scaleV = glm::length(v) / scaleV;
-                if (scaleU <= 0.0f) scaleU = 1.0f;
-                if (scaleV <= 0.0f) scaleV = 1.0f;
-
-                bool uvAxisSameScale = math::CloseEnough(scaleU, 1.0f, 0.0001f) && math::CloseEnough(scaleV, 1.0f, 0.0001f);
-                bool uvAxisPerpendicular = math::CloseEnough(glm::dot(u, v), 0.0f, 0.0025f);
-
-                if (locking && uvAxisPerpendicular)
-                {
-                    side.textureAxes[0].xyz = u / scaleU;
-                    side.textureAxes[1].xyz = v / scaleV;
-                }
-
-                if (uvAxisSameScale)
-                {
-                    if (!locking)
-                    {
-                        // TODO: re-init
-                    }
-                }
-                else
-                {
-                    if (scaleLocking)
-                    {
-                        side.scale[0] *= scaleU;
-                        side.scale[1] *= scaleV;
-                    }
-                }
-
-                if (moving && locking)
-                {
-                    side.textureAxes[0][3] -= glm::dot(delta, vec3(side.textureAxes[0].xyz)) / side.scale[0];
-                    side.textureAxes[1][3] -= glm::dot(delta, vec3(side.textureAxes[1].xyz)) / side.scale[1];
-                }
-            }
-        }
-        void AlignToGrid(vec3 gridSize) final override { brush->AlignToGrid(gridSize); }
-        void SetVolume(Volume volume) final override { m_volume = volume; UpdateVolume(); }
-
-        void UpdateVolume()
-        {
-            Volume volume = m_volume;
-            if (volume == Volume::Auto)
-            {
-                bool translucent = false;
-                for (const auto& side : m_sides)
-                    translucent |= side.material && side.material->translucent;
-                volume = translucent ? Volume::Window : Volume::Solid;
-            }
-
-            if (m_realVolume == volume)
-                return;
-
-            m_realVolume = volume;
-            brush->SetVolumeOperation(CreateSourceContentsVolumeOperation(volume));
-        }
+        std::vector<Face> m_faces;
     };
 
-    inline void InitSideData(SideData& localSide, const CSG::Side& csgSide)
-    {
-        localSide.rotate = 0.0f;
-
-        localSide.textureAxes[0].w = 0.0f;
-        localSide.textureAxes[1].w = 0.0f;
-
-        localSide.scale[0] = 0.25f;
-        localSide.scale[1] = 0.25f;
-
-        localSide.textureAxes[0].xyz = vec3(0);
-        localSide.textureAxes[1].xyz = vec3(0);
-
-        Orientation orientation = Orientations::CalcOrientation(csgSide.plane);
-        if (orientation == Orientations::Invalid)
-            return;
-
-        localSide.textureAxes[1].xyz = Orientations::DownVectors[orientation];
-        if (trans_texture_face_alignment)
-        {
-            // Calculate true U axis
-            localSide.textureAxes[0].xyz = glm::normalize(
-                glm::cross(glm::vec3(localSide.textureAxes[1].xyz), csgSide.plane.normal));
-
-            // Now calculate the true V axis
-            localSide.textureAxes[1].xyz = glm::normalize(
-                glm::cross(csgSide.plane.normal, glm::vec3(localSide.textureAxes[0].xyz)));
-        }
-        else
-        {
-            localSide.textureAxes[0].xyz = Orientations::RightVectors[orientation];
-        }
-    }
-
-    inline Solid CubeBrush(CSG::Brush& brush, Volume volume, vec3 size = vec3(64.f), const mat4x4& transform = glm::identity<mat4x4>())
-    {
-        Solid cube = Solid(brush, volume);
-        
-        static const std::array<CSG::Plane, 6> kUnitCubePlanes =
-        {
-            CSG::Plane(vec3(+1,0,0), vec3(+1,0,0)),
-            CSG::Plane(vec3(-1,0,0), vec3(-1,0,0)),
-            CSG::Plane(vec3(0,+1,0), vec3(0,+1,0)),
-            CSG::Plane(vec3(0,-1,0), vec3(0,-1,0)),
-            CSG::Plane(vec3(0,0,+1), vec3(0,0,+1)),
-            CSG::Plane(vec3(0,0,-1), vec3(0,0,-1))
-        };
-
-        std::array<SideData, 6> localSides{};
-        std::array<CSG::Side, 6> csgSides{};
-        for (size_t i = 0; i < 6; i++)
-        {
-            SideData& localSide = localSides[i];
-            CSG::Side& csgSide = csgSides[i];
-
-            csgSide.plane = kUnitCubePlanes[i].Transformed(glm::scale(transform, size));
-            csgSide.userdata = i;
-
-            InitSideData(localSide, csgSide);
-        }
-
-        cube.SetSides(&csgSides.front(), &csgSides.back() + 1, &localSides.front(), &localSides.back() + 1);
-        
-        return cube;
-    }
+    std::vector<Side> CreateCubeBrush(vec3 size = vec3(64.f), const mat4x4& transform = glm::identity<mat4x4>());
 }

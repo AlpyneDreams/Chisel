@@ -7,8 +7,6 @@
 
 namespace chisel
 {
-    static ConVar<bool> r_rebuildworld("r_rebuildworld", true, "Rebuild world");
-
     static ConVar<bool> r_drawbrushes("r_drawbrushes", true, "Draw brushes");
     static ConVar<bool> r_drawworld("r_drawworld", true, "Draw world");
     static ConVar<bool> r_drawsprites("r_drawsprites", true, "Draw sprites");
@@ -17,14 +15,14 @@ namespace chisel
 
     MapRender::MapRender()
         : System()
-        , brushAllocator(r)
     {
     }
 
     void MapRender::Start()
     {
-        shader = render::Shader(r.device.ptr(), VertexCSG::Layout, "brush");
+        shader = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush");
         missingTexture = Assets.Load<Texture>("textures/error.png");
+        Chisel.brushAllocator = std::make_unique<BrushGPUAllocator>(r);
     }
 
     void MapRender::Update()
@@ -53,15 +51,6 @@ namespace chisel
         float2 size = Tools.rt_SceneView.GetSize();
         D3D11_VIEWPORT viewport = { 0, 0, size.x, size.y, 0.0f, 1.0f };
         r.ctx->RSSetViewports(1, &viewport);
-
-        if (r_rebuildworld)
-        {
-            // TODO: Refactor so we can rebuild but not upload
-            // Return bool if rebuild changed to open allocator etc.
-            brushAllocator.open();
-            map.Rebuild(brushAllocator);
-            brushAllocator.close();
-        }
 
         // TODO: Cull!
         if (r_drawbrushes)
@@ -160,10 +149,10 @@ namespace chisel
             r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
             r.ctx->PSSetConstantBuffers(1, 1, &r.cbuffers.brush);
 
-            UINT stride = sizeof(VertexCSG);
+            UINT stride = sizeof(VertexSolid);
             UINT vertexOffset = mesh->alloc->offset;
-            UINT indexOffset = vertexOffset + mesh->vertices.size() * sizeof(VertexCSG);
-            ID3D11Buffer* buffer = brushAllocator.buffer();
+            UINT indexOffset = vertexOffset + mesh->vertices.size() * sizeof(VertexSolid);
+            ID3D11Buffer* buffer = Chisel.brushAllocator->buffer();
             ID3D11ShaderResourceView *srv = nullptr;
             bool pointSample = false;
             if (mesh->material)
@@ -183,7 +172,7 @@ namespace chisel
             }
             r.ctx->PSSetShaderResources(0, 1, &srv);
             r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
-            r.ctx->IASetIndexBuffer(brushAllocator.buffer(), DXGI_FORMAT_R32_UINT, indexOffset);
+            r.ctx->IASetIndexBuffer(buffer, DXGI_FORMAT_R32_UINT, indexOffset);
             r.ctx->DrawIndexed(mesh->indices.size(), 0, 0);
             if (pointSample)
             {

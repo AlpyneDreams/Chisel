@@ -64,6 +64,7 @@ namespace chisel
                 vec3 normal = vec3(0, 0, 1);
                 vec3 point = vec3(0);
 
+#if 0
                 auto r_hit = map.GetTree().QueryRay(ray);
                 if (r_hit)
                 {
@@ -71,6 +72,7 @@ namespace chisel
                     normal = r_hit->face->side->plane.normal;
                     point = ray.GetPoint(r_hit->t);
                 }
+#endif
 
                 if (!hit)
                 {
@@ -186,16 +188,6 @@ namespace chisel
                 if (ImGui::Selectable( ICON_MC_GRID " Align to Grid"))
                     Selection.AlignToGrid(gridSize);
 
-                if (ImGui::BeginMenu(ICON_MC_CUBE_OUTLINE " Change Volume"))
-                {
-                    if (ImGui::MenuItem(ICON_MC_CUBE "Solid"))
-                        Selection.SetVolume(Volumes::Solid);
-
-                    if (ImGui::MenuItem(ICON_MC_CUBE_OUTLINE "Air"))
-                        Selection.SetVolume(Volumes::Air);
-
-                    ImGui::EndMenu();
-                }
                 ImGui::EndPopup();
             }
         }
