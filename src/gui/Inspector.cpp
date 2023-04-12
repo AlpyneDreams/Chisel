@@ -16,17 +16,21 @@
 namespace chisel
 {
     // These classes won't get a section, but their properties
-    // will be shown unless also hidden by HiddenVariables
+    // will still be shown unless also hidden or hoisted
     const std::unordered_set<Hash> HiddenClasses =
     {
         "EnableDisable"_hash
     };
 
-    const std::unordered_set<Hash> HiddenVariables =
+    const std::vector<Hash> HoistedVariables =
     {
-        // EnableDisable
-        "startdisabled"_hash
+        "targetname"_hash,
+        "origin"_hash,          // All PointClass entities
+        "spawnflags"_hash,
+        "startdisabled"_hash    // EnableDisable
     };
+
+    const std::unordered_set<Hash> HoistedVariableSet = {HoistedVariables.begin(), HoistedVariables.end()};
 
     Inspector::Inspector() : GUI::Window(ICON_MC_INFORMATION, "Inspector", 512, 512, true, ImGuiWindowFlags_MenuBar)
     {
@@ -100,22 +104,6 @@ namespace chisel
         ImVec2 cursorPos = ImGui::GetCursorPos();
         ImGui::SetCursorPos({cursorPos.x + iconSize + iconPadding, cursorPos.y});
 
-        // Draw enable/disable checkbox
-        if (cls.EnableDisable)
-        {
-            FGD::Var& startdisabled = cls.EnableDisable->variables.front();
-            if (startdisabled.hash == "startdisabled"_hash)
-            {
-                std::string invValue = ent->kv.contains("startdisabled") ? ent->kv["startdisabled"] : "0";
-                std::string value = invValue == "1" ? "0" : "1";
-                if (ValueInput(startdisabled, &value))
-                    ent->kv["startdisabled"] = value == "1" ? "0" : "1";
-                if (ImGui::IsItemHovered())
-                    ImGui::SetTooltip("Start Enabled");
-                ImGui::SameLine();
-            }
-        }
-
         // Draw classname picker
         if (ImGui::BeginCombo("##Class", ent->classname.c_str()))
         {
@@ -134,6 +122,7 @@ namespace chisel
             ImGui::EndCombo();
         }
         ImGui::SetCursorPos({cursorPos.x, cursorPos.y + iconSize + iconPadding});
+        ImGui::Separator();
 
         DrawProperties(&cls, ent);
     }
@@ -223,50 +212,88 @@ namespace chisel
         return ValueInput((std::string("##") + var.name).c_str(), var, value);
     }
 
-    inline bool Inspector::ValueInput(FGD::Var& var, Entity* ent)
+    inline bool Inspector::ValueInput(FGD::Var& var, Entity* ent, bool raw)
     {
         std::string str = "";
+        bool defaultVal = false;
 
         // Get value or default value
         if (ent->kv.contains(var.name))
             str = ent->kv[var.name];
-        else if (!var.defaultValue.empty())
+        else if (!var.defaultValue.empty()) {
             str = var.defaultValue;
+            defaultVal = true;
+        }
+
+        if (!defaultVal)
+            defaultVal = str == var.defaultValue;
 
         if (var.readOnly)
             ImGui::BeginDisabled();
 
-        bool modified = ValueInput(var, &str);
+        float cursorX, width = -FLT_MIN;
+
+        // Make space for reset button
+        if (!defaultVal)
+        {
+            cursorX = ImGui::GetCursorPosX();
+            width = ImGui::GetContentRegionAvail().x - 26.;
+        }
+        ImGui::SetNextItemWidth(width);
+
+        bool modified = raw
+            ? ImGui::InputText((std::string("##") + var.name).c_str(), &str)
+            : ValueInput(var, &str);
+
+        // Reset button
+        if (!defaultVal)
+        {
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(cursorX + width + 2.f);
+            if (defaultVal)
+                ImGui::BeginDisabled();
+
+            if (ImGui::Button(ICON_MC_ARROW_U_LEFT_TOP)) {
+                str = var.defaultValue;
+                modified = true;
+            }
+
+            if (defaultVal)
+                ImGui::EndDisabled();
+        }
 
         if (var.readOnly)
             ImGui::EndDisabled();
         else if (modified)
-            {} // TODO: Update var
+            ent->kv[var.name] = str;
 
         return modified;
     }
 
-    inline bool Inspector::RawInput(FGD::Var& var, Entity* ent)
+    inline void Inspector::BeginRow(FGD::Var& var, Entity* ent)
     {
-        std::string str = "";
+        ImGui::TableNextRow();
+        
+        if (ent->kv.contains(var.name) && ent->kv[var.name] != var.defaultValue)
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ModifiedColor);
 
-        // Get value or default value
-        if (ent->kv.contains(var.name))
-            str = ent->kv[var.name];
-        else if (!var.defaultValue.empty())
-            str = var.defaultValue;
+        ImGui::TableNextColumn();
+    }
 
-        if (var.readOnly)
-            ImGui::BeginDisabled();
+    inline void Inspector::VarLabel(const char* name)
+    {
+        ImGui::TextUnformatted(name);
 
-        bool modified = ImGui::InputText((std::string("##") + var.name).c_str(), &str);
+        ImGui::TableNextColumn();
+    }
 
-        if (var.readOnly)
-            ImGui::EndDisabled();
-        else if (modified && str != var.defaultValue)
-            ent->kv[var.name] = str;
+    inline void Inspector::VarLabel(FGD::Var& var)
+    {
+        const char* name = var.displayName.c_str();
+        if (var.type == FGD::Flags && var.displayName == "spawnflags")
+            name = "Flags";
 
-        return modified;
+        VarLabel(name);
     }
 
     void Inspector::DrawProperties(FGD::Class* cls, Entity* ent, bool root)
@@ -283,17 +310,7 @@ namespace chisel
                 if (!visited.contains(base->hash))
                     DrawProperties(base, ent, false);
 
-        // Draw (sub)class header
-        bool showHeader = debug || (
-            !HiddenClasses.contains(cls->hash) && !cls->variables.empty()
-        );
-        if (showHeader)
-        {
-            if (!ImGui::CollapsingHeader(cls->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                goto BaseClasses;
-        }
-
-        if (!ImGui::BeginTable("properties", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_PadOuterX))
+        if (!StartTable())
             return;
 
         //ImGui::TableSetupColumn("Property Name");
@@ -306,7 +323,7 @@ namespace chisel
             for (auto& [key, value] : ent->kv)
             {
                 auto hash = HashString(key);
-                if (!cls->HasVar(hash))
+                if (!cls->GetVar(hash))
                 {
                     ImGui::TableNextRow();
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, 0xff331f33);
@@ -318,40 +335,55 @@ namespace chisel
                 }
             }
 
-            // Draw special properties
-            if (cls->type != FGD::SolidClass)
+            // Draw hoisted and special properties
+            for (Hash hash : HoistedVariables)
             {
-                if (PointEntity* point = dynamic_cast<PointEntity*>(ent))
+                if (FGD::Var* var = cls->GetVar(hash); var && !debug)
                 {
-                    ImGui::TableNextRow(); ImGui::TableNextColumn();
-                    ImGui::TextUnformatted(debug ? "origin" : "Position");
-                    ImGui::TableNextColumn();
-                    ImGui::SetNextItemWidth(-FLT_MIN);
-                    ImGui::DragFloat3("##position", &point->origin.x);
+                    BeginRow(*var, ent);
+                    VarLabel(*var);
+                    ValueInput(*var, ent);
+                }
+                else if (hash == "origin"_hash && cls->type != FGD::SolidClass)
+                {
+                    if (PointEntity* point = dynamic_cast<PointEntity*>(ent))
+                    {
+                        ImGui::TableNextRow(); ImGui::TableNextColumn();
+                        ImGui::TextUnformatted(debug ? "origin" : "Position");
+                        ImGui::TableNextColumn();
+                        ImGui::SetNextItemWidth(-FLT_MIN);
+                        ImGui::DragFloat3("##position", &point->origin.x);
+                    }
                 }
             }
         }
 
-        for (int varNum = 0, varCount = cls->variables.size(); auto& var : cls->variables)
+        ImGui::EndTable();
+
+        // Draw (sub)class header
+        bool showHeader = debug || (
+            !HiddenClasses.contains(cls->hash) && !cls->variables.empty()
+        );
+        if (showHeader)
         {
-            if (!debug && HiddenVariables.contains(var.hash))
+            if (!ImGui::CollapsingHeader(cls->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                goto BaseClasses;
+        }
+
+        if (!StartTable())
+            return;
+
+        for (int varNum = 0, varCount = cls->variables.size(); auto& [hash, var] : cls->variables)
+        {
+            if (!debug && HoistedVariableSet.contains(hash))
                 continue;
 
-            ImGui::TableNextRow();
-
-            if (ent->kv.contains(var.name) && ent->kv[var.name] != var.defaultValue)
-            {
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, 0xff332e1f);
-            }
-            
-            ImGui::TableNextColumn();
+            BeginRow(var, ent);
 
             if (debug)
             {
-                ImGui::TextUnformatted(var.name.c_str());
-                ImGui::TableNextColumn();
-                ImGui::SetNextItemWidth(-FLT_MIN);
-                RawInput(var, ent);
+                VarLabel(var.name.c_str());
+                ValueInput(var, ent, true);
                 continue;
             }
 
@@ -368,14 +400,7 @@ namespace chisel
                 continue;
             }
 
-            const char* name = var.displayName.c_str();
-            if (var.type == FGD::Flags && var.displayName == "spawnflags")
-                name = "Flags";
-
-            ImGui::TextUnformatted(name);
-
-            ImGui::TableNextColumn();
-            ImGui::SetNextItemWidth(-FLT_MIN);
+            VarLabel(var);
             ValueInput(var, ent);
 
             varNum++;

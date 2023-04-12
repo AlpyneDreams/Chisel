@@ -17,6 +17,9 @@ namespace chisel
         using Dict = std::map<std::string, T>;
 
         template <class T>
+        using HashMap = std::map<Hash, T>;
+
+        template <class T>
         using List = std::vector<T>;
 
         friend struct FGDParser;
@@ -137,7 +140,7 @@ namespace chisel
         struct Class : Base
         {
             ClassType type;
-            List<Var> variables;
+            HashMap<Var> variables;
             Dict<InputOutput> inputs;
             Dict<InputOutput> outputs;
             List<Class*> bases;
@@ -145,9 +148,6 @@ namespace chisel
             Texture* texture = nullptr;
             int3 bbox[2] = {int3(-8, -8, -8), int3(8, 8, 8)};
             int3 color = int3(255, 255, 255);
-
-            // Special base classes
-            Class* EnableDisable = nullptr;
 
             Class* Get(Hash className)
             {
@@ -165,15 +165,14 @@ namespace chisel
                 bases.push_back(base);
             }
 
-            bool HasVar(Hash varName)
+            Var* GetVar(Hash varName)
             {
-                for (auto& var : variables)
-                    if (var.hash == varName)
-                        return true;
+                if (variables.contains(varName))
+                    return &variables[varName];
                 for (auto base : bases)
-                    if (base->HasVar(varName))
-                        return true;
-                return false;
+                    if (Var* var = base->GetVar(varName))
+                        return var;
+                return nullptr;
             }
         };
 

@@ -197,8 +197,6 @@ namespace chisel
                     for (auto& param : helper.params)
                         if (fgd.classes.contains(param))
                             cls.AddBase(&fgd.classes[param]);
-
-                    cls.EnableDisable = cls.Get("EnableDisable"_hash);
                 }
                 else if (helper.type == FGD::HelperType::SweptPlayerHull)
                 {
@@ -246,7 +244,7 @@ namespace chisel
         void ParseVar(FGD::Class& cls)
         {
             auto name = Expect(Tokens.Name);
-            FGD::Var& var = cls.variables.emplace_back();
+            FGD::Var var;
             var.name = name;
             var.hash = name.text.hash;
             Expect('(');
@@ -292,6 +290,7 @@ namespace chisel
                 Expect(']');
             }
             printdbg("    {}({})", var.name, var.type);
+            cls.variables.insert({var.hash, var});
         }
 
         void ParseInputOutput(FGD::Class& cls, bool input)
