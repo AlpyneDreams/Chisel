@@ -2,6 +2,7 @@
 
 #include "math/Math.h"
 #include "math/Ray.h"
+#include "math/Plane.h"
 #include "core/Transform.h"
 
 #include "platform/Window.h"
@@ -118,6 +119,14 @@ namespace chisel
             return size.x / size.y;
         }
 
+        void GetFOV(float& fovX, float& fovY)
+        {
+            fovX = fieldOfView;
+            if (scaleFOV)
+                fovX = ScaleFOVByWidthRatio(fovX, aspectRatio, (scaleFOVAspect.x / scaleFOVAspect.y));
+            fovY = CalcVerticalFOV(fovX, aspectRatio);
+        }
+
         // Projection matrix
         mat4x4 ProjMatrix()
         {
@@ -126,10 +135,8 @@ namespace chisel
 
             aspectRatio = AspectRatio();
 
-            float fovX = fieldOfView;
-            if (scaleFOV)
-                fovX = ScaleFOVByWidthRatio(fovX, aspectRatio, (scaleFOVAspect.x/scaleFOVAspect.y));
-            float fovY = CalcVerticalFOV(fovX, aspectRatio);
+            float fovX, fovY;
+            GetFOV(fovX, fovY);
 
             if (rightHanded)
                 proj = glm::perspectiveRH_ZO(math::radians(fovY), aspectRatio, near, far);
@@ -148,6 +155,26 @@ namespace chisel
 
         void ResetProjMatrix() {
             overrideProjMatrix = false;
+        }
+
+        Frustum CreateFrustum()
+        {
+            float fovX, fovY;
+            GetFOV(fovX, fovY);
+            const glm::vec3 frontMultFar = far * Forward();
+
+            const float halfVSide = far * tanf(fovY * .5f);
+            const float halfHSide = halfVSide * aspectRatio;
+
+            return Frustum
+            {
+                .topFace    = { position, glm::cross(Right(), frontMultFar - Up() * halfVSide) },
+                .bottomFace = { position, glm::cross(frontMultFar + Up() * halfVSide, Right()) },
+                .rightFace  = { position, glm::cross(frontMultFar - Right() * halfHSide, Up()) },
+                .leftFace   = { position, glm::cross(Up(),frontMultFar + Right() * halfHSide) },
+                .farFace    = { position + frontMultFar, -Forward() },
+                .nearFace   = { position + near * Forward(), Forward() },
+            };
         }
 
     private:
