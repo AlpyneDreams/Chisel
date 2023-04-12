@@ -28,7 +28,7 @@ namespace chisel::VMF
         Editor(kv::KeyValues& editor);
     };
 
-    struct MapAtom : kv::KeyValues
+    struct MapAtom
     {
         int id;
 

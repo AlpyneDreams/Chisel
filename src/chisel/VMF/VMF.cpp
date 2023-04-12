@@ -19,17 +19,19 @@ namespace chisel::VMF
         , comments            (std::string_view(editor["comments"]))
     {} 
 
-    MapAtom::MapAtom(KeyValues& atom) : KeyValues(atom),
-        id                  (atom["id"])
+    MapAtom::MapAtom(kv::KeyValues& atom)
+        : id                  (atom["id"])
     {}
 
-    MapClass::MapClass(KeyValues& atom) : MapAtom(atom),
-        editor              (atom["editor"])
+    MapClass::MapClass(kv::KeyValues& atom)
+        : MapAtom(atom)
+        , editor              (atom["editor"])
     {}
 
-    MapEntity::MapEntity(KeyValues& ent) : MapClass(ent),
-        classname           (std::string_view(ent["classname"])),
-        targetname          (std::string_view(ent["targetname"]))
+    MapEntity::MapEntity(kv::KeyValues& ent)
+        : MapClass(ent)
+        , classname           (std::string_view(ent["classname"]))
+        , targetname          (std::string_view(ent["targetname"]))
     {
         auto range = ent.FindAll("solid");
         while (range.first != range.second)
@@ -68,7 +70,8 @@ namespace chisel::VMF
         }
     }
 
-    World::World(KeyValues& world) : MapEntity(world)
+    World::World(kv::KeyValues& world)
+        : MapEntity(world)
     {}
 
     Visgroup::Visgroup(kv::KeyValues& visgroup)
@@ -117,6 +120,9 @@ namespace chisel::VMF
 
     static void AddSolid(BrushEntity& ent, const Solid& solid)
     {
+        if (solid.sides.empty())
+            return;
+
         std::vector<CSG::Side> sides;
         std::vector<SideData> side_data;
 

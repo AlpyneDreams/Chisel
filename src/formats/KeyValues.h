@@ -34,6 +34,38 @@ namespace chisel::kv
 
     class KeyValues;
 
+    #define fast_toupper( c ) ( ( ( (c) >= 'a' ) && ( (c) <= 'z' ) ) ? ( (c) - 32 ) : (c) )
+    #define fast_tolower( c ) ( ( ( (c) >= 'A' ) && ( (c) <= 'Z' ) ) ? ( (c) + 32 ) : (c) )
+
+    template <typename T>
+    static void hash_combine(size_t& s, const T& v)
+    {
+	    std::hash<T> h;
+	    s^= h(v) + 0x9e3779b9 + (s<< 6) + (s>> 2);
+    }
+
+    struct KVStringHash
+    {
+        size_t operator()(const std::string& key) const
+        {
+            size_t hash = 0;
+            for (char c : key)
+                hash_combine(hash, fast_tolower(c));
+            return hash;
+        }
+    };
+
+    struct KVStringEqual
+    {
+        bool operator()(const std::string& a, const std::string& b) const
+        {
+            if (a.size() != b.size())
+                return false;
+
+            return std::equal(a.begin(), a.end(), b.begin(), [](char a, char b) { return fast_tolower(a) == fast_tolower(b); });
+        }
+    };
+
     class KeyValuesVariant
     {
     public:
@@ -152,7 +184,7 @@ namespace chisel::kv
             auto iter = m_children.find(string);
             if (iter == m_children.end())
             {
-                std::cerr << "Returning KeyValuesVariant empty value: " << string << std::endl;
+                //std::cerr << "Returning KeyValuesVariant empty value: " << string << std::endl;
                 return KeyValuesVariant::GetEmptyValue();
             }
 
@@ -164,7 +196,7 @@ namespace chisel::kv
             auto iter = m_children.find(string);
             if (iter == m_children.end())
             {
-                std::cerr << "Returning KeyValuesVariant empty value: " << string << std::endl;
+                //std::cerr << "Returning KeyValuesVariant empty value: " << string << std::endl;
                 return KeyValuesVariant::GetEmptyValue();
             }
 
@@ -276,8 +308,7 @@ namespace chisel::kv
             return kv;
         }
 
-        std::string m_rootMemberName;
-        std::unordered_multimap<std::string, KeyValuesVariant> m_children;
+        std::unordered_multimap<std::string, KeyValuesVariant, KVStringHash, KVStringEqual> m_children;
     };
     inline KeyValues KeyValues::s_Nothing;
 

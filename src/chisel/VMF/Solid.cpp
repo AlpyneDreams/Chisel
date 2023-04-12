@@ -37,12 +37,13 @@ namespace chisel::VMF
         }
     }
 
-    Side::Side(KeyValues& side) : MapAtom(side),
-        plane               (side["plane"]),
-        material            (side["material"]),
-        rotation            (side["rotation"]),
-        lightmapscale       (side["lightmapscale"]),
-        smoothing_groups    (side["smoothing_groups"])
+    Side::Side(kv::KeyValues& side)
+        : MapAtom(side)
+        , plane               (side["plane"])
+        , material            (side["material"])
+        , rotation            (side["rotation"])
+        , lightmapscale       (side["lightmapscale"])
+        , smoothing_groups    (side["smoothing_groups"])
     {
         auto parseAxis = [&](std::string_view value, vec4& axis, float& scale)
         {
@@ -68,7 +69,8 @@ namespace chisel::VMF
     }
 
 
-    Solid::Solid(KeyValues& solid) : MapClass(solid)
+    Solid::Solid(kv::KeyValues& solid)
+        : MapClass(solid)
     {
         auto range = solid.FindAll("side");
         while (range.first != range.second)
