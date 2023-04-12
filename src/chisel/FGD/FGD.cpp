@@ -126,6 +126,7 @@ namespace chisel
             {
                 FGD::Helper& helper = cls.helpers.emplace_back();
                 helper.name = str::toLower(cur->text);
+                helper.hash = cur->text.hash;
                 helper.type = FGD::HelperType(HashedString(helper.name).hash);
 
                 cur++;
@@ -195,7 +196,9 @@ namespace chisel
                 {
                     for (auto& param : helper.params)
                         if (fgd.classes.contains(param))
-                            cls.bases.push_back(&fgd.classes.at(param));
+                            cls.AddBase(&fgd.classes[param]);
+
+                    cls.EnableDisable = cls.Get("EnableDisable"_hash);
                 }
                 else if (helper.type == FGD::HelperType::SweptPlayerHull)
                 {
@@ -206,7 +209,9 @@ namespace chisel
                 
             }
             Expect('=');
-            cls.name = Expect(Tokens.Name);
+            auto name = Expect(Tokens.Name);
+            cls.name = name;
+            cls.hash = name.text.hash;
             cls.description = ParseDescription();
 
             printdbg("@{} = {} : {}", type, cls.name, cls.description);
@@ -243,6 +248,7 @@ namespace chisel
             auto name = Expect(Tokens.Name);
             FGD::Var& var = cls.variables.emplace_back();
             var.name = name;
+            var.hash = name.text.hash;
             Expect('(');
             auto typeName = str::toLower(Expect(Tokens.Name).text);
             var.type = FGD::VarType(HashedString(typeName).hash);
@@ -293,6 +299,7 @@ namespace chisel
             auto name = Expect(Tokens.Name);
             FGD::InputOutput& io = (input ? cls.inputs : cls.outputs).try_emplace(name).first->second;
             io.name = name;
+            io.hash = name.text.hash;
             Expect('(');
             io.type = Expect(Tokens.Name);
             Expect(')');

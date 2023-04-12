@@ -3,7 +3,6 @@
 #include <list>
 
 #include "core/Mesh.h"
-#include "Common.h"
 #include "../CSG/Brush.h"
 #include "../CSG/CSGTree.h"
 

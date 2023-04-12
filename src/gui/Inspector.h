@@ -2,6 +2,7 @@
 
 #include "gui/Common.h"
 #include "gui/Window.h"
+#include "chisel/FGD/FGD.h"
 
 namespace chisel
 {
@@ -21,5 +22,11 @@ namespace chisel
 
         Texture* defaultIcon;
         Texture* defaultIconBrush;
+
+        void DrawProperties(FGD::Class* cls, Entity* ent, bool root = true);
+        bool ValueInput(FGD::Var& var, Entity* ent);
+        bool RawInput(FGD::Var& var, Entity* ent);
+        bool ValueInput(FGD::Var& var, std::string* value);
+        bool ValueInput(const char* name, FGD::Var& var, std::string* value);
     };
 }

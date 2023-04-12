@@ -108,6 +108,7 @@ namespace chisel
         struct Base
         {
             std::string name;
+            Hash hash;
             std::string description;
         };
 
@@ -127,10 +128,9 @@ namespace chisel
             std::string type; // TODO: Enum
         };
 
-        struct Helper
+        struct Helper : Base
         {
             HelperType type;
-            std::string name;
             List<std::string> params;
         };
 
@@ -145,6 +145,36 @@ namespace chisel
             Texture* texture = nullptr;
             int3 bbox[2] = {int3(-8, -8, -8), int3(8, 8, 8)};
             int3 color = int3(255, 255, 255);
+
+            // Special base classes
+            Class* EnableDisable = nullptr;
+
+            Class* Get(Hash className)
+            {
+                if (hash == className)
+                    return this;
+
+                for (auto base : bases)
+                    if (Class* c = base->Get(className))
+                        return c;
+                return nullptr;
+            }
+
+            void AddBase(Class* base)
+            {
+                bases.push_back(base);
+            }
+
+            bool HasVar(Hash varName)
+            {
+                for (auto& var : variables)
+                    if (var.hash == varName)
+                        return true;
+                for (auto base : bases)
+                    if (base->HasVar(varName))
+                        return true;
+                return false;
+            }
         };
 
         std::string path;

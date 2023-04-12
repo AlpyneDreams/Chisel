@@ -1,6 +1,7 @@
 #include "Inspector.h"
 
 #include "imgui.h"
+#include "common/Hash.h"
 #include "chisel/Chisel.h"
 #include "chisel/FGD/FGD.h"
 #include "chisel/map/Map.h"
@@ -14,6 +15,19 @@
 
 namespace chisel
 {
+    // These classes won't get a section, but their properties
+    // will be shown unless also hidden by HiddenVariables
+    const std::unordered_set<Hash> HiddenClasses =
+    {
+        "EnableDisable"_hash
+    };
+
+    const std::unordered_set<Hash> HiddenVariables =
+    {
+        // EnableDisable
+        "startdisabled"_hash
+    };
+
     Inspector::Inspector() : GUI::Window(ICON_MC_INFORMATION, "Inspector", 512, 512, true, ImGuiWindowFlags_MenuBar)
     {
         defaultIcon = Assets.Load<Texture>("textures/ui/entity.png");
@@ -44,6 +58,7 @@ namespace chisel
             ImGui::EndMenuBar();
         }
 
+
         // If not locked, inspect current selection
         if (!locked)
         {
@@ -56,19 +71,20 @@ namespace chisel
                 locked = false;
                 return;
             }
-            
+
             DrawEntityInspector(target);
         }
     }
-
-    static inline void DrawProperties(FGD::Class* cls, Entity* ent, bool root = true);
 
     void Inspector::DrawEntityInspector(Entity* ent)
     {
         FGD::Class cls = Chisel.fgd->classes[ent->classname];
 
+        constexpr float iconSize = 64;
+        constexpr float iconPadding = 8;
+
         ImVec2 screenPos = ImGui::GetCursorScreenPos();
-        ImVec2 endPos = ImVec2(screenPos.x + 32, screenPos.y + 32);
+        ImVec2 endPos = ImVec2(screenPos.x + iconSize, screenPos.y + iconSize);
 
         // Draw entity icon
         Texture* tex = cls.texture;
@@ -82,8 +98,25 @@ namespace chisel
             );
 
         ImVec2 cursorPos = ImGui::GetCursorPos();
-        ImGui::SetCursorPos({cursorPos.x + 40, cursorPos.y});
+        ImGui::SetCursorPos({cursorPos.x + iconSize + iconPadding, cursorPos.y});
 
+        // Draw enable/disable checkbox
+        if (cls.EnableDisable)
+        {
+            FGD::Var& startdisabled = cls.EnableDisable->variables.front();
+            if (startdisabled.hash == "startdisabled"_hash)
+            {
+                std::string invValue = ent->kv.contains("startdisabled") ? ent->kv["startdisabled"] : "0";
+                std::string value = invValue == "1" ? "0" : "1";
+                if (ValueInput(startdisabled, &value))
+                    ent->kv["startdisabled"] = value == "1" ? "0" : "1";
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("Start Enabled");
+                ImGui::SameLine();
+            }
+        }
+
+        // Draw classname picker
         if (ImGui::BeginCombo("##Class", ent->classname.c_str()))
         {
             for (auto& [name, cls] : Chisel.fgd->classes)
@@ -100,12 +133,13 @@ namespace chisel
             }
             ImGui::EndCombo();
         }
-        ImGui::SetCursorPos({cursorPos.x, cursorPos.y + 40});
+        ImGui::SetCursorPos({cursorPos.x, cursorPos.y + iconSize + iconPadding});
 
         DrawProperties(&cls, ent);
     }
-    
-    static inline bool ValueInput(const char* name, FGD::Var& var, std::string* value)
+
+    // TODO: Variants
+    inline bool Inspector::ValueInput(const char* name, FGD::Var& var, std::string* value)
     {
         using enum FGD::VarType;
         auto type = var.type;
@@ -117,7 +151,14 @@ namespace chisel
             default:        return ImGui::TextUnformatted(value->c_str()), false;
             case Integer:   return ImGui::InputInt(name, &i);
             case Float:     return ImGui::InputFloat(name, &v[0]);
-            case Boolean:   return ImGui::Checkbox(name, &b);
+            case Boolean:
+            {
+                if (ImGui::Checkbox(name, &b)) {
+                    *value = b ? "1" : "0";
+                    return true;
+                }
+                return false;
+            }
             case TargetSrc:
             case TargetDest:
             case TargetNameOrClass: // TODO: Entity pickers
@@ -177,7 +218,12 @@ namespace chisel
         }
     }
 
-    static inline bool ValueInput(FGD::Var& var, Entity* ent)
+    inline bool Inspector::ValueInput(FGD::Var& var, std::string* value)
+    {
+        return ValueInput((std::string("##") + var.name).c_str(), var, value);
+    }
+
+    inline bool Inspector::ValueInput(FGD::Var& var, Entity* ent)
     {
         std::string str = "";
 
@@ -190,7 +236,7 @@ namespace chisel
         if (var.readOnly)
             ImGui::BeginDisabled();
 
-        bool modified = ValueInput((std::string("##") + var.name).c_str(), var, &str);
+        bool modified = ValueInput(var, &str);
 
         if (var.readOnly)
             ImGui::EndDisabled();
@@ -200,47 +246,114 @@ namespace chisel
         return modified;
     }
 
-    static inline void DrawProperties(FGD::Class* cls, Entity* ent, bool root)
+    inline bool Inspector::RawInput(FGD::Var& var, Entity* ent)
     {
-        static std::unordered_set<std::string> visited;
+        std::string str = "";
+
+        // Get value or default value
+        if (ent->kv.contains(var.name))
+            str = ent->kv[var.name];
+        else if (!var.defaultValue.empty())
+            str = var.defaultValue;
+
+        if (var.readOnly)
+            ImGui::BeginDisabled();
+
+        bool modified = ImGui::InputText((std::string("##") + var.name).c_str(), &str);
+
+        if (var.readOnly)
+            ImGui::EndDisabled();
+        else if (modified && str != var.defaultValue)
+            ent->kv[var.name] = str;
+
+        return modified;
+    }
+
+    void Inspector::DrawProperties(FGD::Class* cls, Entity* ent, bool root)
+    {
+        static std::unordered_set<Hash> visited;
         if (root)
             visited.clear();
 
-        visited.insert(cls->name);
+        visited.insert(cls->hash);
 
+        // Draw nested base classes first
         if (!root)
             for (FGD::Class* base : cls->bases)
-                if (!visited.contains(base->name))
+                if (!visited.contains(base->hash))
                     DrawProperties(base, ent, false);
 
-        if (cls->variables.empty())
-            return;
+        // Draw (sub)class header
+        bool showHeader = debug || (
+            !HiddenClasses.contains(cls->hash) && !cls->variables.empty()
+        );
+        if (showHeader)
+        {
+            if (!ImGui::CollapsingHeader(cls->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                goto BaseClasses;
+        }
 
-        if (!root && !ImGui::CollapsingHeader(cls->name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-            return;
-
-        if (!ImGui::BeginTable("properties", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable))
+        if (!ImGui::BeginTable("properties", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_PadOuterX))
             return;
 
         //ImGui::TableSetupColumn("Property Name");
         //ImGui::TableSetupColumn("Value");
         //ImGui::TableHeadersRow();
-
-        if (root && cls->type != FGD::SolidClass)
+        
+        if (root)
         {
-            if (PointEntity* point = dynamic_cast<PointEntity*>(ent))
+            // Draw unrecognized properties
+            for (auto& [key, value] : ent->kv)
             {
-                ImGui::TableNextRow(); ImGui::TableNextColumn();
-                ImGui::TextUnformatted("Position");
-                ImGui::TableNextColumn();
-                ImGui::SetNextItemWidth(-FLT_MIN);
-                ImGui::DragFloat3("##position", &point->origin.x);
+                auto hash = HashString(key);
+                if (!cls->HasVar(hash))
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, 0xff331f33);
+                    ImGui::TableNextColumn();
+                    ImGui::TextUnformatted(key.c_str());
+                    ImGui::TableNextColumn();
+                    ImGui::SetNextItemWidth(-FLT_MIN);
+                    ImGui::InputText((std::string("##") + key).c_str(), &value);
+                }
+            }
+
+            // Draw special properties
+            if (cls->type != FGD::SolidClass)
+            {
+                if (PointEntity* point = dynamic_cast<PointEntity*>(ent))
+                {
+                    ImGui::TableNextRow(); ImGui::TableNextColumn();
+                    ImGui::TextUnformatted(debug ? "origin" : "Position");
+                    ImGui::TableNextColumn();
+                    ImGui::SetNextItemWidth(-FLT_MIN);
+                    ImGui::DragFloat3("##position", &point->origin.x);
+                }
             }
         }
 
         for (int varNum = 0, varCount = cls->variables.size(); auto& var : cls->variables)
         {
-            ImGui::TableNextRow(); ImGui::TableNextColumn();
+            if (!debug && HiddenVariables.contains(var.hash))
+                continue;
+
+            ImGui::TableNextRow();
+
+            if (ent->kv.contains(var.name) && ent->kv[var.name] != var.defaultValue)
+            {
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, 0xff332e1f);
+            }
+            
+            ImGui::TableNextColumn();
+
+            if (debug)
+            {
+                ImGui::TextUnformatted(var.name.c_str());
+                ImGui::TableNextColumn();
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                RawInput(var, ent);
+                continue;
+            }
 
             // Some FGDs have separators that are purely cosmetic
             if (var.readOnly && var.displayName.find_first_not_of("-") == std::string::npos)
@@ -270,9 +383,12 @@ namespace chisel
 
         ImGui::EndTable();
 
+    BaseClasses:
+
         if (root)
             for (FGD::Class* base : cls->bases)
-                if (!visited.contains(base->name))
+                if (!visited.contains(base->hash))
                     DrawProperties(base, ent, false);
     }
 }
+
