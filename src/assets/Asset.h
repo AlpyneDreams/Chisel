@@ -8,13 +8,14 @@
 namespace chisel
 {
     using AssetID = uint;
+    static constexpr AssetID InvalidAssetID = 0;
     using AssetTable = std::unordered_map<fs::Path, struct Asset*>;
 
     struct Asset
     {
         using Path = fs::Path;
 
-        AssetID id = NextID++;
+        AssetID id = ++s_NextID;
 
         virtual ~Asset()
         {
@@ -41,7 +42,7 @@ namespace chisel
 
         static inline AssetTable AssetDB;
         static inline std::unordered_map<AssetID, Path> AssetPaths;
-        static inline AssetID NextID = 0;
+        static inline AssetID s_NextID = 0;
 
         static inline const fs::Path nullPath = fs::Path();
     };

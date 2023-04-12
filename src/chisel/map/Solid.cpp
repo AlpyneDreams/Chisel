@@ -2,6 +2,8 @@
 #include "chisel/Chisel.h"
 #include "common/Bit.h"
 
+#include <unordered_set>
+
 namespace chisel
 {
     inline void InitSideData(Side& side)
@@ -117,7 +119,7 @@ namespace chisel
         vec3 org = plane.normal * plane.Dist();
         vec3 right = glm::cross(up, plane.normal);
 
-        static constexpr float MaxTraceLength = 1.732050807569 * 32768.0f;
+        static constexpr float MaxTraceLength = 1.732050807569f * 32768.0f;
 
         up = up * MaxTraceLength;
         right = right * MaxTraceLength;
@@ -215,6 +217,9 @@ namespace chisel
 
     void Solid::UpdateMesh()
     {
+        static std::vector<uint32_t> shouldUse;
+        static std::unordered_set<AssetID> uniqueMaterials;
+
         BrushGPUAllocator& a = *Chisel.brushAllocator;
 
         // TODO: Avoid clearing meshes out every time.
@@ -226,14 +231,23 @@ namespace chisel
                 mesh.alloc = std::nullopt;
             }
         }
+
+        uniqueMaterials.clear();
+        uniqueMaterials.reserve(m_sides.size());
         m_meshes.clear();
         m_meshes.reserve(m_sides.size());
-
-        static std::vector<uint32_t> shouldUse;
+        m_faces.clear();
+        m_faces.reserve(m_sides.size());
         shouldUse.clear();
         shouldUse.resize(m_sides.size());
+
         for (uint32_t i = 0; i < m_sides.size(); i++)
         {
+            AssetID id = InvalidAssetID;
+            if (m_sides[i].material)
+                id = m_sides[i].material->id;
+            uniqueMaterials.insert(id);
+
             glm::vec3 normal0 = m_sides[i].plane.normal;
             float dist0 = m_sides[i].plane.Dist();
             if (normal0 == glm::vec3(0.0f))
@@ -255,10 +269,9 @@ namespace chisel
                 }
             }
         }
+        m_meshes.resize(uniqueMaterials.size());
 
         // Convert from sides as planes to faces.
-        m_faces.clear();
-        m_faces.reserve(m_sides.size());
         for (uint32_t i = 0; i < m_sides.size(); i++)
         {
             for (uint32_t mask = shouldUse[i]; mask; mask &= mask - 1)
@@ -331,13 +344,18 @@ namespace chisel
                 continue;
             uint32_t numIndices = (numVertices - 2) * 3;
 
-            // TODO re-dedupe meshes by texture per-solids
-            auto& mesh = m_meshes.emplace_back();
+            AssetID id = InvalidAssetID;
+            if (face.side->material)
+                id = face.side->material->id;
+
+            uint32_t meshIdx = std::distance(uniqueMaterials.begin(), uniqueMaterials.find(id));
+            auto& mesh = m_meshes[meshIdx];
             mesh.material = face.side->material;
             mesh.brush = this;
-
-            mesh.vertices.reserve(numVertices);
-            mesh.indices.reserve(numIndices);
+            uint32_t startingVertex = mesh.vertices.size();
+            uint32_t startingIndex = mesh.indices.size();
+            mesh.vertices.reserve(startingVertex + numVertices);
+            mesh.indices.reserve(startingIndex + numIndices);
             for (uint32_t i = 0; i < numVertices; i++)
             {
                 vec3 pos = face.points[i];
@@ -370,9 +388,9 @@ namespace chisel
             const uint32_t numPolygons = numIndices / 3;
             for (uint32_t i = 0; i < numPolygons; i++)
             {
-                mesh.indices.emplace_back(i + 2);
-                mesh.indices.emplace_back(i + 1);
-                mesh.indices.emplace_back(0);
+                mesh.indices.emplace_back(startingVertex + i + 2);
+                mesh.indices.emplace_back(startingVertex + i + 1);
+                mesh.indices.emplace_back(startingVertex);
             }
         }
 
