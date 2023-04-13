@@ -136,6 +136,17 @@ namespace chisel
             systems.erase(iterator);
         }
 
+        // Removes a single system
+        void RemoveSystem(System* system) {
+            for (auto it = systems.begin(); it != systems.end(); ++it) {
+                if (it->second.system.get() == system) {
+                    UnregisterCallbacks(it->second);
+                    systems.erase(it);
+                    return;
+                }
+            }
+        }
+
     // Iteration:
 
         Iterator begin() const {return systems.begin();}
@@ -150,7 +161,12 @@ namespace chisel
     protected:
 
         inline void Call(auto& event) {
-            for (auto& [sys, Func] : event) { Func(sys); }
+            int i = 0;
+            for (auto& [sys, Func] : event) {
+                // TODO: Why is this necessary?
+                if (i++ > event.size()) return;
+                Func(sys);
+            }
         }
 
         inline auto RegisterCallback(auto& event, System* system, SystemFunc* func) {
