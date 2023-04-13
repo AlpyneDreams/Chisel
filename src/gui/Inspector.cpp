@@ -257,12 +257,9 @@ namespace chisel
         return ValueInput((std::string("##") + var.name).c_str(), var, value);
     }
 
-    inline bool Inspector::ValueInput(const FGD::Var& var, Entity* ent, bool raw)
+    inline bool Inspector::GetKV(const FGD::Var& var, Entity* ent, kv::KeyValuesVariant*& kv)
     {
-        kv::KeyValuesVariant *kv = nullptr;
         bool defaultVal = false;
-
-        // Get value or default value
         if (ent->kv.Contains(var.name))
             kv = &ent->kv[var.name];
         else
@@ -271,11 +268,23 @@ namespace chisel
             defaultVal = true;
         }
 
-        if (!kv)
-            return false;
-
         if (!defaultVal)
-            defaultVal = kv->Get<std::string_view>() == var.defaultValue;
+        {
+            if (var.defaultValue.empty())
+                defaultVal = kv->IsDefault();
+            else
+                defaultVal = kv->Get<std::string_view>() == var.defaultValue;
+        }
+
+        return defaultVal;
+    }
+
+    inline bool Inspector::ValueInput(const FGD::Var& var, Entity* ent, bool raw)
+    {
+        kv::KeyValuesVariant *kv = nullptr;
+        bool defaultVal = false;
+
+        defaultVal = GetKV(var, ent, kv);
 
         if (var.readOnly)
             ImGui::BeginDisabled();
@@ -327,8 +336,11 @@ namespace chisel
     inline void Inspector::BeginRow(const FGD::Var& var, Entity* ent)
     {
         ImGui::TableNextRow();
+
+        kv::KeyValuesVariant* kv = nullptr;
+        bool defaultVal = GetKV(var, ent, kv);
         
-        if (ent->kv.Contains(var.name) && ent->kv[var.name] != var.defaultValue)
+        if (!defaultVal)
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ModifiedColor);
 
         ImGui::TableNextColumn();

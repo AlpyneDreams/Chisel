@@ -50,7 +50,7 @@ namespace chisel
 
         Solid& AddBrush(std::vector<Side> sides)
         {
-            return m_solids.emplace_back(sides);
+            return m_solids.emplace_back(this, sides);
         }
 
         Solid& AddCube(mat4x4 transform = glm::identity<mat4x4>(), vec3 size = vec3(64.f))
@@ -69,6 +69,7 @@ namespace chisel
     // Entity Interface //
 
         bool IsBrushEntity() const override { return true; }
+        virtual bool IsMap() { return false; }
 
     // Selectable Interface //
 
@@ -117,6 +118,8 @@ namespace chisel
                 delete ent;
             entities.clear();
         }
+
+        bool IsMap() final override { return true; }
 
         ~Map() { Clear(); }
 

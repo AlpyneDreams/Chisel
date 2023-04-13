@@ -43,6 +43,10 @@ namespace chisel
         if (ent->IsSelected())
             return;
 
+        Selectable* resolved;
+        while ((resolved = ent->ResolveSelectable()) != ent)
+            ent = resolved;
+
         ent->SetSelected(true);
         m_selection.emplace_back(ent);
     }
@@ -51,6 +55,10 @@ namespace chisel
     {
         if (!ent->IsSelected())
             return;
+
+        Selectable* resolved;
+        while ((resolved = ent->ResolveSelectable()) != ent)
+            ent = resolved;
 
         ent->SetSelected(false);
         if (m_selection.size() > 0)

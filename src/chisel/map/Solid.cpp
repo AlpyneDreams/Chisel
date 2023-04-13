@@ -40,12 +40,14 @@ namespace chisel
         }
     }
 
-    Solid::Solid()
+    Solid::Solid(BrushEntity* parent)
+        : m_parent(parent)
     {
     }
 
-    Solid::Solid(std::vector<Side> sides, bool initMesh)
-        : m_sides(std::move(sides))
+    Solid::Solid(BrushEntity* parent, std::vector<Side> sides, bool initMesh)
+        : m_parent(parent)
+        , m_sides(std::move(sides))
     {
         if (initMesh)
             UpdateMesh();
@@ -53,6 +55,9 @@ namespace chisel
 
     Solid::Solid(Solid&& other)
     {
+        this->m_parent = other.m_parent;
+        other.m_parent = nullptr;
+
         this->m_meshes = std::move(other.m_meshes);
         other.m_meshes.clear();
 
@@ -501,6 +506,23 @@ namespace chisel
         vec3 ref  = bounds->min;
         vec3 snap = math::Snap(bounds->min, gridSize);
         Transform(glm::translate(glm::identity<mat4x4>(), snap - ref));
+    }
+
+    Selectable* Solid::ResolveSelectable()
+    {
+        if (Chisel.selectMode == SelectMode::Solids)
+            return this;
+
+        // Groups/Objects
+        if (m_parent->IsMap())
+            return this;
+
+        return m_parent;
+    }
+
+    bool Solid::IsSelected() const
+    {
+        return Atom::IsSelected() || m_parent->IsSelected();
     }
 
     std::vector<Side> CreateCubeBrush(vec3 size, const mat4x4& transform)

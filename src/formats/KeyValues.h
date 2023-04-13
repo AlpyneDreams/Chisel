@@ -193,6 +193,8 @@ namespace chisel::kv
         KeyValuesType GetType() const { return m_type; }
 
         static KeyValuesVariant Parse(std::string_view view);
+
+        bool IsDefault() const;
     private:
         void UpdateString() const;
 
@@ -277,6 +279,8 @@ namespace chisel::kv
         {
             return m_children.emplace(std::string(name), KeyValuesVariant::Parse(std::forward<Args>(args)...))->second;
         }
+
+        bool empty() const { return m_children.empty(); }
     private:
         static KeyValues s_Nothing;
 
@@ -682,6 +686,13 @@ namespace chisel::kv
             return;
         }
 
+        if (m_type == Types::None)
+        {
+            std::memset(&m_data, 0, sizeof(m_data));
+            m_type = type;
+            return;
+        }
+
         if      (m_type == Types::Float   && type == Types::Vector2) Set(vec2(Get<double>(), 0.0f));
         else if (m_type == Types::Float   && type == Types::Vector3) Set(vec3(Get<double>(), 0.0f, 0.0f));
         else if (m_type == Types::Float   && type == Types::Vector4) Set(vec4(Get<double>(), 0.0f, 0.0f, 0.0f));
@@ -691,5 +702,22 @@ namespace chisel::kv
         else if (m_type == Types::Int     && type == Types::Float)   Set(double(Get<int>()));
         else
             abort();
+    }
+
+    inline bool KeyValuesVariant::IsDefault() const
+    {
+        switch (m_type)
+        {
+        default:
+        case Types::None:      return true;
+        case Types::String:    return m_str.empty();
+        case Types::Int:       return m_data.Get<int>() == 0;
+        case Types::Float:     return m_data.Get<double>() == 0;
+        case Types::Ptr:       return m_data.Get<void*>() == nullptr;
+        case Types::Vector2:   return m_data.Get<vec2>() == vec2(0.0f);
+        case Types::Vector3:   return m_data.Get<vec3>() == vec3(0.0f);
+        case Types::Vector4:   return m_data.Get<vec4>() == vec4(0.0f);
+        case Types::KeyValues: return m_data.Get<KeyValuesChild>()->empty();
+        }
     }
 }

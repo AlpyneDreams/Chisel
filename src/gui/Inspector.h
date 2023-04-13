@@ -35,6 +35,8 @@ namespace chisel
         bool ValueInput(const FGD::Var& var, kv::KeyValuesVariant& kv);
         bool ValueInput(const char* name, const FGD::Var& var, kv::KeyValuesVariant& kv);
 
+        bool GetKV(const FGD::Var& var, Entity* ent, kv::KeyValuesVariant*& kv);
+
         bool StartTable() {
             return ImGui::BeginTable("properties", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_PadOuterX);
         }

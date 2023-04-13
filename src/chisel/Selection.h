@@ -19,12 +19,13 @@ namespace chisel
         virtual ~Selectable();
 
         SelectionID GetSelectionID() const { return m_id; }
-        bool IsSelected() const { return m_selected; }
+        virtual bool IsSelected() const { return m_selected; }
 
         virtual std::optional<AABB> GetBounds() const = 0;
         virtual void Transform(const mat4x4& matrix) = 0;
         virtual void Delete() = 0;
         virtual void AlignToGrid(vec3 gridSize) = 0;
+        virtual Selectable* ResolveSelectable() { return this; }
     protected:
         friend class Selection;
 

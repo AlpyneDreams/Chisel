@@ -29,6 +29,7 @@ namespace chisel
     };
 
     struct Solid;
+    struct BrushEntity;
 
     struct BrushMesh
     {
@@ -54,8 +55,8 @@ namespace chisel
     struct Solid : Atom
     {
     public:
-        Solid();
-        Solid(std::vector<Side> sides, bool initMesh = true);
+        Solid(BrushEntity* parent);
+        Solid(BrushEntity* parent, std::vector<Side> sides, bool initMesh = true);
         Solid(Solid&& other);
         ~Solid();
 
@@ -77,7 +78,12 @@ namespace chisel
         void Transform(const mat4x4& _matrix) final override;
         void AlignToGrid(vec3 gridSize) final override;
 
+        Selectable* ResolveSelectable() final override;
+        bool IsSelected() const final override;
+
     private:
+        BrushEntity* m_parent;
+
         std::vector<BrushMesh> m_meshes;
         std::vector<Side> m_sides;
         std::optional<AABB> m_bounds;
