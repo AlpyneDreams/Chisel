@@ -15,6 +15,7 @@
 
 #include "common/Filesystem.h"
 #include "render/Render.h"
+#include "common/Parse.h"
 
 #include <cstring>
 #include <vector>
@@ -67,9 +68,9 @@ namespace chisel
             xyz.remove_prefix(1);
 
             auto coords = str::split(xyz, " ");
-            float x = std::stof(std::string(coords[0]));
-            float y = std::stof(std::string(coords[1]));
-            float z = std::stof(std::string(coords[2]));
+            float x = stream::ParseSimple<float>(coords[0]);
+            float y = stream::ParseSimple<float>(coords[1]);
+            float z = stream::ParseSimple<float>(coords[2]);
 
             pointTrio[i] = vec3(x, y, z);
         }
@@ -85,16 +86,16 @@ namespace chisel
         axis_part.remove_prefix(1);
         axis_part = str::trim(axis_part);
         auto coords = str::split(axis_part, " ");
-        float x = std::stof(std::string(coords[0]));
-        float y = std::stof(std::string(coords[1]));
-        float z = std::stof(std::string(coords[2]));
-        float w = std::stof(std::string(coords[3]));
+        float x = stream::ParseSimple<float>(coords[0]);
+        float y = stream::ParseSimple<float>(coords[1]);
+        float z = stream::ParseSimple<float>(coords[2]);
+        float w = stream::ParseSimple<float>(coords[3]);
         axis = vec4(x, y, z, w);
 
         auto scale_part = values[1];
         scale_part.remove_prefix(1);
         scale_part = str::trim(scale_part);
-        scale = std::stof(std::string(scale_part));
+        scale = stream::ParseSimple<float>(scale_part);
     }
 
     bool AddSolid(BrushEntity& map, kv::KeyValues& kvWorld, std::string& matNameScratch)
@@ -150,10 +151,9 @@ namespace chisel
         if (!vec.empty())
         {
             auto coords = str::split(vec, " ");
-            // SUCKS!
-            float x = std::stof(std::string(coords[0]));
-            float y = std::stof(std::string(coords[1]));
-            float z = std::stof(std::string(coords[2]));
+            float x = stream::ParseSimple<float>(coords[0]);
+            float y = stream::ParseSimple<float>(coords[1]);
+            float z = stream::ParseSimple<float>(coords[2]);
             return vec3(x, y, z);
         }
         return vec3(0);

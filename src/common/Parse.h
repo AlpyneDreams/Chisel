@@ -5,6 +5,7 @@
 
 #include <charconv>
 #include <string.h>
+#include <type_traits>
 
 namespace chisel::stream
 {
@@ -38,6 +39,15 @@ namespace chisel::stream
     Result<T> Parse(const char*& first)
     {
         return Parse<T>(first, first + strlen(first));
+    }
+
+    template <typename T, typename... Args>
+    T ParseSimple(Args... args)
+    {
+        auto result = Parse<T>(std::forward<Args>(args)...);
+        if (result.IsSuccess())
+            return *result;
+        return T{};
     }
 
     inline bool EndOfStream(const char* first, const char* end)

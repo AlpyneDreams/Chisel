@@ -312,6 +312,7 @@ namespace chisel
                         }
                     }
 
+#if 0
                     // Remove duplicate points.
                     for (uint32_t i = 0; i < currentWinding->count; i++)
                     {
@@ -329,6 +330,7 @@ namespace chisel
                             }
                         }
                     }
+#endif
                     
                     m_faces.emplace_back(&side, std::vector<vec3>(currentWinding->points, currentWinding->points + currentWinding->count));
                 }
