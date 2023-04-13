@@ -12,8 +12,7 @@ namespace chisel
     namespace GUI
     {
         void Setup();
-        void Update();
-        void Render();
+        void Present();
 
         inline ImFont* FontMonospace = nullptr;
 

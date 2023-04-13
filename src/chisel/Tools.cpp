@@ -16,15 +16,18 @@ namespace chisel
     extern ConVar<render::MSAA> r_msaa;
 #endif
 
-    static RenderSystem& Renderer   = Tools.Renderer;
-    static render::RenderContext& r = Tools.Renderer.rctx;
+    static render::RenderContext& rctx = Tools.rctx;
+    static render::RenderContext& r = Tools.rctx;
 
     void Tools::Init()
     {
         console = &systems.AddSystem<GUI::ConsoleWindow>();
 
+        // Create window
+        window->Create("Chisel", 1920, 1080, true, false);
+
         // Initialize render system
-        Renderer.Start();
+        rctx.Init(window);
 
         // Setup gizmos and handles
         Primitives.Init();
@@ -106,13 +109,20 @@ namespace chisel
             // Process input
             window->PreUpdate();
 
+            // Setup to render
+            rctx.BeginFrame();
+
             // Perform system updates
             systems.Update();
 
-            // Render
-            Renderer.Update();
+            // Finish rendering
+            rctx.EndFrame();
+            OnEndFrame(rctx);
+            
+            // Present to non-main windows
+            GUI::Present();
 
-            // Present
+            // Present to main window
             window->Update();
 
             Time.frameCount++;
@@ -121,7 +131,8 @@ namespace chisel
 
     void Tools::Shutdown()
     {
-        Renderer.Shutdown();
+        window->OnDetach();
+        rctx.Shutdown();
         delete window;
         Window::Shutdown();
     }
@@ -134,7 +145,7 @@ namespace chisel
         r.UpdateDynamicBuffer(bufferIn.buffer.ptr(), mouse);
 
         // When rendering completes...
-        Renderer.OnEndFrame.Once([](render::RenderContext& r)
+        OnEndFrame.Once([](render::RenderContext& r)
         {
             // Unbind render targets
             r.ctx->OMSetRenderTargets(0, nullptr, nullptr);

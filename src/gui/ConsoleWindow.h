@@ -10,6 +10,7 @@
 
 #include "input/Input.h"
 
+#include "gui/Common.h"
 #include "gui/IconsMaterialCommunity.h"
 
 namespace chisel::GUI

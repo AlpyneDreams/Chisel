@@ -1,13 +1,13 @@
 #pragma once
 
 #include "common/Common.h"
+#include "common/Event.h"
 #include "console/ConCommand.h"
 #include "math/Math.h"
 #include "render/Render.h"
 #include "gui/Window.h"
 #include "core/Camera.h"
 #include "core/Transform.h"
-#include "render/RenderSystem.h"
 #include "render/Render.h"
 #include "core/Mesh.h"
 
@@ -25,9 +25,9 @@ namespace chisel
         Window* window          = Window::CreateWindow();
     public:
         SystemGroup systems;
+        render::RenderContext rctx;
 
-        RenderSystem Renderer   = RenderSystem(window);
-        render::RenderContext& rctx  = Renderer.rctx;
+        Event<render::RenderContext&> OnEndFrame;
 
     public:
     // Viewport //

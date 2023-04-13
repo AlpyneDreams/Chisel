@@ -256,6 +256,6 @@ namespace chisel
 
     void Handles::Init()
     {
-        sh_Grid = render::Shader(Tools.Renderer.rctx.device.ptr(), GridVertex::Layout, "grid");
+        sh_Grid = render::Shader(Tools.rctx.device.ptr(), GridVertex::Layout, "grid");
     }
 }

@@ -16,6 +16,7 @@
 #include <glm/gtc/matrix_inverse.hpp>
 
 #include "gui/IconsMaterialCommunity.h"
+#include "gui/Common.h"
 #include "render/Render.h"
 
 namespace chisel

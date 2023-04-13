@@ -55,6 +55,7 @@ namespace chisel::render
         if (FAILED(hr))
             return;
 
+
         localDevice->QueryInterface(__uuidof(ID3D11Device1), reinterpret_cast<void**>(&device));
         localSwapchain->QueryInterface(__uuidof(IDXGISwapChain), reinterpret_cast<void**>(&swapchain));
         device->GetImmediateContext1(&ctx);
@@ -72,8 +73,6 @@ namespace chisel::render
             swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backbuffer.texture));
             device->CreateRenderTargetView(backbuffer.texture.ptr(), nullptr, &backbuffer.rtv);
         });
-
-        ImGui::CreateContext();
 
         GUI::Setup();
 
@@ -160,6 +159,8 @@ namespace chisel::render
 
         desc.AntialiasedLineEnable = TRUE;
         device->CreateRasterizerState(&desc, &Raster.SmoothLines);
+
+        window->OnAttach();
     }
 
     void RenderContext::Shutdown()
@@ -176,30 +177,48 @@ namespace chisel::render
 
     void RenderContext::BeginFrame()
     {
-        D3D11_TEXTURE2D_DESC desc;
-        backbuffer.texture->GetDesc(&desc);
-
+        // Bind the backbuffer
         ctx->OMSetRenderTargets(1, &backbuffer.rtv, nullptr);
+
+        uint2 size = backbuffer.GetSize();
         D3D11_VIEWPORT viewport =
         {
             .TopLeftX = 0,
             .TopLeftY = 0,
-            .Width    = float(desc.Width),
-            .Height   = float(desc.Height),
+            .Width    = float(size.x),
+            .Height   = float(size.y),
             .MinDepth = 0.0f,
             .MaxDepth = 1.0f,
         };
         ctx->RSSetViewports(1, &viewport);
 
+        // Clear entire backbuffer
         float debugColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
         ctx->ClearRenderTargetView(backbuffer.rtv.ptr(), debugColor);
     }
 
     void RenderContext::EndFrame()
     {
+        // Bind the backbuffer
+        ctx->OMSetRenderTargets(1, &backbuffer.rtv, nullptr);
+
+        uint2 size = backbuffer.GetSize();
+        D3D11_VIEWPORT viewport =
+        {
+            .TopLeftX = 0,
+            .TopLeftY = 0,
+            .Width    = float(size.x),
+            .Height   = float(size.y),
+            .MinDepth = 0.0f,
+            .MaxDepth = 1.0f,
+        };
+        ctx->RSSetViewports(1, &viewport);
+
+        // Update ImGui
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
+        // Present
         swapchain->Present(0, 0);
     }
 

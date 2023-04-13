@@ -7,7 +7,7 @@
 
 namespace chisel
 {
-    extern ConVar<bool> gui_demo;
+    ConVar gui_demo("gui_demo", false, "Show ImGui demo window");
 
     //--------------------------------------------------
     //  Selection Mode Toolbar
@@ -96,6 +96,10 @@ namespace chisel
     void Layout::Update()
     {
         using namespace ImGui;
+
+        if (gui_demo) {
+            ShowDemoWindow();
+        }
 
         bool unsaved = Chisel.HasUnsavedChanges();
         static enum FileAction {

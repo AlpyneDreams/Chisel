@@ -38,6 +38,8 @@ namespace chisel
 
     void GUI::Setup()
     {
+        ImGui::CreateContext();
+
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = "chisel.ui.ini";
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -89,16 +91,7 @@ namespace chisel
         colors[ImGuiCol_TabUnfocusedActive]     = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
     }
 
-    ConVar gui_demo("gui_demo", false, "Show ImGui demo window");
-
-    void GUI::Update()
-    {
-        if (gui_demo) {
-            ImGui::ShowDemoWindow();
-        }
-    }
-
-    void GUI::Render()
+    void GUI::Present()
     {
         static ImGuiIO& io = ImGui::GetIO();
 
