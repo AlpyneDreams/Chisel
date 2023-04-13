@@ -4,6 +4,7 @@
 #include "common/SmallVector.h"
 #include "common/Parse.h"
 #include "common/Span.h"
+#include "common/String.h"
 #include "math/Color.h"
 
 #include <unordered_map>
@@ -72,7 +73,7 @@ namespace chisel::kv
     {
     public:
         using KeyValuesChild = std::unique_ptr<KeyValues>;
-        using KeyValuesString = SmallVector<char, 8>;
+        using KeyValuesString = std::string;
 
         KeyValuesVariant()
         {
@@ -122,7 +123,6 @@ namespace chisel::kv
         template <typename T>
         T Get() const;
 
-        operator StringView();
         operator std::string_view() const;
         operator int64_t();
         operator int32_t();
@@ -137,9 +137,8 @@ namespace chisel::kv
         operator uint64_t();
         operator KeyValues&();
 
-        void Set(const std::string& val) { Clear(); m_type = Types::String;    m_str = KeyValuesString{ StringView{ val } }; }
-        void Set(std::string_view val)   { Clear(); m_type = Types::String;    m_str = KeyValuesString{ StringView{ val } }; }
-        void Set(StringView val)         { Clear(); m_type = Types::String;    m_str = KeyValuesString{ val }; }
+        void Set(const std::string& val) { Clear(); m_type = Types::String;    m_str = KeyValuesString{ val }; }
+        void Set(std::string_view val)   { Clear(); m_type = Types::String;    m_str = KeyValuesString{ val }; }
         void Set(int64_t val)            { Clear(); m_type = Types::Int;       m_data.Get<int64_t>() = val; }
         void Set(int32_t val)            { Clear(); m_type = Types::Int;       m_data.Get<int64_t>() = val; }
         void Set(bool val)               { Clear(); m_type = Types::Int;       m_data.Get<int64_t>() = val ? 1 : 0; }
@@ -153,6 +152,39 @@ namespace chisel::kv
         void Set(uint64_t val)           { Clear(); m_type = Types::Uint64;    m_data.Get<uint64_t>() = val; }
         void Set(KeyValuesChild val)     { Clear(); m_type = Types::KeyValues; m_data.Get<KeyValuesChild>() = std::move(val); }
 
+        KeyValuesVariant& operator = (KeyValuesVariant&& other)
+        {
+            m_type = other.m_type;
+            m_str = std::move(other.m_str);
+            m_data = std::move(other.m_data);
+
+            other.m_type = Types::None;
+            return *this;
+        }
+
+        template <typename T>
+        KeyValuesVariant& operator = (const T& thing) { Set(thing); return *this; }
+
+        template <typename T>
+        bool operator == (const T& thing) const { return ((T)(*this)) == thing; }
+
+        template <typename T>
+        bool operator != (const T& thing) const { return ((T)(*this)) != thing; }
+
+        void EnsureType(KeyValuesType type);
+        void AssertType(KeyValuesType type) { assert(m_type == type); }
+        template <typename T>
+        T* GetPtr(KeyValuesType type)
+        {
+            if (m_type != type)
+                return nullptr;
+            if (m_type == Types::None)
+                return nullptr;
+            if (m_type == Types::String)
+                return reinterpret_cast<T*>(&m_str);
+            return &m_data.Get<T>();
+        }
+
         KeyValuesVariant& operator [](const char *string);
 
         const KeyValuesVariant& operator [](const char *string) const;
@@ -163,6 +195,8 @@ namespace chisel::kv
 
         static KeyValuesVariant Parse(std::string_view view);
     private:
+        void UpdateString() const;
+
         static KeyValuesVariant s_Nothing;
 
         KeyValuesType m_type = Types::None;
@@ -196,9 +230,9 @@ namespace chisel::kv
             return s_Nothing;
         }
 
-        KeyValuesVariant& operator [](const char *string)
+        KeyValuesVariant& operator [](std::string_view string)
         {
-            auto iter = m_children.find(string);
+            auto iter = m_children.find(std::string(string));
             if (iter == m_children.end())
             {
                 //std::cerr << "Returning KeyValuesVariant empty value: " << string << std::endl;
@@ -208,9 +242,9 @@ namespace chisel::kv
             return iter->second;
         }
 
-        const KeyValuesVariant& operator [] (const char *string) const
+        const KeyValuesVariant& operator [] (std::string_view string) const
         {
-            auto iter = m_children.find(string);
+            auto iter = m_children.find(std::string(string));
             if (iter == m_children.end())
             {
                 //std::cerr << "Returning KeyValuesVariant empty value: " << string << std::endl;
@@ -220,16 +254,27 @@ namespace chisel::kv
             return iter->second;
         }
 
-        auto FindAll(const char *string)
+        auto FindAll(std::string_view string)
         {
-            return m_children.equal_range(string);
+            return m_children.equal_range(std::string(string));
         }
 
         auto begin() { return m_children.begin(); }
         auto end()   { return m_children.end(); }
 
+        bool Contains(std::string_view name)
+        {
+            return m_children.contains(std::string(name));
+        }
+
         KeyValues()
         {
+        }
+
+        template <typename... Args>
+        KeyValuesVariant& CreateChild(std::string_view name, Args... args)
+        {
+            return m_children.emplace(std::string(name), KeyValuesVariant::Parse(std::forward<Args>(args)...))->second;
         }
     private:
         static KeyValues s_Nothing;
@@ -298,7 +343,7 @@ namespace chisel::kv
 
                         if (!fillingInValue)
                         {
-                            kv->m_children.emplace(key, KeyValuesVariant::Parse(value));
+                            kv->CreateChild(key, value);
                             key.clear();
                             value.clear();
                         }
@@ -329,18 +374,8 @@ namespace chisel::kv
     };
     inline KeyValues KeyValues::s_Nothing;
 
-    template <>
-    inline StringView KeyValuesVariant::Get() const
+    inline void KeyValuesVariant::UpdateString() const
     {
-        if (m_type == Types::String)
-            return m_str;
-
-        if (m_type == Types::None)
-            return "";
-
-        if (!m_str.empty())
-            return m_str;
-
         auto printKV = [&](char* dst, size_t dst_length)
         {
             int len = 0;
@@ -361,6 +396,22 @@ namespace chisel::kv
         int len = printKV(nullptr, 0) + 1;
         m_str.resize(len);
         printKV(m_str.data(), m_str.size());
+        m_str.resize(len - 1);
+    }
+
+    template <>
+    inline std::string_view KeyValuesVariant::Get() const
+    {
+        if (m_type == Types::String)
+            return m_str;
+
+        if (m_type == Types::None)
+            return "";
+
+        if (!m_str.empty())
+            return m_str;
+
+        UpdateString();
         return m_str;
     }
 
@@ -519,13 +570,9 @@ namespace chisel::kv
         return Get<const kv::KeyValues&>()[string];
     }
 
-    inline KeyValuesVariant::operator StringView()
-    {
-        return Get<StringView>();
-    }
     inline KeyValuesVariant::operator std::string_view() const
     {
-        return (std::string_view)Get<StringView>();
+        return Get<std::string_view>();
     }
     inline KeyValuesVariant::operator int64_t()
     {
@@ -594,7 +641,7 @@ namespace chisel::kv
                 }
                 else
                 {
-                    if (view[0] == '-')
+                    if (view[0] != '-')
                     {
                         auto r_uint64 = stream::Parse<uint64>(view);
                         if (r_uint64) return KeyValuesVariant(*r_uint64);
@@ -633,5 +680,31 @@ namespace chisel::kv
         }
 
         return KeyValuesVariant(view);
+    }
+
+    inline void KeyValuesVariant::EnsureType(KeyValuesType type)
+    {
+        if (m_type == type)
+            return;
+
+        if (type == Types::String)
+        {
+            if (m_str.empty())
+                UpdateString();
+
+            m_type = Types::String;
+            return;
+        }
+
+        if      (m_type == Types::Float   && type == Types::Vector2) Set(vec2(Get<double>(), 0.0f));
+        else if (m_type == Types::Float   && type == Types::Vector3) Set(vec3(Get<double>(), 0.0f, 0.0f));
+        else if (m_type == Types::Float   && type == Types::Vector4) Set(vec4(Get<double>(), 0.0f, 0.0f, 0.0f));
+        else if (m_type == Types::Vector2 && type == Types::Vector3) Set(vec3(Get<vec2>(), 0.0f));
+        else if (m_type == Types::Vector2 && type == Types::Vector4) Set(vec4(Get<vec2>(), 0.0f, 0.0f));
+        else if (m_type == Types::Vector3 && type == Types::Vector4) Set(vec4(Get<vec3>(), 0.0f));
+        else if (m_type == Types::Int     && type == Types::Float)   Set(double(Get<int>()));
+        else if (m_type == Types::Uint64  && type == Types::Float)   Set(double(Get<int>()));
+        else
+            abort();
     }
 }

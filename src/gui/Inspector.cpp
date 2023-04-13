@@ -142,33 +142,66 @@ namespace chisel
     }
 
     // TODO: Variants
-    inline bool Inspector::ValueInput(const char* name, const FGD::Var& var, std::string* value)
+    inline bool Inspector::ValueInput(const char* name, const FGD::Var& var, kv::KeyValuesVariant& kv)
     {
         using enum FGD::VarType;
-        auto type = var.type;
-        float v[3] = {0, 0, 0};
-        int i = 0;
-        bool b = *value == "1";
-        switch (type)
+        bool dummyBool = false;
+        switch (var.type)
         {
-            default:        return ImGui::TextUnformatted(value->c_str()), false;
-            case Integer:   return ImGui::InputInt(name, &i);
-            case Float:     return ImGui::InputFloat(name, &v[0]);
-            case Boolean:
+            default:
             {
-                if (ImGui::Checkbox(name, &b)) {
-                    *value = b ? "1" : "0";
-                    return true;
-                }
+                std::string_view view = (std::string_view)kv;
+                ImGui::TextUnformatted(view.data(), view.data() + view.length());
                 return false;
             }
+            case Integer:
+            {
+                kv.EnsureType(kv::Types::Int);
+                return ImGui::InputInt(name, kv.GetPtr<int32_t>(kv::Types::Int));
+            }
+            case Float:
+            {
+                kv.EnsureType(kv::Types::Float);
+                return ImGui::InputDouble(name, kv.GetPtr<double>(kv::Types::Float));
+            }
+
+            case Boolean:
+            {
+                if (kv.GetType() == kv::Types::Int)
+                {
+                    bool* value = (bool*)kv.GetPtr<int64_t>(kv::Types::Int);
+                    if (ImGui::Checkbox(name, value))
+                    {
+                        *value = *value ? "1" : "0";
+                        return true;
+                    }
+                    return false;
+                }
+                else
+                {
+                    kv.EnsureType(kv::Types::Uint64);
+                    bool* value = (bool*)kv.GetPtr<uint64_t>(kv::Types::Uint64);
+                    if (ImGui::Checkbox(name, value))
+                    {
+                        *value = *value ? "1" : "0";
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            case StudioModel:
+            case Sound:
             case TargetSrc:
             case TargetDest:
             case TargetNameOrClass: // TODO: Entity pickers
-            case String:    return ImGui::InputText(name, value);
+            case String:
+            {
+                kv.EnsureType(kv::Types::String);
+                return ImGui::InputText(name, kv.GetPtr<std::string>(kv::KeyValuesType::String));
+            }
             case Choices:
             {
-                std::string str = *value;
+                std::string str = std::string((std::string_view)kv);
                 if (var.choices.contains(str))
                     str = var.choices.at(str);
 
@@ -179,10 +212,11 @@ namespace chisel
 
                 for (auto& [key, name] : var.choices)
                 {
-                    bool selected = *value == key;
-                    if (ImGui::Selectable(name.c_str(), selected)) {
+                    bool selected = kv == key;
+                    if (ImGui::Selectable(name.c_str(), selected))
+                    {
                         modified = true;
-                        *value = key;
+                        kv = std::move(kv::KeyValuesVariant::Parse(key));
                     }
                     if (selected)
                         ImGui::SetItemDefaultFocus();
@@ -191,6 +225,7 @@ namespace chisel
                 ImGui::EndCombo();
                 return modified;
             }
+#if 0
             case Flags:
             {
                 if (ImGui::Button(ICON_MC_FLAG " Flags"))
@@ -202,45 +237,58 @@ namespace chisel
                 {
                     for (auto& [key, name] : var.choices)
                     {
-                        ImGui::Checkbox(name.c_str(), &b);
+                        ImGui::Checkbox(name.c_str(), &dummyBool);
                     }
                     ImGui::EndPopup();
                 }
                 return modified;
             }
+#endif
 
             case Color255:
-            case Color1:    return ImGui::ColorEdit4(name, v);
+            case Color1:
+            {
+                kv.EnsureType(kv::Types::Vector4);
+                return ImGui::ColorEdit4(name, (float*)kv.GetPtr<vec4>(kv::Types::Vector4), ImGuiColorEditFlags_Float);
+            }
 
             case Angle:
             case Vector:
-            case Origin:    return ImGui::DragFloat3(name, v);
+            case Origin:
+            {
+                kv.EnsureType(kv::Types::Vector3);
+                return ImGui::DragFloat3(name, (float*)kv.GetPtr<vec3>(kv::Types::Vector3));
+            }
 
             case ScriptList:    return ImGui::Button(ICON_MC_SCRIPT " Scripts");
             case Script:        return ImGui::Button(ICON_MC_SCRIPT " Script");
         }
     }
 
-    inline bool Inspector::ValueInput(const FGD::Var& var, std::string* value)
+    inline bool Inspector::ValueInput(const FGD::Var& var, kv::KeyValuesVariant &value)
     {
         return ValueInput((std::string("##") + var.name).c_str(), var, value);
     }
 
     inline bool Inspector::ValueInput(const FGD::Var& var, Entity* ent, bool raw)
     {
-        std::string str = "";
+        kv::KeyValuesVariant *kv = nullptr;
         bool defaultVal = false;
 
         // Get value or default value
-        if (ent->kv.contains(var.name))
-            str = ent->kv[var.name];
-        else if (!var.defaultValue.empty()) {
-            str = var.defaultValue;
+        if (ent->kv.Contains(var.name))
+            kv = &ent->kv[var.name];
+        else
+        {
+            kv = &ent->kv.CreateChild(var.name, var.defaultValue.c_str());
             defaultVal = true;
         }
 
+        if (!kv)
+            return false;
+
         if (!defaultVal)
-            defaultVal = str == var.defaultValue;
+            defaultVal = kv->Get<std::string_view>() == var.defaultValue;
 
         if (var.readOnly)
             ImGui::BeginDisabled();
@@ -255,9 +303,14 @@ namespace chisel
         }
         ImGui::SetNextItemWidth(width);
 
+#if 0
+        // TODO JEFF WHAT WAS THIS FOR I DONT KNOW
+        // FIX IT
         bool modified = raw
-            ? ImGui::InputText((std::string("##") + var.name).c_str(), &str)
+            ? ImGui::InputText((std::string("##") + var.name).c_str(), )
             : ValueInput(var, &str);
+#endif
+        bool modified = ValueInput(var, *kv);
 
         // Reset button
         if (!defaultVal)
@@ -268,7 +321,7 @@ namespace chisel
                 ImGui::BeginDisabled();
 
             if (ImGui::Button(ICON_MC_ARROW_U_LEFT_TOP)) {
-                str = var.defaultValue;
+                //str = var.defaultValue;
                 modified = true;
             }
 
@@ -278,8 +331,8 @@ namespace chisel
 
         if (var.readOnly)
             ImGui::EndDisabled();
-        else if (modified)
-            ent->kv[var.name] = str;
+        //else if (modified)
+            //ent->kv[var.name] = str;
 
         return modified;
     }
@@ -288,7 +341,7 @@ namespace chisel
     {
         ImGui::TableNextRow();
         
-        if (ent->kv.contains(var.name) && ent->kv[var.name] != var.defaultValue)
+        if (ent->kv.Contains(var.name) && ent->kv[var.name] != var.defaultValue)
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ModifiedColor);
 
         ImGui::TableNextColumn();
@@ -333,6 +386,7 @@ namespace chisel
             if (!StartTable())
                 return;
             // Draw unrecognized properties
+#if 0
             for (auto& [key, value] : ent->kv)
             {
                 auto hash = HashString(key);
@@ -347,6 +401,7 @@ namespace chisel
                     ImGui::InputText((std::string("##") + key).c_str(), &value);
                 }
             }
+#endif
 
             // Draw hoisted and special properties
             for (Hash hash : HoistedVariables)

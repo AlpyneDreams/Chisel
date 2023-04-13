@@ -172,6 +172,7 @@ namespace chisel
         entity->classname = (std::string_view)kvEntity["classname"];
         entity->targetname = (std::string_view)kvEntity["targetname"];
         entity->origin = kvEntity["origin"];
+        entity->kv = std::move(kvEntity);
         map.entities.push_back(entity);
         return true;
     }

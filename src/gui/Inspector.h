@@ -3,6 +3,7 @@
 #include "gui/Common.h"
 #include "gui/Window.h"
 #include "chisel/FGD/FGD.h"
+#include "formats/KeyValues.h"
 
 namespace chisel
 {
@@ -31,8 +32,8 @@ namespace chisel
 
         void DrawProperties(const FGD::Class* cls, Entity* ent, bool root = true);
         bool ValueInput(const FGD::Var& var, Entity* ent, bool raw = false);
-        bool ValueInput(const FGD::Var& var, std::string* value);
-        bool ValueInput(const char* name, const FGD::Var& var, std::string* value);
+        bool ValueInput(const FGD::Var& var, kv::KeyValuesVariant& kv);
+        bool ValueInput(const char* name, const FGD::Var& var, kv::KeyValuesVariant& kv);
 
         bool StartTable() {
             return ImGui::BeginTable("properties", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_PadOuterX);

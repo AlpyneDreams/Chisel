@@ -5,6 +5,7 @@
 #include "core/Mesh.h"
 #include "Common.h"
 #include "Solid.h"
+#include "formats/KeyValues.h"
 
 namespace chisel
 {
@@ -15,9 +16,7 @@ namespace chisel
 
         glm::vec3 origin;
 
-        // TODO: Variants...
-        std::unordered_map<std::string, std::string> kv;
-        std::unordered_map<std::string, std::string> connections;
+        kv::KeyValues kv;
 
         std::optional<AABB> GetBounds() const override { return std::nullopt; }
         void Transform(const mat4x4& matrix) override { /* Do Nothing */ }

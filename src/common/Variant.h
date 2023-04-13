@@ -24,6 +24,12 @@ namespace chisel
             memcpy(&data, &other.data, sizeof(data));
         }
 
+        Variant& operator = (Variant&& other)
+        {
+            memcpy(&data, &other.data, sizeof(data));
+            return *this;
+        }
+
         template <typename T, typename... Args>
         Variant(Args&&... args)
         {
