@@ -85,11 +85,15 @@ namespace chisel
 
                 if (hit)
                 {
-                    point = math::Snap(point, gridSize);
-                    Handles.DrawPoint(point, false);
+                    if (view_grid_snap)
+                        point = math::Snap(point, gridSize);
 
                     if (activeTool == Tool::Entity)
                     {
+                        // Draw hypothetical entity
+                        Chisel.Renderer->DrawPointEntity(Chisel.entTool.className, true, point);
+
+                        // Place entity on click
                         if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
                         {
                             PointEntity* pt = map.AddPointEntity(Chisel.entTool.className.c_str());
@@ -99,6 +103,8 @@ namespace chisel
                         }
                         break;
                     }
+
+                    Handles.DrawPoint(point, false);
 
                     if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
                     {

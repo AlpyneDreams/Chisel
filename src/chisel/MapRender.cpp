@@ -11,7 +11,10 @@ namespace chisel
     static ConVar<bool> r_drawworld("r_drawworld", true, "Draw world");
     static ConVar<bool> r_drawsprites("r_drawsprites", true, "Draw sprites");
 
-    static const glm::vec4 SelectionColor = vec4(0.6f, 0.1f, 0.1f, 1.0f);
+    // Orange Tint: Color(0.8, 0.4, 0.1, 1);
+    // Selection Outline Color: Color(1, 0.6, 0.25, 1)
+    static const Color SelectionColor = Color(0.6f, 0.1f, 0.1f, 1.0f);
+    static const Color PreviewColor = Color(1.0f, 1.0f, 1.0f, 0.5f);
 
     MapRender::MapRender()
         : System()
@@ -70,52 +73,59 @@ namespace chisel
             const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
             if (!point) continue;
 
-            auto& classname = entity->classname;
-            if (Chisel.fgd->classes.contains(classname))
+            DrawPointEntity(entity->classname, false, point->origin, vec3(0), point->IsSelected(), point->GetSelectionID());
+        }
+    }
+
+    void MapRender::DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles, bool selected, SelectionID id)
+    {
+        Color color = selected ? SelectionColor : (preview ? PreviewColor : Colors.White);
+
+        if (Chisel.fgd->classes.contains(classname))
+        {
+            auto& cls = Chisel.fgd->classes[classname];
+            
+            AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
+
+            if (cls.texture)
             {
-                auto& cls = Chisel.fgd->classes[classname];
-                
-                AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
+                if (!r_drawsprites)
+                    return;
 
-                if (cls.texture)
-                {
-                    if (!r_drawsprites)
-                        continue;
-
-                    r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-                    Gizmos.DrawIcon(
-                        point->origin,
-                        cls.texture ? cls.texture : Gizmos.icnObsolete,
-                        point->IsSelected() ? SelectionColor : vec4(1),
-                        point->GetSelectionID()
-                    );
-                    r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
-                }
-                else
-                {
-                    AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
-                    //r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
-
-                    //if (point->IsSelected())
-                        //Tools.DrawSelectionOutline(&Primitives.Cube);
-
-                    r.SetShader(shader);
-                    //r.SetTexture(0, Tools.tex_White);
-                    //r.SetUniform("u_color", color);
-                   // r.DrawMesh(&Primitives.Cube);
-                }
-            }
-            else if (r_drawsprites)
-            {
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
                 Gizmos.DrawIcon(
-                    point->origin,
-                    Gizmos.icnObsolete,
-                    point->IsSelected() ? SelectionColor : vec4(1.0),
-                    point->GetSelectionID()
+                    origin,
+                    cls.texture ? cls.texture : Gizmos.icnObsolete,
+                    color,
+                    id
                 );
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
             }
+            else
+            {
+                Handles.DrawPoint(origin, false);
+                //AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
+                //r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
+
+                //if (point->IsSelected())
+                    //Tools.DrawSelectionOutline(&Primitives.Cube);
+
+                //r.SetShader(shader);
+                //r.SetTexture(0, Tools.tex_White);
+                //r.SetUniform("u_color", color);
+                // r.DrawMesh(&Primitives.Cube);
+            }
+        }
+        else if (r_drawsprites)
+        {
+            r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
+            Gizmos.DrawIcon(
+                origin,
+                Gizmos.icnObsolete,
+                color,
+                id
+            );
+            r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
     }
     
@@ -143,7 +153,7 @@ namespace chisel
         auto DrawMesh = [&](BrushMesh* mesh)
         {
             cbuffers::BrushState data;
-            data.color = mesh->brush->IsSelected() ? SelectionColor : vec4(1.0);
+            data.color = mesh->brush->IsSelected() ? SelectionColor : Colors.White;
             data.id = mesh->brush->GetSelectionID();
 
             r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
