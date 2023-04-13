@@ -165,12 +165,12 @@ namespace chisel
                 bases.push_back(base);
             }
 
-            Var* GetVar(Hash varName)
+            const Var* GetVar(Hash varName) const
             {
                 if (variables.contains(varName))
-                    return &variables[varName];
+                    return &variables.at(varName);
                 for (auto base : bases)
-                    if (Var* var = base->GetVar(varName))
+                    if (const Var* var = base->GetVar(varName))
                         return var;
                 return nullptr;
             }

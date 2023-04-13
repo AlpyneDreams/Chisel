@@ -23,6 +23,7 @@ chisel_src = files(
     'gui/Inspector.cpp',
     'gui/View3D.cpp',
     'gui/Viewport.cpp',
+    'gui/ToolProperties.cpp',
     'gui/impl/imgui_impl_sdl.cpp',
     'gui/impl/imgui_impl_dx11.cpp',
 

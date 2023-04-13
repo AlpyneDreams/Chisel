@@ -1,4 +1,5 @@
 #include "gui/Viewport.h"
+#include "gui/ToolProperties.h"
 #include "chisel/Gizmos.h"
 #include "chisel/MapRender.h"
 
@@ -91,8 +92,7 @@ namespace chisel
                     {
                         if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
                         {
-                            // TODO: Entity type selection popup
-                            PointEntity* pt = map.AddPointEntity("npc_personality_core");
+                            PointEntity* pt = map.AddPointEntity(Chisel.entTool.className.c_str());
                             pt->origin = point;
                             Selection.Clear();
                             Selection.Select(pt);
@@ -165,6 +165,8 @@ namespace chisel
 
     void Viewport::OnPostDraw()
     {
+        GUI::ToolPropertiesWindow(activeTool, viewport);
+
         if (IsMouseOver(viewport))
         {
             if (!Selection.Empty() && (/*Mouse.GetButtonUp(Mouse.Right) ||*/ Mouse.GetButtonDown(Mouse.Middle)))

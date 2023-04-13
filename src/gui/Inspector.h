@@ -20,17 +20,19 @@ namespace chisel
         void Draw() override;
         void DrawEntityInspector(Entity* ent);
 
+        static void ClassnamePicker(std::string* classname, bool solids = false, const char* label = "##Class");
+
         Texture* defaultIcon;
         Texture* defaultIconBrush;
 
-        void BeginRow(FGD::Var& var, Entity* ent);
+        void BeginRow(const FGD::Var& var, Entity* ent);
         void VarLabel(const char* name);
-        void VarLabel(FGD::Var& var);
+        void VarLabel(const FGD::Var& var);
 
-        void DrawProperties(FGD::Class* cls, Entity* ent, bool root = true);
-        bool ValueInput(FGD::Var& var, Entity* ent, bool raw = false);
-        bool ValueInput(FGD::Var& var, std::string* value);
-        bool ValueInput(const char* name, FGD::Var& var, std::string* value);
+        void DrawProperties(const FGD::Class* cls, Entity* ent, bool root = true);
+        bool ValueInput(const FGD::Var& var, Entity* ent, bool raw = false);
+        bool ValueInput(const FGD::Var& var, std::string* value);
+        bool ValueInput(const char* name, const FGD::Var& var, std::string* value);
 
         bool StartTable() {
             return ImGui::BeginTable("properties", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_PadOuterX);

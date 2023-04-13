@@ -1,5 +1,6 @@
 #pragma once
 
+#include "chisel/Enums.h"
 #include "chisel/Tools.h"
 
 #include "chisel/Chisel.h"
@@ -8,15 +9,6 @@
 namespace chisel
 {
     struct MapRender;
-
-    enum class Tool {
-        Select, Translate, Rotate, Scale, Universal, Bounds,
-        Entity, Block
-    };
-
-    enum class SelectMode {
-        Groups, Objects, Solids
-    };
 
     inline class Chisel
     {
@@ -28,8 +20,19 @@ namespace chisel
         // TODO: Multiple maps.
         Map map;
 
-        Tool activeTool = Tool::Translate;
-        SelectMode selectMode = SelectMode::Groups;
+        Tool        activeTool = Tool::Translate;
+        SelectMode  selectMode = SelectMode::Groups;
+
+        // TODO: Store tool properties per-mapdoc
+        struct EntTool {
+            std::string className = "info_player_start";
+            bool        randomYaw  = "info_player_start";
+        } entTool;
+
+        struct BlockTool {
+            PrimitiveType type = PrimitiveType::Block;
+        } blockTool;
+        
 
         std::unique_ptr<BrushGPUAllocator> brushAllocator;
 

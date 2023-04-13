@@ -66,7 +66,7 @@ namespace chisel
         // If not locked, inspect current selection
         if (!locked)
         {
-            if (Selection.Count() != 1) 
+            if (Selection.Count() != 1)
                 return;
             
             // TODO: Better interface for this
@@ -82,7 +82,7 @@ namespace chisel
 
     void Inspector::DrawEntityInspector(Entity* ent)
     {
-        FGD::Class cls = Chisel.fgd->classes[ent->classname];
+        const FGD::Class& cls = Chisel.fgd->classes[ent->classname];
 
         constexpr float iconSize = 64;
         constexpr float iconPadding = 8;
@@ -105,30 +105,44 @@ namespace chisel
         ImGui::SetCursorPos({cursorPos.x + iconSize + iconPadding, cursorPos.y});
 
         // Draw classname picker
-        if (ImGui::BeginCombo("##Class", ent->classname.c_str()))
-        {
-            for (auto& [name, cls] : Chisel.fgd->classes)
-            {
-                if (cls.type == FGD::BaseClass)
-                    continue;
+        ClassnamePicker(&ent->classname, cls.type == FGD::SolidClass);
 
-                bool selected = ent->classname == name;
-                if (ImGui::Selectable(name.c_str(), selected)) {
-                    ent->classname = name;
-                }
-                if (selected)
-                    ImGui::SetItemDefaultFocus();
-            }
-            ImGui::EndCombo();
-        }
         ImGui::SetCursorPos({cursorPos.x, cursorPos.y + iconSize + iconPadding});
         ImGui::Separator();
 
         DrawProperties(&cls, ent);
     }
 
+    void Inspector::ClassnamePicker(std::string* classname, bool solids, const char* label)
+    {
+        if (ImGui::BeginCombo(label, classname->c_str()))
+        {
+            for (auto& [name, cls] : Chisel.fgd->classes)
+            {
+                if (cls.type == FGD::BaseClass)
+                    continue;
+
+                if (solids) {
+                    if (cls.type != FGD::SolidClass)
+                        continue;
+                } else {
+                    if (cls.type == FGD::SolidClass)
+                        continue;
+                }
+
+                bool selected = *classname == name;
+                if (ImGui::Selectable(name.c_str(), selected)) {
+                    *classname = name;
+                }
+                if (selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+    }
+
     // TODO: Variants
-    inline bool Inspector::ValueInput(const char* name, FGD::Var& var, std::string* value)
+    inline bool Inspector::ValueInput(const char* name, const FGD::Var& var, std::string* value)
     {
         using enum FGD::VarType;
         auto type = var.type;
@@ -156,7 +170,7 @@ namespace chisel
             {
                 std::string str = *value;
                 if (var.choices.contains(str))
-                    str = var.choices[str];
+                    str = var.choices.at(str);
 
                 if (!ImGui::BeginCombo(name, str.c_str()))
                     return false;
@@ -207,12 +221,12 @@ namespace chisel
         }
     }
 
-    inline bool Inspector::ValueInput(FGD::Var& var, std::string* value)
+    inline bool Inspector::ValueInput(const FGD::Var& var, std::string* value)
     {
         return ValueInput((std::string("##") + var.name).c_str(), var, value);
     }
 
-    inline bool Inspector::ValueInput(FGD::Var& var, Entity* ent, bool raw)
+    inline bool Inspector::ValueInput(const FGD::Var& var, Entity* ent, bool raw)
     {
         std::string str = "";
         bool defaultVal = false;
@@ -270,7 +284,7 @@ namespace chisel
         return modified;
     }
 
-    inline void Inspector::BeginRow(FGD::Var& var, Entity* ent)
+    inline void Inspector::BeginRow(const FGD::Var& var, Entity* ent)
     {
         ImGui::TableNextRow();
         
@@ -287,7 +301,7 @@ namespace chisel
         ImGui::TableNextColumn();
     }
 
-    inline void Inspector::VarLabel(FGD::Var& var)
+    inline void Inspector::VarLabel(const FGD::Var& var)
     {
         const char* name = var.displayName.c_str();
         if (var.type == FGD::Flags && var.displayName == "spawnflags")
@@ -296,7 +310,7 @@ namespace chisel
         VarLabel(name);
     }
 
-    void Inspector::DrawProperties(FGD::Class* cls, Entity* ent, bool root)
+    void Inspector::DrawProperties(const FGD::Class* cls, Entity* ent, bool root)
     {
         static std::unordered_set<Hash> visited;
         if (root)
@@ -306,7 +320,7 @@ namespace chisel
 
         // Draw nested base classes first
         if (!root)
-            for (FGD::Class* base : cls->bases)
+            for (const FGD::Class* base : cls->bases)
                 if (!visited.contains(base->hash))
                     DrawProperties(base, ent, false);
 
@@ -338,7 +352,7 @@ namespace chisel
             // Draw hoisted and special properties
             for (Hash hash : HoistedVariables)
             {
-                if (FGD::Var* var = cls->GetVar(hash); var && !debug)
+                if (const FGD::Var* var = cls->GetVar(hash); var && !debug)
                 {
                     BeginRow(*var, ent);
                     VarLabel(*var);

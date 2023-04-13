@@ -73,20 +73,20 @@ namespace chisel
         {
             using std::clamp;
             constexpr T packScale = T(255) / NormalMax;
-            return    uint32( clamp(r * packScale, T{0}, T{255}) ) << 24u
-                    | uint32( clamp(g * packScale, T{0}, T{255}) ) << 16u
-                    | uint32( clamp(b * packScale, T{0}, T{255}) ) <<  8u
-                    | uint32( clamp(a * packScale, T{0}, T{255}) ) <<  0u ;
+            return    uint32( clamp<T>(r * packScale, T{0}, T{255}) ) << 24u
+                    | uint32( clamp<T>(g * packScale, T{0}, T{255}) ) << 16u
+                    | uint32( clamp<T>(b * packScale, T{0}, T{255}) ) <<  8u
+                    | uint32( clamp<T>(a * packScale, T{0}, T{255}) ) <<  0u ;
         }
 
         uint32 PackABGR()
         {
             using std::clamp;
             constexpr T packScale = T(255) / NormalMax;
-            return    uint32( clamp(a * packScale, T{0}, T{255}) ) << 24u
-                    | uint32( clamp(b * packScale, T{0}, T{255}) ) << 16u
-                    | uint32( clamp(g * packScale, T{0}, T{255}) ) <<  8u
-                    | uint32( clamp(r * packScale, T{0}, T{255}) ) <<  0u ;
+            return    uint32( clamp<T>(a * packScale, T{0}, T{255}) ) << 24u
+                    | uint32( clamp<T>(b * packScale, T{0}, T{255}) ) << 16u
+                    | uint32( clamp<T>(g * packScale, T{0}, T{255}) ) <<  8u
+                    | uint32( clamp<T>(r * packScale, T{0}, T{255}) ) <<  0u ;
         }
 
         static auto SRGBToLinear(auto f)
