@@ -27,7 +27,6 @@ namespace chisel::kv
             Vector2,
             Vector3,
             Vector4,
-            Uint64,
             KeyValues,
 
             Count,
@@ -148,8 +147,8 @@ namespace chisel::kv
         void Set(vec2 val)               { Clear(); m_type = Types::Vector2;   m_data.Get<vec2>() = val; }
         void Set(vec3 val)               { Clear(); m_type = Types::Vector3;   m_data.Get<vec3>() = val; }
         void Set(vec4 val)               { Clear(); m_type = Types::Vector4;   m_data.Get<vec4>() = val; }
-        void Set(uint32_t val)           { Clear(); m_type = Types::Uint64;    m_data.Get<uint64_t>() = val; }
-        void Set(uint64_t val)           { Clear(); m_type = Types::Uint64;    m_data.Get<uint64_t>() = val; }
+        void Set(uint32_t val)           { Clear(); m_type = Types::Int;       m_data.Get<int64_t>() = val; }
+        void Set(uint64_t val)           { Clear(); m_type = Types::Int;       m_data.Get<int64_t>() = val; }
         void Set(KeyValuesChild val)     { Clear(); m_type = Types::KeyValues; m_data.Get<KeyValuesChild>() = std::move(val); }
 
         KeyValuesVariant& operator = (KeyValuesVariant&& other)
@@ -384,7 +383,6 @@ namespace chisel::kv
             switch (m_type)
             {
                 case Types::Int:       len = snprintf(dst, dst_length, "%lld",            (long long int)m_data.Get<int64_t>()); break;
-                case Types::Uint64:    len = snprintf(dst, dst_length, "%llu",            (long long int)m_data.Get<uint64_t>()); break;
                 case Types::Float:     len = snprintf(dst, dst_length, "%g",              m_data.Get<double>()); break;
                 case Types::Ptr:       len = snprintf(dst, dst_length, "%p",              m_data.Get<void*>()); break;
                 case Types::Vector2:   len = snprintf(dst, dst_length, "%g %g",           m_data.Get<vec2>()[0], m_data.Get<vec2>()[1]); break;
@@ -429,7 +427,6 @@ namespace chisel::kv
         {
             case Types::String:  return 0;
             case Types::Int:     return (uint64_t)m_data.Get<int64_t>();
-            case Types::Uint64:  return (uint64_t)m_data.Get<uint64_t>();
             case Types::Float:   return (uint64_t)m_data.Get<double>();
             case Types::Vector2: return (uint64_t)m_data.Get<vec2>()[0];
             case Types::Vector3: return (uint64_t)m_data.Get<vec3>()[0];
@@ -445,7 +442,6 @@ namespace chisel::kv
         {
             case Types::String:  return 0;
             case Types::Int:     return (int64_t)m_data.Get<int64_t>();
-            case Types::Uint64:  return (int64_t)m_data.Get<uint64_t>();
             case Types::Float:   return (int64_t)m_data.Get<double>();
             case Types::Vector2: return (int64_t)m_data.Get<vec2>()[0];
             case Types::Vector3: return (int64_t)m_data.Get<vec3>()[0];
@@ -479,7 +475,6 @@ namespace chisel::kv
         {
         case Types::String:  return 0.0f;
         case Types::Int:     return (double)m_data.Get<int64_t>();
-        case Types::Uint64:  return (double)m_data.Get<uint64_t>();
         case Types::Float:   return (double)m_data.Get<double>();
         case Types::Vector2: return (double)m_data.Get<vec2>()[0];
         case Types::Vector3: return (double)m_data.Get<vec3>()[0];
@@ -517,7 +512,6 @@ namespace chisel::kv
         switch (m_type)
         {
         case Types::Int:     return vec2(m_data.Get<int64_t>(),  0.0f);
-        case Types::Uint64:  return vec2(m_data.Get<uint64_t>(), 0.0f);
         case Types::Float:   return vec2(m_data.Get<double>(),   0.0f);
         case Types::Vector2: return m_data.Get<vec2>().xy;
         case Types::Vector3: return m_data.Get<vec3>().xy;
@@ -532,7 +526,6 @@ namespace chisel::kv
         switch (m_type)
         {
         case Types::Int:     return vec3(m_data.Get<int64_t>(),  0.0f, 0.0f);
-        case Types::Uint64:  return vec3(m_data.Get<uint64_t>(), 0.0f, 0.0f);
         case Types::Float:   return vec3(m_data.Get<double>(),   0.0f, 0.0f);
         case Types::Vector2: return vec3(m_data.Get<vec2>().xy, 0.0f);
         case Types::Vector3: return m_data.Get<vec3>().xyz;
@@ -547,7 +540,6 @@ namespace chisel::kv
         switch (m_type)
         {
         case Types::Int:     return vec4(m_data.Get<int64_t>(),  0.0f, 0.0f, 0.0f);
-        case Types::Uint64:  return vec4(m_data.Get<uint64_t>(), 0.0f, 0.0f, 0.0f);
         case Types::Float:   return vec4(m_data.Get<double>(),   0.0f, 0.0f, 0.0f);
         case Types::Vector2: return vec4(m_data.Get<vec2>().xy, 0.0f, 0.0f);
         case Types::Vector3: return vec4(m_data.Get<vec3>().xyz, 0.0f);
@@ -643,16 +635,8 @@ namespace chisel::kv
                 }
                 else
                 {
-                    if (view[0] != '-')
-                    {
-                        auto r_uint64 = stream::Parse<uint64>(view);
-                        if (r_uint64) return KeyValuesVariant(*r_uint64);
-                    }
-                    else
-                    {
-                        auto r_int64 = stream::Parse<int64>(view);
-                        if (r_int64) return KeyValuesVariant(*r_int64);
-                    }
+                    auto r_int64 = stream::Parse<int64>(view);
+                    if (r_int64) return KeyValuesVariant(*r_int64);
                 }
             }
             else if (vec.size() == 2)
@@ -705,7 +689,6 @@ namespace chisel::kv
         else if (m_type == Types::Vector2 && type == Types::Vector4) Set(vec4(Get<vec2>(), 0.0f, 0.0f));
         else if (m_type == Types::Vector3 && type == Types::Vector4) Set(vec4(Get<vec3>(), 0.0f));
         else if (m_type == Types::Int     && type == Types::Float)   Set(double(Get<int>()));
-        else if (m_type == Types::Uint64  && type == Types::Float)   Set(double(Get<int>()));
         else
             abort();
     }

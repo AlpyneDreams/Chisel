@@ -167,27 +167,14 @@ namespace chisel
 
             case Boolean:
             {
-                if (kv.GetType() == kv::Types::Int)
+                kv.EnsureType(kv::Types::Int);
+                bool* value = (bool*)kv.GetPtr<int64_t>(kv::Types::Int);
+                if (ImGui::Checkbox(name, value))
                 {
-                    bool* value = (bool*)kv.GetPtr<int64_t>(kv::Types::Int);
-                    if (ImGui::Checkbox(name, value))
-                    {
-                        *value = *value ? "1" : "0";
-                        return true;
-                    }
-                    return false;
+                    *value = *value ? "1" : "0";
+                    return true;
                 }
-                else
-                {
-                    kv.EnsureType(kv::Types::Uint64);
-                    bool* value = (bool*)kv.GetPtr<uint64_t>(kv::Types::Uint64);
-                    if (ImGui::Checkbox(name, value))
-                    {
-                        *value = *value ? "1" : "0";
-                        return true;
-                    }
-                    return false;
-                }
+                return false;
             }
             case StudioModel:
             case Sound:
