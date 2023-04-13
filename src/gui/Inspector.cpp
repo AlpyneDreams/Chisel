@@ -324,15 +324,14 @@ namespace chisel
                 if (!visited.contains(base->hash))
                     DrawProperties(base, ent, false);
 
-        if (!StartTable())
-            return;
-
         //ImGui::TableSetupColumn("Property Name");
         //ImGui::TableSetupColumn("Value");
         //ImGui::TableHeadersRow();
         
         if (root)
         {
+            if (!StartTable())
+                return;
             // Draw unrecognized properties
             for (auto& [key, value] : ent->kv)
             {
@@ -370,13 +369,15 @@ namespace chisel
                     }
                 }
             }
-        }
 
-        ImGui::EndTable();
+            ImGui::EndTable();
+        }
 
         // Draw (sub)class header
         bool showHeader = debug || (
-            !HiddenClasses.contains(cls->hash) && !cls->variables.empty()
+            !HiddenClasses.contains(cls->hash)
+            && !cls->variables.empty()
+            && !(cls->variables.size() == 1 && HoistedVariableSet.contains(cls->variables.begin()->first))
         );
         if (showHeader)
         {
