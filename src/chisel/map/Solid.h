@@ -81,8 +81,9 @@ namespace chisel
         Selectable* ResolveSelectable() final override;
         bool IsSelected() const final override;
 
+        void Delete() final override;
+
     private:
-        BrushEntity* m_parent;
 
         std::vector<BrushMesh> m_meshes;
         std::vector<Side> m_sides;

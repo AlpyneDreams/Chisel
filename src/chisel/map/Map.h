@@ -11,6 +11,11 @@ namespace chisel
 {
     struct Entity : Atom
     {
+        Entity(BrushEntity* parent)
+            : Atom(parent)
+        {
+        }
+
         std::string classname;
         std::string targetname;
 
@@ -23,10 +28,17 @@ namespace chisel
         void AlignToGrid(vec3 gridSize) override { /* Do Nothing */ }
 
         virtual bool IsBrushEntity() const = 0;
+
+        void Delete() final override;
     };
 
     struct PointEntity final : Entity
     {
+        PointEntity(BrushEntity* parent)
+            : Entity(parent)
+        {
+        }
+
         // TODO: Bounds from model or FGD
         std::optional<AABB> GetBounds() const final override { return AABB(origin - vec3(32), origin + vec3(32)); }
         void Transform(const mat4x4& matrix) final override { origin = matrix * vec4(origin, 1); }
@@ -40,7 +52,8 @@ namespace chisel
     struct BrushEntity : Entity
     {
     public:
-        BrushEntity()
+        BrushEntity(BrushEntity* parent)
+            : Entity(parent)
         {
         }
 
@@ -125,15 +138,33 @@ namespace chisel
 
         PointEntity* AddPointEntity(const char* classname)
         {
-            PointEntity* ent = new PointEntity();
+            PointEntity* ent = new PointEntity(this);
             ent->classname = classname;
             entities.push_back(ent);
             return ent;
         }
 
+        void RemoveEntity(Entity& entity)
+        {
+            // SUCKS
+            entities.erase(std::remove_if(entities.begin(),
+                entities.end(),
+                [&](Entity* a)-> bool
+                { return a == &entity; }),
+                entities.end());
+
+            delete &entity;
+        }
+
         Map()
-            : BrushEntity()
+            : BrushEntity(nullptr)
         {
         }
     };
+
+    inline void Entity::Delete()
+    {
+        assert(m_parent->IsMap());
+        static_cast<Map*>(m_parent)->RemoveEntity(*this);
+    }
 }

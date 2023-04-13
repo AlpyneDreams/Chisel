@@ -9,10 +9,16 @@
 
 namespace chisel
 {
+    struct BrushEntity;
+
     struct Atom : Selectable
     {
-    // Selectable Interface //
-        void Delete() final override { Console.Error("Need a reference to the map in here to kill myself."); }
+        Atom(BrushEntity* parent)
+            : m_parent(parent)
+        {
+        }
+    protected:
+        BrushEntity* m_parent;
     };
 
     struct VertexSolid

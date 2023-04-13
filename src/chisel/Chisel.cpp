@@ -159,12 +159,12 @@ namespace chisel
         Entity* entity = nullptr;
         if (point)
         {
-            PointEntity* point = new PointEntity();
+            PointEntity* point = new PointEntity(&map);
             entity = point;
         }
         else
         {
-            BrushEntity* brush = new BrushEntity();
+            BrushEntity* brush = new BrushEntity(&map);
             AddSolid(*brush, kvEntity, matNameScratch);
             entity = brush;
         }

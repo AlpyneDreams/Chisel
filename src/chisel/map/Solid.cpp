@@ -41,12 +41,12 @@ namespace chisel
     }
 
     Solid::Solid(BrushEntity* parent)
-        : m_parent(parent)
+        : Atom(parent)
     {
     }
 
     Solid::Solid(BrushEntity* parent, std::vector<Side> sides, bool initMesh)
-        : m_parent(parent)
+        : Atom(parent)
         , m_sides(std::move(sides))
     {
         if (initMesh)
@@ -54,22 +54,12 @@ namespace chisel
     }
 
     Solid::Solid(Solid&& other)
+        : Atom(other.m_parent)
     {
-        this->m_parent = other.m_parent;
-        other.m_parent = nullptr;
-
         this->m_meshes = std::move(other.m_meshes);
-        other.m_meshes.clear();
-
         this->m_sides = std::move(other.m_sides);
-        other.m_sides.clear();
-
         this->m_faces = std::move(other.m_faces);
-        other.m_faces.clear();
-
         this->m_bounds = other.m_bounds;
-        other.m_bounds = std::nullopt;
-
     }
         
     Solid::~Solid()
@@ -523,6 +513,11 @@ namespace chisel
     bool Solid::IsSelected() const
     {
         return Atom::IsSelected() || m_parent->IsSelected();
+    }
+
+    void Solid::Delete()
+    {
+        m_parent->RemoveBrush(*this);
     }
 
     std::vector<Side> CreateCubeBrush(vec3 size, const mat4x4& transform)
