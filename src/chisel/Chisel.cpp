@@ -1,6 +1,7 @@
 
 #include "chisel/Chisel.h"
 #include "chisel/MapRender.h"
+#include "chisel/ExportMap.h"
 #include "common/String.h"
 #include "formats/KeyValues.h"
 #include "chisel/FGD/FGD.h"
@@ -47,6 +48,11 @@ namespace chisel
     Chisel::~Chisel()
     {
         delete fgd;
+    }
+
+    void Chisel::Save()
+    {
+        ExportMap("test.map");
     }
 
     void Chisel::CloseMap()
@@ -154,7 +160,6 @@ namespace chisel
         if (point)
         {
             PointEntity* point = new PointEntity();
-            point->origin = kvEntity["origin"];
             entity = point;
         }
         else
@@ -166,6 +171,7 @@ namespace chisel
 
         entity->classname = (std::string_view)kvEntity["classname"];
         entity->targetname = (std::string_view)kvEntity["targetname"];
+        entity->origin = kvEntity["origin"];
         map.entities.push_back(entity);
         return true;
     }

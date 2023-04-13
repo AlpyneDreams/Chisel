@@ -108,7 +108,7 @@ namespace chisel
             {
                 if (MenuItem("New",   "Ctrl+N"))                  action = New;
                 if (MenuItem("Open",  "Ctrl+O"))                  action = Open;
-                if (MenuItem("Save",  "Ctrl+S", false, unsaved))  Chisel.Save();
+                if (MenuItem("Save",  "Ctrl+S", unsaved))         Chisel.Save();
                 if (MenuItem("Save as...",  "Ctrl+Shift+S"))      SaveFilePicker();
                 Separator();
                 if (MenuItem("Close", "Ctrl+W"))                  action = Close;

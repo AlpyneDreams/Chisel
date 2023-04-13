@@ -13,6 +13,8 @@ namespace chisel
         std::string classname;
         std::string targetname;
 
+        glm::vec3 origin;
+
         // TODO: Variants...
         std::unordered_map<std::string, std::string> kv;
         std::unordered_map<std::string, std::string> connections;
@@ -20,16 +22,20 @@ namespace chisel
         std::optional<AABB> GetBounds() const override { return std::nullopt; }
         void Transform(const mat4x4& matrix) override { /* Do Nothing */ }
         void AlignToGrid(vec3 gridSize) override { /* Do Nothing */ }
+
+        virtual bool IsBrushEntity() const = 0;
     };
 
     struct PointEntity final : Entity
     {
-        glm::vec3 origin;
-
         // TODO: Bounds from model or FGD
         std::optional<AABB> GetBounds() const final override { return AABB(origin - vec3(32), origin + vec3(32)); }
         void Transform(const mat4x4& matrix) final override { origin = matrix * vec4(origin, 1); }
         void AlignToGrid(vec3 gridSize) final override { origin = math::Snap(origin, gridSize); }
+
+    // Entity Interface //
+
+        virtual bool IsBrushEntity() const override { return false; }
     };
 
     struct BrushEntity : Entity
@@ -60,6 +66,10 @@ namespace chisel
 
         auto begin() { return m_solids.begin(); }
         auto end()   { return m_solids.end(); }
+
+    // Entity Interface //
+
+        bool IsBrushEntity() const override { return true; }
 
     // Selectable Interface //
 

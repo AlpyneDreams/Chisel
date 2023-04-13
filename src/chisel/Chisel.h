@@ -53,7 +53,7 @@ namespace chisel
 
     // File I/O //
         bool HasUnsavedChanges() { return !map.Empty(); }
-        void Save() {} // TODO
+        void Save();
         void CloseMap();
         bool LoadVMF(std::string_view path);
         void CreateEntityGallery();
