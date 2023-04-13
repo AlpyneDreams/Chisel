@@ -261,6 +261,8 @@ namespace chisel::kv
 
         auto begin() { return m_children.begin(); }
         auto end()   { return m_children.end(); }
+        auto begin() const { return m_children.begin(); }
+        auto end() const   { return m_children.end(); }
 
         bool Contains(std::string_view name)
         {
