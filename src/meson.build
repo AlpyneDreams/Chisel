@@ -30,6 +30,7 @@ chisel_src = files(
     'chisel/Tools.cpp',
     'chisel/Selection.cpp',
     'chisel/Chisel.cpp',
+    'chisel/ExportMap.cpp',
     'chisel/Handles.cpp',
     'chisel/Gizmos.cpp',
     'chisel/MapRender.cpp',
