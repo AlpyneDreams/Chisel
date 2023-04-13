@@ -28,9 +28,11 @@ namespace chisel
         fgd = new FGD("core/test.fgd");
 
         // Add chisel systems...
+        Tools.systems.RemoveSystems<GUI::ConsoleWindow>(); // Needs to come after Layout
         Renderer = &Tools.systems.AddSystem<MapRender>();
         Tools.systems.AddSystem<Keybinds>();
         Tools.systems.AddSystem<Layout>();
+        Tools.console = &Tools.systems.AddSystem<GUI::ConsoleWindow>();
         Tools.systems.AddSystem<MainToolbar>();
         Tools.systems.AddSystem<SelectionModeToolbar>();
         Tools.systems.AddSystem<Inspector>();

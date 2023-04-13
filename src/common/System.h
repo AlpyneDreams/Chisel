@@ -80,6 +80,9 @@ namespace chisel
             auto* sys   = system.get();
 
             auto& [id, record] = *systems.insert({typeid(Sys), {system}});
+            record.Start  = OnStart.end();
+            record.Update = OnUpdate.end();
+            record.Tick   = OnTick.end();
 
             VTable<System>& vt = GetVTable<System>(sys);
 
@@ -156,9 +159,9 @@ namespace chisel
 
         inline void UnregisterCallbacks(const SystemRecord& record)
         {
-            OnStart.erase(record.Start);
-            OnUpdate.erase(record.Update);
-            OnTick.erase(record.Tick);
+            if (record.Start != OnStart.end())  OnStart.erase(record.Start);
+            if (record.Update != OnUpdate.end()) OnUpdate.erase(record.Update);
+            if (record.Tick != OnTick.end())   OnTick.erase(record.Tick);
         }
     };
 }
