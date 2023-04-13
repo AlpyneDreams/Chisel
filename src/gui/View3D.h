@@ -4,6 +4,7 @@
 #include "chisel/Handles.h"
 #include "console/ConVar.h"
 #include "core/Camera.h"
+#include "render/Render.h"
 
 namespace chisel
 {
@@ -14,7 +15,9 @@ namespace chisel
 
     struct View3D : public GUI::Window
     {
-        View3D(auto... args) : GUI::Window(args..., ImGuiWindowFlags_MenuBar) {}
+        View3D(auto... args) : GUI::Window(args..., ImGuiWindowFlags_MenuBar) { }
+
+        Camera camera;
 
         Space space          = Space::World;
         Rect  viewport;
@@ -28,26 +31,19 @@ namespace chisel
 
     // Virtual Methods //
 
+        virtual void Start() override;
         virtual void OnClick(uint2 pos) {}
+        virtual void OnResize(uint width, uint height) {}
         virtual void OnResizeGrid(vec3& gridSize) {}
+        virtual void OnPostRender();
+        virtual void PresentView() = 0;
         virtual void DrawHandles(mat4x4& view, mat4x4& proj) {}
+        virtual void OnDrawMenuBar() {}
         virtual void OnPostDraw() {}
 
-        Camera& GetCamera() const;
+        Camera& GetCamera();
         uint2 GetMousePos() const;
-        Ray GetMouseRay() const;
-
-    // Draw Modes //
-
-        enum class DrawMode {
-            Shaded, Depth, ObjectID
-        };
-
-        static inline const char* drawModes[] = { "Shaded", "Depth", "Object ID" };
-
-        DrawMode drawMode = DrawMode::Shaded;
-
-        Texture GetTexture(DrawMode mode);
+        Ray GetMouseRay();
 
     // UI //
 
@@ -62,6 +58,7 @@ namespace chisel
         void PostDraw();
 
     protected:
+
         void MouseLook(int2 mouse);
 
         // Returns true if window is not collapsed

@@ -43,31 +43,6 @@ namespace chisel
         cs_ObjectID.buffers.push_back(r.CreateCSInputBuffer<uint2>());
         cs_ObjectID.buffers.push_back(r.CreateCSOutputBuffer<uint>());
         cs_ObjectID.buffers[1].AddStagingBuffer(r.device.ptr());
-
-        // Setup editor render targets
-        auto [width, height] = window->GetSize();
-
-        float debugColor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
-
-        rt_SceneView = r.CreateRenderTarget(width, height);
-        r.ctx->ClearRenderTargetView(rt_SceneView.rtv.ptr(), debugColor);
-
-        ds_SceneView = r.CreateDepthStencil(width, height);
-        r.ctx->ClearDepthStencilView(ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-        rt_ObjectID = r.CreateRenderTarget(width, height, DXGI_FORMAT_R32_UINT);
-
-        // Setup editor camera
-        editorCamera.camera.position = vec3(-64.0f, -32.0f, 32.0f) * 32.0f;
-        editorCamera.camera.angles = math::radians(vec3(-30.0f, 30.0f, 0));
-        editorCamera.camera.renderTarget = &rt_SceneView;
-    }
-
-    void Tools::ResizeViewport(uint width, uint height)
-    {
-        rt_SceneView = r.CreateRenderTarget(width, height);
-        ds_SceneView = r.CreateDepthStencil(width, height);
-        rt_ObjectID = r.CreateRenderTarget(width, height, DXGI_FORMAT_R32_UINT);
     }
 
     void Tools::Loop()
@@ -137,7 +112,7 @@ namespace chisel
         Window::Shutdown();
     }
 
-    void Tools::PickObject(uint2 mouse)
+    void Tools::PickObject(uint2 mouse, render::RenderTarget rt_ObjectID)
     {
         auto bufferIn = cs_ObjectID.buffers[0];
 
@@ -145,7 +120,7 @@ namespace chisel
         r.UpdateDynamicBuffer(bufferIn.buffer.ptr(), mouse);
 
         // When rendering completes...
-        OnEndFrame.Once([](render::RenderContext& r)
+        OnEndFrame.Once([rt_ObjectID](render::RenderContext& r)
         {
             // Unbind render targets
             r.ctx->OMSetRenderTargets(0, nullptr, nullptr);
@@ -155,7 +130,7 @@ namespace chisel
             auto bufferOut = Tools.cs_ObjectID.buffers[1];
 
             // Bind the render target, input coords, output value
-            ID3D11ShaderResourceView* srvs[] = { Tools.rt_ObjectID.srvLinear.ptr(), bufferIn.srv.ptr() };
+            ID3D11ShaderResourceView* srvs[] = { rt_ObjectID.srvLinear.ptr(), bufferIn.srv.ptr() };
             r.ctx->CSSetShaderResources(0, 2, srvs);
             r.ctx->CSSetUnorderedAccessViews(0, 1, &bufferOut.uav, nullptr);
 

@@ -33,7 +33,20 @@ namespace chisel
     inline ConVar<bool>  trans_texture_scale_lock("trans_texture_scale_lock", false, "Enable scaling texture lock.");
     inline ConVar<bool>  trans_texture_face_alignment("trans_texture_face_alignment", true, "Enable texture face alignment.");
 
-    Camera& View3D::GetCamera() const { return Tools.editorCamera.camera; }
+    Camera& View3D::GetCamera() { return camera; }
+
+    void View3D::Start()
+    {
+        camera.position = vec3(-64.0f, -32.0f, 32.0f) * 32.0f;
+        camera.angles = math::radians(vec3(-30.0f, 30.0f, 0));
+    }
+
+    void View3D::OnPostRender()
+    {
+        // Draw grid
+        if (view_grid_show)
+            Handles.DrawGrid(camera, gridSize);
+    }
 
     uint2 View3D::GetMousePos() const
     {
@@ -41,23 +54,9 @@ namespace chisel
         return uint2(absolute.x - viewport.x, absolute.y - viewport.y);
     }
 
-    Ray View3D::GetMouseRay() const
+    Ray View3D::GetMouseRay()
     {
         return GetCamera().ScreenPointToRay(GetMousePos(), viewport);
-    }
-
-// Draw Modes //
-
-    Texture View3D::GetTexture(DrawMode mode)
-    {
-        switch (mode) {
-            default: case DrawMode::Shaded:
-                return Tools.rt_SceneView;
-#if 0
-            case DrawMode::Depth:
-                return Tools.rt_SceneView->GetDepthTexture();
-#endif
-        }
     }
 
 // UI //
@@ -122,10 +121,6 @@ namespace chisel
         // HACK: Reset hovered window
         g.HoveredWindow = hovered;
 
-        // Draw grid
-        if (view_grid_show)
-            Handles.DrawGrid(Tools.rctx, camera.position, gridSize);
-
         OnPostDraw();
     }
 
@@ -166,17 +161,7 @@ namespace chisel
                 "Texture Scale Lock"
             );
 
-            // Right side
-            ImGui::SameLine(ImGui::GetWindowWidth() - 90);
-            if (BeginMenu(ICON_MC_IMAGE_MULTIPLE " " ICON_MC_MENU_DOWN, "Render Mode"))
-            {
-                for (int i = 0; i < sizeof(drawModes) / sizeof(const char*); i++)
-                {
-                    if (ImGui::MenuItem(drawModes[i], "", drawMode == DrawMode(i)))
-                        drawMode = DrawMode(i);
-                }
-                ImGui::EndMenu();
-            }
+            OnDrawMenuBar();
 
             // Right side
             ImGui::SameLine(ImGui::GetWindowWidth() - 40);
@@ -199,16 +184,9 @@ namespace chisel
 
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 size = ImGui::GetContentRegionAvail();
-        ImVec2 max = ImVec2(pos.x + size.x, pos.y + size.y);
-
-        // Copy from scene view render target into viewport
-        ImGui::GetWindowDrawList()->AddImage(
-            GetTexture(drawMode).srvLinear.ptr(),
-            pos, max,
-            ImVec2(0, 0), ImVec2(1, 1)
-        );
-
         viewport = Rect(pos.x, pos.y, size.x, size.y);
+
+        PresentView();
 
         // If mouse is over viewport,
         if (mouseOver = ImGui::IsWindowHovered(ImGuiHoveredFlags_None) && IsMouseOver(viewport))
@@ -288,7 +266,7 @@ namespace chisel
             height = uint(size.y);
 
             // Resize framebuffer or viewport
-            Tools.ResizeViewport(width, height);
+            OnResize(width, height);
 
             return true;
         }

@@ -7,6 +7,7 @@
 #include "math/AABB.h"
 #include "render/Render.h"
 #include "core/Transform.h"
+#include "core/Camera.h"
 #include "console/ConVar.h"
 
 #include <vector>
@@ -50,7 +51,7 @@ namespace chisel
 
         static constexpr int gridChunkSize = 200;
 
-        void DrawGrid(render::RenderContext& r, vec3 cameraPos, vec3 gridSize);
+        void DrawGrid(Camera& camera, vec3 gridSize);
 
         Handles();
 

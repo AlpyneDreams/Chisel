@@ -61,6 +61,8 @@ namespace chisel
         map.Clear();
     }
 
+    // TODO: Move these somewhere else
+
     static Plane ParsePlane(std::string_view string)
     {
         auto points = str::split(string, ")");

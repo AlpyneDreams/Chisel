@@ -170,8 +170,9 @@ namespace chisel
     //  Grid
     //--------------------------------------------------
 
-    void Handles::DrawGrid(render::RenderContext& r, vec3 cameraPos, vec3 gridSize)
+    void Handles::DrawGrid(Camera& camera, vec3 gridSize)
     {
+        auto& r = Tools.rctx;
         r.SetBlendState(render::BlendFuncs::Alpha);
         r.ctx->OMSetDepthStencilState(r.Depth.LessEqual.ptr(), 0);
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
@@ -180,7 +181,7 @@ namespace chisel
 
         // Determine center of grid based on camera position
         vec3 chunk = gridSize * float(gridChunkSize);
-        vec3 cameraCell = glm::floor((cameraPos / chunk) + vec3(0.5));
+        vec3 cameraCell = glm::floor((camera.position / chunk) + vec3(0.5));
         cameraCell.z = 0;
 
         mat4x4 mtx = glm::translate(mat4x4(1), cameraCell * chunk);
@@ -192,9 +193,8 @@ namespace chisel
         // Set far Z based on radius
         vec3 farZ = vec3(radius) * chunk * 0.8f;
 
-        Camera& cam = Tools.editorCamera.camera;
-        mat4x4 view = cam.ViewMatrix();
-        mat4x4 proj = cam.ProjMatrix();
+        mat4x4 view = camera.ViewMatrix();
+        mat4x4 proj = camera.ProjMatrix();
 
         // Set camera state
         cbuffers::CameraState camState;

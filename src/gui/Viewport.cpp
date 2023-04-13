@@ -1,3 +1,4 @@
+#include "console/Console.h"
 #include "gui/Viewport.h"
 #include "gui/ToolProperties.h"
 #include "chisel/Gizmos.h"
@@ -12,13 +13,40 @@ namespace chisel
 {
     Viewport::Viewport() : View3D(ICON_MC_IMAGE_SIZE_SELECT_ACTUAL, "Viewport", 512, 512, true) {}
 
+    void Viewport::Start()
+    {
+        View3D::Start();
+        OnResize(width, height); // Ballpark initial size
+    }
+
+    void Viewport::OnResize(uint width, uint height)
+    {
+        rt_SceneView = Tools.rctx.CreateRenderTarget(width, height);
+        ds_SceneView = Tools.rctx.CreateDepthStencil(width, height);
+        rt_ObjectID  = Tools.rctx.CreateRenderTarget(width, height, DXGI_FORMAT_R32_UINT);
+        camera.renderTarget = &rt_SceneView;
+    }
+
+    void Viewport::PresentView()
+    {
+        ImVec2 pos = ImVec2(viewport.pos.x, viewport.pos.y);
+        ImVec2 max = ImVec2(viewport.pos.x + viewport.size.x, viewport.pos.y + viewport.size.y);
+
+        // Copy from scene view render target into viewport
+        ImGui::GetWindowDrawList()->AddImage(
+            GetTexture(drawMode).srvLinear.ptr(),
+            pos, max,
+            ImVec2(0, 0), ImVec2(1, 1)
+        );
+    }
+
     void Viewport::OnClick(uint2 mouse)
     {
         switch (activeTool)
         {
             default:
             case Tool::Select:
-                Tools.PickObject(mouse);
+                Tools.PickObject(mouse, rt_ObjectID);
                 break;
             
             case Tool::Entity:
@@ -210,6 +238,35 @@ namespace chisel
 
             gridSize = glm::clamp(gridSize, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
             OnResizeGrid(gridSize);
+        }
+    }
+// Draw Modes //
+
+    void Viewport::OnDrawMenuBar()
+    {
+        // Right side
+        ImGui::SameLine(ImGui::GetWindowWidth() - 90);
+        if (BeginMenu(ICON_MC_IMAGE_MULTIPLE " " ICON_MC_MENU_DOWN, "Render Mode"))
+        {
+            for (int i = 0; i < sizeof(drawModes) / sizeof(const char*); i++)
+            {
+                if (ImGui::MenuItem(drawModes[i], "", drawMode == DrawMode(i)))
+                    drawMode = DrawMode(i);
+            }
+            ImGui::EndMenu();
+        }
+
+    }
+
+    Texture Viewport::GetTexture(Viewport::DrawMode mode)
+    {
+        switch (mode) {
+            default: case DrawMode::Shaded:
+                return rt_SceneView;
+#if 0
+            case DrawMode::Depth:
+                return rt_SceneView->GetDepthTexture();
+#endif
         }
     }
 }

@@ -3,6 +3,7 @@
 #include "console/ConVar.h"
 #include "core/Transform.h"
 #include "FGD/FGD.h"
+#include "gui/Viewport.h"
 #include "render/CBuffers.h"
 
 namespace chisel
@@ -30,9 +31,16 @@ namespace chisel
 
     void MapRender::Update()
     {
-        Camera& camera = Tools.editorCamera.camera;
+        for (auto& [type, entry] : Tools.systems.GetSystems<Viewport>())
+        {
+            DrawViewport(*(Viewport*)entry.system.get());
+        }
+    }
 
+    void MapRender::DrawViewport(Viewport& viewport)
+    {
         // Get camera matrices
+        Camera& camera = viewport.GetCamera();
         mat4x4 view = camera.ViewMatrix();
         mat4x4 proj = camera.ProjMatrix();
 
@@ -44,16 +52,16 @@ namespace chisel
         r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), data);
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
 
-        r.ctx->ClearRenderTargetView(Tools.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2).Linear());
-        r.ctx->ClearRenderTargetView(Tools.rt_ObjectID.rtv.ptr(), Colors.Black);
-        r.ctx->ClearDepthStencilView(Tools.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        ID3D11RenderTargetView* rts[] = {viewport.rt_SceneView.rtv.ptr(), viewport.rt_ObjectID.rtv.ptr()};
+        r.ctx->OMSetRenderTargets(2, rts, viewport.ds_SceneView.dsv.ptr());
 
-        ID3D11RenderTargetView* rts[] = {Tools.rt_SceneView.rtv.ptr(), Tools.rt_ObjectID.rtv.ptr()};
-        r.ctx->OMSetRenderTargets(2, rts, Tools.ds_SceneView.dsv.ptr());
+        float2 size = viewport.rt_SceneView.GetSize();
+        D3D11_VIEWPORT viewrect = { 0, 0, size.x, size.y, 0.0f, 1.0f };
+        r.ctx->RSSetViewports(1, &viewrect);
 
-        float2 size = Tools.rt_SceneView.GetSize();
-        D3D11_VIEWPORT viewport = { 0, 0, size.x, size.y, 0.0f, 1.0f };
-        r.ctx->RSSetViewports(1, &viewport);
+        r.ctx->ClearRenderTargetView(viewport.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2).Linear());
+        r.ctx->ClearRenderTargetView(viewport.rt_ObjectID.rtv.ptr(), Colors.Black);
+        r.ctx->ClearDepthStencilView(viewport.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         // TODO: Cull!
         if (r_drawbrushes)
@@ -75,6 +83,8 @@ namespace chisel
 
             DrawPointEntity(entity->classname, false, point->origin, vec3(0), point->IsSelected(), point->GetSelectionID());
         }
+
+        viewport.OnPostRender();
     }
 
     void MapRender::DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles, bool selected, SelectionID id)

@@ -21,9 +21,29 @@ namespace chisel
         bool  draggingBlock  = false;
         vec3  dragStartPos   = vec3(0.f);
 
-        void OnClick(uint2 mouse);
-        void OnResizeGrid(vec3& gridSize);
+        render::RenderTarget rt_SceneView;
+        render::DepthStencil ds_SceneView;
+        render::RenderTarget rt_ObjectID;
+
+        void Start() override;
+        void OnClick(uint2 mouse) override;
+        void OnResize(uint width, uint height) override;
+        void OnResizeGrid(vec3& gridSize) override;
+        void PresentView() override;
         void DrawHandles(mat4x4& view, mat4x4& proj) override;
+        void OnDrawMenuBar() override;
         void OnPostDraw() override;
+
+    // Draw Modes //
+
+        enum class DrawMode {
+            Shaded, Depth, ObjectID
+        };
+
+        static inline const char* drawModes[] = { "Shaded", "Depth", "Object ID" };
+
+        DrawMode drawMode = DrawMode::Shaded;
+
+        Texture GetTexture(DrawMode mode);
     };
 }

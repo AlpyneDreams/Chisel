@@ -8,6 +8,7 @@
 #include "chisel/Gizmos.h"
 
 #include "core/Primitives.h"
+#include "gui/Viewport.h"
 #include "common/Time.h"
 #include "math/Math.h"
 #include "math/Color.h"
@@ -16,7 +17,8 @@
 
 namespace chisel
 {
-    // TODO: Make this a RenderPipeline?
+    struct Camera;
+
     struct MapRender : public System
     {
     private:
@@ -31,9 +33,9 @@ namespace chisel
         void Start() final override;
         void Update() final override;
 
+        void DrawViewport(Viewport& camera);
         void DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles = vec3(0), bool selected = false, SelectionID id = 0);
         void DrawBrushEntity(BrushEntity& ent);
-
         void DrawHandles(mat4x4& view, mat4x4& proj, Tool tool, Space space, bool snap, const vec3& snapSize);
     };
 }
