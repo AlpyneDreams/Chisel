@@ -199,6 +199,11 @@ namespace chisel
 
     void Viewport::OnPostDraw()
     {
+        if (!open) {
+            Tools.systems.RemoveSystem(this);
+            return;
+        }
+
         GUI::ToolPropertiesWindow(activeTool, viewport);
 
         if (IsMouseOver(viewport))
