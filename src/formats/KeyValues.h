@@ -23,7 +23,9 @@ namespace chisel::kv
             Int,
             Float,
             Ptr,
-            Color,
+            Vector2,
+            Vector3,
+            Vector4,
             Uint64,
             KeyValues,
 
@@ -82,6 +84,14 @@ namespace chisel::kv
             Set(arg);
         }
 
+        KeyValuesVariant(KeyValuesVariant&& other)
+            : m_type(other.m_type)
+            , m_str(std::move(other.m_str))
+            , m_data(std::move(other.m_data))
+        {
+            other.m_type = Types::None;
+        }
+
         template <typename T>
         KeyValuesVariant(T&& arg)
         {
@@ -95,11 +105,10 @@ namespace chisel::kv
 
         void Clear()
         {
+            m_str.clear();
+
             switch (m_type)
             {
-                case Types::String:
-                    m_str.clear();
-                    break;
                 case Types::KeyValues:
                     m_data.Destruct<KeyValuesChild>();
                     break;
@@ -121,7 +130,9 @@ namespace chisel::kv
         operator float();
         operator double();
         operator void*();
-        operator Color255();
+        operator vec2();
+        operator vec3();
+        operator vec4();
         operator uint32_t();
         operator uint64_t();
         operator KeyValues&();
@@ -135,7 +146,9 @@ namespace chisel::kv
         void Set(float val)              { Clear(); m_type = Types::Float;     m_data.Get<double>() = val; }
         void Set(double val)             { Clear(); m_type = Types::Float;     m_data.Get<double>() = val; }
         void Set(void* val)              { Clear(); m_type = Types::Ptr;       m_data.Get<void*>() = val; }
-        void Set(Color255 val)           { Clear(); m_type = Types::Color;     m_data.Construct<Color255>(val); }
+        void Set(vec2 val)               { Clear(); m_type = Types::Vector2;   m_data.Get<vec2>() = val; }
+        void Set(vec3 val)               { Clear(); m_type = Types::Vector3;   m_data.Get<vec3>() = val; }
+        void Set(vec4 val)               { Clear(); m_type = Types::Vector4;   m_data.Get<vec4>() = val; }
         void Set(uint32_t val)           { Clear(); m_type = Types::Uint64;    m_data.Get<uint64_t>() = val; }
         void Set(uint64_t val)           { Clear(); m_type = Types::Uint64;    m_data.Get<uint64_t>() = val; }
         void Set(KeyValuesChild val)     { Clear(); m_type = Types::KeyValues; m_data.Get<KeyValuesChild>() = std::move(val); }
@@ -147,19 +160,23 @@ namespace chisel::kv
         static KeyValuesVariant& GetEmptyValue() { return s_Nothing; }
 
         KeyValuesType GetType() const { return m_type; }
+
+        static KeyValuesVariant Parse(std::string_view view);
     private:
         static KeyValuesVariant s_Nothing;
 
         KeyValuesType m_type = Types::None;
 
-        KeyValuesString m_str;
+        mutable KeyValuesString m_str;
 
         Variant<
             int64_t,
             double,
             void*,
             uint64_t,
-            Color255,
+            vec2,
+            vec3,
+            vec4,
             KeyValuesChild> m_data;
     };
     inline KeyValuesVariant KeyValuesVariant::s_Nothing;
@@ -281,7 +298,7 @@ namespace chisel::kv
 
                         if (!fillingInValue)
                         {
-                            kv->m_children.emplace(key, value);
+                            kv->m_children.emplace(key, KeyValuesVariant::Parse(value));
                             key.clear();
                             value.clear();
                         }
@@ -315,13 +332,36 @@ namespace chisel::kv
     template <>
     inline StringView KeyValuesVariant::Get() const
     {
-        switch (m_type)
+        if (m_type == Types::String)
+            return m_str;
+
+        if (m_type == Types::None)
+            return "";
+
+        if (!m_str.empty())
+            return m_str;
+
+        auto printKV = [&](char* dst, size_t dst_length)
         {
-            case Types::String:
-                return m_str;
-            default:
-                return "";
-        }
+            int len = 0;
+            switch (m_type)
+            {
+                case Types::Int:       len = snprintf(dst, dst_length, "%lld",            (long long int)m_data.Get<int64_t>()); break;
+                case Types::Uint64:    len = snprintf(dst, dst_length, "%llu",            (long long int)m_data.Get<uint64_t>()); break;
+                case Types::Float:     len = snprintf(dst, dst_length, "%g",              m_data.Get<double>()); break;
+                case Types::Ptr:       len = snprintf(dst, dst_length, "%p",              m_data.Get<void*>()); break;
+                case Types::Vector2:   len = snprintf(dst, dst_length, "%g %g",           m_data.Get<vec2>()[0], m_data.Get<vec2>()[1]); break;
+                case Types::Vector3:   len = snprintf(dst, dst_length, "%g %g %g",        m_data.Get<vec3>()[0], m_data.Get<vec3>()[1], m_data.Get<vec3>()[2]); break;
+                case Types::Vector4:   len = snprintf(dst, dst_length, "%g %g %g %g",     m_data.Get<vec4>()[0], m_data.Get<vec4>()[1], m_data.Get<vec4>()[2], m_data.Get<vec4>()[3]); break;
+                case Types::KeyValues: len = snprintf(dst, dst_length, "[object Object]"); break;
+            }
+            return len;
+        };
+
+        int len = printKV(nullptr, 0) + 1;
+        m_str.resize(len);
+        printKV(m_str.data(), m_str.size());
+        return m_str;
     }
 
     // todo josh:
@@ -334,10 +374,14 @@ namespace chisel::kv
     {
         switch (m_type)
         {
-            case Types::String:
-                return *stream::Parse<uint64_t>(m_str);
-            default:
-                return 0;
+            case Types::String:  return 0;
+            case Types::Int:     return (uint64_t)m_data.Get<int64_t>();
+            case Types::Uint64:  return (uint64_t)m_data.Get<uint64_t>();
+            case Types::Float:   return (uint64_t)m_data.Get<double>();
+            case Types::Vector2: return (uint64_t)m_data.Get<vec2>()[0];
+            case Types::Vector3: return (uint64_t)m_data.Get<vec3>()[0];
+            case Types::Vector4: return (uint64_t)m_data.Get<vec4>()[0];
+            default:             return 0;
         }
     }
 
@@ -346,23 +390,27 @@ namespace chisel::kv
     {
         switch (m_type)
         {
-            case Types::String:
-                return *stream::Parse<int64_t>(m_str);
-            default:
-                return 0;
+            case Types::String:  return 0;
+            case Types::Int:     return (int64_t)m_data.Get<int64_t>();
+            case Types::Uint64:  return (int64_t)m_data.Get<uint64_t>();
+            case Types::Float:   return (int64_t)m_data.Get<double>();
+            case Types::Vector2: return (int64_t)m_data.Get<vec2>()[0];
+            case Types::Vector3: return (int64_t)m_data.Get<vec3>()[0];
+            case Types::Vector4: return (int64_t)m_data.Get<vec4>()[0];
+            default:             return 0;
         }
     }
 
     template <>
     inline int32_t KeyValuesVariant::Get() const
     {
-        return Get<int64_t>();
+        return (int32_t)Get<int64_t>();
     }
 
     template <>
     inline uint32_t KeyValuesVariant::Get() const
     {
-        return Get<uint64_t>();
+        return (uint32_t)Get<uint64_t>();
     }
 
     template <>
@@ -372,15 +420,25 @@ namespace chisel::kv
     }
 
     template <>
-    inline float KeyValuesVariant::Get() const
+    inline double KeyValuesVariant::Get() const
     {
         switch (m_type)
         {
-            case Types::String:
-                return *stream::Parse<float>(m_str);
-            default:
-                return 0;
+        case Types::String:  return 0.0f;
+        case Types::Int:     return (double)m_data.Get<int64_t>();
+        case Types::Uint64:  return (double)m_data.Get<uint64_t>();
+        case Types::Float:   return (double)m_data.Get<double>();
+        case Types::Vector2: return (double)m_data.Get<vec2>()[0];
+        case Types::Vector3: return (double)m_data.Get<vec3>()[0];
+        case Types::Vector4: return (double)m_data.Get<vec4>()[0];
+        default:             return 0;
         }
+    }
+
+    template <>
+    inline float KeyValuesVariant::Get() const
+    {
+        return (float)Get<double>();
     }
 
     template <>
@@ -401,9 +459,21 @@ namespace chisel::kv
     }
 
     template <>
-    inline Color255 KeyValuesVariant::Get() const
+    inline vec2 KeyValuesVariant::Get() const
     {
-        return Color255();
+        return vec2();
+    }
+
+    template <>
+    inline vec3 KeyValuesVariant::Get() const
+    {
+        return vec3();
+    }
+
+    template <>
+    inline vec4 KeyValuesVariant::Get() const
+    {
+        return vec4();
     }
 
     inline KeyValuesVariant& KeyValuesVariant::operator [](const char *string)
@@ -454,9 +524,17 @@ namespace chisel::kv
     {
         return Get<void*>();
     }
-    inline KeyValuesVariant::operator Color255()
+    inline KeyValuesVariant::operator vec2()
     {
-        return Get<Color255>();
+        return Get<vec2>();
+    }
+    inline KeyValuesVariant::operator vec3()
+    {
+        return Get<vec3>();
+    }
+    inline KeyValuesVariant::operator vec4()
+    {
+        return Get<vec4>();
     }
     inline KeyValuesVariant::operator uint32_t()
     {
@@ -469,5 +547,64 @@ namespace chisel::kv
     inline KeyValuesVariant::operator KeyValues&()
     {
         return Get<kv::KeyValues&>();
+    }
+
+    inline KeyValuesVariant KeyValuesVariant::Parse(std::string_view view)
+    {
+        if (view.empty())
+            return KeyValuesVariant();
+
+        if (stream::IsPotentiallyNumber(view[0]))
+        {
+            auto vec = str::split(view, " ");
+            if (vec.size() == 1)
+            {
+                bool hasDecimal = view.find('.') != std::string_view::npos;
+                if (hasDecimal)
+                {
+                    auto r_double = stream::Parse<double>(view);
+                    if (r_double) return KeyValuesVariant(*r_double);
+                }
+                else
+                {
+                    if (view[0] == '-')
+                    {
+                        auto r_uint64 = stream::Parse<uint64>(view);
+                        if (r_uint64) return KeyValuesVariant(*r_uint64);
+                    }
+                    else
+                    {
+                        auto r_int64 = stream::Parse<int64>(view);
+                        if (r_int64) return KeyValuesVariant(*r_int64);
+                    }
+                }
+            }
+            else if (vec.size() == 2)
+            {
+                auto r_x = stream::Parse<float>(vec[0]);
+                auto r_y = stream::Parse<float>(vec[1]);
+                if (r_x && r_y)
+                    return KeyValuesVariant(vec2(*r_x, *r_y));
+            }
+            else if (vec.size() == 3)
+            {
+                auto r_x = stream::Parse<float>(vec[0]);
+                auto r_y = stream::Parse<float>(vec[1]);
+                auto r_z = stream::Parse<float>(vec[2]);
+                if (r_x && r_y && r_z)
+                    return KeyValuesVariant(vec3(*r_x, *r_y, *r_z));
+            }
+            else if (vec.size() == 4)
+            {
+                auto r_x = stream::Parse<float>(vec[0]);
+                auto r_y = stream::Parse<float>(vec[1]);
+                auto r_z = stream::Parse<float>(vec[2]);
+                auto r_w = stream::Parse<float>(vec[3]);
+                if (r_x && r_y && r_z && r_w)
+                    return KeyValuesVariant(vec4(*r_x, *r_y, *r_z, *r_w));
+            }
+        }
+
+        return KeyValuesVariant(view);
     }
 }

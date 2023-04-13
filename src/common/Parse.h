@@ -166,4 +166,9 @@ namespace chisel::stream
 
         return true;
     }
+
+    inline bool IsPotentiallyNumber(char value)
+    {
+        return value == '+' || value == '-' || value == '.' || (value >= '0' && value <= '9');
+    }
 }

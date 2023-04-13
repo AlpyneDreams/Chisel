@@ -19,6 +19,11 @@ namespace chisel
         {
         }
 
+        Variant(Variant&& other)
+        {
+            memcpy(&data, &other.data, sizeof(data));
+        }
+
         template <typename T, typename... Args>
         Variant(Args&&... args)
         {

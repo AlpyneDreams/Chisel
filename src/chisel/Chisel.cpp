@@ -146,19 +146,6 @@ namespace chisel
         return true;
     }
 
-    vec3 ParseVector(std::string_view vec)
-    {
-        if (!vec.empty())
-        {
-            auto coords = str::split(vec, " ");
-            float x = stream::ParseSimple<float>(coords[0]);
-            float y = stream::ParseSimple<float>(coords[1]);
-            float z = stream::ParseSimple<float>(coords[2]);
-            return vec3(x, y, z);
-        }
-        return vec3(0);
-    }
-
     bool AddEntity(Map& map, kv::KeyValues& kvEntity, std::string& matNameScratch)
     {
         auto solids = kvEntity.FindAll("solid");
@@ -167,7 +154,7 @@ namespace chisel
         if (point)
         {
             PointEntity* point = new PointEntity();
-            point->origin = ParseVector(kvEntity["origin"]);
+            point->origin = kvEntity["origin"];
             entity = point;
         }
         else
