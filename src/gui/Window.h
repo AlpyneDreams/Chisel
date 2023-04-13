@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <string>
+#include <unordered_map>
 
 namespace chisel::GUI
 {
@@ -14,6 +15,7 @@ namespace chisel::GUI
         const char* icon = "";
         const char* title = "";
         const char* id = "";
+        uint instance = s_nextInstance.try_emplace(id, 0).first->second++;
         std::string name = "##"; // (unnamed)
         uint width = 512;
         uint height = 512;
@@ -21,8 +23,6 @@ namespace chisel::GUI
         bool visible = false;
         ImGuiWindowFlags flags;
 
-    private:
-        ImGuiWindow* m_window = nullptr;
     public:
 
         Window() {}
@@ -30,7 +30,7 @@ namespace chisel::GUI
         // Icon, Title, and ID
         Window(const char* icon, const char* title, const char* id, uint width, uint height, bool open = true, ImGuiWindowFlags flags = ImGuiWindowFlags_None)
           : icon(icon), title(title), id(id)
-          , name(std::string(icon) + " " + title + "###" + id)
+          , name(std::string(icon) + " " + title + "###" + id + (!instance ? "" : std::to_string(instance)))
           , width(width), height(height), open(open), flags(flags) {}
 
         // Icon, Title == ID
@@ -39,7 +39,7 @@ namespace chisel::GUI
 
         // No Icon
         Window(const char* name, uint width, uint height, bool open = true, ImGuiWindowFlags flags = ImGuiWindowFlags_None)
-          : title(name), id(name), name(name)
+          : title(name), id(name), name(std::string(name) + "###" + name + (!instance ? "" : std::to_string(instance)))
           , width(width), height(height), open(open), flags(flags) {}
 
 
@@ -98,5 +98,9 @@ namespace chisel::GUI
         virtual void PostDraw() {}
 
         virtual bool OverrideContentSize(uint2& size) { return false; }
+
+    private:
+        ImGuiWindow* m_window = nullptr;
+        static inline std::unordered_map<std::string, uint> s_nextInstance;
     };
 }
