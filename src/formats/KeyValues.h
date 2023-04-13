@@ -461,19 +461,46 @@ namespace chisel::kv
     template <>
     inline vec2 KeyValuesVariant::Get() const
     {
-        return vec2();
+        switch (m_type)
+        {
+        case Types::Int:     return vec2(m_data.Get<int64_t>(),  0.0f);
+        case Types::Uint64:  return vec2(m_data.Get<uint64_t>(), 0.0f);
+        case Types::Float:   return vec2(m_data.Get<double>(),   0.0f);
+        case Types::Vector2: return m_data.Get<vec2>().xy;
+        case Types::Vector3: return m_data.Get<vec3>().xy;
+        case Types::Vector4: return m_data.Get<vec4>().xy;
+        default:             return vec2(0.0f);
+        }
     }
 
     template <>
     inline vec3 KeyValuesVariant::Get() const
     {
-        return vec3();
+        switch (m_type)
+        {
+        case Types::Int:     return vec3(m_data.Get<int64_t>(),  0.0f, 0.0f);
+        case Types::Uint64:  return vec3(m_data.Get<uint64_t>(), 0.0f, 0.0f);
+        case Types::Float:   return vec3(m_data.Get<double>(),   0.0f, 0.0f);
+        case Types::Vector2: return vec3(m_data.Get<vec2>().xy, 0.0f);
+        case Types::Vector3: return m_data.Get<vec3>().xyz;
+        case Types::Vector4: return m_data.Get<vec4>().xyz;
+        default:             return vec3(0.0f);
+        }
     }
 
     template <>
     inline vec4 KeyValuesVariant::Get() const
     {
-        return vec4();
+        switch (m_type)
+        {
+        case Types::Int:     return vec4(m_data.Get<int64_t>(),  0.0f, 0.0f, 0.0f);
+        case Types::Uint64:  return vec4(m_data.Get<uint64_t>(), 0.0f, 0.0f, 0.0f);
+        case Types::Float:   return vec4(m_data.Get<double>(),   0.0f, 0.0f, 0.0f);
+        case Types::Vector2: return vec4(m_data.Get<vec2>().xy, 0.0f, 0.0f);
+        case Types::Vector3: return vec4(m_data.Get<vec3>().xyz, 0.0f);
+        case Types::Vector4: return m_data.Get<vec4>().xyzw;
+        default:             return vec4(0.0f);
+        }
     }
 
     inline KeyValuesVariant& KeyValuesVariant::operator [](const char *string)
