@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <map>
 #include <string>
 
@@ -14,13 +15,14 @@ namespace chisel
     class FGD
     {
         template <class T>
-        using Dict = std::map<std::string, T>;
+        using Dict = std::unordered_map<std::string, T>;
 
         template <class T>
-        using HashMap = std::map<Hash, T>;
+        using HashMap = std::unordered_map<Hash, T>;
 
         template <class T>
         using List = std::vector<T>;
+
 
         friend struct FGDParser;
     public:
@@ -123,7 +125,7 @@ namespace chisel
             bool report = false;
             bool readOnly = false;
             bool intChoices = false;
-            Dict<std::string> choices;
+            List<std::pair<std::string, std::string>> choices;
         };
 
         struct InputOutput : Base
@@ -140,7 +142,8 @@ namespace chisel
         struct Class : Base
         {
             ClassType type;
-            HashMap<Var> variables;
+            List<Var> variables;
+            HashMap<size_t> varMap;
             Dict<InputOutput> inputs;
             Dict<InputOutput> outputs;
             List<Class*> bases;
@@ -167,8 +170,8 @@ namespace chisel
 
             const Var* GetVar(Hash varName) const
             {
-                if (variables.contains(varName))
-                    return &variables.at(varName);
+                if (varMap.contains(varName))
+                    return &variables[varMap.at(varName)];
                 for (auto base : bases)
                     if (const Var* var = base->GetVar(varName))
                         return var;
@@ -178,7 +181,7 @@ namespace chisel
 
         std::string path;
 
-        Dict<Class> classes;
+        std::map<std::string, Class> classes; // Alphabetical order
         List<std::string> materialExclusion;
 
         int minSize = -16384;

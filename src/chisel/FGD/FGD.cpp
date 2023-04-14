@@ -278,7 +278,7 @@ namespace chisel
                     {
                         auto num = type == Tokens.StringLiteral ? ParseString() : Expect(type);
                         Expect(':');
-                        var.choices[num] = ParseString();
+                        var.choices.push_back({num, ParseString()});
                         if (var.type == FGD::Flags)
                         {
                             // TODO: Default flags...
@@ -290,7 +290,8 @@ namespace chisel
                 Expect(']');
             }
             printdbg("    {}({})", var.name, var.type);
-            cls.variables.insert({var.hash, var});
+            cls.variables.push_back(var);
+            cls.varMap.insert({var.hash, cls.variables.size() - 1});
         }
 
         void ParseInputOutput(FGD::Class& cls, bool input)

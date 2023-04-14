@@ -147,8 +147,24 @@ namespace chisel
         bool dummyBool = false;
        
         auto type = var.type;
-        if (kv.GetType() == kv::Types::String && var.type != FGD::String)
-            type = FGD::BadType;
+        
+        // If a non-string type has a string value (i.e. from VMF
+        // or raw edit mode), then make it non-editable
+        switch (type)
+        {
+            case StudioModel:
+            case Sound:
+            case TargetSrc:
+            case TargetDest:
+            case TargetNameOrClass:
+            case String:
+                type = FGD::String;
+                break;
+            default:
+                if (kv.GetType() == kv::Types::String)
+                    type = FGD::BadType;
+                break;
+        }
         
         switch (type)
         {
@@ -195,8 +211,14 @@ namespace chisel
             case Choices:
             {
                 std::string str = std::string((std::string_view)kv);
-                if (var.choices.contains(str))
-                    str = var.choices.at(str);
+                for (auto& [key, name] : var.choices)
+                {
+                    if (key == str)
+                    {
+                        str = name;
+                        break;
+                    }
+                }
 
                 if (!ImGui::BeginCombo(name, str.c_str()))
                     return false;
@@ -455,7 +477,7 @@ namespace chisel
         bool showHeader = debug || (
             !HiddenClasses.contains(cls->hash)
             && !cls->variables.empty()
-            && !(cls->variables.size() == 1 && HoistedVariableSet.contains(cls->variables.begin()->first))
+            && !(cls->variables.size() == 1 && HoistedVariableSet.contains(cls->variables.begin()->hash))
         );
         if (showHeader)
         {
@@ -466,10 +488,12 @@ namespace chisel
         if (!StartTable())
             return;
 
-        for (int varNum = 0, varCount = cls->variables.size(); auto& [hash, var] : cls->variables)
+        for (int varNum = 0, varCount = cls->variables.size(); auto& var : cls->variables)
         {
-            if (!debug && HoistedVariableSet.contains(hash))
+            if (!debug && HoistedVariableSet.contains(var.hash)) {
+                varNum++;
                 continue;
+            }
 
             BeginRow(var, ent);
 
