@@ -5,6 +5,7 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <vector>
 
 namespace chisel
 {
