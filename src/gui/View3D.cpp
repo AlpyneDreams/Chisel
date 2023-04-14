@@ -95,9 +95,6 @@ namespace chisel
         if (!visible)
             return;
 
-        // Bind the render targets again for drawing gizmos & handles
-        BindRenderTargets(Tools.rctx);
-
         Handles.Begin(viewport, view_axis_allow_flip);
 
         // Get camera matrices
@@ -183,6 +180,9 @@ namespace chisel
             pos, max,
             ImVec2(0, 0), ImVec2(1, 1)
         );
+
+        // Actually render the viewport
+        Render();
 
         // If mouse is over viewport,
         if (mouseOver = ImGui::IsWindowHovered(ImGuiHoveredFlags_None) && IsMouseOver(viewport))

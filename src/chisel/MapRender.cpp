@@ -29,14 +29,6 @@ namespace chisel
         Chisel.brushAllocator = std::make_unique<BrushGPUAllocator>(r);
     }
 
-    void MapRender::Update()
-    {
-        for (auto& [type, entry] : Tools.systems.GetSystems<Viewport>())
-        {
-            DrawViewport(*(Viewport*)entry.system.get());
-        }
-    }
-
     void MapRender::DrawViewport(Viewport& viewport)
     {
         // Get camera matrices
@@ -52,7 +44,12 @@ namespace chisel
         r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), data);
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
 
-        viewport.BindRenderTargets(r);
+        ID3D11RenderTargetView* rts[] = {viewport.rt_SceneView.rtv.ptr(), viewport.rt_ObjectID.rtv.ptr()};
+        r.ctx->OMSetRenderTargets(2, rts, viewport.ds_SceneView.dsv.ptr());
+
+        float2 size = viewport.rt_SceneView.GetSize();
+        D3D11_VIEWPORT viewrect = { 0, 0, size.x, size.y, 0.0f, 1.0f };
+        r.ctx->RSSetViewports(1, &viewrect);
 
         r.ctx->ClearRenderTargetView(viewport.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2).Linear());
         r.ctx->ClearRenderTargetView(viewport.rt_ObjectID.rtv.ptr(), Colors.Black);

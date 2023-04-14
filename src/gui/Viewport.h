@@ -26,7 +26,7 @@ namespace chisel
         render::RenderTarget rt_ObjectID;
 
     // Rendering //
-        void  BindRenderTargets(render::RenderContext& r) override;
+        void  Render() override;
         void* GetMainTexture() override;
 
         void Start() override;
