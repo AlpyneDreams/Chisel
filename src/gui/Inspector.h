@@ -21,7 +21,7 @@ namespace chisel
         void Draw() override;
         void DrawEntityInspector(Entity* ent);
 
-        static void ClassnamePicker(std::string* classname, bool solids = false, const char* label = "##Class");
+        static void ClassnamePicker(std::string* classname, bool solids = false, const char* label = nullptr);
 
         Texture defaultIcons[4];
         Texture* defaultIcon = &defaultIcons[1];

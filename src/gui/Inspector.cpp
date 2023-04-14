@@ -148,7 +148,7 @@ namespace chisel
     void Inspector::ClassnamePicker(std::string* classname, bool solids, const char* label)
     {
         ImGui::PushFont(GUI::FontMonospace);
-        if (ImGui::BeginCombo(label, classname->c_str()))
+        if (ImGui::BeginCombo("##classname", classname->c_str()))
         {
             for (auto& [name, cls] : Chisel.fgd->classes)
             {
@@ -173,6 +173,11 @@ namespace chisel
             ImGui::EndCombo();
         }
         ImGui::PopFont();
+        if (label)
+        {
+            ImGui::SameLine();
+            ImGui::TextUnformatted(label);
+        }
     }
 
     inline bool Inspector::ValueInput(const char* name, const FGD::Var& var, kv::KeyValuesVariant& kv)
