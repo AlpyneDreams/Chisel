@@ -239,10 +239,22 @@ namespace chisel
 #endif
 
             case Color255:
+            {
+                kv.EnsureType(kv::Types::Vector4);
+
+                vec4 color = kv.Get<vec4>() / vec4(255.f);
+
+                if (ImGui::ColorEdit4(name, &color.r, ImGuiColorEditFlags_HDR)) {
+                    kv = color * vec4(255.f);
+                    return true;
+                }
+                return false;
+            }
             case Color1:
             {
                 kv.EnsureType(kv::Types::Vector4);
-                return ImGui::ColorEdit4(name, (float*)kv.GetPtr<vec4>(kv::Types::Vector4), ImGuiColorEditFlags_Float);
+                return ImGui::ColorEdit4(name, (float*)kv.GetPtr<vec4>(kv::Types::Vector4),
+                    ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR);
             }
 
             case Angle:
