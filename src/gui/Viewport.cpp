@@ -37,17 +37,9 @@ namespace chisel
         r.ctx->RSSetViewports(1, &viewrect);
     }
 
-    void Viewport::PresentView()
+    void* Viewport::GetMainTexture()
     {
-        ImVec2 pos = ImVec2(viewport.pos.x, viewport.pos.y);
-        ImVec2 max = ImVec2(viewport.pos.x + viewport.size.x, viewport.pos.y + viewport.size.y);
-
-        // Copy from scene view render target into viewport
-        ImGui::GetWindowDrawList()->AddImage(
-            GetTexture(drawMode).srvLinear.ptr(),
-            pos, max,
-            ImVec2(0, 0), ImVec2(1, 1)
-        );
+        return GetTexture(drawMode).srvLinear.ptr();
     }
 
     void Viewport::OnClick(uint2 mouse)

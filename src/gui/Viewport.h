@@ -26,13 +26,13 @@ namespace chisel
         render::RenderTarget rt_ObjectID;
 
     // Rendering //
-        void BindRenderTargets(render::RenderContext& r) override;
+        void  BindRenderTargets(render::RenderContext& r) override;
+        void* GetMainTexture() override;
 
         void Start() override;
         void OnClick(uint2 mouse) override;
         void OnResize(uint width, uint height) override;
         void OnResizeGrid(vec3& gridSize) override;
-        void PresentView() override;
         void DrawHandles(mat4x4& view, mat4x4& proj) override;
         void OnDrawMenuBar() override;
         void OnPostDraw() override;
