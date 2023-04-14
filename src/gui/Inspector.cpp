@@ -498,7 +498,7 @@ namespace chisel
                         ImGui::DragFloat3("##position", &point->origin.x);
                     }
                 }
-                else if (hash == "spawnflags"_hash)
+                else if (var && hash == "spawnflags"_hash)
                 {
                     BeginRow(*var, ent);
                     bool open = VarTreeNode(
