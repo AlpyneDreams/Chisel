@@ -27,6 +27,16 @@ namespace chisel
         camera.renderTarget = &rt_SceneView;
     }
 
+    void Viewport::BindRenderTargets(render::RenderContext& r)
+    {
+        ID3D11RenderTargetView* rts[] = {rt_SceneView.rtv.ptr(), rt_ObjectID.rtv.ptr()};
+        r.ctx->OMSetRenderTargets(2, rts, ds_SceneView.dsv.ptr());
+
+        float2 size = rt_SceneView.GetSize();
+        D3D11_VIEWPORT viewrect = { 0, 0, size.x, size.y, 0.0f, 1.0f };
+        r.ctx->RSSetViewports(1, &viewrect);
+    }
+
     void Viewport::PresentView()
     {
         ImVec2 pos = ImVec2(viewport.pos.x, viewport.pos.y);

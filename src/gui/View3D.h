@@ -29,13 +29,15 @@ namespace chisel
         bool  mouseOver      = false;
         bool  popupOpen      = false;
 
+    // Rendering //
+        virtual void BindRenderTargets(render::RenderContext& r) = 0;
+
     // Virtual Methods //
 
         virtual void Start() override;
         virtual void OnClick(uint2 pos) {}
         virtual void OnResize(uint width, uint height) {}
         virtual void OnResizeGrid(vec3& gridSize) {}
-        virtual void OnPostRender();
         virtual void PresentView() = 0;
         virtual void DrawHandles(mat4x4& view, mat4x4& proj) {}
         virtual void OnDrawMenuBar() {}

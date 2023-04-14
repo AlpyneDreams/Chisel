@@ -25,6 +25,9 @@ namespace chisel
         render::DepthStencil ds_SceneView;
         render::RenderTarget rt_ObjectID;
 
+    // Rendering //
+        void BindRenderTargets(render::RenderContext& r) override;
+
         void Start() override;
         void OnClick(uint2 mouse) override;
         void OnResize(uint width, uint height) override;

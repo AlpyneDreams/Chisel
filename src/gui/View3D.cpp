@@ -41,13 +41,6 @@ namespace chisel
         camera.angles = math::radians(vec3(-30.0f, 30.0f, 0));
     }
 
-    void View3D::OnPostRender()
-    {
-        // Draw grid
-        if (view_grid_show)
-            Handles.DrawGrid(camera, gridSize);
-    }
-
     uint2 View3D::GetMousePos() const
     {
         ImVec2 absolute = ImGui::GetMousePos();
@@ -102,24 +95,21 @@ namespace chisel
         if (!visible)
             return;
 
-        // HACK: Set hovered window to NULL,
-        // this fixes mouse over with ImGui docking
-        ImGuiContext& g = *ImGui::GetCurrentContext();
-        ImGuiWindow* hovered = g.HoveredWindow;
-        g.HoveredWindow = NULL;
+        // Bind the render targets again for drawing gizmos & handles
+        BindRenderTargets(Tools.rctx);
 
         Handles.Begin(viewport, view_axis_allow_flip);
 
-        Camera& camera = GetCamera();
-
         // Get camera matrices
+        Camera& camera = GetCamera();
         mat4x4 view = camera.ViewMatrix();
         mat4x4 proj = camera.ProjMatrix();
 
         DrawHandles(view, proj);
 
-        // HACK: Reset hovered window
-        g.HoveredWindow = hovered;
+        // Draw grid
+        if (view_grid_show)
+            Handles.DrawGrid(camera, gridSize);
 
         OnPostDraw();
     }
