@@ -274,26 +274,6 @@ namespace chisel
                 ImGui::EndCombo();
                 return modified;
             }
-#if 0
-            case Flags:
-            {
-                if (ImGui::Button(ICON_MC_FLAG " Flags"))
-                    ImGui::OpenPopup("flags");
-
-                bool modified = false;
-
-                if (ImGui::BeginPopup("flags"))
-                {
-                    for (auto& [key, name] : var.choices)
-                    {
-                        ImGui::Checkbox(name.c_str(), &dummyBool);
-                    }
-                    ImGui::EndPopup();
-                }
-                return modified;
-            }
-#endif
-
             case Color255:
             {
                 kv.EnsureType(kv::Types::Vector4);
@@ -436,13 +416,22 @@ namespace chisel
         ImGui::TableNextColumn();
     }
 
+    inline bool Inspector::VarTreeNode(const char* name, const char* desc, const char* keyname)
+    {
+        bool open = ImGui::TreeNodeEx(debug && keyname ? keyname : name,
+            ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding);
+
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+            GUI::HelpTooltip(desc, keyname);
+
+        ImGui::TableNextColumn();
+
+        return open;
+    }
+
     inline void Inspector::VarLabel(const FGD::Var& var)
     {
-        const char* name = var.displayName.c_str();
-        if (var.type == FGD::Flags && var.displayName == "spawnflags")
-            name = "Flags";
-
-        VarLabel(name, var.description.c_str(), var.name.c_str());
+        VarLabel(var.displayName.c_str(), var.description.c_str(), var.name.c_str());
     }
 
     void Inspector::DrawProperties(const FGD::Class* cls, Entity* ent, bool root)
@@ -488,7 +477,7 @@ namespace chisel
             // Draw hoisted and special properties
             for (Hash hash : HoistedVariables)
             {
-                if (const FGD::Var* var = cls->GetVar(hash); var && !debug)
+                if (const FGD::Var* var = cls->GetVar(hash); var && !debug && hash != "spawnflags"_hash)
                 {
                     BeginRow(*var, ent);
                     VarLabel(*var);
@@ -499,9 +488,56 @@ namespace chisel
                     if (PointEntity* point = dynamic_cast<PointEntity*>(ent))
                     {
                         ImGui::TableNextRow(); ImGui::TableNextColumn();
-                        VarLabel(debug ? "origin" : "Position", "The absolute position of this entity.", "origin");
+                        VarLabel("Position", "The absolute position of this entity.", "origin");
                         ImGui::SetNextItemWidth(-FLT_MIN);
                         ImGui::DragFloat3("##position", &point->origin.x);
+                    }
+                }
+                else if (hash == "spawnflags"_hash)
+                {
+                    BeginRow(*var, ent);
+                    bool open = VarTreeNode(
+                        var->displayName == var->name ? "Flags" : var->displayName.c_str(),
+                        var->description.empty() ? "Toggle specific features of this entity." : var->description.c_str(),
+                        var->name.c_str()
+                    );
+                    ImGui::TextUnformatted(ICON_MC_FLAG);
+                    ImGui::TableNextColumn();
+                    if (open)
+                    {
+                        ImGui::TreePop();
+                        for (auto& [key, name] : var->choices)
+                        {
+                            ImGui::TableNextRow(); ImGui::TableNextColumn();
+
+                            const char* label = name.c_str();
+                            if (label[0] == '[' && isdigit(label[1]))
+                            {
+                                const char* c = &label[1];
+                                while (isdigit(*c)) c++;
+                                if (*c == ']') {
+                                    label = &c[1];
+                                    if (*label == ' ')
+                                        label++;
+                                }
+                            }
+
+                            ImGui::Selectable("");
+                            bool hover = ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly);
+                            ImGui::SameLine();
+                            ImGui::Indent(24.f);
+                            ImGui::TextUnformatted(label);
+                            ImGui::Unindent(24.f);
+                            if (hover)
+                                GUI::HelpTooltip(label, key.c_str());
+
+                            ImGui::TableNextColumn();
+
+
+                            // TODO: Hook up the checkbox
+                            bool dummyBool = false;
+                            ImGui::Checkbox((std::string("##") + key).c_str(), &dummyBool);
+                        }
                     }
                 }
             }
