@@ -129,7 +129,7 @@ namespace chisel
 
             if (BeginMenu("Window"))
             {
-                MenuItem(chisel::Tools.console->name.c_str(), "`", &chisel::Tools.console->open);
+                MenuItem(Chisel.console->name.c_str(), "`", &Chisel.console->open);
 
                 if (MenuItem(ICON_MC_IMAGE_PLUS " Add Viewport"))
                 {
@@ -186,8 +186,8 @@ namespace chisel
         {
             if (BeginMenuBar())
             {
-                GUI::WindowToggleButton(chisel::Chisel.mainAssetPicker, 64.0f, "Ctrl+Space");
-                GUI::WindowToggleButton(chisel::Tools.console, 72.0f, "`");
+                GUI::WindowToggleButton(Chisel.mainAssetPicker, 64.0f, "Ctrl+Space");
+                GUI::WindowToggleButton(Chisel.console, 72.0f, "`");
                 EndMenuBar();
             }
             End();

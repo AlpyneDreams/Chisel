@@ -4,7 +4,7 @@
 #include "chisel/Gizmos.h"
 #include "chisel/Handles.h"
 #include "chisel/Selection.h"
-#include "gui/ConsoleWindow.h"
+#include "gui/Common.h"
 #include "assets/Assets.h"
 #include "core/Primitives.h"
 
@@ -21,8 +21,6 @@ namespace chisel
 
     void Tools::Init()
     {
-        console = &systems.AddSystem<GUI::ConsoleWindow>();
-
         // Create window
         window->Create("Chisel", 1920, 1080, true, false);
 

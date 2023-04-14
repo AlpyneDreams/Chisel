@@ -62,6 +62,7 @@ namespace chisel
         MapRender* Renderer;
 
     // GUI //
+        GUI::Window* console;
         GUI::Window* mainAssetPicker;
 
     // Chisel Engine Loop //
