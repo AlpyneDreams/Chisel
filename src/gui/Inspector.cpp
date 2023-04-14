@@ -141,17 +141,23 @@ namespace chisel
         }
     }
 
-    // TODO: Variants
     inline bool Inspector::ValueInput(const char* name, const FGD::Var& var, kv::KeyValuesVariant& kv)
     {
         using enum FGD::VarType;
         bool dummyBool = false;
-        switch (var.type)
+       
+        auto type = var.type;
+        if (kv.GetType() == kv::Types::String && var.type != FGD::String)
+            type = FGD::BadType;
+        
+        switch (type)
         {
             default:
             {
                 std::string_view view = (std::string_view)kv;
-                ImGui::TextUnformatted(view.data(), view.data() + view.length());
+                ImGui::BeginDisabled();
+                ImGui::InputText(name, (char*)view.data(), view.length());
+                ImGui::EndDisabled();
                 return false;
             }
             case Integer:
@@ -257,6 +263,16 @@ namespace chisel
         return ValueInput((std::string("##") + var.name).c_str(), var, value);
     }
 
+    inline bool Inspector::RawInput(const FGD::Var& var, kv::KeyValuesVariant &value)
+    {
+        std::string text = std::string(value.Get<std::string_view>());
+        if (ImGui::InputText((std::string("##") + var.name).c_str(), &text)) {
+            value = kv::KeyValuesVariant::Parse(text);
+            return true;
+        }
+        return false;
+    }
+
     inline bool Inspector::GetKV(const FGD::Var& var, Entity* ent, kv::KeyValuesVariant*& kv)
     {
         bool defaultVal = false;
@@ -282,53 +298,49 @@ namespace chisel
     inline bool Inspector::ValueInput(const FGD::Var& var, Entity* ent, bool raw)
     {
         kv::KeyValuesVariant *kv = nullptr;
-        bool defaultVal = false;
+        bool defaultVal = GetKV(var, ent, kv);
 
-        defaultVal = GetKV(var, ent, kv);
+        // Always show reset button for number fields so the +/- buttons don't move
+        bool showResetButton = !defaultVal || (!raw && var.type == FGD::Integer);
 
-        if (var.readOnly)
-            ImGui::BeginDisabled();
+        ImGui::PushID(var.name.c_str());
+        ImGui::BeginDisabled(var.readOnly);
 
         float cursorX, width = -FLT_MIN;
 
         // Make space for reset button
-        if (!defaultVal)
+        if (showResetButton)
         {
             cursorX = ImGui::GetCursorPosX();
-            width = ImGui::GetContentRegionAvail().x - 26.;
+            width = ImGui::GetContentRegionAvail().x - 28.;
         }
         ImGui::SetNextItemWidth(width);
 
-#if 0
-        // TODO JEFF WHAT WAS THIS FOR I DONT KNOW
-        // FIX IT
         bool modified = raw
-            ? ImGui::InputText((std::string("##") + var.name).c_str(), )
-            : ValueInput(var, &str);
-#endif
-        bool modified = ValueInput(var, *kv);
+            ? RawInput(var, *kv)
+            : ValueInput(var, *kv);
 
         // Reset button
-        if (!defaultVal)
+        if (showResetButton)
         {
             ImGui::SameLine();
-            ImGui::SetCursorPosX(cursorX + width + 2.f);
-            if (defaultVal)
-                ImGui::BeginDisabled();
+            ImGui::SetCursorPosX(cursorX + width + 4.f);
+            ImGui::BeginDisabled(defaultVal);
 
-            if (ImGui::Button(ICON_MC_ARROW_U_LEFT_TOP)) {
-                //str = var.defaultValue;
+            if (ImGui::Button(ICON_MC_ARROW_U_LEFT_TOP))
+            {
+                *kv = std::move(kv::KeyValuesVariant::Parse(var.defaultValue));
                 modified = true;
             }
 
-            if (defaultVal)
-                ImGui::EndDisabled();
+            ImGui::EndDisabled();
         }
 
-        if (var.readOnly)
-            ImGui::EndDisabled();
-        //else if (modified)
-            //ent->kv[var.name] = str;
+        if (modified)
+            kv->ValueChanged();
+
+        ImGui::EndDisabled();
+        ImGui::PopID();
 
         return modified;
     }

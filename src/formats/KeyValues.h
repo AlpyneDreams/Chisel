@@ -172,6 +172,8 @@ namespace chisel::kv
 
         void EnsureType(KeyValuesType type);
         void AssertType(KeyValuesType type) { assert(m_type == type); }
+
+        // Remember to call ValueChanged if you change the value by pointer
         template <typename T>
         T* GetPtr(KeyValuesType type)
         {
@@ -182,6 +184,12 @@ namespace chisel::kv
             if (m_type == Types::String)
                 return reinterpret_cast<T*>(&m_str);
             return &m_data.Get<T>();
+        }
+
+        void ValueChanged()
+        {
+            if (m_type != Types::String)
+                m_str.clear();
         }
 
         KeyValuesVariant& operator [](const char *string);

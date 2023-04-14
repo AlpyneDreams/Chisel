@@ -33,6 +33,7 @@ namespace chisel
         void DrawProperties(const FGD::Class* cls, Entity* ent, bool root = true);
         bool ValueInput(const FGD::Var& var, Entity* ent, bool raw = false);
         bool ValueInput(const FGD::Var& var, kv::KeyValuesVariant& kv);
+        bool RawInput(const FGD::Var& var, kv::KeyValuesVariant& kv);
         bool ValueInput(const char* name, const FGD::Var& var, kv::KeyValuesVariant& kv);
 
         bool GetKV(const FGD::Var& var, Entity* ent, kv::KeyValuesVariant*& kv);
