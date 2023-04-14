@@ -27,7 +27,7 @@ namespace chisel
         Texture* defaultIconBrush;
 
         void BeginRow(const FGD::Var& var, Entity* ent);
-        void VarLabel(const char* name);
+        void VarLabel(const char* name, const char* desc = nullptr, const char* keyname = nullptr);
         void VarLabel(const FGD::Var& var);
 
         void DrawProperties(const FGD::Class* cls, Entity* ent, bool root = true);

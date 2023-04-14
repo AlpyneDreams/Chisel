@@ -28,5 +28,20 @@ namespace chisel
         void WindowToggleButton(Window* window, float width = 64.0f, const char* tooltip = nullptr);
 
         bool Thumbnail(const char* name, Texture* icon = nullptr, bool selected = false);
+
+        inline void HelpTooltip(const char* text, const char* title = nullptr)
+        {
+            ImGui::BeginTooltip();
+            if (title && *title) {
+                ImGui::PushFont(FontMonospace);
+                ImGui::TextUnformatted(title);
+                ImGui::PopFont();
+            }
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 20.0f);
+            if (text && *text)
+                ImGui::TextUnformatted(text);
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
     }
 }

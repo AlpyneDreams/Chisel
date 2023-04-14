@@ -87,8 +87,11 @@ namespace chisel
         constexpr float iconSize = 64;
         constexpr float iconPadding = 8;
 
+        bool hasHelp = !cls.description.empty();
+
         ImVec2 screenPos = ImGui::GetCursorScreenPos();
         ImVec2 endPos = ImVec2(screenPos.x + iconSize, screenPos.y + iconSize);
+        ImVec2 cursorPos = ImGui::GetCursorPos();
 
         // Draw entity icon
         Texture* tex = cls.texture;
@@ -101,20 +104,35 @@ namespace chisel
                 ImVec2(0, 0), ImVec2(1, 1)
             );
 
-        ImVec2 cursorPos = ImGui::GetCursorPos();
+
+        // If icon is hovered, show help text
+        ImGui::Dummy({iconSize, iconSize});
+        if (hasHelp && ImGui::IsItemHovered())
+            GUI::HelpTooltip(cls.description.c_str(), cls.name.c_str());
+
         ImGui::SetCursorPos({cursorPos.x + iconSize + iconPadding, cursorPos.y});
 
         // Draw classname picker
         ClassnamePicker(&ent->classname, cls.type == FGD::SolidClass);
 
+        // Draw help icon
+        ImGui::BeginDisabled(!hasHelp);
+        ImGui::SameLine();
+        ImGui::Selectable(ICON_MC_HELP_CIRCLE, false, 0, ImGui::CalcTextSize(ICON_MC_HELP_CIRCLE));
+        if (hasHelp && ImGui::IsItemHovered())
+            GUI::HelpTooltip(cls.description.c_str(), cls.name.c_str());
+        ImGui::EndDisabled();
+
         ImGui::SetCursorPos({cursorPos.x, cursorPos.y + iconSize + iconPadding});
         ImGui::Separator();
 
+        // Inspect the entity!
         DrawProperties(&cls, ent);
     }
 
     void Inspector::ClassnamePicker(std::string* classname, bool solids, const char* label)
     {
+        ImGui::PushFont(GUI::FontMonospace);
         if (ImGui::BeginCombo(label, classname->c_str()))
         {
             for (auto& [name, cls] : Chisel.fgd->classes)
@@ -139,6 +157,7 @@ namespace chisel
             }
             ImGui::EndCombo();
         }
+        ImGui::PopFont();
     }
 
     inline bool Inspector::ValueInput(const char* name, const FGD::Var& var, kv::KeyValuesVariant& kv)
@@ -392,9 +411,12 @@ namespace chisel
         ImGui::TableNextColumn();
     }
 
-    inline void Inspector::VarLabel(const char* name)
+    inline void Inspector::VarLabel(const char* name, const char* desc, const char* keyname)
     {
-        ImGui::TextUnformatted(name);
+        ImGui::Selectable(debug && keyname ? keyname : name);
+
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+            GUI::HelpTooltip(desc, keyname);
 
         ImGui::TableNextColumn();
     }
@@ -405,7 +427,7 @@ namespace chisel
         if (var.type == FGD::Flags && var.displayName == "spawnflags")
             name = "Flags";
 
-        VarLabel(name);
+        VarLabel(name, var.description.c_str(), var.name.c_str());
     }
 
     void Inspector::DrawProperties(const FGD::Class* cls, Entity* ent, bool root)
@@ -462,8 +484,7 @@ namespace chisel
                     if (PointEntity* point = dynamic_cast<PointEntity*>(ent))
                     {
                         ImGui::TableNextRow(); ImGui::TableNextColumn();
-                        ImGui::TextUnformatted(debug ? "origin" : "Position");
-                        ImGui::TableNextColumn();
+                        VarLabel(debug ? "origin" : "Position", "The absolute position of this entity.", "origin");
                         ImGui::SetNextItemWidth(-FLT_MIN);
                         ImGui::DragFloat3("##position", &point->origin.x);
                     }
@@ -499,7 +520,7 @@ namespace chisel
 
             if (debug)
             {
-                VarLabel(var.name.c_str());
+                VarLabel(var.name.c_str(), var.description.c_str(), var.name.c_str());
                 ValueInput(var, ent, true);
                 continue;
             }
