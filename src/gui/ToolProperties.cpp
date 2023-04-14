@@ -10,7 +10,7 @@ namespace chisel::GUI
 {
     static ConVar<float> gui_tool_properties_opacity("gui_tool_properties_opacity", 0.7f, "Opacity of the tool properties window.");
 
-    void ToolPropertiesWindow(Tool tool, Rect viewport)
+    void ToolPropertiesWindow(Tool tool, Rect viewport, uint instance)
     {
         if (tool != Tool::Entity && tool != Tool::Block)
             return;
@@ -21,8 +21,8 @@ namespace chisel::GUI
               | ImGuiWindowFlags_NoScrollbar
               | ImGuiWindowFlags_NoDocking
               | ImGuiWindowFlags_AlwaysAutoResize
-              | ImGuiWindowFlags_NoSavedSettings
-              | ImGuiWindowFlags_NoFocusOnAppearing;
+              | ImGuiWindowFlags_NoFocusOnAppearing
+              | ImGuiWindowFlags_NoSavedSettings;
 
         constexpr float padding = 10.0f;
         ImVec2 pos;
@@ -36,14 +36,21 @@ namespace chisel::GUI
         ImGui::PushStyleColor(ImGuiCol_TitleBgActive, color);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-        if (ImGui::Begin("Tool Properties", nullptr, flags))
+        ImGuiWindow* window;
+
+        if (ImGui::Begin((std::string("Tool Properties##") + std::to_string(instance)).c_str(), nullptr, flags))
         {
+            window = ImGui::GetCurrentWindow();
             ToolProperties(tool);
         }
         ImGui::End();
 
         ImGui::PopStyleColor(3);
         ImGui::PopStyleVar();
+
+        // Keep this window always on top of viewport
+        if (ImGui::IsWindowFocused())
+            ImGui::BringWindowToDisplayFront(window);
     }
 
     void ToolProperties(Tool tool)

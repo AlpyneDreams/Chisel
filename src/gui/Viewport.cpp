@@ -201,7 +201,7 @@ namespace chisel
             return;
         }
 
-        GUI::ToolPropertiesWindow(activeTool, viewport);
+        GUI::ToolPropertiesWindow(activeTool, viewport, instance);
 
         if (IsMouseOver(viewport))
         {
