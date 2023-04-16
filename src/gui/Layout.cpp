@@ -83,17 +83,17 @@ namespace chisel
 
     static constexpr std::array<ExtensionName, 4> MapExtensionsAndAll =
     { {
-        { "All Map Files", "VMF,BOX,MAP" },
-        { "Boxcutter Map File", "BOX" },
-        { "Valve Map File", "VMF" },
-        { "Quake-style", "MAP" },
+        { "All Map Files", "*.VMF,*.BOX,*.MAP" },
+        { "Boxcutter Map File", ".BOX" },
+        { "Valve Map File", ".VMF" },
+        { "Quake-style", ".MAP" },
     } };
 
     static constexpr std::array<ExtensionName, 3> MapExtensions =
     {{
-        { "Boxcutter Map File", "BOX" },
-        { "Valve Map File", "VMF" },
-        { "Quake-style", "MAP" },
+        { "Boxcutter Map File", ".BOX" },
+        { "Valve Map File", ".VMF" },
+        { "Quake-style", ".MAP" },
     }};
 
     void Layout::OpenFilePicker()

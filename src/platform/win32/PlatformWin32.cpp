@@ -50,15 +50,15 @@ namespace chisel
                 {
                     char formattedExt[512];
                     if (i == 0)
-                        snprintf(formattedExt, sizeof(formattedExt), ".%.*s", int(ext.length()), ext.data());
+                        snprintf(formattedExt, sizeof(formattedExt), "%.*s", int(ext.length()), ext.data());
                     else
-                        snprintf(formattedExt, sizeof(formattedExt), "} .%.*s", int(ext.length()), ext.data());
+                        snprintf(formattedExt, sizeof(formattedExt), "} %.*s", int(ext.length()), ext.data());
 
                     strncat(formattedExts, formattedExt, sizeof(formattedExts));
                     i++;
                 }
 
-                snprintf(localFilter, sizeof(localFilter), "%.*s (%s);*.%s;", int(extension.prettyName.length()), extension.prettyName.data(), formattedExts, ext.c_str());
+                snprintf(localFilter, sizeof(localFilter), "%.*s (%s);%s;", int(extension.prettyName.length()), extension.prettyName.data(), formattedExts, ext.c_str());
                 strncat(filterString, localFilter, sizeof(localFilter));
             }
 
