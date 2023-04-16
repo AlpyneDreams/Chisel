@@ -5,6 +5,7 @@
 #include "core/Mesh.h"
 #include "Common.h"
 #include "Solid.h"
+#include "math/Ray.h"
 #include "formats/KeyValues.h"
 
 namespace chisel
