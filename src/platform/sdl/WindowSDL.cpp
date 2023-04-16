@@ -98,7 +98,7 @@ namespace chisel
                         break;
                     case SDL_MOUSEMOTION:
                     {
-                        Mouse.SetMotion(int2(e.motion.xrel, e.motion.yrel));
+                        Mouse.AccumMotion(int2(e.motion.xrel, e.motion.yrel));
 
                         // Don't send mouse event to ImGui if cursor is locked
                         if (Cursor.GetMode() == Cursor.Locked)

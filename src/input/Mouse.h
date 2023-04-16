@@ -36,23 +36,20 @@ namespace chisel
         // True if mouse button was released this frame
         bool GetButtonUp(MouseButton btn) const { return buttons.GetButtonUp(btn); }
 
-        // Relative (delta) motion this frame
-        int2 GetMotion() const { return motion; }
+        // Relative (delta) motion accumulated since last poll
+        int2 GetMotion() { int2 motion = m_motion; m_motion = int2(0); return motion; }
 
         void SetButton(MouseButton btn, bool down) { buttons.SetButton(btn, down); }
-        void SetMotion(int2 delta) { motion = delta; }
+        void AccumMotion(int2 delta) { m_motion += delta; }
 
         void Update()
         {
             buttons.Update();
-
-            // Clear mouse delta
-            motion = int2(0, 0);
         }
 
     private:
         PressMap<MouseButton> buttons;
-        int2 motion;
+        int2 m_motion = int2(0);
 
     } Mouse;
 
