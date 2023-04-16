@@ -80,18 +80,33 @@ namespace chisel
     //  Layout
     //--------------------------------------------------
 
+    static constexpr std::array<ExtensionName, 4> MapExtensionsAndAll =
+    { {
+        { "All Map Files", "VMF,BOX,MAP" },
+        { "Boxcutter Map File", "BOX" },
+        { "Valve Map File", "VMF" },
+        { "Quake-style", "MAP" },
+    } };
+
+    static constexpr std::array<ExtensionName, 3> MapExtensions =
+    {{
+        { "Boxcutter Map File", "BOX" },
+        { "Valve Map File", "VMF" },
+        { "Quake-style", "MAP" },
+    }};
+
     void Layout::OpenFilePicker()
     {
-        std::string file = Platform.FilePicker();
+        std::string file = Platform.FilePicker(true, MapExtensionsAndAll);
         if (!file.empty())
-            ConCommand::Execute(fmt::format("open_vmf {}", file));
+            ConCommand::Execute(fmt::format("open_map {}", file));
     }
 
     void Layout::SaveFilePicker()
     {
-        std::string file = Platform.FilePicker();
+        std::string file = Platform.FilePicker(false, MapExtensions);
         // TODO
-        Chisel.Save();
+        Chisel.Save(file);
     }
 
     void Layout::Update()
@@ -113,7 +128,7 @@ namespace chisel
             {
                 if (MenuItem("New",   "Ctrl+N"))                  action = New;
                 if (MenuItem("Open",  "Ctrl+O"))                  action = Open;
-                if (MenuItem("Save",  "Ctrl+S", unsaved))         Chisel.Save();
+                //if (MenuItem("Save",  "Ctrl+S", unsaved))         Chisel.Save();
                 if (MenuItem("Save as...",  "Ctrl+Shift+S"))      SaveFilePicker();
                 Separator();
                 if (MenuItem("Close", "Ctrl+W"))                  action = Close;
@@ -162,7 +177,8 @@ namespace chisel
             switch (choice)
             {
                 case Waiting: break;
-                case Save:    Chisel.Save();
+                    // TODO: Hook up active map path
+                //case Save:    Chisel.Save();
                 case Dont:
                 case NoPopup:
                     popup = false;

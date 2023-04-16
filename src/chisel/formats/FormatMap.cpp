@@ -1,5 +1,4 @@
-
-#include "Chisel.h"
+#include "../Chisel.h"
 
 namespace chisel
 {
@@ -59,15 +58,19 @@ namespace chisel
             {
                 assert(face.points.size() >= 3);
 
-                const char* materialName = face.side->material ? (const char *)face.side->material->GetPath() : "DEFAULT";
+                std::string_view materialName = face.side->material ? (const char*)face.side->material->GetPath() : "DEFAULT";
+                if (materialName.starts_with("materials/") || materialName.starts_with("materials\\"))
+                    materialName = materialName.substr(10);
+                if (materialName.ends_with(".vmt"))
+                    materialName = materialName.substr(0, materialName.length() - 4);
 
                 char str[512];
                 snprintf(str, sizeof(str),
-                    "( %g %g %g ) ( %g %g %g ) ( %g %g %g ) %s [ %g %g %g %g ] [ %g %g %g %g ] %g %g %g \n",
+                    "( %g %g %g ) ( %g %g %g ) ( %g %g %g ) %.*s [ %g %g %g %g ] [ %g %g %g %g ] %g %g %g \n",
                     face.points[0].x, face.points[0].y, face.points[0].z,
                     face.points[1].x, face.points[1].y, face.points[1].z,
                     face.points[2].x, face.points[2].y, face.points[2].z,
-                    materialName,
+                    int(materialName.length()), materialName.data(),
                     face.side->textureAxes[0].x, face.side->textureAxes[0].y, face.side->textureAxes[0].z, face.side->textureAxes[0].w,
                     face.side->textureAxes[1].x, face.side->textureAxes[1].y, face.side->textureAxes[1].z, face.side->textureAxes[1].w,
                     face.side->rotate,
@@ -82,21 +85,15 @@ namespace chisel
         }
     }
 
-    void ExportMap(const char* filename)
+    static void WriteMap(std::ofstream& out, Map& map)
     {
-        std::ofstream out(filename);
-        if (out.bad())
-        {
-            return;
-        }
-
         // Write the world first
         out << "{\n";
-        WriteBrushEntity(out, Chisel.map);
+        WriteBrushEntity(out, map);
         out << "}\n";
 
         // Now write the individual entities
-        for (Entity* ent : Chisel.map.entities)
+        for (Entity* ent : map.entities)
         {
             out << "{\n";
 
@@ -111,6 +108,18 @@ namespace chisel
 
             out << "}\n";
         }
+    }
+
+    bool ExportMap(std::string_view filepath, Map& map)
+    {
+        std::ofstream out = std::ofstream(std::string(filepath));
+        if (out.bad())
+        {
+            return false;
+        }
+
+        WriteMap(out, map);
+        return true;
     }
 
 }

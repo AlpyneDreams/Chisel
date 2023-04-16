@@ -1,4 +1,4 @@
-project('chisel', 'cpp',
+project('chisel', ['c', 'cpp'],
     version: 'latest',
     default_options: ['cpp_std=c++20']
 )
@@ -18,10 +18,6 @@ glm_dep    = dependency('glm', static: true)
 imgui_dep  = dependency('imgui', default_options: ['vulkan=disabled'], static: true)
 imguizmo_dep  = dependency('imguizmo')
 
-cmake = import('cmake')
-glaze_proj = cmake.subproject('glaze')
-glaze_dep = glaze_proj.dependency('glaze_glaze')
-
 dxvk_opts = [
     'enable_d3d9=false',
     'enable_d3d10=false',
@@ -31,5 +27,6 @@ d3d11_dep = windows ? cpp.find_library('d3d11') : dependency('d3d11', default_op
 dxgi_dep = windows ? cpp.find_library('dxgi') : dependency('dxgi', default_options: dxvk_opts)
 
 offsetallocator_src = files('submodules/OffsetAllocator/offsetAllocator.cpp')
+yyjson_src = files('submodules/yyjson/src/yyjson.c')
 
 subdir('src')

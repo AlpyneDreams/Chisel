@@ -123,18 +123,18 @@ namespace chisel::kv
         T Get() const;
 
         operator std::string_view() const;
-        operator int64_t();
-        operator int32_t();
-        operator bool();
-        operator float();
-        operator double();
-        operator void*();
-        operator vec2();
-        operator vec3();
-        operator vec4();
-        operator uint32_t();
-        operator uint64_t();
-        operator KeyValues&();
+        operator int64_t() const ;
+        operator int32_t() const;
+        operator bool() const;
+        operator float() const;
+        operator double() const;
+        operator void*() const;
+        operator vec2() const;
+        operator vec3() const;
+        operator vec4() const;
+        operator uint32_t() const;
+        operator uint64_t() const;
+        operator KeyValues&() const;
 
         void Set(const std::string& val) { Clear(); m_type = Types::String;    m_str = KeyValuesString{ val }; }
         void Set(std::string_view val)   { Clear(); m_type = Types::String;    m_str = KeyValuesString{ val }; }
@@ -289,6 +289,14 @@ namespace chisel::kv
         }
 
         bool empty() const { return m_children.empty(); }
+
+        void RemoveAll(std::string_view name)
+        {
+            auto range = m_children.equal_range(std::string(name));
+            if (range.first == range.second)
+                return;
+            m_children.erase(range.first, range.second);
+        }
     private:
         static KeyValues s_Nothing;
 
@@ -580,51 +588,51 @@ namespace chisel::kv
     {
         return Get<std::string_view>();
     }
-    inline KeyValuesVariant::operator int64_t()
+    inline KeyValuesVariant::operator int64_t() const
     {
         return Get<int64_t>();
     }
-    inline KeyValuesVariant::operator int32_t()
+    inline KeyValuesVariant::operator int32_t() const
     {
         return Get<int32_t>();
     }
-    inline KeyValuesVariant::operator bool()
+    inline KeyValuesVariant::operator bool() const
     {
         return Get<bool>();
     }
-    inline KeyValuesVariant::operator float()
+    inline KeyValuesVariant::operator float() const
     {
         return Get<float>();
     }
-    inline KeyValuesVariant::operator double()
+    inline KeyValuesVariant::operator double() const
     {
         return Get<double>();
     }
-    inline KeyValuesVariant::operator void*()
+    inline KeyValuesVariant::operator void*() const
     {
         return Get<void*>();
     }
-    inline KeyValuesVariant::operator vec2()
+    inline KeyValuesVariant::operator vec2() const
     {
         return Get<vec2>();
     }
-    inline KeyValuesVariant::operator vec3()
+    inline KeyValuesVariant::operator vec3() const
     {
         return Get<vec3>();
     }
-    inline KeyValuesVariant::operator vec4()
+    inline KeyValuesVariant::operator vec4() const
     {
         return Get<vec4>();
     }
-    inline KeyValuesVariant::operator uint32_t()
+    inline KeyValuesVariant::operator uint32_t() const
     {
         return Get<uint32_t>();
     }
-    inline KeyValuesVariant::operator uint64_t()
+    inline KeyValuesVariant::operator uint64_t() const
     {
         return Get<uint64_t>();
     }
-    inline KeyValuesVariant::operator KeyValues&()
+    inline KeyValuesVariant::operator KeyValues&() const
     {
         return Get<kv::KeyValues&>();
     }

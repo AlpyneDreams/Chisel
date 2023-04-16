@@ -67,6 +67,7 @@ namespace chisel
         }
 
         std::vector<BrushMesh>& GetMeshes() { return m_meshes; }
+        const std::vector<Side>& GetSides() const { return m_sides; }
         const std::vector<Face>& GetFaces() const { return m_faces; }
 
         void UpdateMesh();

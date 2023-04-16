@@ -30,12 +30,15 @@ chisel_src = files(
     'chisel/Tools.cpp',
     'chisel/Selection.cpp',
     'chisel/Chisel.cpp',
-    'chisel/ExportMap.cpp',
     'chisel/Handles.cpp',
     'chisel/Gizmos.cpp',
     'chisel/MapRender.cpp',
     'chisel/FGD/FGD.cpp',
     'chisel/map/Solid.cpp',
+    
+    'chisel/formats/FormatVMF.cpp',
+    'chisel/formats/FormatMap.cpp',
+    'chisel/formats/FormatBox.cpp',
 )
 
 chisel_deps = [
@@ -47,10 +50,9 @@ chisel_deps = [
     glm_dep,
     imgui_dep,
     imguizmo_dep,
-    glaze_dep,
 ]
 
-chisel = executable('chisel', chisel_src, offsetallocator_src,
+chisel = executable('chisel', chisel_src, offsetallocator_src, yyjson_src,
     dependencies    : chisel_deps,
     include_directories: include_directories('../submodules'),
     win_subsystem   : 'console',

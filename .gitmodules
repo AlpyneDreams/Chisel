@@ -1,6 +1,3 @@
-[submodule "subprojects/glaze"]
-	path = subprojects/glaze
-	url = https://github.com/stephenberry/glaze
 [submodule "submodules/libvpk-plusplus"]
 	path = submodules/libvpk-plusplus
 	url = https://github.com/Joshua-Ashton/libvpk-plusplus
@@ -10,3 +7,6 @@
 [submodule "submodules/OffsetAllocator"]
 	path = submodules/OffsetAllocator
 	url = https://github.com/sebbbi/OffsetAllocator
+[submodule "submodules/yyjson"]
+	path = submodules/yyjson
+	url = https://github.com/ibireme/yyjson
