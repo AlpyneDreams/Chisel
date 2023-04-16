@@ -166,7 +166,8 @@ namespace chisel
                             mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xyz) + (extrude * 0.5f));
                             vec3 size = (vec3(vec.xyz) + extrude) * 0.5f;
                             // make sure we are not degenerate size.
-                            if (!math::CloseEnough(size, vec3(0.0f)))
+                            bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
+                            if (!degenerate)
                             {
                                 auto& cube = map.AddCube(mtx, size);
                                 Selection.Clear();
