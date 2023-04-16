@@ -8,8 +8,217 @@
 
 #include "../submodules/yyjson/src/yyjson.h"
 
+using namespace std::literals;
+
 namespace chisel
 {
+    ConVar<int> box_compression_level("box_compression_level", 3, "Compression level when saving a box format. 1-9. Default is 3.");
+
+    static vec2 YYJsonToVector2(yyjson_val* vec_val)
+    {
+        if (!vec_val)
+            return vec2(0.0f);
+        return vec2(yyjson_get_real(yyjson_arr_get(vec_val, 0)), yyjson_get_real(yyjson_arr_get(vec_val, 1)));
+    }
+
+    static vec3 YYJsonToVector3(yyjson_val* vec_val)
+    {
+        if (!vec_val)
+            return vec3(0.0f);
+        return vec3(yyjson_get_real(yyjson_arr_get(vec_val, 0)), yyjson_get_real(yyjson_arr_get(vec_val, 1)), yyjson_get_real(yyjson_arr_get(vec_val, 2)));
+    }
+
+    static vec4 YYJsonToVector4(yyjson_val* vec_val)
+    {
+        if (!vec_val)
+            return vec4(0.0f);
+        return vec4(yyjson_get_real(yyjson_arr_get(vec_val, 0)), yyjson_get_real(yyjson_arr_get(vec_val, 1)), yyjson_get_real(yyjson_arr_get(vec_val, 2)), yyjson_get_real(yyjson_arr_get(vec_val, 3)));
+    }
+
+    static Plane ReadPlane(yyjson_val* plane_val)
+    {
+        yyjson_val* offset = yyjson_obj_get(plane_val, "offset");
+        yyjson_val* normal = yyjson_obj_get(plane_val, "normal");
+
+        Plane plane{};
+        plane.offset = yyjson_get_real(offset);
+        plane.normal = YYJsonToVector3(normal);
+        return plane;
+    }
+
+    static std::array<vec4, 2> ReadTextureAxis(yyjson_val* axis_val)
+    {
+        yyjson_val* uaxis = yyjson_arr_get(axis_val, 0);
+        yyjson_val* vaxis = yyjson_arr_get(axis_val, 1);
+
+        return std::array<vec4, 2>{ { YYJsonToVector4(uaxis), YYJsonToVector4(vaxis) }};
+    }
+
+    static std::array<float, 2> ReadTextureScale(yyjson_val* scale_val)
+    {
+        yyjson_val* uscale = yyjson_arr_get(scale_val, 0);
+        yyjson_val* yscale = yyjson_arr_get(scale_val, 1);
+
+        return std::array<float, 2>{ { (float)yyjson_get_real(uscale), (float)yyjson_get_real(yscale) }};
+    }
+
+    static const char* GetStringSafe(yyjson_val* base, const char* name)
+    {
+        yyjson_val* val = yyjson_obj_get(base, name);
+        if (!val)
+            return "";
+        const char* value = yyjson_get_str(val);
+        if (!value)
+            return "";
+        return value;
+    }
+
+    static void AddSolid(BrushEntity& map, yyjson_val* entity_val)
+    {
+        yyjson_val* solids = yyjson_obj_get(entity_val, "solids");
+        size_t solid_idx, solid_max;
+        yyjson_val* solid;
+        yyjson_arr_foreach(solids, solid_idx, solid_max, solid)
+        {
+            std::vector<Side> sideData;
+
+            yyjson_val* sides = yyjson_obj_get(solid, "sides");
+            size_t side_idx, side_max;
+            yyjson_val* side;
+            yyjson_arr_foreach(sides, side_idx, side_max, side)
+            {
+                Side thisSide{};
+                thisSide.plane = ReadPlane(yyjson_obj_get(side, "plane"));
+                thisSide.material = Assets.Load<Material>(yyjson_get_str(yyjson_obj_get(side, "material")));
+                thisSide.textureAxes = ReadTextureAxis(yyjson_obj_get(side, "texture_axis"));
+                thisSide.scale = ReadTextureScale(yyjson_obj_get(side, "scale"));
+                thisSide.rotate = yyjson_get_real(yyjson_obj_get(side, "rotate"));
+                thisSide.lightmapScale = yyjson_get_real(yyjson_obj_get(side, "lightmap_scale"));
+                thisSide.smoothing = yyjson_get_int(yyjson_obj_get(side, "smoothing_groups"));
+
+                sideData.emplace_back(thisSide);
+            }
+
+            auto& brush = map.AddBrush(std::move(sideData));
+            brush.UpdateMesh();
+            sideData.clear();
+        }
+    }
+
+    static void AddEntity(Map& map, yyjson_val* entity_val)
+    {
+        yyjson_val* solids = yyjson_obj_get(entity_val, "solids");
+        bool point = solids == nullptr;
+        Entity* entity = nullptr;
+        if (point)
+        {
+            PointEntity* point = new PointEntity(&map);
+            entity = point;
+        }
+        else
+        {
+            BrushEntity* brush = new BrushEntity(&map);
+            AddSolid(*brush, entity_val);
+            entity = brush;
+        }
+
+        entity->classname = GetStringSafe(entity_val, "classname");
+        entity->targetname = GetStringSafe(entity_val, "targetname");
+        entity->origin = YYJsonToVector3(yyjson_obj_get(entity_val, "origin"));
+
+        yyjson_val* properties_val = yyjson_obj_get(entity_val, "properties");
+        if (properties_val)
+        {
+            size_t idx, max;
+            yyjson_val* key, * val;
+            yyjson_obj_foreach(properties_val, idx, max, key, val)
+            {
+                std::string_view key_name = yyjson_get_str(key);
+                if (yyjson_is_str(val))
+                {
+                    entity->kv.CreateTypedChild(key_name, (std::string_view)yyjson_get_str(val));
+                }
+                else if (yyjson_is_real(val))
+                {
+                    entity->kv.CreateTypedChild(key_name, yyjson_get_real(val));
+                }
+                else if (yyjson_is_int(val))
+                {
+                    entity->kv.CreateTypedChild(key_name, (int64_t)yyjson_get_int(val));
+                }
+                else if (yyjson_is_arr(val))
+                {
+                    switch (yyjson_arr_size(val))
+                    {
+                    case 1:
+                        entity->kv.CreateTypedChild(key_name, yyjson_get_real(yyjson_arr_get(val, 0)));
+                        break;
+                    case 2:
+                        entity->kv.CreateTypedChild(key_name, YYJsonToVector2(val));
+                        break;
+                    case 3:
+                        entity->kv.CreateTypedChild(key_name, YYJsonToVector3(val));
+                        break;
+                    case 4:
+                        entity->kv.CreateTypedChild(key_name, YYJsonToVector4(val));
+                        break;
+                    default:
+                        abort();
+                        break;
+                    }
+                }
+                else
+                {
+                    abort();
+                }
+            }
+        }
+
+        map.entities.push_back(entity);
+    }
+
+    bool ImportBox(std::string_view filepath, Map& map)
+    {
+        auto file = fs::readFile(filepath);
+        if (!file)
+            return false;
+
+        std::unique_ptr<uint8_t[]> raw_data;
+        unsigned long long raw_size = ZSTD_getFrameContentSize(file->data(), file->size());
+        assert(raw_size != ZSTD_CONTENTSIZE_UNKNOWN);
+        if (raw_size != ZSTD_CONTENTSIZE_ERROR)
+        {
+            raw_data = std::make_unique<uint8_t[]>(size_t(raw_size));
+            size_t size = ZSTD_decompress(raw_data.get(), size_t(raw_size), file->data(), file->size());
+            if (size != raw_size)
+                return false;
+        }
+
+        const char* json = raw_data ? (const char*)raw_data.get() : (const char *) file->data();
+        size_t json_size = raw_data ? raw_size : file->size();
+
+        Chisel.brushAllocator->open();
+
+        yyjson_doc* doc = yyjson_read(json, json_size, 0);
+
+        yyjson_val* root = yyjson_doc_get_root(doc);
+        yyjson_val* world = yyjson_obj_get(root, "world");
+        AddSolid(map, world);
+
+        yyjson_val* entities = yyjson_obj_get(world, "entities");
+        size_t entity_idx, entity_max;
+        yyjson_val* entity;
+        yyjson_arr_foreach(entities, entity_idx, entity_max, entity)
+        {
+            AddEntity(map, entity);
+        }
+
+        Chisel.brushAllocator->close();
+
+        yyjson_doc_free(doc);
+        return true;
+    }
+
     static yyjson_mut_val* VectorToYYJson(yyjson_mut_doc* doc, const vec2& vec)
     {
         yyjson_mut_val* vec_arr = yyjson_mut_arr(doc);
@@ -117,11 +326,13 @@ namespace chisel
             WriteKVPair(doc, val, "origin", variant);
         }
 
+        yyjson_mut_val* kv_val = yyjson_mut_obj(doc);
         // Write all keyvalues
         for (const auto& pair : entity.kv)
         {
-            WriteKVPair(doc, val, pair.first.c_str(), pair.second);
+            WriteKVPair(doc, kv_val, pair.first.c_str(), pair.second);
         }
+        yyjson_mut_obj_add_val(doc, val, "properties", kv_val);
     }
 
     static void WriteBrushEntity(yyjson_mut_doc* doc, yyjson_mut_val* val, BrushEntity& entity)
@@ -230,10 +441,17 @@ namespace chisel
             size_t bound = std::max<size_t>(ZSTD_compressBound(len) * 2, 128 * 1024 * 1024);
             auto buffer = std::make_unique<uint8_t[]>(bound);
 
-            size_t compressed_size = ZSTD_compress(buffer.get(), bound, json, len, 9);
-            free((void *)json);
-
-            fwrite(buffer.get(), 1, compressed_size, file);
+            if (box_compression_level != 0)
+            {
+                size_t compressed_size = ZSTD_compress(buffer.get(), bound, json, len, box_compression_level);
+                free((void*)json);
+                fwrite(buffer.get(), 1, compressed_size, file);
+            }
+            else
+            {
+                fwrite(buffer.get(), 1, len, file);
+                free((void*)json);
+            }
         }
 
         yyjson_mut_doc_free(doc);

@@ -72,6 +72,9 @@ namespace chisel
         if (path.ends_with("vmf"))
         {
             return ImportVMF(path, map);
+        } else if (path.ends_with("box"))
+        {
+            return ImportBox(path, map);
         }
 
         return false;

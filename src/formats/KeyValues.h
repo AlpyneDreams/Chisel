@@ -288,6 +288,12 @@ namespace chisel::kv
             return m_children.emplace(std::string(name), KeyValuesVariant::Parse(std::forward<Args>(args)...))->second;
         }
 
+        template <typename T>
+        KeyValuesVariant& CreateTypedChild(std::string_view name, const T& thing)
+        {
+            return m_children.emplace(std::string(name), KeyValuesVariant(thing))->second;
+        }
+
         bool empty() const { return m_children.empty(); }
 
         void RemoveAll(std::string_view name)
@@ -296,6 +302,22 @@ namespace chisel::kv
             if (range.first == range.second)
                 return;
             m_children.erase(range.first, range.second);
+        }
+
+        void RemoveAllWithType(std::string_view name, KeyValuesType type)
+        {
+            auto range = m_children.equal_range(std::string(name));
+            if (range.first == range.second)
+                return;
+
+            for (auto it = range.first; it != range.second;) {
+                if (it->first == name && it->second.GetType() == type)
+                {
+                    it = m_children.erase(it);
+                }
+                else
+                    it++;
+            }
         }
     private:
         static KeyValues s_Nothing;

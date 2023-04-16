@@ -247,7 +247,9 @@ namespace chisel
     static bool AddEntity(Map& map, kv::KeyValues& kvEntity, std::string& matNameScratch)
     {
         auto solids = kvEntity.FindAll("solid");
-        bool point = solids.first == solids.second;
+        // Solid can also be the vphysics solid type.
+        // Really annoying.
+        bool point = solids.first == solids.second || solids.first->second.GetType() != kv::Types::KeyValues;
         Entity* entity = nullptr;
         if (point)
         {
@@ -267,9 +269,9 @@ namespace chisel
         kvEntity.RemoveAll("origin");
         kvEntity.RemoveAll("classname");
         kvEntity.RemoveAll("targetname");
-        kvEntity.RemoveAll("editor");
         kvEntity.RemoveAll("id");
-        kvEntity.RemoveAll("solid");
+        kvEntity.RemoveAllWithType("editor", kv::Types::KeyValues);
+        kvEntity.RemoveAllWithType("solid", kv::Types::KeyValues);
         entity->kv = std::move(kvEntity);
         map.entities.push_back(entity);
         return true;
@@ -294,6 +296,7 @@ namespace chisel
         {
             std::string matname;
             kv::KeyValues& kvWorld = (kv::KeyValues&)world;
+            // TODO: Do we want to parse the other "worldspawn" KVs?
             if (!AddSolid(map, kvWorld, matname))
             {
                 Chisel.brushAllocator->close();
