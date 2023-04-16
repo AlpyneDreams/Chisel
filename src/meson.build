@@ -5,7 +5,7 @@ chisel_args = windows ? [] : [
     '-Wno-volatile' # for GLM
 ]
 
-chisel_src = files(
+chisel_src = [
     'console/ConsoleCommands.cpp',
     'assets/Assets.cpp',
     'assets/loaders/Textures.cpp',
@@ -39,7 +39,19 @@ chisel_src = files(
     'chisel/formats/FormatVMF.cpp',
     'chisel/formats/FormatMap.cpp',
     'chisel/formats/FormatBox.cpp',
-)
+]
+
+chisel_link_args = []
+
+if windows
+    chisel_args += '-D_WIN32_WINNT=0xa00'
+    chisel_link_args = [
+        '/MANIFEST:EMBED',
+        '/MANIFESTINPUT:' + meson.source_root() + '/src/platform/win32/windows_default.manifest',
+        '/MANIFESTINPUT:' + meson.source_root() + '/src/platform/win32/windows_dpiaware.manifest',
+        '/MANIFESTINPUT:' + meson.source_root() + '/src/platform/win32/windows_visualstyles.manifest',
+    ]
+endif
 
 chisel_deps = [
     sdl_dep,
@@ -57,7 +69,8 @@ chisel = executable('chisel', chisel_src, offsetallocator_src, yyjson_src,
     dependencies    : chisel_deps,
     include_directories: include_directories('../submodules'),
     win_subsystem   : 'console',
-    cpp_args        : chisel_args
+    cpp_args        : chisel_args,
+    link_args       : chisel_link_args,
 )
 
 copy = windows ? ['powershell', 'cp'] : ['cp', '-f']
