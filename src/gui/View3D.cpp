@@ -308,6 +308,7 @@ namespace chisel
                 : (ICON_MC_GRID_OFF " Show Grid");
             ImGui::Checkbox(label, &view_grid_show.value);
             ImGui::Checkbox(ICON_MC_MAGNET " Snap to Grid", &view_grid_snap.value);
+            ImGui::Checkbox(ICON_MC_SQUARE " Snap Hit Surface to Grid", &view_grid_snap_hit_normal.value);
             ImGui::Checkbox(ICON_MC_LINK " Uniform Grid Size", &gridUniform);
             if (gridUniform) {
                 if (ImGui::InputFloat("Grid Size", &gridSize.x))

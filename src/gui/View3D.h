@@ -11,6 +11,7 @@ namespace chisel
     inline ConVar<bool>  view_axis_allow_flip("view_axis_allow_flip", false, "Allow gizmos to flip axes contextually.");
     inline ConVar<bool>  view_grid_show("view_grid_show", true, "Show grid.");
     inline ConVar<bool>  view_grid_snap("view_grid_snap", true, "Snap to grid.");
+    inline ConVar<bool>  view_grid_snap_hit_normal("view_grid_snap_hit_normal", false, "Should the axis of the normal of the raycast also be snapped?");
     inline ConVar<bool>  view_rotate_snap("view_rotate_snap", true, "Snap rotation angles.");
 
     struct View3D : public GUI::Window

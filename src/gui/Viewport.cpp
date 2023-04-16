@@ -114,7 +114,20 @@ namespace chisel
                 if (hit)
                 {
                     if (view_grid_snap)
-                        point = math::Snap(point, gridSize);
+                    {
+                        vec3 snapped = math::Snap(point, gridSize);
+                        vec3 axis = glm::abs(normal);
+                        // TODO: Handle non-cardinal angles better.
+                        bool cardinal = math::CloseEnough(axis, vec3(1.0f, 0.0f, 0.0f)) || math::CloseEnough(axis, vec3(0.0f, 1.0f, 0.0f)) || math::CloseEnough(axis, vec3(0.0f, 0.0f, 1.0f));
+                        if (view_grid_snap_hit_normal || !cardinal)
+                        {
+                            point = snapped;
+                        }
+                        else
+                        {
+                            point = (point * axis) + (snapped * (glm::vec3(1.0f) - axis));
+                        }
+                    }
 
                     if (activeTool == Tool::Entity)
                     {
@@ -151,9 +164,14 @@ namespace chisel
                             if (math::CloseEnough(vec.x, 0) || math::CloseEnough(vec.y, 0) || math::CloseEnough(vec.z, 0))
                                 extrude = normal * gridSize;
                             mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xyz) + (extrude * 0.5f));
-                            auto& cube = map.AddCube(mtx, (vec3(vec.xyz) + extrude) * 0.5f);
-                            Selection.Clear();
-                            Selection.Select(&cube);
+                            vec3 size = (vec3(vec.xyz) + extrude) * 0.5f;
+                            // make sure we are not degenerate size.
+                            if (!math::CloseEnough(size, vec3(0.0f)))
+                            {
+                                auto& cube = map.AddCube(mtx, size);
+                                Selection.Clear();
+                                Selection.Select(&cube);
+                            }
                         }
                     }
 
