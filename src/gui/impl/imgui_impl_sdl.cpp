@@ -73,6 +73,9 @@
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
 #endif
+#ifdef _WIN32
+#include <dwmapi.h>
+#endif
 
 #if SDL_VERSION_ATLEAST(2,0,4) && !defined(__EMSCRIPTEN__) && !defined(__ANDROID__) && !(defined(__APPLE__) && TARGET_OS_IOS) && !defined(__amigaos4__)
 #define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE    1
@@ -771,6 +774,39 @@ static void ImGui_ImplSDL2_CreateWindow(ImGuiViewport* viewport)
     }
     if (use_opengl && backup_context)
         SDL_GL_MakeCurrent(vd->Window, backup_context);
+
+#ifdef _WIN32
+    bool dark = true;
+
+    HMODULE hModule = LoadLibraryA("dwmapi");
+    if (hModule)
+    {
+        auto pDwmSetWindowAttribute = (decltype(DwmSetWindowAttribute)*)GetProcAddress(hModule, "DwmSetWindowAttribute");
+        if (hModule)
+        {
+            SDL_SysWMinfo wmInfo{};
+            SDL_VERSION(&wmInfo.version);
+            SDL_GetWindowWMInfo(vd->Window, &wmInfo);
+
+            HWND hWnd = wmInfo.info.win.window;
+
+            // Enable the dark titlebar
+            const BOOL DarkMode = dark ? TRUE : FALSE;
+            HRESULT hr = pDwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &DarkMode, sizeof(DarkMode));
+            if (FAILED(hr))
+            {
+                // 19 is the old value of DWMWA_USE_IMMERSIVE_DARK_MODE
+                hr = pDwmSetWindowAttribute(hWnd, 19, &dark, sizeof(dark));
+            }
+
+            // Our IMGUI title bars are quite small so let's set the preference to be ROUNDSMALL
+            // so that our controls don't get clipped.
+            DWM_WINDOW_CORNER_PREFERENCE preference = DWMWCP_ROUNDSMALL;
+            hr = pDwmSetWindowAttribute(hWnd, DWMWA_WINDOW_CORNER_PREFERENCE, &preference, sizeof(preference));
+        }
+        FreeLibrary(hModule);
+    }
+#endif
 
     viewport->PlatformHandle = (void*)vd->Window;
     viewport->PlatformHandleRaw = ImGui_ImplSDL2_GetNWH(vd->Window);

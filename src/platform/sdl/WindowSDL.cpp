@@ -14,6 +14,10 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
+#ifdef _WIN32
+#include <dwmapi.h>
+#endif
+
 #if defined(_INC_WINDOWS) and defined(CreateWindow)
     #undef CreateWindow
 #endif
@@ -31,6 +35,11 @@ namespace chisel
 
         void Create(const char* name, uint width, uint height, bool resizable, bool borderless)
         {
+#ifdef _WIN32
+            // Don't show us as grey'ed out, not responding when loading.
+            DisableProcessWindowsGhosting();
+#endif
+
             int x = SDL_WINDOWPOS_CENTERED,
                 y = SDL_WINDOWPOS_CENTERED;
             int flags = SDL_WINDOW_SHOWN | (resizable ? SDL_WINDOW_RESIZABLE : 0) | (borderless ? SDL_WINDOW_BORDERLESS : 0);
@@ -46,8 +55,39 @@ namespace chisel
                 throw std::runtime_error("[SDL] Failed to create window!");
             }
 
+            EnableDarkMode(true);
+
             // Force window position
             SDL_SetWindowPosition(window, x, y);
+        }
+
+        void EnableDarkMode(bool dark)
+        {
+#ifdef _WIN32
+            HMODULE hModule = LoadLibraryA("dwmapi");
+            if (hModule)
+            {
+                auto pDwmSetWindowAttribute = (decltype(DwmSetWindowAttribute)*) GetProcAddress(hModule, "DwmSetWindowAttribute");
+                if (hModule)
+                {
+                    SDL_SysWMinfo wmInfo{};
+                    SDL_VERSION(&wmInfo.version);
+                    SDL_GetWindowWMInfo(window, &wmInfo);
+
+                    HWND hWnd = wmInfo.info.win.window;
+
+                    // Enable the dark titlebar
+                    const BOOL DarkMode = dark ? TRUE : FALSE;
+                    HRESULT hr = pDwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &DarkMode, sizeof(DarkMode));
+                    if (FAILED(hr))
+                    {
+                        // 19 is the old value of DWMWA_USE_IMMERSIVE_DARK_MODE
+                        hr = pDwmSetWindowAttribute(hWnd, 19, &dark, sizeof(dark));
+                    }
+                }
+                FreeLibrary(hModule);
+            }
+#endif
         }
 
         void OnAttach() {
