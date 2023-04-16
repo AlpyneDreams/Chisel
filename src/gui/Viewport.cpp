@@ -57,6 +57,8 @@ namespace chisel
         map.gridSize = gridSize;
     }
 
+    ConVar<bool> r_raycast_brush_placement("r_raycast_brush_placement", true, "Enable/disable raycast brush placement for perf debugging");
+
     void Viewport::DrawHandles(mat4x4& view, mat4x4& proj)
     {
         // Draw transform handles
@@ -89,16 +91,17 @@ namespace chisel
                 bool hit = false;
                 vec3 normal = vec3(0, 0, 1);
                 vec3 point = vec3(0);
-
-#if 0
-                auto r_hit = map.GetTree().QueryRay(ray);
-                if (r_hit)
+                
+                if (r_raycast_brush_placement)
                 {
-                    hit = true;
-                    normal = r_hit->face->side->plane.normal;
-                    point = ray.GetPoint(r_hit->t);
+                    auto r_hit = map.QueryRay(ray);
+                    if (r_hit)
+                    {
+                        hit = true;
+                        normal = r_hit->face->side->plane.normal;
+                        point = ray.GetPoint(r_hit->t);
+                    }
                 }
-#endif
 
                 if (!hit)
                 {

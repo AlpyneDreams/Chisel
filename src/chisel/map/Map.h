@@ -9,6 +9,38 @@
 
 namespace chisel
 {
+    struct RayHit
+    {
+        const Solid* brush;
+        const Face* face;
+        float t;
+    };
+
+    inline bool PointInsideConvex(const vec3& point, std::span<const vec3> vertices)
+    {
+        if (vertices.size() < 3)
+            return false;
+
+        glm::vec3 v0 = vertices[0];
+        glm::vec3 v1 = vertices[1];
+        glm::vec3 v2 = vertices[2];
+        glm::vec3 normal = glm::cross(v1 - v0, v2 - v0);
+
+        for (size_t i = 0; i < vertices.size(); i++)
+        {
+            size_t j = (i + 1) % vertices.size();
+
+            glm::vec3 vi = vertices[i];
+            glm::vec3 vj = vertices[j];
+
+            static constexpr float epsilon = 0.001f;
+            if (glm::dot(normal, glm::cross(vj - vi, point - vi)) < -epsilon)
+                return false;
+        }
+
+        return true;
+    }
+
     struct Entity : Atom
     {
         Entity(BrushEntity* parent)
@@ -105,6 +137,44 @@ namespace chisel
 
         void Transform(const mat4x4& matrix) final override { for (auto& b : m_solids) b.Transform(matrix); }
         void AlignToGrid(vec3 gridSize) final override { for (auto& b : m_solids) b.AlignToGrid(gridSize); }
+
+        std::optional<RayHit> QueryRay(const Ray& ray) const
+        {
+            std::optional<RayHit> hit;
+
+            for (const auto& brush : m_solids)
+            {
+                auto bounds = brush.GetBounds();
+                if (!bounds)
+                    continue;
+
+                if (!ray.Intersects(*bounds))
+                    continue;
+
+                for (const auto& face : brush.GetFaces())
+                {
+                    float t;
+                    if (!ray.Intersects(face.side->plane, t))
+                        continue;
+
+                    vec3 intersection = ray.GetPoint(t);
+                    if (!PointInsideConvex(intersection, face.points))
+                        continue;
+
+                    RayHit thisHit =
+                    {
+                        .brush    = &brush,
+                        .face     = &face,
+                        .t        = t,
+                    };
+
+                    if (!hit || t < hit->t)
+                        hit = thisHit;
+                }
+            }
+
+            return hit;
+        }
     protected:
         std::list<Solid> m_solids;
     };
