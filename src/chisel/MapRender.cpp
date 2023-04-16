@@ -103,6 +103,9 @@ namespace chisel
             }
             else
             {
+                if (!r_drawsprites)
+                    return;
+
                 Handles.DrawPoint(origin, !preview);
                 //AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
                 //r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
