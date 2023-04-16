@@ -158,6 +158,13 @@ namespace chisel
                 ImGui::InputFloat("FOV", &camera.fieldOfView);
                 ImGui::InputFloat("Speed (hu/s)", &cam_maxspeed.value);
                 ImGui::InputFloat("Sensitivity", &m_sensitivity.value);
+
+                ImGui::InputFloat2("Near/Far Z", &camera.near);
+                ImGui::SameLine();
+                ImGui::Selectable(ICON_MC_HELP_CIRCLE, false, 0, ImGui::CalcTextSize(ICON_MC_HELP_CIRCLE));
+                if (ImGui::IsItemHovered())
+                    GUI::HelpTooltip("Near Z and Far Z control the depth range of the perspective projection.\nSmaller values of Near Z result in a closer near clipping plane, ie. objects get cut off less when close to the camera.\nLarger values of Near Z result in more clipping but much better precision at further distances due to 1/z falloff.\nFar Z controls the far clipping plane, ie. how far objects/brushes will render until.\nSetting Far Z lower may result in better performance on larger maps.\nRecommended values:\nNear Z: 8.0\nFar Z: 16384.0", "Near Z and Far Z");
+
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();

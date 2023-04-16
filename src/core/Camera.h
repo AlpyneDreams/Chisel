@@ -20,7 +20,7 @@ namespace chisel
         // Base aspect ratio for FOV scaling.
         vec2 scaleFOVAspect = vec2(16, 9);
 
-        float near = 0.1f;
+        float near = 8.0f;
         float far  = 16384.f;
 
         // If not null then camera only renders to this texture
