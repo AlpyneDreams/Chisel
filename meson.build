@@ -17,6 +17,7 @@ fmt_dep    = dependency('fmt', static: true)
 glm_dep    = dependency('glm', static: true)
 imgui_dep  = dependency('imgui', default_options: ['vulkan=disabled'], static: true)
 imguizmo_dep  = dependency('imguizmo')
+zstd_dep = dependency('libzstd', static: true)
 
 dxvk_opts = [
     'enable_d3d9=false',

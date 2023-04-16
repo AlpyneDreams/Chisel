@@ -4,6 +4,8 @@
 #include "../map/Map.h"
 #include "../Chisel.h"
 
+#include "zstd.h"
+
 #include "../submodules/yyjson/src/yyjson.h"
 
 namespace chisel
@@ -202,6 +204,13 @@ namespace chisel
 
     bool ExportBox(std::string_view filepath, Map& map)
     {
+        std::string path_string = std::string(filepath);
+        FILE* file = fopen(path_string.c_str(), "wb");
+        if (!file)
+        {
+            return false;
+        }
+
         bool success = false;
 
         yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
@@ -212,22 +221,23 @@ namespace chisel
         WriteMap(doc, map_val, map);
         yyjson_mut_obj_add_val(doc, root, "world", map_val);
 
-        const char* json = yyjson_mut_write(doc, 0, NULL);
+        size_t len = 0;
+        const char* json = yyjson_mut_write(doc, 0, &len);
         success = json != nullptr;
 
         if (success)
         {
-            std::ofstream out = std::ofstream(std::string(filepath));
-            success = out && out.good();
+            size_t bound = std::max<size_t>(ZSTD_compressBound(len) * 2, 128 * 1024 * 1024);
+            auto buffer = std::make_unique<uint8_t[]>(bound);
 
-            if (success)
-            {
-                out << json;
-            }
+            size_t compressed_size = ZSTD_compress(buffer.get(), bound, json, len, 9);
             free((void *)json);
+
+            fwrite(buffer.get(), 1, compressed_size, file);
         }
 
         yyjson_mut_doc_free(doc);
+        fclose(file);
         return success;
     }
 }

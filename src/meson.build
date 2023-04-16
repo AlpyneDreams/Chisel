@@ -50,6 +50,7 @@ chisel_deps = [
     glm_dep,
     imgui_dep,
     imguizmo_dep,
+    zstd_dep,
 ]
 
 chisel = executable('chisel', chisel_src, offsetallocator_src, yyjson_src,
