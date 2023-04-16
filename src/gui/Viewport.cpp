@@ -83,6 +83,7 @@ namespace chisel
                 Chisel.Renderer->DrawHandles(view, proj, Tool::Bounds, space, view_grid_snap, gridSize);
                 if (Handles.IsMouseOver())
                     break;
+            case Tool::Clip:
             case Tool::Entity:
             {
                 Plane grid = Plane(Vectors.Zero, Vectors.Up);
@@ -91,6 +92,7 @@ namespace chisel
                 bool hit = false;
                 vec3 normal = vec3(0, 0, 1);
                 vec3 point = vec3(0);
+                Plane plane = Plane();
                 
                 if (r_raycast_brush_placement)
                 {
@@ -147,6 +149,13 @@ namespace chisel
 
                     Handles.DrawPoint(point, false);
 
+                    if (activeTool == Tool::Clip && draggingBlock)
+                    {
+                        vec3 direction = glm::normalize(point - dragStartPos);
+
+                        plane = Plane(point, glm::cross(direction, normal));
+                    }
+
                     if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
                     {
                         draggingBlock = true;
@@ -157,38 +166,53 @@ namespace chisel
                         draggingBlock = false;
                         if (point != dragStartPos)
                         {
-                            vec3 vec = glm::abs(point - dragStartPos);
-                            vec3 center = (dragStartPos + point) / 2.f;
-                            vec3 extrude = vec3(0);
-                            // If we have a degenerate axis, extrude by normal by 1 grid size.
-                            if (math::CloseEnough(vec.x, 0) || math::CloseEnough(vec.y, 0) || math::CloseEnough(vec.z, 0))
-                                extrude = normal * gridSize;
-                            mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xyz) + (extrude * 0.5f));
-                            vec3 size = (vec3(vec.xyz) + extrude) * 0.5f;
-                            // make sure we are not degenerate size.
-                            bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
-                            if (!degenerate)
+                            if (activeTool == Tool::Clip)
                             {
-                                auto& cube = map.AddCube(mtx, size);
-                                Selection.Clear();
-                                Selection.Select(&cube);
+
+                            }
+                            else
+                            {
+                                vec3 vec = glm::abs(point - dragStartPos);
+                                vec3 center = (dragStartPos + point) / 2.f;
+                                vec3 extrude = vec3(0);
+                                // If we have a degenerate axis, extrude by normal by 1 grid size.
+                                if (math::CloseEnough(vec.x, 0) || math::CloseEnough(vec.y, 0) || math::CloseEnough(vec.z, 0))
+                                    extrude = normal * gridSize;
+                                mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xyz) + (extrude * 0.5f));
+                                vec3 size = (vec3(vec.xyz) + extrude) * 0.5f;
+                                // make sure we are not degenerate size.
+                                bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
+                                if (!degenerate)
+                                {
+                                    auto& cube = map.AddCube(mtx, size);
+                                    Selection.Clear();
+                                    Selection.Select(&cube);
+                                }
                             }
                         }
                     }
 
                     if (draggingBlock)
                     {
-                        vec3 direction = point - dragStartPos;
-                        vec3 corner1 = vec3(point.x, dragStartPos.y, point.z);
-                        vec3 corner2 = vec3(dragStartPos.x, point.yz);
-                        
-                        Handles.DrawPoint(dragStartPos);
-                        Handles.DrawPoint(corner1);
-                        Handles.DrawPoint(corner2);
-                        Gizmos.DrawLine(dragStartPos, corner1);
-                        Gizmos.DrawLine(dragStartPos, corner2);
-                        Gizmos.DrawLine(corner1, point);
-                        Gizmos.DrawLine(corner2, point);
+                        if (activeTool == Tool::Clip)
+                        {
+                            Handles.DrawPoint(dragStartPos);
+                            Gizmos.DrawPlane(plane, Color(0.0f, 1.0f, 1.0f, 0.1f));
+                        }
+                        else
+                        {
+                            vec3 direction = point - dragStartPos;
+                            vec3 corner1 = vec3(point.x, dragStartPos.y, point.z);
+                            vec3 corner2 = vec3(dragStartPos.x, point.yz);
+
+                            Handles.DrawPoint(dragStartPos);
+                            Handles.DrawPoint(corner1);
+                            Handles.DrawPoint(corner2);
+                            Gizmos.DrawLine(dragStartPos, corner1);
+                            Gizmos.DrawLine(dragStartPos, corner2);
+                            Gizmos.DrawLine(corner1, point);
+                            Gizmos.DrawLine(corner2, point);
+                        }
                     }
                 }
                 break;

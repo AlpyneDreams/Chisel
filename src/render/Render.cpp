@@ -79,6 +79,17 @@ namespace chisel::render
         ImGui_ImplDX11_Init(device.ptr(), ctx.ptr());
         ImGui_ImplDX11_NewFrame();
 
+        // Scratch Vertex Buffer
+        D3D11_BUFFER_DESC bufferDesc = {
+            .ByteWidth      = 4 * 1024,
+            .Usage          = D3D11_USAGE_DYNAMIC,
+            .BindFlags      = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_INDEX_BUFFER,
+            .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+        };
+        hr = device->CreateBuffer(&bufferDesc, nullptr, &scratchVertex);
+        if (FAILED(hr))
+            Console.Error("[D3D11] Failed to create scratch vertex buffer.");
+
         // Global CBuffers
         cbuffers.camera = CreateCBuffer<cbuffers::CameraState>();
         cbuffers.object = CreateCBuffer<cbuffers::ObjectState>();

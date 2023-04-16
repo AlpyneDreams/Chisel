@@ -59,6 +59,7 @@ namespace chisel
         ImGui::Separator();
         Option(ICON_MC_LIGHTBULB, "Entity", Tool::Entity);
         Option(ICON_MC_CUBE_OUTLINE, "Block", Tool::Block);
+        Option(ICON_MC_SCISSORS_CUTTING, "Clip", Tool::Clip);
     }
 
     void MainToolbar::Option(const char* icon, const char* name, Tool tool)

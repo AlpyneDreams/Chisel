@@ -5,6 +5,7 @@
 #include "core/Primitives.h"
 #include <vector>
 #include <glm/gtx/vector_angle.hpp>
+#include "math/Winding.h"
 
 namespace chisel
 {
@@ -40,6 +41,8 @@ namespace chisel
         r.ctx->IASetVertexBuffers(0, 1, &Primitives.Quad, &stride, &offset);
         r.ctx->Draw(6, 0);
         r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
+
+        r.SetBlendState(render::BlendFuncs::Normal);
     }
 
     // TODO: These should be batched.
@@ -69,5 +72,52 @@ namespace chisel
 
         r.ctx->RSSetState(r.Raster.Default.ptr());
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    }
+
+    void Gizmos::DrawPlane(const Plane& plane, Color color)
+    {
+        PlaneWinding winding;
+        if (!PlaneWinding::CreateFromPlane(plane, winding))
+            return;
+
+        auto& r = Tools.rctx;
+        r.SetShader(Tools.sh_Color);
+
+        cbuffers::ObjectState data;
+        data.model = glm::identity<mat4x4>();
+        data.color = color;
+        data.id = 0;
+
+        Primitives::Vertex vertices[6];
+        vertices[0].pos = winding.points[2];
+        vertices[0].uv = vec2(0.0f);
+        vertices[1].pos = winding.points[1];
+        vertices[1].uv = vec2(0.0f);
+        vertices[2].pos = winding.points[0];
+        vertices[2].uv = vec2(0.0f);
+        vertices[3].pos = winding.points[3];
+        vertices[3].uv = vec2(0.0f);
+        vertices[4].pos = winding.points[2];
+        vertices[4].uv = vec2(0.0f);
+        vertices[5].pos = winding.points[0];
+        vertices[5].uv = vec2(0.0f);
+
+        ID3D11Buffer* buffer = r.scratchVertex.ptr();
+
+        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
+        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
+        r.UpdateDynamicBuffer(buffer, vertices, sizeof(Primitives::Vertex) * 6);
+        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.SetBlendState(render::BlendFuncs::Alpha);
+
+        uint stride = sizeof(Primitives::Vertex);
+        uint offset = 0;
+        r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+        r.ctx->Draw(6, 0);
+
+        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
+        r.SetBlendState(render::BlendFuncs::Normal);
     }
 }

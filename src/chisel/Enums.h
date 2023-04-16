@@ -4,7 +4,7 @@ namespace chisel
 {
     enum class Tool {
         Select, Translate, Rotate, Scale, Universal, Bounds,
-        Entity, Block
+        Entity, Block, Clip
     };
 
     enum class SelectMode {

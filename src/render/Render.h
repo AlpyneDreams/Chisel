@@ -120,8 +120,7 @@ namespace chisel::render
         template <typename T>
         Com<ID3D11Buffer> CreateCBuffer();
 
-        template <typename T>
-        void UpdateDynamicBuffer(ID3D11Resource* res, const T& data)
+        void UpdateDynamicBuffer(ID3D11Resource* res, const void *data, size_t size)
         {
             D3D11_MAPPED_SUBRESOURCE mapped;
             HRESULT hr = ctx->Map(res, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
@@ -130,8 +129,14 @@ namespace chisel::render
                 // fuck.
                 return;
             }
-            memcpy(mapped.pData, &data, sizeof(T));
+            memcpy(mapped.pData, data, size);
             ctx->Unmap(res, 0);
+        }
+
+        template <typename T>
+        void UpdateDynamicBuffer(ID3D11Resource* res, const T& data)
+        {
+            UpdateDynamicBuffer(res, &data, sizeof(T));
         }
 
         Com<ID3D11Device1> device;
@@ -139,6 +144,8 @@ namespace chisel::render
         Com<IDXGISwapChain> swapchain;
 
         RenderTarget backbuffer;
+
+        Com<ID3D11Buffer> scratchVertex;
 
         GlobalCBuffers cbuffers;
         Com<ID3D11SamplerState> sampler;
