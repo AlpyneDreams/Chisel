@@ -509,6 +509,7 @@ namespace chisel::render
                     return;
                 }
             }
+            mesh->uploaded = true;
         }
         uint strides[] = {(uint)mesh->groups[0].vertices.Stride()};
         uint offsets[] = {0};
