@@ -208,6 +208,7 @@ namespace chisel
             {
                 Cursor.SetMode(Cursor::Locked);
                 Cursor.SetVisible(false);
+                Mouse.GetMotion(); // Clear accum motion
             }
 
             if (Mouse.GetButton(Mouse::Right) || (!Keyboard.ctrl && Keyboard.GetKey(Key::Z)))
