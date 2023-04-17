@@ -184,7 +184,7 @@ namespace chisel
                                 bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
                                 if (!degenerate)
                                 {
-                                    auto& cube = map.AddCube(mtx, size);
+                                    auto& cube = map.AddCube(Chisel.activeMaterial, mtx, size);
                                     Selection.Clear();
                                     Selection.Select(&cube);
                                 }

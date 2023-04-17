@@ -99,9 +99,9 @@ namespace chisel
             return m_solids.emplace_back(this, sides);
         }
 
-        Solid& AddCube(mat4x4 transform = glm::identity<mat4x4>(), vec3 size = vec3(64.f))
+        Solid& AddCube(Material* material, mat4x4 transform = glm::identity<mat4x4>(), vec3 size = vec3(64.f))
         {
-            return AddBrush(CreateCubeBrush(size, transform));
+            return AddBrush(CreateCubeBrush(material, size, transform));
         }
 
         void RemoveBrush(const Solid& brush)

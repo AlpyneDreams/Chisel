@@ -7,8 +7,9 @@
 
 namespace chisel
 {
-    inline void InitSideData(Side& side)
+    inline void InitSideData(Side& side, Material *material)
     {
+        side.material = material;
         side.rotate = 0.0f;
 
         side.textureAxes[0].w = 0.0f;
@@ -377,7 +378,7 @@ namespace chisel
         m_parent->RemoveBrush(*this);
     }
 
-    std::vector<Side> CreateCubeBrush(vec3 size, const mat4x4& transform)
+    std::vector<Side> CreateCubeBrush(Material* material, vec3 size, const mat4x4& transform)
     {
         static const std::array<Plane, 6> kUnitCubePlanes =
         {
@@ -395,7 +396,7 @@ namespace chisel
         {
             sides[i].plane = kUnitCubePlanes[i].Transformed(glm::scale(transform, size));
 
-            InitSideData(sides[i]);
+            InitSideData(sides[i], material);
         }
         
         return sides;

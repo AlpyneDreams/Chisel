@@ -64,23 +64,17 @@ namespace chisel
                     ImVec2 basePos = ImVec2(column * (AssetThumbnailSize.x + AssetPadding.x) + initialXPadding, (xAssetRow + row) * (AssetThumbnailSize.y + AssetPadding.y) + initialYPadding);
 
                     auto& material = m_materials[currentAsset];
-                    if (!material.thing && !material.triedToLoad)
-                    {
-                        material.thing = Assets.Load<Material>(material.path);
-                        material.triedToLoad = true;
-                    }
+                    material.Load();
+
                     if (material.thing && material.thing->baseTexture && material.thing->baseTexture->srvLinear != nullptr)
                     {
                         ImGui::SetCursorPos(basePos);
-                        ImVec2 screenPos = ImGui::GetCursorScreenPos();
 
-                        ImVec2 endPos = ImVec2(screenPos.x + AssetThumbnailSize.x, screenPos.y + AssetThumbnailSize.y);
-
-                        ImGui::GetWindowDrawList()->AddImage(
-                            material.thing->baseTexture->srvLinear.ptr(),
-                            screenPos, endPos,
-                            ImVec2(0, 0), ImVec2(1, 1)
-                        );
+                        if (ImGui::ImageButton(material.path.c_str(), (ImTextureID)material.thing->baseTexture->srvLinear.ptr(),
+                            ImVec2(AssetThumbnailSize.x, AssetThumbnailSize.y), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+                        {
+                            Chisel.activeMaterial = material.thing;
+                        }
                     }
 
                     ImVec2 textPos = ImVec2(basePos.x, basePos.y + AssetThumbnailSize.y);
@@ -131,5 +125,10 @@ namespace chisel
             asset.name = name;
         });
         std::sort(m_materials.begin(), m_materials.end(), [](AssetPickerAsset<Material>& a, AssetPickerAsset<Material>& b) { return a.path < b.path; });
+        if (Chisel.activeMaterial == nullptr && !m_materials.empty())
+        {
+            m_materials[0].Load();
+            Chisel.activeMaterial = m_materials[0].thing;
+        }
     }
 }

@@ -93,5 +93,5 @@ namespace chisel
         std::vector<Face> m_faces;
     };
 
-    std::vector<Side> CreateCubeBrush(vec3 size = vec3(64.f), const mat4x4& transform = glm::identity<mat4x4>());
+    std::vector<Side> CreateCubeBrush(Material* material, vec3 size = vec3(64.f), const mat4x4& transform = glm::identity<mat4x4>());
 }

@@ -2,6 +2,7 @@
 
 #include "gui/Common.h"
 #include "gui/Window.h"
+#include "assets/Assets.h"
 
 namespace chisel
 {
@@ -14,6 +15,15 @@ namespace chisel
         std::string_view name;
         T* thing = nullptr;
         bool triedToLoad = false;
+
+        void Load()
+        {
+            if (!thing && !triedToLoad)
+            {
+                thing = Assets.Load<T>(path);
+                triedToLoad = true;
+            }
+        }
     };
 
     struct AssetPicker : public GUI::Window

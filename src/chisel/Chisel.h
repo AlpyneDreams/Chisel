@@ -23,6 +23,8 @@ namespace chisel
         Tool        activeTool = Tool::Translate;
         SelectMode  selectMode = SelectMode::Groups;
 
+        Material* activeMaterial = nullptr;
+
         // TODO: Store tool properties per-mapdoc
         struct EntTool {
             std::string className = "info_player_start";
