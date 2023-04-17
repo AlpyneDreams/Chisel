@@ -309,7 +309,9 @@ namespace chisel
     Texture Viewport::GetTexture(Viewport::DrawMode mode)
     {
         switch (mode) {
-            default: case DrawMode::Shaded:
+            default:
+            case DrawMode::Shaded:
+            case DrawMode::Wireframe:
                 return rt_SceneView;
 #if 0
             case DrawMode::Depth:

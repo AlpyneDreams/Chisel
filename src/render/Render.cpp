@@ -168,6 +168,10 @@ namespace chisel::render
         device->CreateRasterizerState(&desc, &Raster.Default);
         ctx->RSSetState(Raster.Default.ptr());
 
+        desc.FillMode = D3D11_FILL_WIREFRAME;
+        device->CreateRasterizerState(&desc, &Raster.Wireframe);
+        desc.FillMode = D3D11_FILL_SOLID;
+
         desc.AntialiasedLineEnable = TRUE;
         device->CreateRasterizerState(&desc, &Raster.SmoothLines);
 

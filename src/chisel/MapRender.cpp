@@ -55,6 +55,15 @@ namespace chisel
         r.ctx->ClearRenderTargetView(viewport.rt_ObjectID.rtv.ptr(), Colors.Black);
         r.ctx->ClearDepthStencilView(viewport.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+        if (viewport.drawMode == Viewport::DrawMode::Wireframe)
+        {
+            r.ctx->RSSetState(r.Raster.Wireframe.ptr());
+        }
+        else
+        {
+            r.ctx->RSSetState(r.Raster.Default.ptr());
+        }
+
         // TODO: Cull!
         if (r_drawbrushes)
         {
@@ -75,6 +84,8 @@ namespace chisel
 
             DrawPointEntity(entity->classname, false, point->origin, vec3(0), point->IsSelected(), point->GetSelectionID());
         }
+
+        r.ctx->RSSetState(r.Raster.Default.ptr());
     }
 
     void MapRender::DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles, bool selected, SelectionID id)

@@ -40,10 +40,10 @@ namespace chisel
     // Draw Modes //
 
         enum class DrawMode {
-            Shaded, Depth, ObjectID
+            Shaded, Wireframe, Depth, ObjectID
         };
 
-        static inline const char* drawModes[] = { "Shaded", "Depth", "Object ID" };
+        static inline const char* drawModes[] = { "Shaded", "Wireframe", "Depth", "Object ID" };
 
         DrawMode drawMode = DrawMode::Shaded;
 
