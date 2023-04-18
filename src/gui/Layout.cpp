@@ -40,6 +40,79 @@ namespace chisel
     }
 
     //--------------------------------------------------
+    //  Edit Toolbar
+    //--------------------------------------------------
+
+    EditingToolbar::EditingToolbar() : Toolbar(
+        ICON_MC_CURSOR_DEFAULT, "Editing", 500, 32, true) {}
+
+    void EditingToolbar::DrawToolbar()
+    {
+        const char* name = "";
+        switch (Chisel.transformSpace) {
+            default:
+            case Space::World: name = ICON_MC_WEB " World"; break;
+            case Space::Local: name = ICON_MC_CUBE_OUTLINE " Local"; break;
+        }
+        if (RadioButton(name)) {
+            if (Chisel.transformSpace == Space::World)
+                Chisel.transformSpace = Space::Local;
+            else
+                Chisel.transformSpace = Space::World;
+        }
+
+        RadioButton(ICON_MC_AXIS_ARROW " Axis Flip", &view_axis_allow_flip.value);
+
+        RadioButton(
+            trans_texture_lock
+                ? (ICON_MC_TEXTURE " " ICON_MC_LOCK)
+                : (ICON_MC_TEXTURE " " ICON_MC_LOCK_OPEN_OUTLINE),
+            &trans_texture_lock.value,
+            "Texture Lock"
+        );
+
+        RadioButton(
+            trans_texture_scale_lock
+                ? (ICON_MC_TEXTURE ICON_MC_ARROW_LEFT_RIGHT " " ICON_MC_LOCK)
+                : (ICON_MC_TEXTURE ICON_MC_ARROW_LEFT_RIGHT " " ICON_MC_LOCK_OPEN_OUTLINE),
+            &trans_texture_scale_lock.value,
+            "Texture Scale Lock"
+        );
+
+        ImGui::SameLine();
+        ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+
+        RadioButton(
+            view_grid_show ? ICON_MC_GRID : ICON_MC_GRID_OFF,
+            &view_grid_show.value,
+            "Show Grid"
+        );
+
+        /*vec3 gridSize(64.f);
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+        ImGui::SameLine();
+        if (ImGui::BeginCombo("##GridSettings", nullptr, ImGuiComboFlags_NoPreview))
+        {
+            ImGui::PopStyleVar();
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, defaultPadding);
+            ImGui::Checkbox("Uniform Grid", &view_grid_show.value);
+            ImGui::DragFloat3("Grid Size", &gridSize.x, 1.f, 1.f, 4096.f);
+            ImGui::EndCombo();
+        }
+        ImGui::PopStyleVar();
+
+        RadioButton(
+            view_grid_show ? ICON_MC_LINK : ICON_MC_LINK_OFF,
+            &view_grid_show.value,
+            "Uniform Grid Size"
+        );
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(48.f);
+        ImGui::DragFloat("##GridSize", &gridSize.x);*/
+    }
+
+    //--------------------------------------------------
     //  Main Toolbar
     //--------------------------------------------------
 

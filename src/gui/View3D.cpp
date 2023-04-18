@@ -29,10 +29,6 @@ namespace chisel
     inline ConVar<float> m_pitch      ("m_pitch",       0.022f, "Mouse pitch factor.");
     inline ConVar<float> m_yaw        ("m_yaw",         0.022f, "Mouse yaw factor.");
 
-    inline ConVar<bool>  trans_texture_lock("trans_texture_lock", true, "Enable texture lock for transformations.");
-    inline ConVar<bool>  trans_texture_scale_lock("trans_texture_scale_lock", false, "Enable scaling texture lock.");
-    inline ConVar<bool>  trans_texture_face_alignment("trans_texture_face_alignment", true, "Enable texture face alignment.");
-
     Camera& View3D::GetCamera() { return camera; }
 
     void View3D::Start()
@@ -120,7 +116,6 @@ namespace chisel
         if (ImGui::BeginMenuBar())
         {
             // Left side
-            CoordinateSpacePicker();
             GridMenu();
 
             const char* rotationIcon = rotationSnap < 90.f ? ICON_MC_ANGLE_ACUTE
@@ -131,22 +126,6 @@ namespace chisel
                 ImGui::InputFloat("Angle Snap", &rotationSnap);
                 ImGui::EndMenu();
             }
-
-            GUI::MenuBarToggle(
-                trans_texture_lock
-                    ? (ICON_MC_TEXTURE " " ICON_MC_LOCK)
-                    : (ICON_MC_TEXTURE " " ICON_MC_LOCK_OPEN_OUTLINE),
-                &trans_texture_lock.value,
-                "Texture Lock"
-            );
-            
-            GUI::MenuBarToggle(
-                trans_texture_scale_lock
-                    ? (ICON_MC_TEXTURE ICON_MC_ARROW_LEFT_RIGHT " " ICON_MC_LOCK)
-                    : (ICON_MC_TEXTURE ICON_MC_ARROW_LEFT_RIGHT " " ICON_MC_LOCK_OPEN_OUTLINE),
-                &trans_texture_scale_lock.value,
-                "Texture Scale Lock"
-            );
 
             OnDrawMenuBar();
 
@@ -276,27 +255,6 @@ namespace chisel
         }
 
         return true;
-    }
-
-// Coordinate Space Picker //
-
-    void View3D::CoordinateSpacePicker()
-    {
-        const char* items[] = {
-            ICON_MC_WEB " World",
-            ICON_MC_CUBE_OUTLINE " Local"
-        };
-        int i = int(space);
-        auto label = std::string(items[i]) + " " ICON_MC_MENU_DOWN;
-        if (BeginMenu(label.c_str(), "Transform")) {
-            for (size_t j = 0; j < std::size(items); j++) {
-                if (ImGui::MenuItem(items[j], "", space == Space(j))) {
-                    space = Space(j);
-                }
-            }
-            ImGui::Checkbox("Axis Flip", &view_axis_allow_flip.value);
-            ImGui::EndMenu();
-        }
     }
 
 // Grid Menu //

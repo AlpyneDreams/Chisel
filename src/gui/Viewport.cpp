@@ -74,13 +74,13 @@ namespace chisel
             {
                 bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
                 vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : gridSize;
-                Chisel.Renderer->DrawHandles(view, proj, activeTool, space, snap, snapSize);
+                Chisel.Renderer->DrawHandles(view, proj, activeTool, Chisel.transformSpace, snap, snapSize);
                 break;
             }
 
             case Tool::Block:
                 // User can edit block bounds while adding blocks
-                Chisel.Renderer->DrawHandles(view, proj, Tool::Bounds, space, view_grid_snap, gridSize);
+                Chisel.Renderer->DrawHandles(view, proj, Tool::Bounds, Chisel.transformSpace, view_grid_snap, gridSize);
                 if (Handles.IsMouseOver())
                     break;
             case Tool::Clip:

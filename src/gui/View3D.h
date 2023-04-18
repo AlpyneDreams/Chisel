@@ -14,13 +14,16 @@ namespace chisel
     inline ConVar<bool>  view_grid_snap_hit_normal("view_grid_snap_hit_normal", false, "Should the axis of the normal of the raycast also be snapped?");
     inline ConVar<bool>  view_rotate_snap("view_rotate_snap", true, "Snap rotation angles.");
 
+    inline ConVar<bool>  trans_texture_lock("trans_texture_lock", true, "Enable texture lock for transformations.");
+    inline ConVar<bool>  trans_texture_scale_lock("trans_texture_scale_lock", false, "Enable scaling texture lock.");
+    inline ConVar<bool>  trans_texture_face_alignment("trans_texture_face_alignment", true, "Enable texture face alignment.");
+
     struct View3D : public GUI::Window
     {
         View3D(auto... args) : GUI::Window(args..., ImGuiWindowFlags_MenuBar) { }
 
         Camera camera;
 
-        Space space          = Space::World;
         Rect  viewport;
 
         vec3  gridSize       = vec3(64.f);

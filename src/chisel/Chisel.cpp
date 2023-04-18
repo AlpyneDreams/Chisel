@@ -36,6 +36,7 @@ namespace chisel
         console = &Tools.systems.AddSystem<GUI::ConsoleWindow>();
         Tools.systems.AddSystem<MainToolbar>();
         Tools.systems.AddSystem<SelectionModeToolbar>();
+        Tools.systems.AddSystem<EditingToolbar>();
         Tools.systems.AddSystem<Inspector>();
         mainAssetPicker = &Tools.systems.AddSystem<AssetPicker>();
         Tools.systems.AddSystem<Viewport>();

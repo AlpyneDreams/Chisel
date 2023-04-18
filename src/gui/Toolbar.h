@@ -40,7 +40,7 @@ namespace chisel
             ImGui::PopStyleVar(1); // FramePadding
         }
 
-        bool RadioButton(const char* name, bool selected = false)
+        bool RadioButton(const char* name, bool selected = false, const char* tooltip = nullptr)
         {
             if (selected)
                 ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::GetColorU32(ImGuiCol_ButtonHovered));
@@ -52,7 +52,22 @@ namespace chisel
 
             if (selected)
                 ImGui::PopStyleColor();
+
+            if (tooltip && ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", tooltip);
+
             return clicked;
         }
+
+        bool RadioButton(const char* name, bool* pSelected, const char* tooltip = nullptr)
+        {
+            if (RadioButton(name, *pSelected, tooltip))
+            {
+                *pSelected = !*pSelected;
+                return true;
+            }
+            return false;
+        }
+
     };
 }

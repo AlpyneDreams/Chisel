@@ -20,6 +20,13 @@ namespace chisel
         void Option(const char* name, SelectMode mode);
     };
 
+    struct EditingToolbar final : Toolbar
+    {
+        EditingToolbar();
+
+        void DrawToolbar() override;
+    };
+
     struct MainToolbar final : Toolbar
     {
         MainToolbar();
