@@ -104,8 +104,13 @@ namespace chisel
                 {
                     float t;
                     hit = ray.Intersects(grid, t);
-                    if (hit)
+                    if (hit) {
                         point = ray.GetPoint(t);
+
+                        // Set z to 0 manually to avoid precision errors.
+                        // This assumes the grid is at z = 0
+                        point.z = 0.f;
+                    }
                 }
 
                 if (hit)

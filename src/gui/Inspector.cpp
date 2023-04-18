@@ -303,7 +303,7 @@ namespace chisel
             case Origin:
             {
                 kv.EnsureType(kv::Types::Vector3);
-                return ImGui::DragFloat3(name, (float*)kv.GetPtr<vec3>(kv::Types::Vector3));
+                return ImGui::DragFloat3(name, (float*)kv.GetPtr<vec3>(kv::Types::Vector3), 1.f, 0.f, 0.f, "%g", ImGuiSliderFlags_NoRoundToFormat);
             }
 
             case ScriptList:    return ImGui::Button(ICON_MC_SCRIPT " Scripts");
@@ -492,7 +492,7 @@ namespace chisel
                         ImGui::TableNextRow(); ImGui::TableNextColumn();
                         VarLabel("Position", "The absolute position of this entity.", "origin");
                         ImGui::SetNextItemWidth(-FLT_MIN);
-                        ImGui::DragFloat3("##position", &point->origin.x);
+                        ImGui::DragFloat3("##position", &point->origin.x, 1.f, 0.f, 0.f, "%g", ImGuiSliderFlags_NoRoundToFormat);
                     }
                 }
                 else if (var && hash == "spawnflags"_hash)
