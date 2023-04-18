@@ -87,20 +87,23 @@ namespace chisel
         ImGui::SameLine();
         ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
 
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
 
+        // Grid and snap settings
         {
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.f);
             RadioButton(
                 view_grid_show ? ICON_MC_GRID : ICON_MC_GRID_OFF,
                 &view_grid_show.value,
                 "Show Grid"
             );
 
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
             RadioButton(ICON_MC_MAGNET, &view_grid_snap.value, "Snap to Grid");
 
             // + and - buttons
             ImGui::SameLine();
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.f);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 0.5f));
             ImGui::BeginGroup();
             {
@@ -109,22 +112,22 @@ namespace chisel
                 if (ImGui::IsItemHovered())
                     GUI::ShortcutTooltip("Increase Grid Size    ", "]");
 
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 8.f);
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 7.f);
                 if (ImGui::Button(ICON_MC_CHEVRON_DOWN))
                     view_grid_size.value /= 2;
                 if (ImGui::IsItemHovered())
                     GUI::ShortcutTooltip("Decrease Grid Size    ", "[");
             }
             ImGui::EndGroup();
-            ImGui::PopStyleVar();
+            ImGui::PopStyleVar(1); // FramePadding
             
-
             ImGui::SameLine();
-            ImGui::SetNextItemWidth(42.f);
-            if (ImGui::BeginCombo("##GridOptions", str::format("%4g", view_grid_size.value.x).c_str(), 
+            ImGui::SetNextItemWidth(58.f);
+            if (ImGui::BeginCombo("##GridOptions", str::format("%4g " ICON_MC_MENU_DOWN, view_grid_size.value.x).c_str(), 
                 ImGuiComboFlags_PopupAlignLeft | ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton))
             {
-                ImGui::PopStyleVar(2);
+                ImGui::PopStyleVar(2);   // ItemSpacing, FrameRounding
+                ImGui::PopStyleColor(2); // Button, FrameBg
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, defaultPadding);
                 ImGui::TextUnformatted("Grid");
                 ImGui::Separator();
@@ -159,16 +162,21 @@ namespace chisel
                 ImGui::Checkbox("Snap Hit Surface to Grid", &view_grid_snap_hit_normal.value);
 
                 ImGui::EndCombo();
-                ImGui::PopStyleVar();
+                ImGui::PopStyleVar(); // FramePadding
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
             }
-            else ImGui::PopStyleVar(2);
+            else ImGui::PopStyleVar(2); // ItemSpacing, FrameRounding
 
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Grid Options");
         }
+
+        ImGui::SameLine();
+        ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
         
+        // Angle snap settings
         {
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.f);
 
             const char* rotationIcon = view_rotate_snap_angle < 90.f ? ICON_MC_ANGLE_ACUTE
                                     : (view_rotate_snap_angle == 90.f ? ICON_MC_ANGLE_RIGHT : ICON_MC_ANGLE_OBTUSE);
@@ -176,14 +184,15 @@ namespace chisel
             ImGui::SameLine();
             RadioButton(rotationIcon, &view_rotate_snap.value, "Rotation Snap");
 
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.f);
 
             ImGui::SameLine();
-            ImGui::SetNextItemWidth(42.f);
-            if (ImGui::BeginCombo("##AngleSnap", str::format("%3g°", view_rotate_snap_angle.value).c_str(),
+            ImGui::SetNextItemWidth(50.f);
+            if (ImGui::BeginCombo("##AngleSnap", str::format("%3g° " ICON_MC_MENU_DOWN, view_rotate_snap_angle.value).c_str(),
                 ImGuiComboFlags_PopupAlignLeft | ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton))
             {
-                ImGui::PopStyleVar(2);
+                ImGui::PopStyleVar(1);      // FrameRounding
+                ImGui::PopStyleColor(2);    // Button, FrameBg
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, defaultPadding);
                 ImGui::TextUnformatted("Rotation");
                 ImGui::Separator();
@@ -204,13 +213,19 @@ namespace chisel
                 }
 
                 ImGui::EndCombo();
-                ImGui::PopStyleVar();
+                ImGui::PopStyleVar(); // FramePadding
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
             }
-            else ImGui::PopStyleVar(2);
+            else ImGui::PopStyleVar(1); // FrameRounding
 
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Rotation Snap");
         }
+        ImGui::PopStyleColor(2); // Button, FrameBg
+
+        ImGui::SameLine();
+        ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
     }
 
     //--------------------------------------------------
