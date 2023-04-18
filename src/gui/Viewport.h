@@ -32,9 +32,8 @@ namespace chisel
         void Start() override;
         void OnClick(uint2 mouse) override;
         void OnResize(uint width, uint height) override;
-        void OnResizeGrid(const vec3& gridSize) override;
         void DrawHandles(mat4x4& view, mat4x4& proj) override;
-        void OnDrawMenuBar() override;
+        void OnDrawMenu() override;
         void OnPostDraw() override;
 
     // Draw Modes //

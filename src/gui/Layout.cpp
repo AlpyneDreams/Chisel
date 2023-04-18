@@ -5,6 +5,9 @@
 #include "gui/IconsMaterialCommunity.h"
 #include "gui/Modal.h"
 #include "gui/Viewport.h"
+#include "input/Mouse.h"
+
+#include <glm/gtc/round.hpp>
 
 namespace chisel
 {
@@ -60,6 +63,8 @@ namespace chisel
             else
                 Chisel.transformSpace = Space::World;
         }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Transform Mode");
 
         RadioButton(ICON_MC_AXIS_ARROW " Axis Flip", &view_axis_allow_flip.value);
 
@@ -82,34 +87,130 @@ namespace chisel
         ImGui::SameLine();
         ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
 
-        RadioButton(
-            view_grid_show ? ICON_MC_GRID : ICON_MC_GRID_OFF,
-            &view_grid_show.value,
-            "Show Grid"
-        );
 
-        /*vec3 gridSize(64.f);
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-        ImGui::SameLine();
-        if (ImGui::BeginCombo("##GridSettings", nullptr, ImGuiComboFlags_NoPreview))
         {
-            ImGui::PopStyleVar();
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, defaultPadding);
-            ImGui::Checkbox("Uniform Grid", &view_grid_show.value);
-            ImGui::DragFloat3("Grid Size", &gridSize.x, 1.f, 1.f, 4096.f);
-            ImGui::EndCombo();
-        }
-        ImGui::PopStyleVar();
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.f);
+            RadioButton(
+                view_grid_show ? ICON_MC_GRID : ICON_MC_GRID_OFF,
+                &view_grid_show.value,
+                "Show Grid"
+            );
 
-        RadioButton(
-            view_grid_show ? ICON_MC_LINK : ICON_MC_LINK_OFF,
-            &view_grid_show.value,
-            "Uniform Grid Size"
-        );
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(48.f);
-        ImGui::DragFloat("##GridSize", &gridSize.x);*/
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
+            RadioButton(ICON_MC_MAGNET, &view_grid_snap.value, "Snap to Grid");
+
+            // + and - buttons
+            ImGui::SameLine();
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 0.5f));
+            ImGui::BeginGroup();
+            {
+                if (ImGui::Button(ICON_MC_CHEVRON_UP))
+                    view_grid_size.value *= 2;
+                if (ImGui::IsItemHovered())
+                    GUI::ShortcutTooltip("Increase Grid Size    ", "]");
+
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 8.f);
+                if (ImGui::Button(ICON_MC_CHEVRON_DOWN))
+                    view_grid_size.value /= 2;
+                if (ImGui::IsItemHovered())
+                    GUI::ShortcutTooltip("Decrease Grid Size    ", "[");
+            }
+            ImGui::EndGroup();
+            ImGui::PopStyleVar();
+            
+
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(42.f);
+            if (ImGui::BeginCombo("##GridOptions", str::format("%4g", view_grid_size.value.x).c_str(), 
+                ImGuiComboFlags_PopupAlignLeft | ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton))
+            {
+                ImGui::PopStyleVar(2);
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, defaultPadding);
+                ImGui::TextUnformatted("Grid");
+                ImGui::Separator();
+
+                if (ImGui::Button(uniformGridSize ? ICON_MC_LINK : ICON_MC_LINK_OFF))
+                    uniformGridSize = !uniformGridSize;
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("Uniform Grid Size");
+
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(3 * 42.f);
+                if (uniformGridSize) {
+                    if (ImGui::DragFloat("##GridSize1", &view_grid_size.value.x, 1.f, 0.125f, 1024.f, "%g"))
+                        view_grid_size = view_grid_size.value.xxx;
+                } else {
+                    ImGui::InputFloat3("##GridSize3", &view_grid_size.value.x, "%g");
+                }
+                
+                const float gridSizes[] = { 
+                    0.125f, 0.25f, 0.5f, 1.f, 2.f, 4.f, 8.f,
+                    16.f, 32.f, 64.f, 128.f, 256.f, 512.f, 1024.f
+                };
+
+                for (auto size : gridSizes) {
+                    bool selected = view_grid_size.value.x == size;
+                    if (ImGui::Selectable(str::format("%g", size).c_str(), selected))
+                        view_grid_size = vec3(size);
+                    if (selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+
+                ImGui::Checkbox("Snap Hit Surface to Grid", &view_grid_snap_hit_normal.value);
+
+                ImGui::EndCombo();
+                ImGui::PopStyleVar();
+            }
+            else ImGui::PopStyleVar(2);
+
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Grid Options");
+        }
+        
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.f);
+
+            const char* rotationIcon = view_rotate_snap_angle < 90.f ? ICON_MC_ANGLE_ACUTE
+                                    : (view_rotate_snap_angle == 90.f ? ICON_MC_ANGLE_RIGHT : ICON_MC_ANGLE_OBTUSE);
+
+            ImGui::SameLine();
+            RadioButton(rotationIcon, &view_rotate_snap.value, "Rotation Snap");
+
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
+
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(42.f);
+            if (ImGui::BeginCombo("##AngleSnap", str::format("%3g°", view_rotate_snap_angle.value).c_str(),
+                ImGuiComboFlags_PopupAlignLeft | ImGuiComboFlags_HeightLargest | ImGuiComboFlags_NoArrowButton))
+            {
+                ImGui::PopStyleVar(2);
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, defaultPadding);
+                ImGui::TextUnformatted("Rotation");
+                ImGui::Separator();
+
+                ImGui::SetNextItemWidth(64.f);
+                ImGui::DragFloat("##AngleSnap1", &view_rotate_snap_angle.value, 1.f, 1.f, 180.f, "%g°");
+
+                const float angleSnaps[] = { 
+                    1.f, 5.f, 15.f, 30.f, 45.f, 90.f
+                };
+
+                for (auto angle : angleSnaps) {
+                    bool selected = view_rotate_snap_angle.value == angle;
+                    if (ImGui::Selectable(str::format("%g°", angle).c_str(), selected))
+                        view_rotate_snap_angle = angle;
+                    if (selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+
+                ImGui::EndCombo();
+                ImGui::PopStyleVar();
+            }
+            else ImGui::PopStyleVar(2);
+
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Rotation Snap");
+        }
     }
 
     //--------------------------------------------------
@@ -132,7 +233,7 @@ namespace chisel
         ImGui::Separator();
         Option(ICON_MC_LIGHTBULB, "Entity", Tool::Entity);
         Option(ICON_MC_CUBE_OUTLINE, "Block", Tool::Block);
-        Option(ICON_MC_SCISSORS_CUTTING, "Clip", Tool::Clip);
+        Option(ICON_MC_SQUARE_OFF_OUTLINE, "Clip", Tool::Clip);
     }
 
     void MainToolbar::Option(const char* icon, const char* name, Tool tool)

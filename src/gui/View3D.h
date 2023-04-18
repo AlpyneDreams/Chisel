@@ -22,7 +22,7 @@ namespace chisel
 
     struct View3D : public GUI::Window
     {
-        View3D(auto... args) : GUI::Window(args..., ImGuiWindowFlags_MenuBar) { }
+        View3D(auto... args) : GUI::Window(args...) { }
 
         Camera camera;
 
@@ -42,9 +42,8 @@ namespace chisel
         virtual void Start() override;
         virtual void OnClick(uint2 pos) {}
         virtual void OnResize(uint width, uint height) {}
-        virtual void OnResizeGrid(const vec3& gridSize) {}
         virtual void DrawHandles(mat4x4& view, mat4x4& proj) {}
-        virtual void OnDrawMenuBar() {}
+        virtual void OnDrawMenu() {}
         virtual void OnPostDraw() {}
 
         Camera& GetCamera();
@@ -69,13 +68,5 @@ namespace chisel
 
         // Returns true if window is not collapsed
         bool CheckResize();
-
-        void CoordinateSpacePicker();
-
-        void GridMenu();
-
-        void Toolbar();
-        void ToolbarButton(const char* label, Tool tool);
-
     };
 }

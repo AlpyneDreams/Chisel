@@ -52,11 +52,6 @@ namespace chisel
         }
     }
 
-    void Viewport::OnResizeGrid(const vec3& gridSize)
-    {
-        map.gridSize = gridSize;
-    }
-
     ConVar<bool> r_raycast_brush_placement("r_raycast_brush_placement", true, "Enable/disable raycast brush placement for perf debugging");
 
     void Viewport::DrawHandles(mat4x4& view, mat4x4& proj)
@@ -285,25 +280,21 @@ namespace chisel
                 view_grid_size.value /= 2.0f;
 
             view_grid_size = glm::clamp(view_grid_size.value, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
-            OnResizeGrid(view_grid_size);
         }
     }
 // Draw Modes //
 
-    void Viewport::OnDrawMenuBar()
+    void Viewport::OnDrawMenu()
     {
-        // Right side
-        ImGui::SameLine(ImGui::GetWindowWidth() - 90);
-        if (BeginMenu(ICON_MC_IMAGE_MULTIPLE " " ICON_MC_MENU_DOWN, "Render Mode"))
+        ImGui::TextUnformatted("View Mode");
+        ImGui::Separator();
+        for (int i = 0; i < sizeof(drawModes) / sizeof(const char*); i++)
         {
-            for (int i = 0; i < sizeof(drawModes) / sizeof(const char*); i++)
-            {
-                if (ImGui::MenuItem(drawModes[i], "", drawMode == DrawMode(i)))
-                    drawMode = DrawMode(i);
-            }
-            ImGui::EndMenu();
+            if (ImGui::MenuItem(drawModes[i], "", drawMode == DrawMode(i)))
+                drawMode = DrawMode(i);
         }
-
+        ImGui::TextUnformatted("");
+        ImGui::Spacing();
     }
 
     Texture Viewport::GetTexture(Viewport::DrawMode mode)

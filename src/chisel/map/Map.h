@@ -185,8 +185,6 @@ namespace chisel
      */
     struct Map final : BrushEntity
     {
-        vec3 gridSize = vec3(64.0f);
-
         // TODO: Polymorphic linked list
         std::vector<Entity*> entities;
 

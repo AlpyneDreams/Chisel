@@ -43,5 +43,12 @@ namespace chisel
             ImGui::PopTextWrapPos();
             ImGui::EndTooltip();
         }
+
+        inline void ShortcutTooltip(const char* text, const char* shortcut)
+        {
+            ImGui::BeginTooltip();
+            ImGui::MenuItem(text, shortcut);
+            ImGui::EndTooltip();
+        }
     }
 }

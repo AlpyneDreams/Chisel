@@ -11,6 +11,7 @@ namespace chisel
             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar) {}
 
         bool horizontal = false;
+        ImVec2 defaultPadding;
 
         // Override this
         virtual void DrawToolbar() = 0;
@@ -28,6 +29,7 @@ namespace chisel
 
         void PreDraw() override
         {
+            defaultPadding = ImGui::GetStyle().FramePadding;
             //ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(100.f, 32.f));
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.f, 8.f));
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(horizontal ? 0.f : 4.f, 0.f));

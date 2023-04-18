@@ -231,7 +231,7 @@ namespace chisel
         {
             Selection.Transform(transform.value());
             // TODO: Align to grid fights with the gizmo rn :s
-            //brush->GetBrush().AlignToGrid(map.gridSize);
+            //brush->GetBrush().AlignToGrid(view_grid_size);
         }
     }
 

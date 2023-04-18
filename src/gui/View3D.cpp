@@ -110,45 +110,8 @@ namespace chisel
     void View3D::Draw()
     {
         popupOpen = false;
-        ResetPadding();
-
-    // Menu Bar //
-        if (ImGui::BeginMenuBar())
-        {
-            // Left side
-            GridMenu();
-
-            const char* rotationIcon = view_rotate_snap_angle < 90.f ? ICON_MC_ANGLE_ACUTE
-                                        : (view_rotate_snap_angle == 90.f ? ICON_MC_ANGLE_RIGHT : ICON_MC_ANGLE_OBTUSE);
-            if (BeginMenu(str::format("%s %g " ICON_MC_MENU_DOWN, rotationIcon, view_rotate_snap_angle.value).c_str(), "Rotation"))
-            {
-                ImGui::Checkbox(ICON_MC_MAGNET " Rotation Snap", &view_rotate_snap.value);
-                ImGui::InputFloat("Angle Snap", &view_rotate_snap_angle.value);
-                ImGui::EndMenu();
-            }
-
-            OnDrawMenuBar();
-
-            // Right side
-            ImGui::SameLine(ImGui::GetWindowWidth() - 40);
-            if (BeginMenu(ICON_MC_VIDEO " " ICON_MC_MENU_DOWN, "Camera"))
-            {
-                Camera& camera = GetCamera();
-                ImGui::InputFloat("FOV", &camera.fieldOfView);
-                ImGui::InputFloat("Speed (hu/s)", &cam_maxspeed.value);
-                ImGui::InputFloat("Sensitivity", &m_sensitivity.value);
-
-                ImGui::InputFloat2("Near/Far Z", &camera.near);
-                ImGui::SameLine();
-                ImGui::Selectable(ICON_MC_HELP_CIRCLE, false, 0, ImGui::CalcTextSize(ICON_MC_HELP_CIRCLE));
-                if (ImGui::IsItemHovered())
-                    GUI::HelpTooltip("Near Z and Far Z control the depth range of the perspective projection.\nSmaller values of Near Z result in a closer near clipping plane, ie. objects get cut off less when close to the camera.\nLarger values of Near Z result in more clipping but much better precision at further distances due to 1/z falloff.\nFar Z controls the far clipping plane, ie. how far objects/brushes will render until.\nSetting Far Z lower may result in better performance on larger maps.\nRecommended values:\nNear Z: 8.0\nFar Z: 16384.0", "Near Z and Far Z");
-
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-        NoPadding();
+        
+        ImVec2 startPos = ImGui::GetCursorPos();
 
         // Return if window is collapsed
         if (!CheckResize()) {
@@ -213,6 +176,34 @@ namespace chisel
                 camera.position += camera.Right() * (d-a) * cam_maxspeed.value * float(Time.deltaTime);
             }
         }
+
+        ResetPadding();
+        ImGui::SetCursorPos(startPos);
+        if (ImGui::Button(ICON_MC_DOTS_VERTICAL))
+            ImGui::OpenPopup("ViewportMenu");
+
+        if (ImGui::BeginPopup("ViewportMenu"))
+        {
+            OnDrawMenu();
+
+            ImGui::TextUnformatted("Camera");
+            ImGui::Separator();
+
+            Camera& camera = GetCamera();
+            ImGui::InputFloat("FOV", &camera.fieldOfView);
+            ImGui::InputFloat("Speed (hu/s)", &cam_maxspeed.value);
+            ImGui::InputFloat("Sensitivity", &m_sensitivity.value);
+
+            ImGui::InputFloat2("Near/Far Z", &camera.near);
+            ImGui::SameLine();
+            ImGui::Selectable(ICON_MC_HELP_CIRCLE, false, 0, ImGui::CalcTextSize(ICON_MC_HELP_CIRCLE));
+            if (ImGui::IsItemHovered())
+                GUI::HelpTooltip("Near Z and Far Z control the depth range of the perspective projection.\nSmaller values of Near Z result in a closer near clipping plane, ie. objects get cut off less when close to the camera.\nLarger values of Near Z result in more clipping but much better precision at further distances due to 1/z falloff.\nFar Z controls the far clipping plane, ie. how far objects/brushes will render until.\nSetting Far Z lower may result in better performance on larger maps.\nRecommended values:\nNear Z: 8.0\nFar Z: 16384.0", "Near Z and Far Z");
+
+            ImGui::EndPopup();
+        }
+        NoPadding();
+
     }
     
     void View3D::MouseLook(int2 mouse)
@@ -255,36 +246,5 @@ namespace chisel
         }
 
         return true;
-    }
-
-// Grid Menu //
-
-    void View3D::GridMenu()
-    {
-        vec3 gridSize = view_grid_size;
-        char gridTabName[128];
-        const bool isGridUniform = gridUniform || (gridSize.x == gridSize.y && gridSize.y == gridSize.z);
-        if (isGridUniform)
-            snprintf(gridTabName, sizeof(gridTabName), ICON_MC_GRID " %g " ICON_MC_MENU_DOWN, gridSize.x);
-        else
-            snprintf(gridTabName, sizeof(gridTabName), ICON_MC_GRID " %g %g %g " ICON_MC_MENU_DOWN, gridSize.x, gridSize.y, gridSize.z);
-        if (BeginMenu(gridTabName, "Grid"))
-        {
-            const char* label = view_grid_show
-                ? (ICON_MC_GRID " Show Grid")
-                : (ICON_MC_GRID_OFF " Show Grid");
-            ImGui::Checkbox(label, &view_grid_show.value);
-            ImGui::Checkbox(ICON_MC_MAGNET " Snap to Grid", &view_grid_snap.value);
-            ImGui::Checkbox(ICON_MC_SQUARE " Snap Hit Surface to Grid", &view_grid_snap_hit_normal.value);
-            ImGui::Checkbox(ICON_MC_LINK " Uniform Grid Size", &gridUniform);
-            if (gridUniform) {
-                if (ImGui::InputFloat("Grid Size", &gridSize.x))
-                    OnResizeGrid(gridSize = gridSize.xxx);
-            } else {
-                if (ImGui::InputFloat3("Grid Size", &gridSize.x))
-                    OnResizeGrid(gridSize);
-            }
-            ImGui::EndMenu();
-        }
     }
 }

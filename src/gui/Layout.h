@@ -25,6 +25,10 @@ namespace chisel
         EditingToolbar();
 
         void DrawToolbar() override;
+
+        // Should match default values of view_grid_size
+        bool uniformGridSize = true;
+        int3 gridPower = int3(6); // 64
     };
 
     struct MainToolbar final : Toolbar
