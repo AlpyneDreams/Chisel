@@ -11,6 +11,7 @@ namespace chisel
     inline ConVar<bool>  view_axis_allow_flip("view_axis_allow_flip", false, "Allow gizmos to flip axes contextually.");
     inline ConVar<bool>  view_grid_show("view_grid_show", true, "Show grid.");
     inline ConVar<bool>  view_grid_snap("view_grid_snap", true, "Snap to grid.");
+    inline ConVar<vec3>  view_grid_size("view_grid_size", vec3(64.f), "Grid snap size.");
     inline ConVar<bool>  view_grid_snap_hit_normal("view_grid_snap_hit_normal", false, "Should the axis of the normal of the raycast also be snapped?");
     inline ConVar<bool>  view_rotate_snap("view_rotate_snap", true, "Snap rotation angles.");
 
@@ -26,7 +27,6 @@ namespace chisel
 
         Rect  viewport;
 
-        vec3  gridSize       = vec3(64.f);
         bool  gridUniform    = true;
         float rotationSnap   = 15.f;
 
@@ -42,7 +42,7 @@ namespace chisel
         virtual void Start() override;
         virtual void OnClick(uint2 pos) {}
         virtual void OnResize(uint width, uint height) {}
-        virtual void OnResizeGrid(vec3& gridSize) {}
+        virtual void OnResizeGrid(const vec3& gridSize) {}
         virtual void DrawHandles(mat4x4& view, mat4x4& proj) {}
         virtual void OnDrawMenuBar() {}
         virtual void OnPostDraw() {}

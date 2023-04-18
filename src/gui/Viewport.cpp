@@ -52,7 +52,7 @@ namespace chisel
         }
     }
 
-    void Viewport::OnResizeGrid(vec3& gridSize)
+    void Viewport::OnResizeGrid(const vec3& gridSize)
     {
         map.gridSize = gridSize;
     }
@@ -73,14 +73,14 @@ namespace chisel
             case Tool::Bounds:
             {
                 bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
-                vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : gridSize;
+                vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : view_grid_size;
                 Chisel.Renderer->DrawHandles(view, proj, activeTool, Chisel.transformSpace, snap, snapSize);
                 break;
             }
 
             case Tool::Block:
                 // User can edit block bounds while adding blocks
-                Chisel.Renderer->DrawHandles(view, proj, Tool::Bounds, Chisel.transformSpace, view_grid_snap, gridSize);
+                Chisel.Renderer->DrawHandles(view, proj, Tool::Bounds, Chisel.transformSpace, view_grid_snap, view_grid_size);
                 if (Handles.IsMouseOver())
                     break;
             case Tool::Clip:
@@ -117,7 +117,7 @@ namespace chisel
                 {
                     if (view_grid_snap)
                     {
-                        vec3 snapped = math::Snap(point, gridSize);
+                        vec3 snapped = math::Snap(point, view_grid_size);
                         vec3 axis = glm::abs(normal);
                         // TODO: Handle non-cardinal angles better.
                         bool cardinal = math::CloseEnough(axis, vec3(1.0f, 0.0f, 0.0f)) || math::CloseEnough(axis, vec3(0.0f, 1.0f, 0.0f)) || math::CloseEnough(axis, vec3(0.0f, 0.0f, 1.0f));
@@ -177,7 +177,7 @@ namespace chisel
                                 vec3 extrude = vec3(0);
                                 // If we have a degenerate axis, extrude by normal by 1 grid size.
                                 if (math::CloseEnough(vec.x, 0) || math::CloseEnough(vec.y, 0) || math::CloseEnough(vec.z, 0))
-                                    extrude = normal * gridSize;
+                                    extrude = normal * view_grid_size.value;
                                 mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xyz) + (extrude * 0.5f));
                                 vec3 size = (vec3(vec.xyz) + extrude) * 0.5f;
                                 // make sure we are not degenerate size.
@@ -270,7 +270,7 @@ namespace chisel
                 ImGui::Separator();
 
                 if (ImGui::Selectable( ICON_MC_GRID " Align to Grid"))
-                    Selection.AlignToGrid(gridSize);
+                    Selection.AlignToGrid(view_grid_size);
 
                 ImGui::EndPopup();
             }
@@ -280,12 +280,12 @@ namespace chisel
         {
             const bool up = Keyboard.GetKeyUp(Key::RightBracket);
             if (up)
-                gridSize *= 2.0f;
+                view_grid_size.value *= 2.0f;
             else
-                gridSize /= 2.0f;
+                view_grid_size.value /= 2.0f;
 
-            gridSize = glm::clamp(gridSize, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
-            OnResizeGrid(gridSize);
+            view_grid_size = glm::clamp(view_grid_size.value, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
+            OnResizeGrid(view_grid_size);
         }
     }
 // Draw Modes //

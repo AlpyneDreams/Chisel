@@ -102,7 +102,7 @@ namespace chisel
 
         // Draw grid
         if (view_grid_show)
-            Handles.DrawGrid(camera, gridSize);
+            Handles.DrawGrid(camera, view_grid_size);
 
         OnPostDraw();
     }
@@ -261,6 +261,7 @@ namespace chisel
 
     void View3D::GridMenu()
     {
+        vec3 gridSize = view_grid_size;
         char gridTabName[128];
         const bool isGridUniform = gridUniform || (gridSize.x == gridSize.y && gridSize.y == gridSize.z);
         if (isGridUniform)
