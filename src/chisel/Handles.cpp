@@ -188,10 +188,10 @@ namespace chisel
         mtx = glm::scale(mtx, gridSize);
 
         // Determine number of grid chunks to draw
-        int3 radius = glm::min(int3(view_grid_max_radius), int3(64) / int3(gridSize));
+        int3 radius = glm::min(int3(view_grid_max_radius), int3(glm::ceil(vec3(64.f) / gridSize)));
 
         // Set far Z based on radius
-        vec3 farZ = vec3(radius) * chunk * 0.8f;
+        vec3 farZ = glm::min(vec3(radius) * chunk * 0.8f, vec3(camera.far));
 
         mat4x4 view = camera.ViewMatrix();
         mat4x4 proj = camera.ProjMatrix();
