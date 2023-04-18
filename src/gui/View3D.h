@@ -14,6 +14,7 @@ namespace chisel
     inline ConVar<vec3>  view_grid_size("view_grid_size", vec3(64.f), "Grid snap size.");
     inline ConVar<bool>  view_grid_snap_hit_normal("view_grid_snap_hit_normal", false, "Should the axis of the normal of the raycast also be snapped?");
     inline ConVar<bool>  view_rotate_snap("view_rotate_snap", true, "Snap rotation angles.");
+    inline ConVar<float>  view_rotate_snap_angle("view_rotate_snap_angle", 15.f, "Snap rotation angles.");
 
     inline ConVar<bool>  trans_texture_lock("trans_texture_lock", true, "Enable texture lock for transformations.");
     inline ConVar<bool>  trans_texture_scale_lock("trans_texture_scale_lock", false, "Enable scaling texture lock.");
@@ -28,7 +29,6 @@ namespace chisel
         Rect  viewport;
 
         bool  gridUniform    = true;
-        float rotationSnap   = 15.f;
 
         bool  mouseOver      = false;
         bool  popupOpen      = false;

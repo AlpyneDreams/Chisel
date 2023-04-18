@@ -73,7 +73,7 @@ namespace chisel
             case Tool::Bounds:
             {
                 bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
-                vec3 snapSize = activeTool == Tool::Rotate ? vec3(rotationSnap) : view_grid_size;
+                vec3 snapSize = activeTool == Tool::Rotate ? vec3(view_rotate_snap_angle) : view_grid_size;
                 Chisel.Renderer->DrawHandles(view, proj, activeTool, Chisel.transformSpace, snap, snapSize);
                 break;
             }

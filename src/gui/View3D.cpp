@@ -118,12 +118,12 @@ namespace chisel
             // Left side
             GridMenu();
 
-            const char* rotationIcon = rotationSnap < 90.f ? ICON_MC_ANGLE_ACUTE
-                                        : (rotationSnap == 90.f ? ICON_MC_ANGLE_RIGHT : ICON_MC_ANGLE_OBTUSE);
-            if (BeginMenu(str::format("%s %g " ICON_MC_MENU_DOWN, rotationIcon, rotationSnap).c_str(), "Rotation"))
+            const char* rotationIcon = view_rotate_snap_angle < 90.f ? ICON_MC_ANGLE_ACUTE
+                                        : (view_rotate_snap_angle == 90.f ? ICON_MC_ANGLE_RIGHT : ICON_MC_ANGLE_OBTUSE);
+            if (BeginMenu(str::format("%s %g " ICON_MC_MENU_DOWN, rotationIcon, view_rotate_snap_angle.value).c_str(), "Rotation"))
             {
                 ImGui::Checkbox(ICON_MC_MAGNET " Rotation Snap", &view_rotate_snap.value);
-                ImGui::InputFloat("Angle Snap", &rotationSnap);
+                ImGui::InputFloat("Angle Snap", &view_rotate_snap_angle.value);
                 ImGui::EndMenu();
             }
 
