@@ -70,11 +70,18 @@ namespace chisel
                     {
                         ImGui::SetCursorPos(basePos);
 
+                        bool selected = Chisel.activeMaterial == material.thing;
+                        if (selected)
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_TabActive));
+
                         if (ImGui::ImageButton(material.path.c_str(), (ImTextureID)material.thing->baseTexture->srvLinear.ptr(),
-                            ImVec2(AssetThumbnailSize.x, AssetThumbnailSize.y), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+                            ImVec2(float(AssetThumbnailSize.x), float(AssetThumbnailSize.y)), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
                         {
                             Chisel.activeMaterial = material.thing;
                         }
+
+                        if (selected)
+                            ImGui::PopStyleColor();
                     }
 
                     ImVec2 textPos = ImVec2(basePos.x, basePos.y + AssetThumbnailSize.y);
