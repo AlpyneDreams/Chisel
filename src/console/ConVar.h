@@ -102,7 +102,7 @@ namespace chisel
         void PrintHelp() final override
         {
             PrintValue();
-            Console.Log("- {}, {}", description, DescribeType());
+            Console.Log("- {}: {}", DescribeType(), description);
         }
         
         void PrintValue()
@@ -113,6 +113,8 @@ namespace chisel
 
     template <>
     inline const char* ConVar<const char*>::ParseValue(const char *string) { return string; }
+
+// Booleans //
 
     // Allowed values: 1, 0, true, false, yes, no, t, f, y, n
     template <>
@@ -144,19 +146,51 @@ namespace chisel
         }
     }
 
+// Generic //
+
     template <typename T>
-    inline T ConVar<T>::ParseValue(const char* string)
+    inline T ParseValue(std::string_view string)
     {
         UnderlyingType<T> value;
-        auto [ptr, err] = std::from_chars(string, string + std::strlen(string), value);
+        auto [ptr, err] = std::from_chars(string.data(), string.data() + string.size(), value);
         switch (err)
         {
             case std::errc::invalid_argument:
-                throw std::invalid_argument(string);
+                throw std::invalid_argument(std::string(string));
             case std::errc::result_out_of_range:
-                throw std::out_of_range(string);
+                throw std::out_of_range(std::string(string));
             default:
                 return T(value);
         }
     }
+
+    template <typename T> inline T ConVar<T>::ParseValue(const char* string) { return chisel::ParseValue<T>(string); }
+
+// Vectors //
+
+    template <int N, typename T>
+    inline glm::vec<N, T> ParseVec(const char* string)
+    {
+        auto str = str::split(string, " ");
+
+        if (str.size() == 1) // splat
+            return glm::vec<N, T>(ParseValue<T>(str[0]));
+
+        glm::vec<N, T> vec;
+        for (int i = 0; i < str.size() && i < N; i++)
+            vec[i] = ParseValue<T>(str[i]);
+        return vec;
+    }
+
+    template <> inline vec4 ConVar<vec4>::ParseValue(const char* string) { return ParseVec<4, float>(string); }
+    template <> inline vec3 ConVar<vec3>::ParseValue(const char* string) { return ParseVec<3, float>(string); }
+    template <> inline vec2 ConVar<vec2>::ParseValue(const char* string) { return ParseVec<2, float>(string); }
+
+    template <> constexpr const char* ConVar<vec4>::DescribeType() { return "vec4"; }
+    template <> constexpr const char* ConVar<vec3>::DescribeType() { return "vec3"; }
+    template <> constexpr const char* ConVar<vec2>::DescribeType() { return "vec2"; }
+
+    template <> inline void ConVar<vec4>::PrintValue() { Console.Log("{} = {} {} {} {}", name, value.x, value.y, value.z, value.w); }
+    template <> inline void ConVar<vec3>::PrintValue() { Console.Log("{} = {} {} {}", name, value.x, value.y, value.z); }
+    template <> inline void ConVar<vec2>::PrintValue() { Console.Log("{} = {} {}", name, value.x, value.y); }
 }
