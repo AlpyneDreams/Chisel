@@ -45,6 +45,9 @@ namespace chisel
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+        // Click once to edit DragXXX sliders.
+        io.ConfigDragClickToInputText = true;
+
         // Default font
         AddFontFile("Roboto-Regular.ttf", 15);
 

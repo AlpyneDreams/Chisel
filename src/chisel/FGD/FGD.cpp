@@ -264,7 +264,13 @@ namespace chisel
             var.displayName = ParseDescription();
             if (var.displayName.empty())
                 var.displayName = var.name;
+            
             var.defaultValue = ParseDefault();
+
+            // Normalize float default values
+            if (var.type == FGD::Float && !var.defaultValue.empty())
+                var.defaultValue = str::format("%g", std::stof(var.defaultValue.c_str()));
+
             var.description = ParseDescription();
             if (var.type == FGD::Choices || var.type == FGD::Flags)
             {

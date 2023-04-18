@@ -218,12 +218,12 @@ namespace chisel
             case Integer:
             {
                 kv.EnsureType(kv::Types::Int);
-                return ImGui::InputInt(name, kv.GetPtr<int32_t>(kv::Types::Int));
+                return ImGui::DragInt(name, kv.GetPtr<int32_t>(kv::Types::Int));
             }
             case Float:
             {
                 kv.EnsureType(kv::Types::Float);
-                return ImGui::InputDouble(name, kv.GetPtr<double>(kv::Types::Float));
+                return ImGui::DragScalar(name, ImGuiDataType_Double, kv.GetPtr<double>(kv::Types::Float), 1.f, nullptr, nullptr, "%g", ImGuiSliderFlags_NoRoundToFormat);
             }
 
             case Boolean:
@@ -351,10 +351,7 @@ namespace chisel
     inline bool Inspector::ValueInput(const FGD::Var& var, Entity* ent, bool raw)
     {
         kv::KeyValuesVariant *kv = nullptr;
-        bool defaultVal = GetKV(var, ent, kv);
-
-        // Always show reset button for number fields so the +/- buttons don't move
-        bool showResetButton = !defaultVal || (!raw && var.type == FGD::Integer);
+        const bool defaultVal = GetKV(var, ent, kv);
 
         ImGui::PushID(var.name.c_str());
         ImGui::BeginDisabled(var.readOnly);
@@ -362,7 +359,7 @@ namespace chisel
         float cursorX, width = -FLT_MIN;
 
         // Make space for reset button
-        if (showResetButton)
+        if (!defaultVal)
         {
             cursorX = ImGui::GetCursorPosX();
             width = ImGui::GetContentRegionAvail().x - 28.;
@@ -374,7 +371,7 @@ namespace chisel
             : ValueInput(var, *kv);
 
         // Reset button
-        if (showResetButton)
+        if (!defaultVal)
         {
             ImGui::SameLine();
             ImGui::SetCursorPosX(cursorX + width + 4.f);
