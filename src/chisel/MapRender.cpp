@@ -13,9 +13,9 @@ namespace chisel
     static ConVar<bool> r_drawsprites("r_drawsprites", true, "Draw sprites");
 
     // Orange Tint: Color(0.8, 0.4, 0.1, 1);
-    // Selection Outline Color: Color(1, 0.6, 0.25, 1)
-    static const Color SelectionColor = Color(0.6f, 0.1f, 0.1f, 1.0f);
-    static const Color PreviewColor = Color(1.0f, 1.0f, 1.0f, 0.5f);
+    static ConVar<vec4> color_selection = ConVar<vec4>("color_selection", vec4(0.6, 0.1, 0.1, 1), "Selection color");
+    static ConVar<vec4> color_selection_outline = ConVar<vec4>("color_selection_outline", vec4(0.95, 0.59, 0.19, 1), "Selection outline color");
+    static ConVar<vec4> color_preview = ConVar<vec4>("color_preview", vec4(1, 1, 1, 0.5), "Placement preview color");
 
     MapRender::MapRender()
         : System()
@@ -55,14 +55,10 @@ namespace chisel
         r.ctx->ClearRenderTargetView(viewport.rt_ObjectID.rtv.ptr(), Colors.Black);
         r.ctx->ClearDepthStencilView(viewport.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        if (viewport.drawMode == Viewport::DrawMode::Wireframe)
-        {
+        if (wireframe = viewport.drawMode == Viewport::DrawMode::Wireframe)
             r.ctx->RSSetState(r.Raster.Wireframe.ptr());
-        }
         else
-        {
             r.ctx->RSSetState(r.Raster.Default.ptr());
-        }
 
         // TODO: Cull!
         if (r_drawbrushes)
@@ -90,7 +86,7 @@ namespace chisel
 
     void MapRender::DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles, bool selected, SelectionID id)
     {
-        Color color = selected ? SelectionColor : (preview ? PreviewColor : Colors.White);
+        Color color = selected ? Color(color_selection) : (preview ? Color(color_preview) : Colors.White);
 
         if (Chisel.fgd->classes.contains(classname))
         {
@@ -164,10 +160,10 @@ namespace chisel
             }
         }
 
-        auto DrawMesh = [&](BrushMesh* mesh)
+        auto DrawMeshOnce = [&](BrushMesh* mesh, float4 color, Texture* tex = nullptr)
         {
             cbuffers::BrushState data;
-            data.color = mesh->brush->IsSelected() ? SelectionColor : Colors.White;
+            data.color = color;
             data.id = mesh->brush->GetSelectionID();
 
             r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
@@ -184,6 +180,9 @@ namespace chisel
                 if (mesh->material->baseTexture)
                     srv = mesh->material->baseTexture->srvSRGB.ptr();
             }
+            
+            if (tex)
+                srv = tex->srvSRGB.ptr();
 
             if (!srv)
             {
@@ -201,6 +200,28 @@ namespace chisel
             if (pointSample)
             {
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
+            }
+        };
+
+        auto DrawMesh = [&](BrushMesh* mesh)
+        {
+            if (mesh->brush->IsSelected())
+            {
+                if (wireframe)
+                {
+                    DrawMeshOnce(mesh, color_selection_outline);
+                }
+                else
+                {
+                    DrawMeshOnce(mesh, color_selection);
+                    r.ctx->RSSetState(r.Raster.Wireframe.ptr());
+                    DrawMeshOnce(mesh, color_selection_outline, Tools.tex_White);
+                    r.ctx->RSSetState(r.Raster.Default.ptr());
+                }
+            }
+            else
+            {
+                DrawMeshOnce(mesh, Colors.White);
             }
         };
 
