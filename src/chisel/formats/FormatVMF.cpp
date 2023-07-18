@@ -196,6 +196,54 @@ namespace chisel
         scale = stream::ParseSimple<float>(scale_part);
     }
 
+    using DispRow1 = std::vector<float>;
+    using DispRow3 = std::vector<vec3>;
+    using DispField1 = std::vector<DispRow1>;
+    using DispField3 = std::vector<DispRow3>;
+
+    static DispRow1 ParseRow1(std::string_view value)
+    {
+        DispRow1 row;
+        auto numbers = str::split(value, " ");
+        for (auto i = 0; i < numbers.size(); i++)
+            row.push_back(stream::ParseSimple<float>(numbers[i]));
+        return row;
+    }
+
+    static DispRow3 ParseRow3(std::string_view value)
+    {
+        DispRow3 row;
+        auto numbers = str::split(value, " ");
+        for (auto i = 0; i < numbers.size(); i += 3)
+        {
+            row.push_back(vec3(
+                stream::ParseSimple<float>(numbers[i]),
+                stream::ParseSimple<float>(numbers[i + 1]),
+                stream::ParseSimple<float>(numbers[i + 2])
+            ));
+        }
+        return row;
+    }
+
+    static DispField1 ParseField1(kv::KeyValues& obj)
+    {
+        DispField1 field;
+        for (auto& [key, value] : obj)
+            field.push_back(ParseRow1(value));
+        return field;
+    }
+
+    static DispField3 ParseField3(kv::KeyValues& obj)
+    {
+        DispField3 field;
+        for (auto& [key, value] : obj)
+        {
+            field.push_back(ParseRow3(value));
+        }
+        return field;
+    }
+
+
     static bool AddSolid(BrushEntity& map, kv::KeyValues& kvWorld, std::string& matNameScratch)
     {
         std::vector<Side> sideData;
@@ -230,6 +278,38 @@ namespace chisel
                 thisSide.rotate = kvSide["rotate"];
                 thisSide.lightmapScale = kvSide["lightmapscale"];
                 thisSide.smoothing = kvSide["smoothing_groups"];
+
+                if (kvSide.Contains("dispinfo"))
+                {
+                    kv::KeyValues& kvDisp = kvSide["dispinfo"];
+                    thisSide.disp.emplace(int(kvDisp["power"]));
+                    thisSide.disp->startPos = kvDisp["startposition"];
+                    thisSide.disp->elevation = kvDisp["elevation"];
+                    thisSide.disp->subdiv = kvDisp["subdiv"];
+                    thisSide.disp->flags = kvDisp["flags"];
+
+                    DispField3 normals = ParseField3(kvDisp["normals"]);
+                    DispField1 distances = ParseField1(kvDisp["distances"]);
+                    DispField3 offsets = ParseField3(kvDisp["offsets"]);
+                    DispField3 offset_normals = ParseField3(kvDisp["offset_normals"]);
+                    DispField1 alphas = ParseField1(kvDisp["alphas"]);
+                    // TODO: triangle_tags, allowed_verts
+
+                    for (uint y = 0; y < thisSide.disp->length; y++)
+                    {
+                        for (uint x = 0; x < thisSide.disp->length; x++)
+                        {
+                            DispVert vert;
+                            vert.normal = normals[y][x];
+                            vert.dist = distances[y][x];
+                            vert.offset = offsets[y][x];
+                            vert.offsetNormal = offset_normals[y][x];
+                            vert.alpha = alphas[y][x];
+                            (*thisSide.disp)[y][x] = vert;
+                        }
+                    }
+                }
+
                 sideData.emplace_back(thisSide);
 
                 sides.first++;

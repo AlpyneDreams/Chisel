@@ -9,6 +9,7 @@
 #include "math/Color.h"
 
 #include "Common.h"
+#include "Displacement.h"
 
 #include <memory>
 #include <unordered_map>
@@ -18,14 +19,15 @@ namespace chisel
 {
     struct Side
     {
-        Plane plane{};
+        Plane plane;
 
-        Material *material{};
-        std::array<vec4, 2> textureAxes{};
-        std::array<float, 2> scale{ 1.0f, 1.0f };
+        Material* material;
+        std::array<vec4, 2> textureAxes;
+        std::array<float, 2> scale { 1.0f, 1.0f };
         float rotate = 0;
         float lightmapScale = 16;
         uint32_t smoothing = 0;
+        std::optional<DispInfo> disp;
     };
 
     struct Solid;

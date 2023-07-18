@@ -664,6 +664,12 @@ namespace chisel::kv
         if (view.empty())
             return KeyValuesVariant();
 
+        if (view[0] == '[' && view[view.size() - 1] == ']')
+        {
+            view.remove_prefix(1);
+            view.remove_suffix(1);
+        }
+
         if (stream::IsPotentiallyNumber(view[0]))
         {
             auto vec = str::split(view, " ");
