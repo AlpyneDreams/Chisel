@@ -51,6 +51,16 @@ namespace chisel
         : Atom(parent)
         , m_sides(std::move(sides))
     {
+        // Check if this brush has displacements
+        for (Side& side : m_sides)
+        {
+            if (side.disp.has_value())
+            {
+                this->m_displacement = true;
+                break;
+            }
+        }
+
         if (initMesh)
             UpdateMesh();
     }
@@ -58,6 +68,7 @@ namespace chisel
     Solid::Solid(Solid&& other)
         : Atom(other.m_parent)
     {
+        this->m_displacement = other.m_displacement;
         this->m_meshes = std::move(other.m_meshes);
         this->m_sides = std::move(other.m_sides);
         this->m_faces = std::move(other.m_faces);
@@ -96,6 +107,10 @@ namespace chisel
 
         for (uint32_t i = 0; i < m_sides.size(); i++)
         {
+            // Displacements: exclude unused sides
+            if (m_displacement && !m_sides[i].disp.has_value())
+                continue;
+
             AssetID id = InvalidAssetID;
             if (m_sides[i].material)
                 id = m_sides[i].material->id;
@@ -122,7 +137,6 @@ namespace chisel
                 }
             }
         }
-        m_meshes.resize(uniqueMaterials.size());
 
         // Convert from sides as planes to faces.
         for (uint32_t i = 0; i < m_sides.size(); i++)
@@ -190,63 +204,176 @@ namespace chisel
             }
         }
 
+        if (m_displacement)
+            m_meshes.resize(m_faces.size());
+        else
+            m_meshes.resize(uniqueMaterials.size());
+
         m_bounds = std::nullopt;
+
+        uint faceIdx = 0;
         // Create mesh from faces
         for (auto& face : m_faces)
         {
-            uint32_t numVertices = face.points.size();
-            if (numVertices < 3)
-                continue;
-            uint32_t numIndices = (numVertices - 2) * 3;
-
-            AssetID id = InvalidAssetID;
-            if (face.side->material)
-                id = face.side->material->id;
-
-            uint32_t meshIdx = std::distance(uniqueMaterials.begin(), uniqueMaterials.find(id));
-            auto& mesh = m_meshes[meshIdx];
-            mesh.material = face.side->material;
-            mesh.brush = this;
-            uint32_t startingVertex = mesh.vertices.size();
-            uint32_t startingIndex = mesh.indices.size();
-            mesh.vertices.reserve(startingVertex + numVertices);
-            mesh.indices.reserve(startingIndex + numIndices);
-            for (uint32_t i = 0; i < numVertices; i++)
+            if (m_displacement)
             {
-                vec3 pos = face.points[i];
+                if (!face.side->disp.has_value())
+                    continue;
 
-                float mappingWidth = 32.0f;
-                float mappingHeight = 32.0f;
-                if (face.side->material != nullptr && face.side->material->baseTexture != nullptr && face.side->material->baseTexture->texture != nullptr)
+                DispInfo& disp = *(face.side->disp);
+
+                if (face.points.size() <= 2)
+                    continue;
+                
+                // Compute the bounds
+                for (uint i = 0; i < face.points.size(); i++)
                 {
-                    D3D11_TEXTURE2D_DESC desc;
-                    face.side->material->baseTexture->texture->GetDesc(&desc);
+                    vec3 pos = face.points[i];
 
-                    mappingWidth = float(desc.Width);
-                    mappingHeight = float(desc.Height);
+                    m_bounds = m_bounds
+                        ? AABB::Extend(*m_bounds, pos)
+                        : AABB{ pos, pos };
                 }
 
-                float u = glm::dot(glm::vec3(face.side->textureAxes[0].xyz), glm::vec3(pos)) / face.side->scale[0] + face.side->textureAxes[0].w;
-                float v = glm::dot(glm::vec3(face.side->textureAxes[1].xyz), glm::vec3(pos)) / face.side->scale[1] + face.side->textureAxes[1].w;
+                // 2^n x 2^m quads, 2 tris per quad, 3 verts per tri.
+                uint numVertices = disp.verts.size();
+                int length = disp.length;
+                int quadLength = length - 1;
+                uint numIndices = (2 * quadLength * quadLength) * 3;
 
-                u = mappingWidth ? u / float(mappingWidth) : 0.0f;
-                v = mappingHeight ? v / float(mappingHeight) : 0.0f;
+                disp.UpdatePointStartIndex(face.points);
 
-                mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec2(u, v));
-                m_bounds = m_bounds
-                    ? AABB::Extend(*m_bounds, pos)
-                    : AABB{ pos, pos };
+                vec3 edgeInt[2];
+                edgeInt[0] = (face.points[(1 + disp.pointStartIndex) % 4] - face.points[(0 + disp.pointStartIndex) % 4]) / float(length - 1);
+                edgeInt[1] = (face.points[(2 + disp.pointStartIndex) % 4] - face.points[(3 + disp.pointStartIndex) % 4]) / float(length - 1);
+
+                auto& mesh = m_meshes[faceIdx];
+                mesh.material = face.side->material;
+                mesh.brush = this;
+                mesh.vertices.reserve(numVertices);
+                mesh.indices.reserve(numIndices);
+
+                for (uint y = 0; y < length; y++)
+                {
+                    vec3 endPts[2];
+                    endPts[0] = (edgeInt[0] * float(y)) + face.points[(0 + disp.pointStartIndex) % 4];
+                    endPts[1] = (edgeInt[1] * float(y)) + face.points[(3 + disp.pointStartIndex) % 4];
+
+                    vec3 seg = endPts[1] - endPts[0];
+                    vec3 segInt = seg / float(length - 1);
+
+                    for (uint x = 0; x < length; x++)
+                    {
+                        float xPercent = float(x) / float(quadLength);
+                        float yPercent = float(y) / float(quadLength);
+
+                        vec3 pos = endPts[0] + segInt * float(x);
+
+                        DispVert& vert = disp[y][x];
+
+                        // Add elevation if any
+                        pos += face.side->plane.normal * disp.elevation;
+
+                        // Apply subdivision surface offset (not typically used)
+                        pos += vert.offset;
+
+                        // Add displacement field direction (normal) scaled by distance
+                        pos += vert.normal * vert.dist;
+
+                        // TODO: UVs
+                        mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec2(xPercent, yPercent));
+                    }
+                }
+
+                for (uint y = 0; y < quadLength; y++)
+                {
+                    for (uint x = 0; x < quadLength; x++)
+                    {
+                        bool even = (y * length + x) % 2 == 0;
+                        if (even)
+                        {
+                            // 1, 2, 0 (clockwise from bottom left)
+                            mesh.indices.push_back(y * length + x);
+                            mesh.indices.push_back(y * length + x + 1);
+                            mesh.indices.push_back((y + 1) * length + x);
+
+                            // 3, 0, 2
+                            mesh.indices.push_back((y + 1) * length + x + 1);
+                            mesh.indices.push_back((y + 1) * length + x);
+                            mesh.indices.push_back(y * length + x + 1);
+                        }
+                        else
+                        {
+                            // 1, 0, 3
+                            mesh.indices.push_back((y + 1) * length + x + 1);
+                            mesh.indices.push_back((y + 1) * length + x);
+                            mesh.indices.push_back(y * length + x);
+
+                            // 3, 2, 1
+                            mesh.indices.push_back(y * length + x);
+                            mesh.indices.push_back(y * length + x + 1);
+                            mesh.indices.push_back((y + 1) * length + x + 1);
+                        }
+                    }
+                }
             }
-            // Naiive fan-ing.
-            // Should move to delaugney potentially.
-            // Need to consider perf impact of that though compared to simple approach.
-            const uint32_t numPolygons = numIndices / 3;
-            for (uint32_t i = 0; i < numPolygons; i++)
+            else // regular brush
             {
-                mesh.indices.emplace_back(startingVertex + i + 2);
-                mesh.indices.emplace_back(startingVertex + i + 1);
-                mesh.indices.emplace_back(startingVertex);
+                uint32_t numVertices = face.points.size();
+                if (numVertices < 3)
+                    continue;
+                uint32_t numIndices = (numVertices - 2) * 3;
+
+                AssetID id = InvalidAssetID;
+                if (face.side->material)
+                    id = face.side->material->id;
+
+                uint32_t meshIdx = std::distance(uniqueMaterials.begin(), uniqueMaterials.find(id));
+                auto& mesh = m_meshes[meshIdx];
+                mesh.material = face.side->material;
+                mesh.brush = this;
+                uint32_t startingVertex = mesh.vertices.size();
+                uint32_t startingIndex = mesh.indices.size();
+                mesh.vertices.reserve(startingVertex + numVertices);
+                mesh.indices.reserve(startingIndex + numIndices);
+                for (uint32_t i = 0; i < numVertices; i++)
+                {
+                    vec3 pos = face.points[i];
+
+                    float mappingWidth = 32.0f;
+                    float mappingHeight = 32.0f;
+                    if (face.side->material != nullptr && face.side->material->baseTexture != nullptr && face.side->material->baseTexture->texture != nullptr)
+                    {
+                        D3D11_TEXTURE2D_DESC desc;
+                        face.side->material->baseTexture->texture->GetDesc(&desc);
+
+                        mappingWidth = float(desc.Width);
+                        mappingHeight = float(desc.Height);
+                    }
+
+                    float u = glm::dot(glm::vec3(face.side->textureAxes[0].xyz), glm::vec3(pos)) / face.side->scale[0] + face.side->textureAxes[0].w;
+                    float v = glm::dot(glm::vec3(face.side->textureAxes[1].xyz), glm::vec3(pos)) / face.side->scale[1] + face.side->textureAxes[1].w;
+
+                    u = mappingWidth ? u / float(mappingWidth) : 0.0f;
+                    v = mappingHeight ? v / float(mappingHeight) : 0.0f;
+
+                    mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec2(u, v));
+                    m_bounds = m_bounds
+                        ? AABB::Extend(*m_bounds, pos)
+                        : AABB{ pos, pos };
+                }
+                // Naiive fan-ing.
+                // Should move to delaugney potentially.
+                // Need to consider perf impact of that though compared to simple approach.
+                const uint32_t numPolygons = numIndices / 3;
+                for (uint32_t i = 0; i < numPolygons; i++)
+                {
+                    mesh.indices.emplace_back(startingVertex + i + 2);
+                    mesh.indices.emplace_back(startingVertex + i + 1);
+                    mesh.indices.emplace_back(startingVertex);
+                }
             }
+            faceIdx++;
         }
 
         // Upload all meshes after they're complete

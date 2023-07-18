@@ -88,6 +88,8 @@ namespace chisel
 
     private:
 
+        bool m_displacement = false;
+
         std::vector<BrushMesh> m_meshes;
         std::vector<Side> m_sides;
         std::optional<AABB> m_bounds;
