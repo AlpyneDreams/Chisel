@@ -68,6 +68,7 @@ namespace chisel
             return this == &other;
         }
 
+        bool HasDisplacement() const { return m_displacement; }
         std::vector<BrushMesh>& GetMeshes() { return m_meshes; }
         const std::vector<Side>& GetSides() const { return m_sides; }
         const std::vector<Face>& GetFaces() const { return m_faces; }

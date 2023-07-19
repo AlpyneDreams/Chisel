@@ -7,6 +7,13 @@
 
 namespace chisel
 {
+    ConVar<bool> r_disp_mask_solid("r_disp_mask_solid", true, "Hide unused faces of displacement brushes", [](bool& b) {
+        for (auto& solid : Chisel.map) {
+            if (solid.HasDisplacement())
+                solid.UpdateMesh();
+        }
+    });
+
     inline void InitSideData(Side& side, Material *material)
     {
         side.material = material;
@@ -108,7 +115,7 @@ namespace chisel
         for (uint32_t i = 0; i < m_sides.size(); i++)
         {
             // Displacements: exclude unused sides
-            if (m_displacement && !m_sides[i].disp.has_value())
+            if (m_displacement && r_disp_mask_solid && !m_sides[i].disp.has_value())
                 continue;
 
             AssetID id = InvalidAssetID;
@@ -212,29 +219,18 @@ namespace chisel
         m_bounds = std::nullopt;
 
         uint faceIdx = 0;
+
+        static DispInfo dispDefault = DispInfo(0);
+
         // Create mesh from faces
         for (auto& face : m_faces)
         {
             if (m_displacement)
             {
-                if (!face.side->disp.has_value())
-                    continue;
+                DispInfo& disp = face.side->disp.has_value() ? *(face.side->disp) : dispDefault;
 
-                DispInfo& disp = *(face.side->disp);
-
-                if (face.points.size() <= 2)
-                    continue;
+                assert(face.points.size() >= 3);
                 
-                // Compute the bounds
-                for (uint i = 0; i < face.points.size(); i++)
-                {
-                    vec3 pos = face.points[i];
-
-                    m_bounds = m_bounds
-                        ? AABB::Extend(*m_bounds, pos)
-                        : AABB{ pos, pos };
-                }
-
                 // 2^n x 2^m quads, 2 tris per quad, 3 verts per tri.
                 uint numVertices = disp.verts.size();
                 int length = disp.length;
@@ -279,6 +275,11 @@ namespace chisel
 
                         // Add displacement field direction (normal) scaled by distance
                         pos += vert.normal * vert.dist;
+
+                        // Extend bounds
+                        m_bounds = m_bounds
+                            ? AABB::Extend(*m_bounds, pos)
+                            : AABB { pos, pos };
 
                         // TODO: UVs
                         mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec2(xPercent, yPercent));
