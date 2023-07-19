@@ -32,9 +32,6 @@ namespace chisel
         Gizmos.Init();
         Handles.Init();
 
-        // Load builtin textures
-        tex_White = Assets.Load<Texture>("textures/white.png");
-
         // Load editor shaders
         sh_Color    = render::Shader(r.device.ptr(), Primitives::Vertex::Layout, "color");
         cs_ObjectID = render::ComputeShader(r.device.ptr(), "objectid");

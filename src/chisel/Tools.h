@@ -35,8 +35,6 @@ namespace chisel
         render::Shader sh_Color;
         render::ComputeShader cs_ObjectID;
 
-        Texture* tex_White;
-
         // Read object ID from given selection buffer render target and update selection
         void PickObject(uint2 mouse, render::RenderTarget rt_ObjectID);
 

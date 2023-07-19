@@ -25,7 +25,11 @@ namespace chisel
     void MapRender::Start()
     {
         shader = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush");
-        missingTexture = Assets.Load<Texture>("textures/error.png");
+
+        // Load builtin textures
+        Textures.Missing = Assets.Load<Texture>("textures/error.png");
+        Textures.White = Assets.Load<Texture>("textures/white.png");
+
         Chisel.brushAllocator = std::make_unique<BrushGPUAllocator>(r);
     }
 
@@ -121,7 +125,7 @@ namespace chisel
                     //Tools.DrawSelectionOutline(&Primitives.Cube);
 
                 //r.SetShader(shader);
-                //r.SetTexture(0, Tools.tex_White);
+                //r.SetTexture(0, Textures.White);
                 //r.SetUniform("u_color", color);
                 // r.DrawMesh(&Primitives.Cube);
             }
@@ -160,7 +164,7 @@ namespace chisel
             }
         }
 
-        auto DrawMeshOnce = [&](BrushMesh* mesh, float4 color, Texture* tex = nullptr)
+        auto DrawPass = [&](BrushMesh* mesh, float4 color, Texture* tex = nullptr)
         {
             cbuffers::BrushState data;
             data.color = color;
@@ -186,7 +190,7 @@ namespace chisel
 
             if (!srv)
             {
-                srv = missingTexture->srvSRGB.ptr();
+                srv = Textures.Missing->srvSRGB.ptr();
                 pointSample = true;
             }
             if (pointSample)
@@ -209,19 +213,19 @@ namespace chisel
             {
                 if (wireframe)
                 {
-                    DrawMeshOnce(mesh, color_selection_outline);
+                    DrawPass(mesh, color_selection_outline, Textures.White);
                 }
                 else
                 {
-                    DrawMeshOnce(mesh, color_selection);
+                    DrawPass(mesh, color_selection);
                     r.ctx->RSSetState(r.Raster.Wireframe.ptr());
-                    DrawMeshOnce(mesh, color_selection_outline, Tools.tex_White);
+                    DrawPass(mesh, color_selection_outline, Textures.White);
                     r.ctx->RSSetState(r.Raster.Default.ptr());
                 }
             }
             else
             {
-                DrawMeshOnce(mesh, Colors.White);
+                DrawPass(mesh, Colors.White);
             }
         };
 
