@@ -620,7 +620,15 @@ namespace chisel::kv
     }
     inline KeyValuesVariant::operator bool() const
     {
-        return Get<bool>();
+        switch (m_type)
+        {
+        case Types::None:       return false;
+        case Types::Int:        return m_data.Get<int64_t>() != 0;
+        case Types::Float:      return m_data.Get<double>() != 0.0f;
+        case Types::KeyValues:  return true;
+        case Types::String:     
+        default:                return !m_str.empty();
+        }
     }
     inline KeyValuesVariant::operator float() const
     {
