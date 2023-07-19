@@ -81,7 +81,7 @@ namespace chisel
 
     void Solid::UpdateMesh()
     {
-        static std::vector<uint32_t> shouldUse;
+        static bit::bitvector shouldUse;
         static std::unordered_set<AssetID> uniqueMaterials;
 
         BrushGPUAllocator& a = *Chisel.brushAllocator;
@@ -102,9 +102,8 @@ namespace chisel
         m_meshes.reserve(m_sides.size());
         m_faces.clear();
         m_faces.reserve(m_sides.size());
-        const uint32_t maxSideDwords = (m_sides.size() + (32 - 1)) / 32;
-        shouldUse.clear();
-        shouldUse.resize(maxSideDwords);
+        shouldUse.clearAll();
+        shouldUse.ensureSize(m_sides.size());
 
         for (uint32_t i = 0; i < m_sides.size(); i++)
         {
@@ -121,11 +120,11 @@ namespace chisel
             float dist0 = m_sides[i].plane.Dist();
             if (normal0 == glm::vec3(0.0f))
             {
-                shouldUse[i / 32u] &= ~(1u << (i % 32));
+                shouldUse.set(i, false);
                 continue;
             }
 
-            shouldUse[i / 32u] |= 1u << (i % 32);
+            shouldUse.set(i, true);
             for (uint32_t j = 0; j < i; j++)
             {
                 glm::vec3 normal1 = m_sides[j].plane.normal;
@@ -133,18 +132,18 @@ namespace chisel
 
                 if (glm::dot(normal0, normal1) > 0.999f && (fabsf(dist0 - dist1) < 0.01f))
                 {
-                    shouldUse[j / 32u] &= ~(1u << (j % 32));
+                    shouldUse.set(j, false);
                     break;
                 }
             }
         }
 
         // Convert from sides as planes to faces.
-        for (uint32_t i = 0; i < maxSideDwords; i++)
+        for (uint32_t i = 0; i < shouldUse.dwordCount(); i++)
         {
-            for (uint32_t mask = shouldUse[i]; mask; mask &= mask - 1)
+            for (uint32_t idx : bit::BitMask(shouldUse.dword(i)))
             {
-                uint32_t sideIdx = i * 32 + bit::tzcnt(mask);
+                uint32_t sideIdx = i * 32 + idx;
 
                 Side& side = m_sides[sideIdx];
 
