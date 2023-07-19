@@ -102,8 +102,9 @@ namespace chisel
         m_meshes.reserve(m_sides.size());
         m_faces.clear();
         m_faces.reserve(m_sides.size());
+        const uint32_t maxSideDwords = (m_sides.size() + (32 - 1)) / 32;
         shouldUse.clear();
-        shouldUse.resize(m_sides.size());
+        shouldUse.resize(maxSideDwords);
 
         for (uint32_t i = 0; i < m_sides.size(); i++)
         {
@@ -139,7 +140,7 @@ namespace chisel
         }
 
         // Convert from sides as planes to faces.
-        for (uint32_t i = 0; i < m_sides.size(); i++)
+        for (uint32_t i = 0; i < maxSideDwords; i++)
         {
             for (uint32_t mask = shouldUse[i]; mask; mask &= mask - 1)
             {
