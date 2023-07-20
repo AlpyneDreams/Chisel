@@ -23,9 +23,9 @@ namespace chisel
 
         static void ClassnamePicker(std::string* classname, bool solids = false, const char* label = nullptr);
 
-        Texture defaultIcons[4];
-        Texture* defaultIcon = &defaultIcons[1];
-        Texture* defaultIconBrush;
+        Rc<Texture> defaultIcons[4];
+        uint32_t defaultIconIndex = 1;
+        Rc<Texture> defaultIconBrush;
 
         void BeginRow(const FGD::Var& var, Entity* ent);
         void VarLabel(const char* name, const char* desc = nullptr, const char* keyname = nullptr);

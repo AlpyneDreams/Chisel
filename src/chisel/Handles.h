@@ -19,8 +19,7 @@ namespace chisel
     {
         struct GridVertex;
     private:
-        static inline Mesh grid;
-        static std::vector<GridVertex> gridVertices;
+        Rc<Mesh> grid;
         render::Shader sh_Grid;
 
     public:

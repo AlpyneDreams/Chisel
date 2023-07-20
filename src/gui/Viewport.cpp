@@ -24,7 +24,7 @@ namespace chisel
         rt_SceneView = Tools.rctx.CreateRenderTarget(width, height);
         ds_SceneView = Tools.rctx.CreateDepthStencil(width, height);
         rt_ObjectID  = Tools.rctx.CreateRenderTarget(width, height, DXGI_FORMAT_R32_UINT);
-        camera.renderTarget = &rt_SceneView;
+        camera.renderTarget = rt_SceneView;
     }
 
     void Viewport::Render()
@@ -34,7 +34,7 @@ namespace chisel
 
     void* Viewport::GetMainTexture()
     {
-        return GetTexture(drawMode).srvLinear.ptr();
+        return GetTexture(drawMode)->srvLinear.ptr();
     }
 
     void Viewport::OnClick(uint2 mouse)
@@ -184,7 +184,7 @@ namespace chisel
                                 bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
                                 if (!degenerate)
                                 {
-                                    auto& cube = map.AddCube(Chisel.activeMaterial, mtx, size);
+                                    auto& cube = map.AddCube(Chisel.activeMaterial.ptr(), mtx, size);
                                     Selection.Clear();
                                     Selection.Select(&cube);
                                 }
@@ -302,13 +302,13 @@ namespace chisel
         ImGui::Spacing();
     }
 
-    Texture Viewport::GetTexture(Viewport::DrawMode mode)
+    Texture* Viewport::GetTexture(Viewport::DrawMode mode)
     {
         switch (mode) {
             default:
             case DrawMode::Shaded:
             case DrawMode::Wireframe:
-                return rt_SceneView;
+                return rt_SceneView.ptr();
 #if 0
             case DrawMode::Depth:
                 return rt_SceneView->GetDepthTexture();

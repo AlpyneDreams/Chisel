@@ -9,9 +9,9 @@ namespace chisel
     inline struct Primitives
     {
         struct Vertex;
-        static inline Mesh& Cube   = *Assets.Load<Mesh>("models/cube.obj");
-        static inline Mesh& Teapot = *Assets.Load<Mesh>("models/teapot.obj");
-        static inline Mesh& Plane  = *Assets.Load<Mesh>("models/plane.obj");
+        static inline Rc<Mesh> Cube   = Assets.Load<Mesh>("models/cube.obj");
+        static inline Rc<Mesh> Teapot = Assets.Load<Mesh>("models/teapot.obj");
+        static inline Rc<Mesh> Plane  = Assets.Load<Mesh>("models/plane.obj");
 
         Com<ID3D11Buffer> Quad;
         Com<ID3D11Buffer> Line;

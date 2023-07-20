@@ -11,6 +11,8 @@
 
 namespace chisel
 {
+    // TODO: Don't store all the vertex data on the CPU here.
+    // Just dump it when we dont need it.
     struct Mesh : Asset
     {
         struct Group {
@@ -21,7 +23,7 @@ namespace chisel
         std::vector<Group> groups;
         bool uploaded = false;
 
-        Mesh() {}
+        using Asset::Asset;
 
         Group& AddGroup() {
             return groups.emplace_back();

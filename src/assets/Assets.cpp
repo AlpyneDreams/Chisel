@@ -20,18 +20,18 @@ namespace chisel
     {
         // Delete all remaining assets on the heap
         std::vector<Asset*> assets;
-        for (auto& [path, asset] : AssetDB)
+        for (auto& [path, asset] : Asset::AssetDB)
             assets.push_back(asset);
         for (Asset* asset : assets)
             delete asset;
-        AssetDB.clear();
+        Asset::AssetDB.clear();
     }
 
 // Asset Loading //
 
     bool Assets::IsLoaded(const Path& path)
     {
-        return AssetDB.contains(path);
+        return Asset::AssetDB.contains(path);
     }
 
     std::optional<Buffer> Assets::ReadFile(const Path& path)
@@ -94,10 +94,12 @@ namespace chisel
         }
 
         if (!std::filesystem::is_directory(p))
+        {
             if (str::toLower(path.ext()) == ".vpk")
                 return AddPakFile(path);
             else
                 return Console.Error("[Assets] Search path '{}' is not a directory", path);
+        }
 
         searchPaths.push_back(path);
     }

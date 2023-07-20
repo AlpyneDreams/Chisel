@@ -32,8 +32,8 @@ namespace chisel
         } Shaders;
 
         struct DefaultTextures {
-            Texture* Missing;
-            Texture* White;
+            Rc<Texture> Missing;
+            Rc<Texture> White;
         } Textures;
 
         MapRender();

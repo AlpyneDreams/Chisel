@@ -18,6 +18,8 @@ namespace chisel
 {
     struct Texture : Asset
     {
+        using Asset::Asset;
+
         Com<ID3D11Texture2D>          texture;
         Com<ID3D11ShaderResourceView> srvLinear;
         Com<ID3D11ShaderResourceView> srvSRGB;
@@ -33,8 +35,15 @@ namespace chisel
 
     struct Material : Asset
     {
-        Texture* baseTexture;
-        Texture* baseTextures[3]; // Additional layers
+        Material(const fs::Path& path)
+            : Asset(path)
+        {
+            translucent = 0;
+            alphatest = 0;
+        }
+
+        Rc<Texture> baseTexture;
+        Rc<Texture> baseTextures[3]; // Additional layers
         bool translucent : 1;
         bool alphatest   : 1;
     };
@@ -44,11 +53,15 @@ namespace chisel::render
 {
     struct RenderTarget : public Texture
     {
+        using Texture::Texture;
+
         Com<ID3D11RenderTargetView> rtv;
     };
 
     struct DepthStencil : public Texture
     {
+        using Texture::Texture;
+
         Com<ID3D11DepthStencilView> dsv;
     };
 
@@ -98,8 +111,8 @@ namespace chisel::render
         void BeginFrame();
         void EndFrame();
 
-        RenderTarget CreateRenderTarget(uint width, uint height, DXGI_FORMAT format = DXGI_FORMAT_B8G8R8X8_UNORM);
-        DepthStencil CreateDepthStencil(uint width, uint height, DXGI_FORMAT format = DXGI_FORMAT_D32_FLOAT);
+        Rc<RenderTarget> CreateRenderTarget(uint width, uint height, DXGI_FORMAT format = DXGI_FORMAT_B8G8R8X8_UNORM);
+        Rc<DepthStencil> CreateDepthStencil(uint width, uint height, DXGI_FORMAT format = DXGI_FORMAT_D32_FLOAT);
 
         void CreateBlendState(const BlendState& state);
         void SetBlendState(const BlendState& state, vec4 factor = vec4(1), uint32 sampleMask = 0xFFFFFFFF);
@@ -109,6 +122,7 @@ namespace chisel::render
 
         // Compatability with existing Mesh class
         void DrawMesh(Mesh* mesh);
+        void UploadMesh(Mesh* mesh);
 
         template <class T>
         ComputeShaderBuffer CreateCSOutputBuffer() { return CreateCSOutputBuffer(uint(sizeof(T))); }

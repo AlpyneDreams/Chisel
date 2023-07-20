@@ -241,9 +241,10 @@ namespace chisel::render
         swapchain->Present(0, 0);
     }
 
-    RenderTarget RenderContext::CreateRenderTarget(uint width, uint height, DXGI_FORMAT format)
+    Rc<RenderTarget> RenderContext::CreateRenderTarget(uint width, uint height, DXGI_FORMAT format)
     {
-        RenderTarget rt;
+        Rc<RenderTarget> obj = new RenderTarget();
+        RenderTarget& rt = *obj;
         D3D11_TEXTURE2D_DESC rtDesc =
         {
             .Width = width,
@@ -294,12 +295,13 @@ namespace chisel::render
         };
         device->CreateShaderResourceView(rt.texture.ptr(), &srvDescLinear, &rt.srvLinear);
         device->CreateShaderResourceView(rt.texture.ptr(), &srvDescSRGB, &rt.srvSRGB);
-        return rt;
+        return obj;
     }
 
-    DepthStencil RenderContext::CreateDepthStencil(uint width, uint height, DXGI_FORMAT format)
+    Rc<DepthStencil> RenderContext::CreateDepthStencil(uint width, uint height, DXGI_FORMAT format)
     {
-        DepthStencil ds;
+        Rc<DepthStencil> obj = new DepthStencil();
+        DepthStencil& ds = *obj;
         D3D11_TEXTURE2D_DESC dsDesc =
         {
             .Width = width,
@@ -319,7 +321,7 @@ namespace chisel::render
         };
         device->CreateTexture2D(&dsDesc, nullptr, &ds.texture);
         device->CreateDepthStencilView(ds.texture.ptr(), nullptr, &ds.dsv);
-        return ds;
+        return obj;
     }
 
     void RenderContext::CreateBlendState(const BlendState& state)
@@ -501,28 +503,33 @@ namespace chisel::render
 
     void RenderContext::DrawMesh(Mesh* mesh)
     {
-        if (!mesh->uploaded) {
-            for (auto& group : mesh->groups) {
-                D3D11_BUFFER_DESC desc = {};
-                desc.ByteWidth  = group.vertices.Size();
-                desc.Usage      = D3D11_USAGE_DEFAULT;
-                desc.BindFlags  = D3D11_BIND_VERTEX_BUFFER;
-
-                D3D11_SUBRESOURCE_DATA data = {};
-                data.pSysMem    = group.vertices.pointer;
-
-                HRESULT hr = device->CreateBuffer(&desc, &data, (ID3D11Buffer**)&group.vertices.handle);
-                if (FAILED(hr)) {
-                    Console.Error("[D3D11] Failed to create vertex buffer");
-                    return;
-                }
-            }
-            mesh->uploaded = true;
-        }
+        assert(mesh->uploaded);
         uint strides[] = {(uint)mesh->groups[0].vertices.Stride()};
         uint offsets[] = {0};
         ctx->IASetVertexBuffers(0, 1, (ID3D11Buffer**)&mesh->groups[0].vertices.handle, strides, offsets);
         ctx->Draw(mesh->groups[0].vertices.count, 0);
+    }
+
+    void RenderContext::UploadMesh(Mesh* mesh)
+    {
+        mesh->uploaded = false;
+
+        for (auto& group : mesh->groups) {
+            D3D11_BUFFER_DESC desc = {};
+            desc.ByteWidth  = group.vertices.Size();
+            desc.Usage      = D3D11_USAGE_DEFAULT;
+            desc.BindFlags  = D3D11_BIND_VERTEX_BUFFER;
+
+            D3D11_SUBRESOURCE_DATA data = {};
+            data.pSysMem    = group.vertices.pointer;
+
+            HRESULT hr = device->CreateBuffer(&desc, &data, (ID3D11Buffer**)&group.vertices.handle);
+            if (FAILED(hr)) {
+                Console.Error("[D3D11] Failed to create vertex buffer");
+                return;
+            }
+        }
+        mesh->uploaded = true;
     }
 
     //--------------------------------------------------

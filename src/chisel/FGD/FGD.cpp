@@ -151,7 +151,7 @@ namespace chisel
                         fs::Path path = fs::Path("materials") / ParseString();
                         path.setExt(".png");
                         cls.texture = Assets.Load<Texture>(path);
-                        if (!cls.texture) {
+                        if (cls.texture == nullptr) {
                             path.setExt(".vtf");
                             cls.texture = Assets.Load<Texture>(path);
                         }

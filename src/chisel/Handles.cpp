@@ -23,8 +23,6 @@ namespace chisel
     };
     static_assert(sizeof(Handles::GridVertex) == sizeof(float) * 4);
 
-    std::vector<Handles::GridVertex> Handles::gridVertices;
-
     //--------------------------------------------------
     //  ImGuizmo
     //--------------------------------------------------
@@ -163,7 +161,7 @@ namespace chisel
 
     void Handles::DrawPoint(vec3 pos, bool depthTest)
     {
-        Gizmos.DrawIcon(pos, Gizmos.icnHandle, Colors.White, 0, vec3(16.f), depthTest);
+        Gizmos.DrawIcon(pos, Gizmos.icnHandle.ptr(), Colors.White, 0, vec3(16.f), depthTest);
     }
 
     //--------------------------------------------------
@@ -218,7 +216,7 @@ namespace chisel
                 r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
                 r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
 
-                r.DrawMesh(&grid);
+                r.DrawMesh(grid.ptr());
             }
         }
 
@@ -230,6 +228,17 @@ namespace chisel
 
     Handles::Handles()
     {
+    }
+
+    void Handles::Init()
+    {
+        auto& r = Tools.rctx;
+
+        sh_Grid = render::Shader(Tools.rctx.device.ptr(), GridVertex::Layout, "grid");
+
+        std::vector<Handles::GridVertex> gridVertices;
+        grid = new Mesh();
+
         int radius = gridChunkSize / 2;
         int gridMajor = 8;
         gridVertices.resize((gridChunkSize + 1) * 4);
@@ -247,15 +256,12 @@ namespace chisel
             gridVertices[i+1] = {vec3(+radius, z, 0), z % gridMajor == 0 ? 1.f : 0.f};
         }
 
-        auto& g = grid.AddGroup();
+        auto& g = grid->AddGroup();
         g.vertices.layout.Add<float>(3, VertexAttribute::Position);
         g.vertices.layout.Add<float>(1, VertexAttribute::TexCoord);
         g.vertices.pointer = &gridVertices[0];
         g.vertices.count = gridVertices.size();
-    }
 
-    void Handles::Init()
-    {
-        sh_Grid = render::Shader(Tools.rctx.device.ptr(), GridVertex::Layout, "grid");
+        r.UploadMesh(grid.ptr());
     }
 }

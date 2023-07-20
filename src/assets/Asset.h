@@ -2,46 +2,50 @@
 
 #include "common/Common.h"
 #include "common/Path.h"
+#include "common/Rc.h"
 #include <unordered_map>
 #include <memory>
+#include <cassert>
 
 namespace chisel
 {
+    struct Asset;
     using AssetID = uint;
     static constexpr AssetID InvalidAssetID = 0;
-    using AssetTable = std::unordered_map<fs::Path, struct Asset*>;
 
-    struct Asset
+    struct Asset : public RcObject
     {
-        using Path = fs::Path;
+        using AssetTable = std::unordered_map<fs::Path, Asset*>;
 
         AssetID id = ++s_NextID;
 
-        virtual ~Asset()
+        Asset(const fs::Path& path = "")
         {
-            if (AssetPaths.contains(id))
+            if (!path.empty())
             {
-                AssetDB.erase(AssetPaths[id]);
-                AssetPaths.erase(id);
+                auto res = AssetDB.insert(std::make_pair<fs::Path, Asset*>(fs::Path(path), this));
+                assert(res.second);
+                m_path = &res.first->first;
             }
         }
 
-        const Path& GetPath() const
+        virtual ~Asset()
         {
-            return AssetPaths.contains(id) ? AssetPaths.at(id) : nullPath;
+            if (m_path)
+                AssetDB.erase(*m_path);
+        }
+
+        const fs::Path& GetPath() const
+        {
+            return *m_path;
         }
 
     private:
+        const fs::Path* m_path = nullptr;
+
         friend struct Assets;
 
-        void SetPath(const Path& p)
-        {
-            AssetDB[p] = this;
-            AssetPaths[id] = p;
-        }
-
         static inline AssetTable AssetDB;
-        static inline std::unordered_map<AssetID, Path> AssetPaths;
         static inline AssetID s_NextID = 0;
 
         static inline const fs::Path nullPath = fs::Path();

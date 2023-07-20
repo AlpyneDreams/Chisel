@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <map>
 #include <string>
-
 #include "common/Hash.h"
 #include "math/Math.h"
+#include "render/Render.h"
 
 namespace chisel
 {
@@ -148,7 +148,7 @@ namespace chisel
             Dict<InputOutput> outputs;
             List<Class*> bases;
             List<Helper> helpers;
-            Texture* texture = nullptr;
+            Rc<Texture> texture;
             int3 bbox[2] = {int3(-8, -8, -8), int3(8, 8, 8)};
             int3 color = int3(255, 255, 255);
 

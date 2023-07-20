@@ -24,7 +24,7 @@ namespace chisel
         float far  = 16384.f;
 
         // If not null then camera only renders to this texture
-        render::RenderTarget* renderTarget;
+        Rc<render::RenderTarget> renderTarget;
 
         // TODO: Move all of this stuff to Transform
 
@@ -110,7 +110,7 @@ namespace chisel
         float AspectRatio()
         {
             vec2 size;
-            if (renderTarget) {
+            if (renderTarget != nullptr) {
                 size = renderTarget->GetSize();
             } else {
                 size = Window::main->GetSize();

@@ -4,7 +4,7 @@
 
 namespace chisel
 {
-    static Texture* LoadVTF(std::string_view name)
+    static Rc<Texture> LoadVTF(std::string_view name)
     {
         std::string val = std::string((std::string_view)name);
 
@@ -13,11 +13,8 @@ namespace chisel
             val = "materials/" + val;
         if (!val.ends_with(".vtf"))
             val += ".vtf";
-        Texture* tex = Assets.Load<Texture>(val);
-        if (!tex) // TODO: Use MapRender.Textures.Missing
-            return Assets.Load<Texture>("textures/error.png");
-        else
-            return tex;
+
+        return Assets.Load<Texture>(val);
     }
 
     static AssetLoader <Material, FixedString(".VMT")> VMTLoader = [](Material& mat, const Buffer& data)
@@ -34,8 +31,6 @@ namespace chisel
 
         if (auto& basetexture = kv["$basetexture"])
             mat.baseTexture = LoadVTF((std::string_view)basetexture);
-        else // TODO: Use MapRender.Textures.Missing
-            mat.baseTexture = Assets.Load<Texture>("textures/error.png");
 
         if (auto& basetexture2 = kv["$basetexture2"])
             mat.baseTextures[0] = LoadVTF((std::string_view)basetexture2);

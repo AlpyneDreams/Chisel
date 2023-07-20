@@ -13,12 +13,12 @@ namespace chisel
     {
         std::string path;
         std::string_view name;
-        T* thing = nullptr;
+        Rc<T> thing;
         bool triedToLoad = false;
 
         void Load()
         {
-            if (!thing && !triedToLoad)
+            if (thing == nullptr && !triedToLoad)
             {
                 thing = Assets.Load<T>(path);
                 triedToLoad = true;

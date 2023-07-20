@@ -349,7 +349,7 @@ namespace chisel
             {
                 yyjson_mut_val* side_val = yyjson_mut_arr_add_obj(doc, side_arr);
 
-                const char* materialName = side.material ? (const char*)side.material->GetPath() : "DEFAULT";
+                const char* materialName = side.material != nullptr ? (const char*)side.material->GetPath() : "DEFAULT";
 
                 yyjson_mut_obj_add_str(doc, side_val, "material", materialName);
 

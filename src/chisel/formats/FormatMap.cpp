@@ -58,7 +58,7 @@ namespace chisel
             {
                 assert(face.points.size() >= 3);
 
-                std::string_view materialName = face.side->material ? (const char*)face.side->material->GetPath() : "DEFAULT";
+                std::string_view materialName = face.side->material != nullptr ? (const char*)face.side->material->GetPath() : "DEFAULT";
                 if (materialName.starts_with("materials/") || materialName.starts_with("materials\\"))
                     materialName = materialName.substr(10);
                 if (materialName.ends_with(".vmt"))

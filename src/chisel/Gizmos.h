@@ -10,8 +10,8 @@ namespace chisel
 {
     inline struct Gizmos
     {
-        static inline Texture* icnObsolete;
-        static inline Texture* icnHandle;
+        static inline Rc<Texture> icnObsolete;
+        static inline Rc<Texture> icnHandle;
         static inline render::Shader sh_Sprite;
 
         void DrawIcon(vec3 pos, Texture* icon, Color color = Colors.White, SelectionID selection = 0, vec3 size = vec3(32.0f), bool depthTest = true);

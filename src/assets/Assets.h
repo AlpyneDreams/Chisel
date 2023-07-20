@@ -27,8 +27,8 @@ namespace chisel
 
         bool IsLoaded(const Path& path);
 
-        template <class T>
-        T* Load(const Path& path);
+        template <typename T>
+        Rc<T> Load(const Path& path);
 
         std::optional<Buffer> ReadFile(const Path& path);
         std::optional<Buffer> ReadLooseFile(const Path& path);
@@ -47,16 +47,14 @@ namespace chisel
     private:
         std::list<Path> searchPaths;
         std::list<std::unique_ptr<libvpk::VPKSet>> pakFiles;
-
-        static inline AssetTable& AssetDB = Asset::AssetDB;
     } Assets;
 
-    template <class T>
-    inline T* Assets::Load(const Path& path)
+    template <typename T>
+    inline Rc<T> Assets::Load(const Path& path)
     {
         // Cache hit
         if (IsLoaded(path)) [[likely]]
-            return (T*)AssetDB[path];
+            return Rc<T>(static_cast<T*>(T::AssetDB[path]));
 
         // Lookup file extension
         auto* loader = AssetLoader<T>::ForExtension(path.ext());
@@ -71,13 +69,12 @@ namespace chisel
             return nullptr;
 
         // Create the asset
-        T* ptr = new T();
-        ptr->SetPath(path);
+        Rc<T> asset = new T(path);
 
         // Attempt to load asset for first time
         try
         {
-            loader->Load(*ptr, *data);
+            loader->Load(*asset.ptr(), *data);
         }
         catch (std::exception& err)
         {
@@ -86,7 +83,7 @@ namespace chisel
             return nullptr;
         }
 
-        return ptr;
+        return asset;
     }
 
     template <typename T>

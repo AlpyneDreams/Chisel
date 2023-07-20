@@ -24,7 +24,7 @@ namespace chisel
         Space       transformSpace = Space::World;
         SelectMode  selectMode     = SelectMode::Groups;
 
-        Material* activeMaterial   = nullptr;
+        Rc<Material> activeMaterial   = nullptr;
 
         // TODO: Store tool properties per-mapdoc
         struct EntTool {

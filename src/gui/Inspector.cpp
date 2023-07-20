@@ -34,10 +34,10 @@ namespace chisel
 
     Inspector::Inspector() : GUI::Window(ICON_MC_INFORMATION, "Inspector", 512, 512, true, ImGuiWindowFlags_MenuBar)
     {
-        defaultIcons[0] = *Assets.Load<Texture>("textures/ui/entity.png");
-        defaultIcons[1] = *Assets.Load<Texture>("textures/ui/entity2.png");
-        defaultIcons[2] = *Assets.Load<Texture>("textures/ui/entity3.png");
-        defaultIcons[3] = *Assets.Load<Texture>("textures/ui/entity4.png");
+        defaultIcons[0] = Assets.Load<Texture>("textures/ui/entity.png");
+        defaultIcons[1] = Assets.Load<Texture>("textures/ui/entity2.png");
+        defaultIcons[2] = Assets.Load<Texture>("textures/ui/entity3.png");
+        defaultIcons[3] = Assets.Load<Texture>("textures/ui/entity4.png");
         defaultIconBrush = Assets.Load<Texture>("textures/ui/cube.png");
     }
 
@@ -97,15 +97,17 @@ namespace chisel
         ImVec2 endPos = ImVec2(screenPos.x + iconSize, screenPos.y + iconSize);
         ImVec2 cursorPos = ImGui::GetCursorPos();
 
+        Texture* defaultIcon = defaultIcons[defaultIconIndex].ptr();
+
         // Draw entity icon
-        Texture* tex = cls.texture;
-        if (!tex) {
-            tex = cls.type == FGD::SolidClass ? defaultIconBrush : defaultIcon;
+        Texture* tex = cls.texture.ptr();
+        if (tex == nullptr) {
+            tex = cls.type == FGD::SolidClass ? defaultIconBrush.ptr() : defaultIcon;
             hasDefaultIcon = true;
         }
         if (tex) {
             ImGui::GetWindowDrawList()->AddImage(
-                (cls.texture ? cls.texture : defaultIcon)->srvLinear.ptr(),
+                (cls.texture.ptr() ? cls.texture.ptr() : defaultIcon)->srvLinear.ptr(),
                 screenPos, endPos,
                 ImVec2(0, 0), ImVec2(1, 1)
             );
@@ -113,7 +115,7 @@ namespace chisel
 
         // Cycle light bulb states :v
         if (ImGui::InvisibleButton("Icon", {iconSize, iconSize}) && hasDefaultIcon)
-            defaultIcon = defaultIcon == (&defaultIcons[3]) ? &defaultIcons[0] : defaultIcon+1;
+            defaultIconIndex = (defaultIconIndex + 1) % 4;
 
         // If icon is hovered, show help text
         if (ImGui::IsItemHovered())

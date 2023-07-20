@@ -13,8 +13,22 @@ namespace chisel::fs
     public:
         Path(auto... args) : m_path(args...), m_text(m_path.string()) {}
 
+        Path(const Path& other)
+        {
+            m_path = other.m_path;
+            m_text = other.m_text;
+        }
+
+        Path(Path&& other)
+        {
+            m_path = std::move(other.m_path);
+            m_text = std::move(other.m_text);
+        }
+
         Path dirname() const { return m_path.parent_path(); }
         Path ext() const { return m_path.extension(); }
+
+        bool empty() const { return m_text.empty(); }
 
         Path& setExt(auto ext) { m_path.replace_extension(ext); m_text = m_path.string(); return *this; }
 

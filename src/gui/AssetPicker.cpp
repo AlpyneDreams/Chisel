@@ -66,7 +66,7 @@ namespace chisel
                     auto& material = m_materials[currentAsset];
                     material.Load();
 
-                    if (material.thing && material.thing->baseTexture && material.thing->baseTexture->srvLinear != nullptr)
+                    if (material.thing != nullptr && material.thing->baseTexture != nullptr && material.thing->baseTexture->srvLinear != nullptr)
                     {
                         ImGui::SetCursorPos(basePos);
 

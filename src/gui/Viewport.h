@@ -21,9 +21,9 @@ namespace chisel
         bool  draggingBlock  = false;
         vec3  dragStartPos   = vec3(0.f);
 
-        render::RenderTarget rt_SceneView;
-        render::DepthStencil ds_SceneView;
-        render::RenderTarget rt_ObjectID;
+        Rc<render::RenderTarget> rt_SceneView;
+        Rc<render::DepthStencil> ds_SceneView;
+        Rc<render::RenderTarget> rt_ObjectID;
 
     // Rendering //
         void  Render() override;
@@ -46,6 +46,6 @@ namespace chisel
 
         DrawMode drawMode = DrawMode::Shaded;
 
-        Texture GetTexture(DrawMode mode);
+        Texture* GetTexture(DrawMode mode);
     };
 }

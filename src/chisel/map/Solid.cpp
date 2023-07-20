@@ -125,7 +125,7 @@ namespace chisel
                 continue;
 
             AssetID id = InvalidAssetID;
-            if (m_sides[i].material)
+            if (m_sides[i].material != nullptr)
                 id = m_sides[i].material->id;
             uniqueMaterials.insert(id);
 
@@ -271,7 +271,7 @@ namespace chisel
                 edgeInt[1] = (face.points[(2 + disp.pointStartIndex) % 4] - face.points[(3 + disp.pointStartIndex) % 4]) / float(length - 1);
 
                 auto& mesh = m_meshes[faceIdx];
-                mesh.material = face.side->material;
+                mesh.material = face.side->material.ptr();
                 mesh.brush = this;
                 mesh.vertices.reserve(numVertices);
                 mesh.indices.reserve(numIndices);
@@ -354,12 +354,12 @@ namespace chisel
                 uint32_t numIndices = (numVertices - 2) * 3;
 
                 AssetID id = InvalidAssetID;
-                if (face.side->material)
+                if (face.side->material != nullptr)
                     id = face.side->material->id;
 
                 uint32_t meshIdx = std::distance(uniqueMaterials.begin(), uniqueMaterials.find(id));
                 auto& mesh = m_meshes[meshIdx];
-                mesh.material = face.side->material;
+                mesh.material = face.side->material.ptr();
                 mesh.brush = this;
                 uint32_t startingVertex = mesh.vertices.size();
                 uint32_t startingIndex = mesh.indices.size();

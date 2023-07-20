@@ -21,7 +21,7 @@ namespace chisel
     {
         Plane plane;
 
-        Material* material;
+        Rc<Material> material;
         std::array<vec4, 2> textureAxes;
         std::array<float, 2> scale { 1.0f, 1.0f };
         float rotate = 0;

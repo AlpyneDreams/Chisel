@@ -49,16 +49,16 @@ namespace chisel
         r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), data);
         r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
 
-        ID3D11RenderTargetView* rts[] = {viewport.rt_SceneView.rtv.ptr(), viewport.rt_ObjectID.rtv.ptr()};
-        r.ctx->OMSetRenderTargets(2, rts, viewport.ds_SceneView.dsv.ptr());
+        ID3D11RenderTargetView* rts[] = {viewport.rt_SceneView->rtv.ptr(), viewport.rt_ObjectID->rtv.ptr()};
+        r.ctx->OMSetRenderTargets(2, rts, viewport.ds_SceneView->dsv.ptr());
 
-        float2 size = viewport.rt_SceneView.GetSize();
+        float2 size = viewport.rt_SceneView->GetSize();
         D3D11_VIEWPORT viewrect = { 0, 0, size.x, size.y, 0.0f, 1.0f };
         r.ctx->RSSetViewports(1, &viewrect);
 
-        r.ctx->ClearRenderTargetView(viewport.rt_SceneView.rtv.ptr(), Color(0.2, 0.2, 0.2).Linear());
-        r.ctx->ClearRenderTargetView(viewport.rt_ObjectID.rtv.ptr(), Colors.Black);
-        r.ctx->ClearDepthStencilView(viewport.ds_SceneView.dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        r.ctx->ClearRenderTargetView(viewport.rt_SceneView->rtv.ptr(), Color(0.2, 0.2, 0.2).Linear());
+        r.ctx->ClearRenderTargetView(viewport.rt_ObjectID->rtv.ptr(), Colors.Black);
+        r.ctx->ClearDepthStencilView(viewport.ds_SceneView->dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         if (wireframe = viewport.drawMode == Viewport::DrawMode::Wireframe)
             r.ctx->RSSetState(r.Raster.Wireframe.ptr());
@@ -99,7 +99,7 @@ namespace chisel
             
             AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
 
-            if (cls.texture)
+            if (cls.texture != nullptr)
             {
                 if (!r_drawsprites)
                     return;
@@ -107,7 +107,7 @@ namespace chisel
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
                 Gizmos.DrawIcon(
                     origin,
-                    cls.texture ? cls.texture : Gizmos.icnObsolete,
+                    cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr(),
                     color,
                     id
                 );
@@ -136,7 +136,7 @@ namespace chisel
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
             Gizmos.DrawIcon(
                 origin,
-                Gizmos.icnObsolete,
+                Gizmos.icnObsolete.ptr(),
                 color,
                 id
             );
@@ -184,13 +184,13 @@ namespace chisel
             if (mesh->material)
             {
                 // Bind $basetexture
-                if (mesh->material->baseTexture)
+                if (mesh->material->baseTexture != nullptr)
                     srv = mesh->material->baseTexture->srvSRGB.ptr();
                 
                 // Bind additional $basetexture2+ layers
                 for (uint i = 0; i < std::size(mesh->material->baseTextures); i++)
                 {
-                    if (Texture* layer = mesh->material->baseTextures[i])
+                    if (Texture* layer = mesh->material->baseTextures[i].ptr())
                     {
                         numLayers++;
                         r.ctx->PSSetShaderResources(i+1, 1, texOverride ? &texOverride->srvSRGB : &layer->srvSRGB);
@@ -233,13 +233,13 @@ namespace chisel
             {
                 if (wireframe)
                 {
-                    DrawPass(mesh, color_selection_outline, Textures.White);
+                    DrawPass(mesh, color_selection_outline, Textures.White.ptr());
                 }
                 else
                 {
                     DrawPass(mesh, color_selection);
                     r.ctx->RSSetState(r.Raster.Wireframe.ptr());
-                    DrawPass(mesh, color_selection_outline, Textures.White);
+                    DrawPass(mesh, color_selection_outline, Textures.White.ptr());
                     r.ctx->RSSetState(r.Raster.Default.ptr());
                 }
             }
