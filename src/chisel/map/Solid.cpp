@@ -7,12 +7,16 @@
 
 namespace chisel
 {
-    ConVar<bool> r_disp_mask_solid("r_disp_mask_solid", true, "Hide unused faces of displacement brushes", [](bool& b) {
+    static auto RebuildDisplacements = [](bool& b)
+    {
         for (auto& solid : Chisel.map) {
             if (solid.HasDisplacement())
                 solid.UpdateMesh();
         }
-    });
+    };
+
+    ConVar<bool> r_displacements("r_displacements", true, "Render displacements", RebuildDisplacements);
+    ConVar<bool> r_disp_mask_solid("r_disp_mask_solid", true, "Hide unused faces of displacement brushes", RebuildDisplacements);
 
     inline void InitSideData(Side& side, Material *material)
     {
@@ -112,10 +116,12 @@ namespace chisel
         shouldUse.clearAll();
         shouldUse.ensureSize(m_sides.size());
 
+        bool displacement = r_displacements && HasDisplacement();
+
         for (uint32_t i = 0; i < m_sides.size(); i++)
         {
             // Displacements: exclude unused sides
-            if (m_displacement && r_disp_mask_solid && !m_sides[i].disp.has_value())
+            if (displacement && r_disp_mask_solid && !m_sides[i].disp.has_value())
                 continue;
 
             AssetID id = InvalidAssetID;
@@ -211,7 +217,7 @@ namespace chisel
             }
         }
 
-        if (m_displacement)
+        if (displacement)
             m_meshes.resize(m_faces.size());
         else
             m_meshes.resize(uniqueMaterials.size());
@@ -246,7 +252,7 @@ namespace chisel
                 return vec2(u, v);
             };
 
-            if (m_displacement)
+            if (displacement)
             {
                 DispInfo& disp = face.side->disp.has_value() ? *(face.side->disp) : dispDefault;
 
