@@ -240,17 +240,23 @@ namespace chisel
     static DispField1 ParseField1(kv::KeyValues& obj)
     {
         DispField1 field;
+        field.resize(obj.ChildCount());
         for (auto& [key, value] : obj)
-            field.push_back(ParseRow1(value));
+        {
+            int i = key[3] - '0';
+            field[i] = ParseRow1(value);
+        }
         return field;
     }
 
     static DispField3 ParseField3(kv::KeyValues& obj)
     {
         DispField3 field;
+        field.resize(obj.ChildCount());
         for (auto& [key, value] : obj)
         {
-            field.push_back(ParseRow3(value));
+            int i = key[3] - '0';
+            field[i] = ParseRow3(value);
         }
         return field;
     }
