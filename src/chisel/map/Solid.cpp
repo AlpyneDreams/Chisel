@@ -225,6 +225,27 @@ namespace chisel
         // Create mesh from faces
         for (auto& face : m_faces)
         {
+            auto ComputeUV = [&](vec3 pos) {
+                float mappingWidth = 32.0f;
+                float mappingHeight = 32.0f;
+                if (face.side->material != nullptr && face.side->material->baseTexture != nullptr && face.side->material->baseTexture->texture != nullptr)
+                {
+                    D3D11_TEXTURE2D_DESC desc;
+                    face.side->material->baseTexture->texture->GetDesc(&desc);
+
+                    mappingWidth = float(desc.Width);
+                    mappingHeight = float(desc.Height);
+                }
+
+                float u = glm::dot(vec3(face.side->textureAxes[0].xyz), vec3(pos)) / face.side->scale[0] + face.side->textureAxes[0].w;
+                float v = glm::dot(vec3(face.side->textureAxes[1].xyz), vec3(pos)) / face.side->scale[1] + face.side->textureAxes[1].w;
+
+                u = mappingWidth ? u / float(mappingWidth) : 0.0f;
+                v = mappingHeight ? v / float(mappingHeight) : 0.0f;
+
+                return vec2(u, v);
+            };
+
             if (m_displacement)
             {
                 DispInfo& disp = face.side->disp.has_value() ? *(face.side->disp) : dispDefault;
@@ -264,6 +285,7 @@ namespace chisel
                         float yPercent = float(y) / float(quadLength);
 
                         vec3 pos = endPts[0] + segInt * float(x);
+                        vec2 uv  = ComputeUV(pos);
 
                         DispVert& vert = disp[y][x];
 
@@ -282,7 +304,7 @@ namespace chisel
                             : AABB { pos, pos };
 
                         // TODO: UVs
-                        mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec3(xPercent, yPercent, vert.alpha / 255.f));
+                        mesh.vertices.emplace_back(pos, face.side->plane.normal, vec3(uv, vert.alpha / 255.f));
                     }
                 }
 
@@ -341,24 +363,7 @@ namespace chisel
                 {
                     vec3 pos = face.points[i];
 
-                    float mappingWidth = 32.0f;
-                    float mappingHeight = 32.0f;
-                    if (face.side->material != nullptr && face.side->material->baseTexture != nullptr && face.side->material->baseTexture->texture != nullptr)
-                    {
-                        D3D11_TEXTURE2D_DESC desc;
-                        face.side->material->baseTexture->texture->GetDesc(&desc);
-
-                        mappingWidth = float(desc.Width);
-                        mappingHeight = float(desc.Height);
-                    }
-
-                    float u = glm::dot(glm::vec3(face.side->textureAxes[0].xyz), glm::vec3(pos)) / face.side->scale[0] + face.side->textureAxes[0].w;
-                    float v = glm::dot(glm::vec3(face.side->textureAxes[1].xyz), glm::vec3(pos)) / face.side->scale[1] + face.side->textureAxes[1].w;
-
-                    u = mappingWidth ? u / float(mappingWidth) : 0.0f;
-                    v = mappingHeight ? v / float(mappingHeight) : 0.0f;
-
-                    mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec3(u, v, 0.0f));
+                    mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec3(ComputeUV(pos), 0.0f));
                     m_bounds = m_bounds
                         ? AABB::Extend(*m_bounds, pos)
                         : AABB{ pos, pos };
