@@ -12,6 +12,13 @@ namespace chisel
         out << "\"" << key << "\"" << ' ' << "\"" << value << "\"\n";
     }
 
+    static void WriteKVPair(std::ofstream& out, const std::string_view key, const char* fmt, auto... args)
+    {
+        char tmp[1024];
+        snprintf(tmp, 1024, fmt, args...);
+        out << "\"" << key << "\"" << ' ' << "\"" << tmp << "\"\n";
+    }
+
     // Writes all KV pairs in an entity, including classname and targetname
     static void WriteEntityKVPairs(std::ofstream& out, const Entity& entity)
     {
@@ -26,9 +33,7 @@ namespace chisel
         }
 
         // Write the origin
-        char originString[64];
-        snprintf(originString, sizeof(originString), "%g %g %g", entity.origin.x, entity.origin.y, entity.origin.z);
-        WriteKVPair(out, "origin", originString);
+        WriteKVPair(out, "origin", "%g %g %g", entity.origin.x, entity.origin.y, entity.origin.z);
 
         // Write targetname
         if (!entity.targetname.empty())
@@ -57,17 +62,14 @@ namespace chisel
             out << "solid\n";
             out << "{\n";
 
-            char tmp[512];
-            snprintf(tmp, sizeof(tmp), "%u", s_VMFUniqueID++);
-            WriteKVPair(out, "id", tmp);
+            WriteKVPair(out, "id", "%u", s_VMFUniqueID++);
 
             for (const Face& face : solid.GetFaces())
             {
                 out << "side\n";
                 out << "{\n";
 
-                snprintf(tmp, sizeof(tmp), "%u", s_VMFUniqueID++);
-                WriteKVPair(out, "id", tmp);
+                WriteKVPair(out, "id", "%u", s_VMFUniqueID++);
 
                 std::string_view materialName = face.side->material ? (const char*)face.side->material->GetPath() : "DEFAULT";
                 if (materialName.starts_with("materials/") || materialName.starts_with("materials\\"))
@@ -76,29 +78,41 @@ namespace chisel
                     materialName = materialName.substr(0, materialName.length() - 4);
                 WriteKVPair(out, "material", materialName);
 
-                snprintf(tmp, sizeof(tmp),
+                WriteKVPair(out, "plane",
                     "(%g %g %g) (%g %g %g) (%g %g %g)",
                     face.points[0].x, face.points[0].y, face.points[0].z,
                     face.points[1].x, face.points[1].y, face.points[1].z,
                     face.points[2].x, face.points[2].y, face.points[2].z);
-                WriteKVPair(out, "plane", tmp);
 
-                snprintf(tmp, sizeof(tmp),
+                WriteKVPair(out, "uaxis",
                     "[%g %g %g %g] %g",
                     face.side->textureAxes[0].x, face.side->textureAxes[0].y, face.side->textureAxes[0].z, face.side->textureAxes[0].w, face.side->scale[0]);
-                WriteKVPair(out, "uaxis", tmp);
 
-                snprintf(tmp, sizeof(tmp),
+                WriteKVPair(out, "vaxis",
                     "[%g %g %g %g] %g",
                     face.side->textureAxes[1].x, face.side->textureAxes[1].y, face.side->textureAxes[1].z, face.side->textureAxes[1].w, face.side->scale[1]);
-                WriteKVPair(out, "vaxis", tmp);
 
-                snprintf(tmp, sizeof(tmp), "%g", face.side->rotate);
-                WriteKVPair(out, "rotation", tmp);
-                snprintf(tmp, sizeof(tmp), "%g", face.side->lightmapScale);
-                WriteKVPair(out, "lightmapscale", tmp);
-                snprintf(tmp, sizeof(tmp), "%u", face.side->smoothing);
-                WriteKVPair(out, "smoothing_groups", tmp);
+                WriteKVPair(out, "rotation", "%g", face.side->rotate);
+                WriteKVPair(out, "lightmapscale", "%g", face.side->lightmapScale);
+                WriteKVPair(out, "smoothing_groups", "%u", face.side->smoothing);
+                
+                if (face.side->disp.has_value())
+                {
+                    out << "dispinfo\n";
+                    out << "{\n";
+
+                    WriteKVPair(out, "power", "%d", face.side->disp->power);
+                    WriteKVPair(out, "startposition", "[%g %g %g]",
+                        face.side->disp->startPos.x, face.side->disp->startPos.y, face.side->disp->startPos.z);
+                    WriteKVPair(out, "elevation", "%g", face.side->disp->elevation);
+                    WriteKVPair(out, "subdiv", "%u", face.side->disp->subdiv);
+                    WriteKVPair(out, "flags", "%u", face.side->disp->flags);
+
+                    // TODO: Displacement vertex data
+
+                    out << "}\n";
+                }
+
 
                 out << "}\n";
             }
@@ -112,9 +126,7 @@ namespace chisel
         out << "world\n";
         out << "{\n";
 
-        char tmp[64];
-        snprintf(tmp, sizeof(tmp), "%u", s_VMFUniqueID++);
-        WriteKVPair(out, "id", tmp);
+        WriteKVPair(out, "id", "%u", s_VMFUniqueID++);
 
         WriteBrushEntity(out, map);
 
@@ -401,6 +413,9 @@ namespace chisel
             }
         }
         Chisel.brushAllocator->close();
+
+        // TODO: Load cameras...
+
         return true;
     }
 
