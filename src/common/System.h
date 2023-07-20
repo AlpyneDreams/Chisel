@@ -8,7 +8,6 @@
 #include <type_traits>
 
 #include "common/Ranges.h"
-#include "common/VTable.h"
 
 namespace chisel
 {
@@ -22,15 +21,6 @@ namespace chisel
     };
 
     using SystemFunc = void(System*);
-
-    template <>
-    struct VTable<System>
-    {
-        SystemFunc* Start;
-        SystemFunc* Update;
-        SystemFunc* Tick;
-        void*       Destructor;
-    };
 
     template <class T>
     concept SystemClass = std::is_base_of_v<System, T>;
@@ -74,7 +64,6 @@ namespace chisel
         Sys& AddSystem(auto&... args)
         {
             static System nullsystem;
-            static VTable<System>& base = GetVTable(&nullsystem);
 
             auto system = std::make_shared<Sys>(args...);
             auto* sys   = system.get();
@@ -84,25 +73,17 @@ namespace chisel
             record.Update = OnUpdate.end();
             record.Tick   = OnTick.end();
 
-            VTable<System>& vt = GetVTable<System>(sys);
+            record.Start = RegisterCallback(OnStart, sys, [](System* sys) { sys->Start(); });
 
-            if (vt.Start != base.Start) {
-                record.Start = RegisterCallback(OnStart, sys, vt.Start);
-
-                // If Start() has already been called, then call
-                // it on new systems as soon as they're created.
-                if (started) {
-                    system->Start();
-                }
+            // If Start() has already been called, then call
+            // it on new systems as soon as they're created.
+            if (started) {
+                system->Start();
             }
 
-            if (vt.Update != base.Update) {
-                record.Update = RegisterCallback(OnUpdate, sys, vt.Update);
-            }
+            record.Update = RegisterCallback(OnUpdate, sys, [](System* sys) { sys->Update(); });
 
-            if (vt.Tick != base.Tick) {
-                record.Tick = RegisterCallback(OnTick, sys, vt.Tick);
-            }
+            record.Tick = RegisterCallback(OnTick, sys, [](System* sys) { sys->Tick(); });
 
             return *sys;
         }
