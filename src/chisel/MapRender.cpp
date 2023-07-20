@@ -97,7 +97,7 @@ namespace chisel
         {
             auto& cls = Chisel.fgd->classes[classname];
             
-            AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
+            AABB bounds = AABB{cls.bbox[0], cls.bbox[1]};
 
             if (cls.texture != nullptr)
             {

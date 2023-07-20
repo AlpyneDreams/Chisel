@@ -19,7 +19,7 @@ namespace chisel
     struct _UnderlyingType<T, false> { using type = T; };
 
     template <typename T>
-    using UnderlyingType = _UnderlyingType<T>::type;
+    using UnderlyingType = typename _UnderlyingType<T>::type;
 
     template <typename T>
     constexpr UnderlyingType<T> ToUnderlying(T t) { return static_cast<UnderlyingType<T>>(t); }

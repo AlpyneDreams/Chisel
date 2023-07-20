@@ -429,7 +429,7 @@ namespace chisel::render
             .ViewDimension = D3D11_UAV_DIMENSION_BUFFER,
             .Buffer = {
                 .FirstElement = 0,
-                .NumElements = size / sizeof(uint),
+                .NumElements = UINT(size / sizeof(uint)),
                 .Flags = 0,
             }
         };

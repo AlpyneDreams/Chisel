@@ -83,6 +83,7 @@ namespace chisel
     template <>
     struct Cursor<char> : BaseCursor<char>
     {
+        using BaseCursor<char>::BaseCursor;
     };
 
     template <>

@@ -310,7 +310,7 @@ namespace chisel
                             : AABB { pos, pos };
 
                         // TODO: UVs
-                        mesh.vertices.emplace_back(pos, face.side->plane.normal, vec3(uv, vert.alpha / 255.f));
+                        mesh.vertices.emplace_back(VertexSolid{pos, face.side->plane.normal, vec3(uv, vert.alpha / 255.f)});
                     }
                 }
 
@@ -369,7 +369,7 @@ namespace chisel
                 {
                     vec3 pos = face.points[i];
 
-                    mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec3(ComputeUV(pos), 0.0f));
+                    mesh.vertices.emplace_back(VertexSolid{pos, face.side->plane.normal, glm::vec3(ComputeUV(pos), 0.0f)});
                     m_bounds = m_bounds
                         ? AABB::Extend(*m_bounds, pos)
                         : AABB{ pos, pos };

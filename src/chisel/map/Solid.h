@@ -50,6 +50,15 @@ namespace chisel
 
     struct Face
     {
+        Face(Side* side, std::vector<vec3> points)
+            : side(side)
+            , points(std::move(points))
+        {}
+
+        Face(Face&& other) = default;
+        Face(const Face& other) = default;
+        Face& operator=(const Face& other) = default;
+
         Side* side;
         std::vector<vec3> points;
     };
