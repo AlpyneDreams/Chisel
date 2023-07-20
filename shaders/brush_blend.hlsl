@@ -1,6 +1,12 @@
 #include "common.hlsli"
 #include "brush.hlsli"
 
+// TODO:
+// - 4-way blend (Lightmapped_4WayBlend, MultiBlend, etc.)
+// - Blend modulation
+// - Masked blending
+// - Blending of normal maps, etc.
+
 Texture2D    s_texture  : register(t0);
 Texture2D    s_texture2 : register(t1);
 SamplerState s_sampler  : register(s0);

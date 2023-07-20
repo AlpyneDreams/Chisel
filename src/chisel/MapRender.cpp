@@ -164,7 +164,7 @@ namespace chisel
             }
         }
 
-        auto DrawPass = [&](BrushMesh* mesh, float4 color, Texture* tex = nullptr)
+        auto DrawPass = [&](BrushMesh* mesh, float4 color, Texture* texOverride = nullptr)
         {
             cbuffers::BrushState data;
             data.color = color;
@@ -193,13 +193,13 @@ namespace chisel
                     if (Texture* layer = mesh->material->baseTextures[i])
                     {
                         numLayers++;
-                        r.ctx->PSSetShaderResources(i+1, 1, &layer->srvSRGB);
+                        r.ctx->PSSetShaderResources(i+1, 1, texOverride ? &texOverride->srvSRGB : &layer->srvSRGB);
                     }
                 }
             }
             
-            if (tex)
-                srv = tex->srvSRGB.ptr();
+            if (texOverride)
+                srv = texOverride->srvSRGB.ptr();
 
             if (!srv)
             {
