@@ -42,9 +42,10 @@ namespace chisel
         }
 
         // Write all keyvalues
-        for (const auto& pair : entity.kv)
+        for (const auto& kvs : entity.kv)
         {
-            WriteKVPair(out, pair.first, pair.second);
+            for (const auto& kv : kvs.second)
+                WriteKVPair(out, kvs.first, kv);
         }
     }
 
@@ -240,17 +241,21 @@ namespace chisel
     static DispField1 ParseField1(kv::KeyValues& obj)
     {
         DispField1 field;
-        for (auto& [key, value] : obj)
-            field.push_back(ParseRow1(value));
+        for (auto& [key, values] : obj)
+        {
+            for (auto& value : values)
+                field.push_back(ParseRow1(value));
+        }
         return field;
     }
 
     static DispField3 ParseField3(kv::KeyValues& obj)
     {
         DispField3 field;
-        for (auto& [key, value] : obj)
+        for (auto& [key, values] : obj)
         {
-            field.push_back(ParseRow3(value));
+            for (auto& value : values)
+                field.push_back(ParseRow3(value));
         }
         return field;
     }
@@ -260,19 +265,17 @@ namespace chisel
     {
         std::vector<Side> sideData;
 
-        auto solids = kvWorld.FindAll("solid");
-        while (solids.first != solids.second)
+        auto& solids = kvWorld.FindAll("solid");
+        for (auto& solid : solids)
         {
-            auto& solid = solids.first->second;
             if (solid.GetType() != kv::Types::KeyValues)
                 return false;
 
             kv::KeyValues& kvSolid = (kv::KeyValues&)solid;
-            auto sides = kvSolid.FindAll("side");
+            auto& sides = kvSolid.FindAll("side");
             sideData.clear();
-            while (sides.first != sides.second)
+            for (auto& side : sides)
             {
-                auto& side = sides.first->second;
                 if (side.GetType() != kv::Types::KeyValues)
                     return false;
 
@@ -323,25 +326,21 @@ namespace chisel
                 }
 
                 sideData.emplace_back(thisSide);
-
-                sides.first++;
             }
 
             auto& brush = map.AddBrush(std::move(sideData));
             brush.UpdateMesh();
             sideData.clear();
-
-            solids.first++;
         }
         return true;
     }
 
     static bool AddEntity(Map& map, kv::KeyValues& kvEntity, std::string& matNameScratch)
     {
-        auto solids = kvEntity.FindAll("solid");
+        auto& solids = kvEntity.FindAll("solid");
         // Solid can also be the vphysics solid type.
         // Really annoying.
-        bool point = solids.first == solids.second || solids.first->second.GetType() != kv::Types::KeyValues;
+        bool point = solids.empty() || solids.front().GetType() != kv::Types::KeyValues;
         Entity* entity = nullptr;
         if (point)
         {
@@ -395,10 +394,9 @@ namespace chisel
                 return false;
             }
 
-            auto entities = kv->FindAll("entity");
-            while (entities.first != entities.second)
+            auto& entities = kv->FindAll("entity");
+            for (auto& entity : entities)
             {
-                auto& entity = entities.first->second;
                 if (entity.GetType() != kv::Types::KeyValues)
                     return false;
 
@@ -408,8 +406,6 @@ namespace chisel
                     Chisel.brushAllocator->close();
                     return false;
                 }
-
-                entities.first++;
             }
         }
         Chisel.brushAllocator->close();

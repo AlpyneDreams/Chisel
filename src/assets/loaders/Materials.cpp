@@ -27,7 +27,7 @@ namespace chisel
             return;
 
         // Get past the root member.
-        kv::KeyValues &kv = r_kv->begin()->second;
+        kv::KeyValues &kv = r_kv->begin()->second.front();
 
         if (auto& basetexture = kv["$basetexture"])
             mat.baseTexture = LoadVTF((std::string_view)basetexture);

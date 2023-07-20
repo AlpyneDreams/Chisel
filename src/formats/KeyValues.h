@@ -8,6 +8,7 @@
 #include "math/Color.h"
 
 #include <unordered_map>
+#include <list>
 #include <cstdint>
 #include <string>
 #include <cstring>
@@ -82,6 +83,11 @@ namespace chisel::kv
         KeyValuesVariant(const T& arg)
         {
             Set(arg);
+        }
+
+        KeyValuesVariant(const KeyValuesVariant& other)
+        {
+            assert(false);
         }
 
         KeyValuesVariant(KeyValuesVariant&& other)
@@ -248,7 +254,7 @@ namespace chisel::kv
                 return KeyValuesVariant::GetEmptyValue();
             }
 
-            return iter->second;
+            return iter->second.front();
         }
 
         const KeyValuesVariant& operator [] (std::string_view string) const
@@ -260,12 +266,16 @@ namespace chisel::kv
                 return KeyValuesVariant::GetEmptyValue();
             }
 
-            return iter->second;
+            return iter->second.front();
         }
 
-        auto FindAll(std::string_view string)
+        std::list<KeyValuesVariant>& FindAll(std::string_view string)
         {
-            return m_children.equal_range(std::string(string));
+            auto range = m_children.equal_range(std::string(string));
+            if (range.first == range.second)
+                return s_NothingList;
+
+            return range.first->second;
         }
 
         auto begin() { return m_children.begin(); }
@@ -285,13 +295,51 @@ namespace chisel::kv
         template <typename... Args>
         KeyValuesVariant& CreateChild(std::string_view name, Args... args)
         {
-            return m_children.emplace(std::string(name), KeyValuesVariant::Parse(std::forward<Args>(args)...))->second;
+            auto str = std::string(name);
+            auto range = m_children.equal_range(std::string(name));
+
+            if (range.first == range.second)
+            {
+                std::list<KeyValuesVariant> list;
+                KeyValuesVariant& ref = list.emplace_back(KeyValuesVariant::Parse(std::forward<Args>(args)...));
+                m_children.emplace(str, std::move(list));
+                return ref;
+            }
+            else
+                return range.first->second.emplace_back(KeyValuesVariant::Parse(std::forward<Args>(args)...));
         }
 
         template <typename T>
         KeyValuesVariant& CreateTypedChild(std::string_view name, const T& thing)
         {
-            return m_children.emplace(std::string(name), KeyValuesVariant(thing))->second;
+            auto str = std::string(name);
+            auto range = m_children.equal_range(std::string(name));
+
+            if (range.first == range.second)
+            {
+                std::list<KeyValuesVariant> list;
+                KeyValuesVariant& ref = list.emplace_back(KeyValuesVariant(thing));
+                m_children.emplace(str, std::move(list));
+                return ref;
+            }
+            else
+                return range.first->second.emplace_back(KeyValuesVariant(thing));
+        }
+
+        KeyValuesVariant& MoveChild(std::string_view name, KeyValuesVariant thing)
+        {
+            auto str = std::string(name);
+            auto range = m_children.equal_range(std::string(name));
+
+            if (range.first == range.second)
+            {
+                std::list<KeyValuesVariant> list;
+                KeyValuesVariant& ref = list.emplace_back(std::move(thing));
+                m_children.emplace(str, std::move(list));
+                return ref;
+            }
+            else
+                return range.first->second.emplace_back(std::move(thing));
         }
 
         bool empty() const { return m_children.empty(); }
@@ -310,17 +358,23 @@ namespace chisel::kv
             if (range.first == range.second)
                 return;
 
-            for (auto it = range.first; it != range.second;) {
-                if (it->first == name && it->second.GetType() == type)
+            auto& list = range.first->second;
+            for (auto it = list.begin(); it != list.end();)
+            {
+                if (it->GetType() == type)
                 {
-                    it = m_children.erase(it);
+                    it = list.erase(it);
                 }
                 else
                     it++;
             }
+
+            if (list.empty())
+                m_children.erase(range.first);
         }
     private:
         static KeyValues s_Nothing;
+        static std::list<KeyValuesVariant> s_NothingList;
 
         static std::unique_ptr<KeyValues> ParseChild(const char*& start, const char* end)
         {
@@ -363,7 +417,7 @@ namespace chisel::kv
                     if (*start == '{')
                     {
                         auto child = ParseChild(start, end);
-                        kv->m_children.emplace(key, std::move(child));
+                        kv->MoveChild(key, std::move(child));
 
                         fillingInValue = false;
                         key.clear();
@@ -413,9 +467,10 @@ namespace chisel::kv
             return kv;
         }
 
-        std::unordered_multimap<std::string, KeyValuesVariant, KVStringHash, KVStringEqual> m_children;
+        std::unordered_map<std::string, std::list<KeyValuesVariant>, KVStringHash, KVStringEqual> m_children;
     };
     inline KeyValues KeyValues::s_Nothing;
+    inline std::list<KeyValuesVariant> KeyValues::s_NothingList;
 
     inline void KeyValuesVariant::UpdateString() const
     {

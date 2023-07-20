@@ -33,9 +33,12 @@ namespace chisel
         }
 
         // Write all keyvalues
-        for (const auto& pair : entity.kv)
+        for (auto kvs : entity.kv)
         {
-            WriteKVPair(out, pair.first, pair.second);
+            for (const auto& kv : kvs.second)
+            {
+                WriteKVPair(out, kvs.first, kv);
+            }
         }
     }
 

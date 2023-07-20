@@ -328,9 +328,12 @@ namespace chisel
 
         yyjson_mut_val* kv_val = yyjson_mut_obj(doc);
         // Write all keyvalues
-        for (const auto& pair : entity.kv)
+        for (auto kvs : entity.kv)
         {
-            WriteKVPair(doc, kv_val, pair.first.c_str(), pair.second);
+            for (const auto& kv : kvs.second)
+            {
+                WriteKVPair(doc, kv_val, kvs.first.c_str(), kv);
+            }
         }
         yyjson_mut_obj_add_val(doc, val, "properties", kv_val);
     }
