@@ -9,6 +9,7 @@ chisel_src = [
     'console/ConsoleCommands.cpp',
     'assets/Assets.cpp',
     'assets/loaders/Textures.cpp',
+    'assets/loaders/Materials.cpp',
     'assets/loaders/MeshOBJ.cpp',
     windows ?
         'platform/win32/PlatformWin32.cpp' :

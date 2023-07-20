@@ -34,6 +34,7 @@ namespace chisel
     struct Material : Asset
     {
         Texture* baseTexture;
+        Texture* baseTextures[3]; // Additional layers
         bool translucent : 1;
         bool alphatest   : 1;
     };

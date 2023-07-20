@@ -24,7 +24,8 @@ namespace chisel
 
     void MapRender::Start()
     {
-        shader = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush");
+        Shaders.Brush = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush");
+        Shaders.BrushBlend = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush_blend");
 
         // Load builtin textures
         Textures.Missing = Assets.Load<Texture>("textures/error.png");
@@ -124,7 +125,7 @@ namespace chisel
                 //if (point->IsSelected())
                     //Tools.DrawSelectionOutline(&Primitives.Cube);
 
-                //r.SetShader(shader);
+                //r.SetShader(Shaders.Brush);
                 //r.SetTexture(0, Textures.White);
                 //r.SetUniform("u_color", color);
                 // r.DrawMesh(&Primitives.Cube);
@@ -142,7 +143,7 @@ namespace chisel
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
     }
-    
+
     void MapRender::DrawBrushEntity(BrushEntity& ent)
     {
         static std::vector<BrushMesh*> opaqueMeshes;
@@ -150,7 +151,6 @@ namespace chisel
         opaqueMeshes.clear();
         transMeshes.clear();
 
-        r.SetShader(shader);
         for (Solid& brush : ent)
         {
             for (auto& mesh : brush.GetMeshes())
@@ -179,10 +179,23 @@ namespace chisel
             ID3D11Buffer* buffer = Chisel.brushAllocator->buffer();
             ID3D11ShaderResourceView *srv = nullptr;
             bool pointSample = false;
+
+            uint numLayers = 1;
             if (mesh->material)
             {
+                // Bind $basetexture
                 if (mesh->material->baseTexture)
                     srv = mesh->material->baseTexture->srvSRGB.ptr();
+                
+                // Bind additional $basetexture2+ layers
+                for (uint i = 0; i < std::size(mesh->material->baseTextures); i++)
+                {
+                    if (Texture* layer = mesh->material->baseTextures[i])
+                    {
+                        numLayers++;
+                        r.ctx->PSSetShaderResources(i+1, 1, &layer->srvSRGB);
+                    }
+                }
             }
             
             if (tex)
@@ -198,6 +211,13 @@ namespace chisel
                 r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
             }
             r.ctx->PSSetShaderResources(0, 1, &srv);
+
+            // Choose shader variant
+            if (numLayers > 1)
+                r.SetShader(Shaders.BrushBlend);
+            else
+                r.SetShader(Shaders.Brush);
+
             r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
             r.ctx->IASetIndexBuffer(buffer, DXGI_FORMAT_R32_UINT, indexOffset);
             r.ctx->DrawIndexed(mesh->indices.size(), 0, 0);

@@ -25,7 +25,11 @@ namespace chisel
         Map& map = Chisel.map;
     public:
         render::RenderContext& r = Tools.rctx;
-        render::Shader shader;
+
+        struct Shaders {
+            render::Shader Brush;
+            render::Shader BrushBlend;
+        } Shaders;
 
         struct DefaultTextures {
             Texture* Missing;

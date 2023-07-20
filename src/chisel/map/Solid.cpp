@@ -282,7 +282,7 @@ namespace chisel
                             : AABB { pos, pos };
 
                         // TODO: UVs
-                        mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec2(xPercent, yPercent));
+                        mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec3(xPercent, yPercent, vert.alpha / 255.f));
                     }
                 }
 
@@ -358,7 +358,7 @@ namespace chisel
                     u = mappingWidth ? u / float(mappingWidth) : 0.0f;
                     v = mappingHeight ? v / float(mappingHeight) : 0.0f;
 
-                    mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec2(u, v));
+                    mesh.vertices.emplace_back(pos, face.side->plane.normal, glm::vec3(u, v, 0.0f));
                     m_bounds = m_bounds
                         ? AABB::Extend(*m_bounds, pos)
                         : AABB{ pos, pos };

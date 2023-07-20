@@ -9,7 +9,6 @@
 #include "render/TextureFormat.h"
 #include "common/Bit.h"
 #include "chisel/Tools.h"
-#include "formats/KeyValues.h"
 #include "libvtf-plusplus/libvtf++.hpp"
 
 #include <span>
@@ -151,36 +150,5 @@ namespace chisel
         };
         Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescLinear, &tex.srvLinear);
         Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
-    };
-
-    static AssetLoader <Material, FixedString(".VMT")> VMTLoader = [](Material& mat, const Buffer& data)
-    {
-        auto r_kv = kv::KeyValues::ParseFromUTF8(chisel::StringView(data));
-        if (!r_kv)
-            return;
-
-        if (r_kv->begin() == r_kv->end())
-            return;
-
-        // Get past the root member.
-        kv::KeyValues &kv = r_kv->begin()->second;
-
-        kv::KeyValuesVariant& basetexture = kv["$basetexture"];
-        if (basetexture.GetType() != kv::Types::None)
-        {
-            std::string val = std::string((std::string_view)basetexture);
-
-            // stupid bodge. using std string here sucks too. should just use fixed size strings of MAX_PATH on stack.
-            if (!val.starts_with("materials"))
-                val = "materials/" + val;
-            if (!val.ends_with(".vtf"))
-                val += ".vtf";
-            mat.baseTexture = Assets.Load<Texture>(val);
-        }
-        if (!mat.baseTexture) // TODO: Automatically load error texture
-            mat.baseTexture = Assets.Load<Texture>("textures/error.png");
-
-        mat.translucent = kv["$translucent"];
-        mat.alphatest = kv["$alphatest"];
     };
 }
