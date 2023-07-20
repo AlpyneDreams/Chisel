@@ -211,7 +211,7 @@ namespace chisel
                         }
                     }
 #endif
-                    Console.Warn("points: {} {} {} {}", currentWinding->points[0], currentWinding->points[1], currentWinding->points[2], currentWinding->points[3]);
+                    
                     m_faces.emplace_back(&side, std::vector<vec3>(currentWinding->points, currentWinding->points + currentWinding->count));
                 }
             }

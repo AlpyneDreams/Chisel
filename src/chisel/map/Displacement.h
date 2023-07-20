@@ -58,8 +58,6 @@ namespace chisel
                 }
             }
 
-            //Console.Warn("startPos: {} minIndex: {} points: {} {} {} {}", startPos, minIndex, points[0], points[1], points[2], points[3]);
-
             pointStartIndex = minIndex;
         }
     };
