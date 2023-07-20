@@ -291,7 +291,7 @@ namespace chisel
                     for (uint x = 0; x < quadLength; x++)
                     {
                         bool even = (y * length + x) % 2 == 0;
-                        if (even)
+                        if (!even)
                         {
                             // 1, 2, 0 (clockwise from bottom left)
                             mesh.indices.push_back(y * length + x);
