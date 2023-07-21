@@ -13,6 +13,7 @@ namespace chisel
     {
         icnObsolete = Assets.Load<Texture>("textures/ui/obsolete.png");
         icnHandle   = Assets.Load<Texture>("textures/ui/handle.png");
+        sh_Color    = render::Shader(Tools.rctx.device.ptr(), Primitives::Vertex::Layout, "color");
         sh_Sprite   = render::Shader(Tools.rctx.device.ptr(), Primitives::Vertex::Layout, "sprite");
     }
 
@@ -49,7 +50,7 @@ namespace chisel
     void Gizmos::DrawLine(vec3 start, vec3 end, Color color)
     {
         auto& r = Tools.rctx;
-        r.SetShader(Tools.sh_Color);
+        r.SetShader(sh_Color);
 
         mat4x4 mtx = glm::translate(mat4x4(1), start);
         mtx = glm::rotate(mtx, glm::orientedAngle(glm::vec3(1, 0, 0), glm::normalize(end - start), Vectors.Up), glm::vec3(0, 0, 1));
@@ -81,7 +82,7 @@ namespace chisel
             return;
 
         auto& r = Tools.rctx;
-        r.SetShader(Tools.sh_Color);
+        r.SetShader(sh_Color);
 
         cbuffers::ObjectState data;
         data.model = glm::identity<mat4x4>();

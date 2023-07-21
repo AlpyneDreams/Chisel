@@ -12,9 +12,6 @@
 
 namespace chisel
 {
-#if 0
-    extern ConVar<render::MSAA> r_msaa;
-#endif
 
     static render::RenderContext& rctx = Tools.rctx;
     static render::RenderContext& r = Tools.rctx;
@@ -33,7 +30,6 @@ namespace chisel
         Handles.Init();
 
         // Load editor shaders
-        sh_Color    = render::Shader(r.device.ptr(), Primitives::Vertex::Layout, "color");
         cs_ObjectID = render::ComputeShader(r.device.ptr(), "objectid");
         cs_ObjectID.buffers.push_back(r.CreateCSInputBuffer<uint2>());
         cs_ObjectID.buffers.push_back(r.CreateCSOutputBuffer<uint>());
@@ -158,15 +154,4 @@ namespace chisel
             });
         });
     }
-
-#if 0
-    ConVar<render::MSAA> r_msaa("r_msaa", render::MSAA::x4, "Set MSAA level", [](render::MSAA& value)
-    {
-        if (!IsValid(value))
-            value = render::MSAA::None;
-        
-        if (Tools.rt_SceneView)
-            Tools.rt_SceneView->SetMSAA(value);
-    });
-#endif
 }
