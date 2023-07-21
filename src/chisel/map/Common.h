@@ -17,6 +17,11 @@ namespace chisel
             : m_parent(parent)
         {
         }
+
+        BrushEntity *GetParent() const
+        {
+            return m_parent;
+        }
     protected:
         BrushEntity* m_parent;
     };

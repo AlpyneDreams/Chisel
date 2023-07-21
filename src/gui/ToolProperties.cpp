@@ -6,13 +6,18 @@
 
 #include <imgui.h>
 
+namespace chisel
+{
+    extern ConVar<ClipType> tool_clip_type;
+}
+
 namespace chisel::GUI
 {
     static ConVar<float> gui_tool_properties_opacity("gui_tool_properties_opacity", 0.7f, "Opacity of the tool properties window.");
 
     void ToolPropertiesWindow(Tool tool, Rect viewport, uint instance)
     {
-        if (tool != Tool::Entity && tool != Tool::Block)
+        if (tool != Tool::Entity && tool != Tool::Block && tool != Tool::Clip)
             return;
 
         ImGuiWindowFlags flags =
@@ -65,6 +70,18 @@ namespace chisel::GUI
             {
                 Inspector::ClassnamePicker(&Chisel.entTool.className, false, "Entity Type");
                 ImGui::Checkbox("Random Yaw", &Chisel.entTool.randomYaw);
+                break;
+            }
+            case Clip:
+            {
+                static const char *buttonNames[] = {
+                    "Front",
+                    "Back",
+                    "Keep Both"
+                };
+                ImGui::Text("Clipping Mode");
+                for (int i = 0; i < 3; i++)
+                    ImGui::RadioButton(buttonNames[i], (int*)&tool_clip_type.value, i);
                 break;
             }
             case Block:

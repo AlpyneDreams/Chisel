@@ -7,6 +7,10 @@ namespace chisel
         Entity, Block, Clip
     };
 
+    enum class ClipType : int {
+        Front, Back, KeepBoth
+    };
+
     enum class SelectMode {
         Groups, Objects, Solids
     };

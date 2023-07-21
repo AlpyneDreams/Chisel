@@ -11,6 +11,8 @@
 
 namespace chisel
 {
+    ConVar<ClipType> tool_clip_type("tool_clip_type", ClipType::Front, "Which clip mode we are in.");
+
     Viewport::Viewport() : View3D(ICON_MC_IMAGE_SIZE_SELECT_ACTUAL, "Viewport", 512, 512, true) {}
 
     void Viewport::Start()
@@ -168,12 +170,24 @@ namespace chisel
                         {
                             if (activeTool == Tool::Clip)
                             {
-                                Side side{ plane, Chisel.activeMaterial, 0.25f };
+                                Side sides[2] = {{ plane, Chisel.activeMaterial, 0.25f }, { plane.Inverse(), Chisel.activeMaterial, 0.25f }};
+
                                 for (Selectable* selectable : Selection)
                                 {
                                     if (Solid* solid = dynamic_cast<Solid*>(selectable))
                                     {
-                                        solid->Clip(side);
+                                        if (tool_clip_type == ClipType::KeepBoth)
+                                        {
+                                            BrushEntity *parent = solid->GetParent();
+                                            assert(parent != nullptr);
+
+                                            std::vector<Side> newSides = solid->GetSides();
+                                            newSides.emplace_back(sides[1]);
+                                            Solid& newSolid = parent->AddBrush(std::move(newSides));
+                                            Selection.Select(&newSolid);
+                                        }
+
+                                        solid->Clip(tool_clip_type == ClipType::Back ? sides[1] : sides[0]);
                                         solid->UpdateMesh();
                                     }
                                 }

@@ -21,7 +21,6 @@ namespace chisel
         Plane(vec3 a, vec3 b, vec3 c)
             : Plane(a, NormalFromPoints(a, b, c)) {}
 
-
         float SignedDistance(const vec3& point) const
         {
             return glm::dot(normal, point) + offset;
@@ -50,6 +49,11 @@ namespace chisel
         float Dist() const
         {
             return -offset;
+        }
+
+        Plane Inverse()
+        {
+            return Plane{ -normal, -offset };
         }
     };
 
