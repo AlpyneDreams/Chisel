@@ -1,5 +1,5 @@
 
-#include "Tools.h"
+#include "Engine.h"
 #include "common/Time.h"
 #include "chisel/Gizmos.h"
 #include "chisel/Handles.h"
@@ -13,10 +13,10 @@
 namespace chisel
 {
 
-    static render::RenderContext& rctx = Tools.rctx;
-    static render::RenderContext& r = Tools.rctx;
+    static render::RenderContext& rctx = Engine.rctx;
+    static render::RenderContext& r = Engine.rctx;
 
-    void Tools::Init()
+    void Engine::Init()
     {
         // Create window
         window->Create("Chisel", 1920, 1080, true, false);
@@ -36,7 +36,7 @@ namespace chisel
         cs_ObjectID.buffers[1].AddStagingBuffer(r.device.ptr());
     }
 
-    void Tools::Loop()
+    void Engine::Loop()
     {
         systems.Start();
 
@@ -95,7 +95,7 @@ namespace chisel
         }
     }
 
-    void Tools::Shutdown()
+    void Engine::Shutdown()
     {
         window->OnDetach();
         rctx.Shutdown();
@@ -103,7 +103,7 @@ namespace chisel
         Window::Shutdown();
     }
 
-    void Tools::PickObject(uint2 mouse, const Rc<render::RenderTarget>& rt_ObjectID)
+    void Engine::PickObject(uint2 mouse, const Rc<render::RenderTarget>& rt_ObjectID)
     {
         auto bufferIn = cs_ObjectID.buffers[0];
 
@@ -116,9 +116,9 @@ namespace chisel
             // Unbind render targets
             r.ctx->OMSetRenderTargets(0, nullptr, nullptr);
 
-            extern class Tools Tools;
-            auto bufferIn = Tools.cs_ObjectID.buffers[0];
-            auto bufferOut = Tools.cs_ObjectID.buffers[1];
+            extern class Engine Engine;
+            auto bufferIn = Engine.cs_ObjectID.buffers[0];
+            auto bufferOut = Engine.cs_ObjectID.buffers[1];
 
             // Bind the render target, input coords, output value
             ID3D11ShaderResourceView* srvs[] = { rt_ObjectID->srvLinear.ptr(), bufferIn.srv.ptr() };
@@ -126,7 +126,7 @@ namespace chisel
             r.ctx->CSSetUnorderedAccessViews(0, 1, &bufferOut.uav, nullptr);
 
             // Run the compute shader
-            r.ctx->CSSetShader(Tools.cs_ObjectID.cs.ptr(), nullptr, 0);
+            r.ctx->CSSetShader(Engine.cs_ObjectID.cs.ptr(), nullptr, 0);
             r.ctx->Dispatch(1, 1, 1);
 
             // Download the output value

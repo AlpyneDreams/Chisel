@@ -16,7 +16,7 @@
 
 namespace chisel
 {
-    inline class Tools
+    inline class Engine
     {
     protected:
         Window* window          = Window::CreateWindow();
@@ -41,5 +41,5 @@ namespace chisel
 
     private:
 
-    } Tools;
+    } Engine;
 }

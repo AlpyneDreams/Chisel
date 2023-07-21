@@ -23,9 +23,9 @@ namespace chisel
 
     void Viewport::OnResize(uint width, uint height)
     {
-        rt_SceneView = Tools.rctx.CreateRenderTarget(width, height);
-        ds_SceneView = Tools.rctx.CreateDepthStencil(width, height);
-        rt_ObjectID  = Tools.rctx.CreateRenderTarget(width, height, DXGI_FORMAT_R32_UINT);
+        rt_SceneView = Engine.rctx.CreateRenderTarget(width, height);
+        ds_SceneView = Engine.rctx.CreateDepthStencil(width, height);
+        rt_ObjectID  = Engine.rctx.CreateRenderTarget(width, height, DXGI_FORMAT_R32_UINT);
         camera.renderTarget = rt_SceneView;
     }
 
@@ -45,7 +45,7 @@ namespace chisel
         {
             default:
             case Tool::Select:
-                Tools.PickObject(mouse, rt_ObjectID);
+                Engine.PickObject(mouse, rt_ObjectID);
                 break;
             
             case Tool::Entity:
@@ -266,7 +266,7 @@ namespace chisel
     void Viewport::OnPostDraw()
     {
         if (!open) {
-            Tools.systems.RemoveSystem(this);
+            Engine.systems.RemoveSystem(this);
             return;
         }
 

@@ -25,24 +25,24 @@ namespace chisel
 {
     void Chisel::Run()
     {
-        Tools.Init();
+        Engine.Init();
 
         fgd = new FGD("core/test.fgd");
 
         // Add chisel systems...
-        Renderer = &Tools.systems.AddSystem<MapRender>();
-        Tools.systems.AddSystem<Keybinds>();
-        Tools.systems.AddSystem<Layout>();
-        console = &Tools.systems.AddSystem<GUI::ConsoleWindow>();
-        Tools.systems.AddSystem<MainToolbar>();
-        Tools.systems.AddSystem<SelectionModeToolbar>();
-        Tools.systems.AddSystem<EditingToolbar>();
-        Tools.systems.AddSystem<Inspector>();
-        mainAssetPicker = &Tools.systems.AddSystem<AssetPicker>();
-        Tools.systems.AddSystem<Viewport>();
+        Renderer = &Engine.systems.AddSystem<MapRender>();
+        Engine.systems.AddSystem<Keybinds>();
+        Engine.systems.AddSystem<Layout>();
+        console = &Engine.systems.AddSystem<GUI::ConsoleWindow>();
+        Engine.systems.AddSystem<MainToolbar>();
+        Engine.systems.AddSystem<SelectionModeToolbar>();
+        Engine.systems.AddSystem<EditingToolbar>();
+        Engine.systems.AddSystem<Inspector>();
+        mainAssetPicker = &Engine.systems.AddSystem<AssetPicker>();
+        Engine.systems.AddSystem<Viewport>();
 
-        Tools.Loop();
-        Tools.Shutdown();
+        Engine.Loop();
+        Engine.Shutdown();
     }
 
     Chisel::~Chisel()
@@ -106,7 +106,7 @@ namespace chisel
 namespace chisel::commands
 {
     static ConCommand quit("quit", "Quit the application", []() {
-        Tools.Shutdown();
+        Engine.Shutdown();
         exit(0);
     });
     

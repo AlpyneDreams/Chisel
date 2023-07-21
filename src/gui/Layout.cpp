@@ -338,7 +338,7 @@ namespace chisel
 
                 if (MenuItem(ICON_MC_IMAGE_PLUS " Add Viewport"))
                 {
-                    Tools.systems.AddSystem<Viewport>();
+                    Engine.systems.AddSystem<Viewport>();
                 }
 
                 MenuItem(ICON_MC_APPLICATION_OUTLINE " GUI Demo", "", &gui_demo.value);

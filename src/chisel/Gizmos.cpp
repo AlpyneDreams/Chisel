@@ -1,6 +1,6 @@
 #include "Gizmos.h"
 #include "glm/ext/matrix_transform.hpp"
-#include "chisel/Tools.h"
+#include "chisel/Engine.h"
 #include "render/CBuffers.h"
 #include "core/Primitives.h"
 #include <vector>
@@ -13,13 +13,13 @@ namespace chisel
     {
         icnObsolete = Assets.Load<Texture>("textures/ui/obsolete.png");
         icnHandle   = Assets.Load<Texture>("textures/ui/handle.png");
-        sh_Color    = render::Shader(Tools.rctx.device.ptr(), Primitives::Vertex::Layout, "color");
-        sh_Sprite   = render::Shader(Tools.rctx.device.ptr(), Primitives::Vertex::Layout, "sprite");
+        sh_Color    = render::Shader(Engine.rctx.device.ptr(), Primitives::Vertex::Layout, "color");
+        sh_Sprite   = render::Shader(Engine.rctx.device.ptr(), Primitives::Vertex::Layout, "sprite");
     }
 
     void Gizmos::DrawIcon(vec3 pos, Texture* icon, Color color, SelectionID selection, vec3 size, bool depthTest)
     {
-        auto& r = Tools.rctx;
+        auto& r = Engine.rctx;
         r.SetShader(sh_Sprite);
         r.ctx->PSSetShaderResources(0, 1, &icon->srvSRGB);
         if (selection == 0)
@@ -49,7 +49,7 @@ namespace chisel
     // TODO: These should be batched.
     void Gizmos::DrawLine(vec3 start, vec3 end, Color color)
     {
-        auto& r = Tools.rctx;
+        auto& r = Engine.rctx;
         r.SetShader(sh_Color);
 
         mat4x4 mtx = glm::translate(mat4x4(1), start);
@@ -81,7 +81,7 @@ namespace chisel
         if (!PlaneWinding::CreateFromPlane(plane, winding))
             return;
 
-        auto& r = Tools.rctx;
+        auto& r = Engine.rctx;
         r.SetShader(sh_Color);
 
         cbuffers::ObjectState data;

@@ -28,7 +28,7 @@ chisel_src = [
     'gui/impl/imgui_impl_sdl.cpp',
     'gui/impl/imgui_impl_dx11.cpp',
 
-    'chisel/Tools.cpp',
+    'chisel/Engine.cpp',
     'chisel/Selection.cpp',
     'chisel/Chisel.cpp',
     'chisel/Handles.cpp',

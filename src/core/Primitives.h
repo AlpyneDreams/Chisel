@@ -63,7 +63,7 @@ namespace chisel
                 .SysMemPitch = 0,
                 .SysMemSlicePitch = 0,
             };
-            if (FAILED(Tools.rctx.device->CreateBuffer(&desc, &data, &Quad)))
+            if (FAILED(Engine.rctx.device->CreateBuffer(&desc, &data, &Quad)))
                 Console.Error("Failed to upload quad mesh.");
         }
 
@@ -81,7 +81,7 @@ namespace chisel
                 .SysMemPitch = 0,
                 .SysMemSlicePitch = 0,
             };
-            if (FAILED(Tools.rctx.device->CreateBuffer(&desc, &data, &Line)))
+            if (FAILED(Engine.rctx.device->CreateBuffer(&desc, &data, &Line)))
                 Console.Error("Failed to upload line mesh.");
         }
 

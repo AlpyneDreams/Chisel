@@ -8,7 +8,7 @@
 #include "render/Render.h"
 #include "render/TextureFormat.h"
 #include "common/Bit.h"
-#include "chisel/Tools.h"
+#include "chisel/Engine.h"
 #include "libvtf-plusplus/libvtf++.hpp"
 
 #include <span>
@@ -43,7 +43,7 @@ namespace chisel
             .SysMemPitch = UINT(width) * 4u,
             .SysMemSlicePitch = 0,
         };
-        Tools.rctx.device->CreateTexture2D(&desc, &initialData, &tex.texture);
+        Engine.rctx.device->CreateTexture2D(&desc, &initialData, &tex.texture);
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDescLinear =
         {
             .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -64,8 +64,8 @@ namespace chisel
                 .MipLevels = UINT(-1),
             },
         };
-        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescLinear, &tex.srvLinear);
-        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
+        Engine.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescLinear, &tex.srvLinear);
+        Engine.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
     }
 
     static AssetLoader<Texture, FixedString(".PNG")> PNGLoader = &LoadTexture;
@@ -127,7 +127,7 @@ namespace chisel
             };
             mipData.push_back(initialData);
         }
-        Tools.rctx.device->CreateTexture2D(&desc, mipData.data(), &tex.texture);
+        Engine.rctx.device->CreateTexture2D(&desc, mipData.data(), &tex.texture);
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDescLinear =
         {
             .Format = format,
@@ -148,7 +148,7 @@ namespace chisel
                 .MipLevels = UINT(-1),
             },
         };
-        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescLinear, &tex.srvLinear);
-        Tools.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
+        Engine.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescLinear, &tex.srvLinear);
+        Engine.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
     };
 }

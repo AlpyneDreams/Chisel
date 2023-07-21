@@ -170,7 +170,7 @@ namespace chisel
 
     void Handles::DrawGrid(Camera& camera, vec3 gridSize)
     {
-        auto& r = Tools.rctx;
+        auto& r = Engine.rctx;
         r.SetBlendState(render::BlendFuncs::Alpha);
         r.ctx->OMSetDepthStencilState(r.Depth.LessEqual.ptr(), 0);
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
@@ -232,9 +232,9 @@ namespace chisel
 
     void Handles::Init()
     {
-        auto& r = Tools.rctx;
+        auto& r = Engine.rctx;
 
-        sh_Grid = render::Shader(Tools.rctx.device.ptr(), GridVertex::Layout, "grid");
+        sh_Grid = render::Shader(Engine.rctx.device.ptr(), GridVertex::Layout, "grid");
 
         std::vector<Handles::GridVertex> gridVertices;
         grid = new Mesh();

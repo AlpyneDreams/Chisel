@@ -1,5 +1,5 @@
 #include "gui/View3D.h"
-#include "chisel/Tools.h"
+#include "chisel/Engine.h"
 #include "chisel/Selection.h"
 #include "chisel/Chisel.h"
 #include "input/Input.h"

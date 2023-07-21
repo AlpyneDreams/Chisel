@@ -2,7 +2,7 @@
 
 #include "chisel/Chisel.h"
 #include "common/System.h"
-#include "chisel/Tools.h"
+#include "chisel/Engine.h"
 #include "chisel/Selection.h"
 #include "chisel/Handles.h"
 #include "chisel/Gizmos.h"
@@ -24,7 +24,7 @@ namespace chisel
     private:
         Map& map = Chisel.map;
     public:
-        render::RenderContext& r = Tools.rctx;
+        render::RenderContext& r = Engine.rctx;
 
         struct Shaders {
             render::Shader Brush;
