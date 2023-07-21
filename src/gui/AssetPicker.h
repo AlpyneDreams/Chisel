@@ -12,7 +12,7 @@ namespace chisel
     struct AssetPickerAsset
     {
         std::string path;
-        std::string_view name;
+        std::string name;
         Rc<T> thing;
         bool triedToLoad = false;
 
