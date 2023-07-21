@@ -96,40 +96,20 @@ namespace chisel
         if (Chisel.fgd->classes.contains(classname))
         {
             auto& cls = Chisel.fgd->classes[classname];
-            
+
             AABB bounds = AABB{cls.bbox[0], cls.bbox[1]};
 
-            if (cls.texture != nullptr)
-            {
-                if (!r_drawsprites)
-                    return;
+            if (!r_drawsprites)
+                return;
 
-                r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-                Gizmos.DrawIcon(
-                    origin,
-                    cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr(),
-                    color,
-                    id
-                );
-                r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
-            }
-            else
-            {
-                if (!r_drawsprites)
-                    return;
-
-                Handles.DrawPoint(origin, !preview);
-                //AABB bounds = AABB(cls.bbox[0], cls.bbox[1]);
-                //r.SetTransform(glm::translate(mat4x4(1), point->origin) * bounds.ComputeMatrix());
-
-                //if (point->IsSelected())
-                    //Tools.DrawSelectionOutline(&Primitives.Cube);
-
-                //r.SetShader(Shaders.Brush);
-                //r.SetTexture(0, Textures.White);
-                //r.SetUniform("u_color", color);
-                // r.DrawMesh(&Primitives.Cube);
-            }
+            r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
+            Gizmos.DrawIcon(
+                origin,
+                cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr(),
+                color,
+                id
+            );
+            r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
         else if (r_drawsprites)
         {
