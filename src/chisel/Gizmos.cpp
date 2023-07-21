@@ -74,7 +74,7 @@ namespace chisel
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     }
 
-    void Gizmos::DrawPlane(const Plane& plane, Color color)
+    void Gizmos::DrawPlane(const Plane& plane, Color color, bool backFace)
     {
         PlaneWinding winding;
         if (!PlaneWinding::CreateFromPlane(plane, winding))
@@ -89,17 +89,17 @@ namespace chisel
         data.id = 0;
 
         Primitives::Vertex vertices[6];
-        vertices[0].pos = winding.points[2];
+        vertices[0].pos = winding.points[backFace ? 2 : 0];
         vertices[0].uv = vec2(0.0f);
         vertices[1].pos = winding.points[1];
         vertices[1].uv = vec2(0.0f);
-        vertices[2].pos = winding.points[0];
+        vertices[2].pos = winding.points[backFace ? 0 : 2];
         vertices[2].uv = vec2(0.0f);
-        vertices[3].pos = winding.points[3];
+        vertices[3].pos = winding.points[backFace ? 3 : 0];
         vertices[3].uv = vec2(0.0f);
         vertices[4].pos = winding.points[2];
         vertices[4].uv = vec2(0.0f);
-        vertices[5].pos = winding.points[0];
+        vertices[5].pos = winding.points[backFace ? 0 : 3];
         vertices[5].uv = vec2(0.0f);
 
         ID3D11Buffer* buffer = r.scratchVertex.ptr();

@@ -168,7 +168,15 @@ namespace chisel
                         {
                             if (activeTool == Tool::Clip)
                             {
-
+                                Side side{ plane, Chisel.activeMaterial, 0.25f };
+                                for (Selectable* selectable : Selection)
+                                {
+                                    if (Solid* solid = dynamic_cast<Solid*>(selectable))
+                                    {
+                                        solid->Clip(side);
+                                        solid->UpdateMesh();
+                                    }
+                                }
                             }
                             else
                             {
@@ -197,7 +205,8 @@ namespace chisel
                         if (activeTool == Tool::Clip)
                         {
                             Handles.DrawPoint(dragStartPos);
-                            Gizmos.DrawPlane(plane, Color(0.0f, 1.0f, 1.0f, 0.1f));
+                            Gizmos.DrawPlane(plane, Color(0.0f, 1.0f, 1.0f, 0.1f), true);
+                            Gizmos.DrawPlane(plane, Color(1.0f, 0.0f, 0.0f, 0.1f), false);
                         }
                         else
                         {

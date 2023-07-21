@@ -18,41 +18,6 @@ namespace chisel
     ConVar<bool> r_displacements("r_displacements", true, "Render displacements", RebuildDisplacements);
     ConVar<bool> r_disp_mask_solid("r_disp_mask_solid", true, "Hide unused faces of displacement brushes", RebuildDisplacements);
 
-    inline void InitSideData(Side& side, Material *material)
-    {
-        side.material = material;
-        side.rotate = 0.0f;
-
-        side.textureAxes[0].w = 0.0f;
-        side.textureAxes[1].w = 0.0f;
-
-        side.scale[0] = 0.25f;
-        side.scale[1] = 0.25f;
-
-        side.textureAxes[0].xyz = vec3(0);
-        side.textureAxes[1].xyz = vec3(0);
-
-        Orientation orientation = Orientations::CalcOrientation(side.plane);
-        if (orientation == Orientations::Invalid)
-            return;
-
-        side.textureAxes[1].xyz = Orientations::DownVectors[orientation];
-        if (trans_texture_face_alignment)
-        {
-            // Calculate true U axis
-            side.textureAxes[0].xyz = glm::normalize(
-                glm::cross(glm::vec3(side.textureAxes[1].xyz), side.plane.normal));
-
-            // Now calculate the true V axis
-            side.textureAxes[1].xyz = glm::normalize(
-                glm::cross(side.plane.normal, glm::vec3(side.textureAxes[0].xyz)));
-        }
-        else
-        {
-            side.textureAxes[0].xyz = Orientations::RightVectors[orientation];
-        }
-    }
-
     Solid::Solid(BrushEntity* parent)
         : Atom(parent)
     {
@@ -88,6 +53,11 @@ namespace chisel
         
     Solid::~Solid()
     {
+    }
+
+    void Solid::Clip(Side side)
+    {
+        m_sides.emplace_back(std::move(side));
     }
 
     void Solid::UpdateMesh()
@@ -530,14 +500,10 @@ namespace chisel
         };
 
         std::vector<Side> sides;
-        sides.resize(6);
+        sides.reserve(6);
         for (size_t i = 0; i < 6; i++)
-        {
-            sides[i].plane = kUnitCubePlanes[i].Transformed(glm::scale(transform, size));
+            sides.emplace_back(kUnitCubePlanes[i].Transformed(glm::scale(transform, size)), material, 0.25f);
 
-            InitSideData(sides[i], material);
-        }
-        
         return sides;
     }
 

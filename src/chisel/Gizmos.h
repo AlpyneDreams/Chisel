@@ -16,7 +16,7 @@ namespace chisel
 
         void DrawIcon(vec3 pos, Texture* icon, Color color = Colors.White, SelectionID selection = 0, vec3 size = vec3(32.0f), bool depthTest = true);
         void DrawLine(vec3 start, vec3 end, Color color = Colors.White);
-        void DrawPlane(const Plane& plane, Color color = Colors.White);
+        void DrawPlane(const Plane& plane, Color color = Colors.White, bool backFace = true);
 
         void Init();
     } Gizmos;
