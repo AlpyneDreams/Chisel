@@ -23,4 +23,10 @@ float3 Lighting(float3 normal, float3 view)
     return color * NoL;
 }
 
+float3 DebugSelectionID(uint id)
+{
+	static const uint N = 16;
+    return float3(((id / uint3(1, N, N * N)) % N) / (float)N);
+}
+
 #endif // COMMON_HLSLI

@@ -29,6 +29,7 @@ namespace chisel
         struct Shaders {
             render::Shader Brush;
             render::Shader BrushBlend;
+            render::Shader BrushDebugID;
         } Shaders;
 
         struct DefaultTextures {
@@ -48,5 +49,6 @@ namespace chisel
         void DrawHandles(mat4x4& view, mat4x4& proj, Tool tool, Space space, bool snap, const vec3& snapSize);
 
         bool wireframe = false;
+        Viewport::DrawMode drawMode = Viewport::DrawMode::Shaded;
     };
 }

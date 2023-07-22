@@ -26,6 +26,7 @@ namespace chisel
     {
         Shaders.Brush = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush");
         Shaders.BrushBlend = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush_blend");
+        Shaders.BrushDebugID = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush_debug_id");
 
         // Load builtin textures
         Textures.Missing = Assets.Load<Texture>("textures/error.png");
@@ -60,7 +61,8 @@ namespace chisel
         r.ctx->ClearRenderTargetView(viewport.rt_ObjectID->rtv.ptr(), Colors.Black);
         r.ctx->ClearDepthStencilView(viewport.ds_SceneView->dsv.ptr(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        if (wireframe = viewport.drawMode == Viewport::DrawMode::Wireframe)
+        drawMode = viewport.drawMode;
+        if (wireframe = drawMode == Viewport::DrawMode::Wireframe)
             r.ctx->RSSetState(r.Raster.Wireframe.ptr());
         else
             r.ctx->RSSetState(r.Raster.Default.ptr());
@@ -197,6 +199,9 @@ namespace chisel
                 r.SetShader(Shaders.BrushBlend);
             else
                 r.SetShader(Shaders.Brush);
+
+            if (this->drawMode == Viewport::DrawMode::ObjectID)
+                r.SetShader(Shaders.BrushDebugID);
 
             r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
             r.ctx->IASetIndexBuffer(buffer, DXGI_FORMAT_R32_UINT, indexOffset);
