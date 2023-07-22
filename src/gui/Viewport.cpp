@@ -206,9 +206,22 @@ namespace chisel
                                 bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
                                 if (!degenerate)
                                 {
-                                    auto& cube = map.AddCube(Chisel.activeMaterial.ptr(), mtx, size);
-                                    Selection.Clear();
-                                    Selection.Select(&cube);
+                                    Chisel.map.actions.PerformAction("Add Cube",
+                                        // Do
+                                        [ this, cActiveMaterial = Chisel.activeMaterial, mtx, size ] (std::any& userdata)
+                                        {
+                                            auto& cube = map.AddCube(cActiveMaterial.ptr(), mtx, size);
+                                            Selection.Clear();
+                                            Selection.Select(&cube);
+
+                                            userdata = &cube;
+                                        },
+                                        // Undo
+                                        [ this ] (std::any& userdata)
+                                        {
+                                            Solid *cube = std::any_cast<Solid*>(userdata);
+                                            cube->Delete();
+                                        });
                                 }
                             }
                         }
@@ -308,6 +321,14 @@ namespace chisel
                 view_grid_size.value /= 2.0f;
 
             view_grid_size = glm::clamp(view_grid_size.value, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
+        }
+
+        if (Keyboard.ctrl)
+        {
+            if (Keyboard.GetKeyDown(Key::Z))
+                Chisel.map.actions.Undo();
+            else if (Keyboard.GetKeyDown(Key::Y))
+                Chisel.map.actions.Redo();
         }
     }
 // Draw Modes //
