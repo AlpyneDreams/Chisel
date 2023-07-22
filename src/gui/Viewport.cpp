@@ -208,12 +208,11 @@ namespace chisel
                                 {
                                     Chisel.map.actions.PerformAction("Add Cube",
                                         // Do
-                                        [ this, cActiveMaterial = Chisel.activeMaterial, mtx, size ] (std::any& userdata)
+                                        [ this, solids = CreateCubeBrush(Chisel.activeMaterial, size, mtx) ] (std::any& userdata)
                                         {
-                                            auto& cube = map.AddCube(cActiveMaterial.ptr(), mtx, size);
+                                            auto& cube = map.AddBrush(solids);
                                             Selection.Clear();
                                             Selection.Select(&cube);
-
                                             userdata = &cube;
                                         },
                                         // Undo
