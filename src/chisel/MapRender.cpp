@@ -73,14 +73,14 @@ namespace chisel
             if (r_drawworld)
                 DrawBrushEntity(map);
 
-            for (auto* entity : map.entities)
+            for (auto* entity : map.Entities())
             {
                 if (BrushEntity* brush = dynamic_cast<BrushEntity*>(entity))
                     DrawBrushEntity(*brush);
             }
         }
 
-        for (const auto* entity : map.entities)
+        for (const auto* entity : map.Entities())
         {
             const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
             if (!point) continue;
@@ -133,7 +133,7 @@ namespace chisel
         opaqueMeshes.clear();
         transMeshes.clear();
 
-        for (Solid& brush : ent)
+        for (Solid& brush : ent.Brushes())
         {
             for (auto& mesh : brush.GetMeshes())
             {

@@ -5,6 +5,7 @@
 #include "assets/Assets.h"
 #include "render/Render.h"
 #include "Orientation.h"
+#include "Atom.h"
 
 #include "math/Color.h"
 
@@ -93,7 +94,7 @@ namespace chisel
         std::vector<vec3> points;
     };
 
-    struct Solid : Atom
+    class Solid : public Atom
     {
     public:
         Solid(BrushEntity* parent);

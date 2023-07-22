@@ -50,7 +50,7 @@ namespace chisel
     {
         WriteEntityKVPairs(out, entity);
 
-        for (Solid& solid : entity)
+        for (Solid& solid : entity.Brushes())
         {
             out << "{\n";
 
@@ -93,7 +93,7 @@ namespace chisel
         out << "}\n";
 
         // Now write the individual entities
-        for (Entity* ent : map.entities)
+        for (Entity* ent : map.Entities())
         {
             out << "{\n";
 

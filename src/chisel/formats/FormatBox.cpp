@@ -174,7 +174,7 @@ namespace chisel
             }
         }
 
-        map.entities.push_back(entity);
+        map.AddEntity(entity);
     }
 
     bool ImportBox(std::string_view filepath, Map& map)
@@ -340,7 +340,7 @@ namespace chisel
         WriteEntityKVPairs(doc, val, entity);
 
         yyjson_mut_val* solid_arr = yyjson_mut_arr(doc);
-        for (Solid& solid : entity)
+        for (Solid& solid : entity.Brushes())
         {
             yyjson_mut_val* solid_val = yyjson_mut_arr_add_obj(doc, solid_arr);
 
@@ -398,7 +398,7 @@ namespace chisel
 
         // Now write the individual entities
         yyjson_mut_val *ent_arr = yyjson_mut_arr(doc);
-        for (Entity* ent : map.entities)
+        for (Entity* ent : map.Entities())
         {
             yyjson_mut_val* ent_val = yyjson_mut_arr_add_obj(doc, ent_arr);
             if (ent->IsBrushEntity())

@@ -36,6 +36,8 @@ chisel_src = [
     'chisel/MapRender.cpp',
     'chisel/FGD/FGD.cpp',
     'chisel/map/Solid.cpp',
+    'chisel/map/Entity.cpp',
+    'chisel/map/Map.cpp',
     
     'chisel/formats/FormatVMF.cpp',
     'chisel/formats/FormatMap.cpp',

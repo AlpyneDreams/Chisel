@@ -2,28 +2,26 @@
 
 #include "core/VertexLayout.h"
 #include "math/Math.h"
-#include "chisel/Selection.h"
 #include "render/Render.h"
 
 #include "../submodules/OffsetAllocator/offsetAllocator.hpp"
 
 namespace chisel
 {
-    struct BrushEntity;
-
-    struct Atom : Selectable
+    template <typename T>
+    class IteratorPassthru
     {
-        Atom(BrushEntity* parent)
-            : m_parent(parent)
-        {
-        }
+    public:
+        IteratorPassthru(T& things)
+          : m_things(things) { }
 
-        BrushEntity *GetParent() const
-        {
-            return m_parent;
-        }
-    protected:
-        BrushEntity* m_parent;
+        auto begin() { return m_things.begin(); }
+        auto end() { return m_things.end(); }
+
+        const auto begin() const { return m_things.begin(); }
+        const auto end() const { return m_things.end(); }
+    private:
+        T& m_things;
     };
 
     struct VertexSolid

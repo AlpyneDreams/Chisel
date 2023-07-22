@@ -57,7 +57,7 @@ namespace chisel
     {
         WriteEntityKVPairs(out, entity);
 
-        for (Solid& solid : entity)
+        for (Solid& solid : entity.Brushes())
         {
             out << "solid\n";
             out << "{\n";
@@ -133,7 +133,7 @@ namespace chisel
         out << "}\n";
 
         // Now write the individual entities
-        for (Entity* ent : map.entities)
+        for (Entity* ent : map.Entities())
         {
             out << "entity\n";
             out << "{\n";
@@ -371,7 +371,7 @@ namespace chisel
         kvEntity.RemoveAllWithType("editor", kv::Types::KeyValues);
         kvEntity.RemoveAllWithType("solid", kv::Types::KeyValues);
         entity->kv = std::move(kvEntity);
-        map.entities.push_back(entity);
+        map.AddEntity(entity);
         return true;
     }
 

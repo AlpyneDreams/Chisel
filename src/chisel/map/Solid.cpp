@@ -9,7 +9,7 @@ namespace chisel
 {
     static auto RebuildDisplacements = [](bool& b)
     {
-        for (auto& solid : Chisel.map) {
+        for (auto& solid : Chisel.map.Brushes()) {
             if (solid.HasDisplacement())
                 solid.UpdateMesh();
         }

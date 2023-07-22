@@ -206,9 +206,10 @@ namespace chisel
                                 bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
                                 if (!degenerate)
                                 {
-                                    Chisel.map.actions.PerformAction("Add Cube",
+                                    Chisel.map.Actions().PerformAction("Add Cube",
                                         // Do
-                                        [ this, solids = CreateCubeBrush(Chisel.activeMaterial, size, mtx) ] (std::any& userdata)
+                                        [this, solids = CreateCubeBrush(Chisel.activeMaterial.ptr(), size, mtx)](
+                                            std::any& userdata)
                                         {
                                             auto& cube = map.AddBrush(solids);
                                             Selection.Clear();
@@ -325,9 +326,9 @@ namespace chisel
         if (Keyboard.ctrl)
         {
             if (Keyboard.GetKeyDown(Key::Z))
-                Chisel.map.actions.Undo();
+                Chisel.map.Actions().Undo();
             else if (Keyboard.GetKeyDown(Key::Y))
-                Chisel.map.actions.Redo();
+                Chisel.map.Actions().Redo();
         }
     }
 // Draw Modes //
