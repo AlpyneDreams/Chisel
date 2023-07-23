@@ -7,7 +7,7 @@
 
 namespace chisel
 {
-    struct Entity;
+    class Entity;
 
     struct Inspector : public GUI::Window
     {

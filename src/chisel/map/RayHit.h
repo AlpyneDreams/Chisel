@@ -4,7 +4,7 @@
 
 namespace chisel
 {
-    struct Solid;
+    class Solid;
     struct Face;
 
     struct RayHit

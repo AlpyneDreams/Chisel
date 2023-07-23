@@ -6,8 +6,6 @@
 
 namespace chisel
 {
-    struct Entity;
-
     template <typename T>
     struct AssetPickerAsset
     {

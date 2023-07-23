@@ -66,8 +66,8 @@ namespace chisel
         std::optional<DispInfo> disp;
     };
 
-    struct Solid;
-    struct BrushEntity;
+    class Solid;
+    class BrushEntity;
 
     struct BrushMesh
     {
