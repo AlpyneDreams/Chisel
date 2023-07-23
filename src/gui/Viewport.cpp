@@ -311,26 +311,8 @@ namespace chisel
                 ImGui::EndPopup();
             }
         }
-
-        if (Keyboard.GetKeyUp(Key::LeftBracket) || Keyboard.GetKeyUp(Key::RightBracket))
-        {
-            const bool up = Keyboard.GetKeyUp(Key::RightBracket);
-            if (up)
-                view_grid_size.value *= 2.0f;
-            else
-                view_grid_size.value /= 2.0f;
-
-            view_grid_size = glm::clamp(view_grid_size.value, glm::vec3(1.0f / 32.0f), glm::vec3(16384.0f));
-        }
-
-        if (Keyboard.ctrl)
-        {
-            if (Keyboard.GetKeyDown(Key::Z))
-                Chisel.map.Actions().Undo();
-            else if (Keyboard.GetKeyDown(Key::Y))
-                Chisel.map.Actions().Redo();
-        }
     }
+
 // Draw Modes //
 
     void Viewport::OnDrawMenu()
