@@ -36,6 +36,19 @@ namespace chisel
         return font;
     }
 
+    inline ConCommand gui_reset("gui_reset", "Loads default UI layout", [](ConCmd& cmd) {
+        //ImGui::LoadIniSettingsFromDisk("chisel_ui_default.ini");
+        // HACK: Docking doesn't work properly unless settings are loaded between frames.
+        fs::copyFile("chisel_ui_default.ini", "chisel_ui.ini");
+        ImGuiContext* g = ImGui::GetCurrentContext();
+        g->SettingsWindows.clear();
+        g->SettingsLoaded = false;
+    });
+
+    inline ConCommand gui_save("gui_save", "Saves default UI layout", [](ConCmd& cmd) {
+        ImGui::SaveIniSettingsToDisk("chisel_ui_default.ini");
+    });
+
     void GUI::Setup()
     {
         ImGui::CreateContext();
