@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <fmt/ostream.h>
 
 namespace chisel::fs
 {
@@ -87,3 +88,5 @@ struct std::hash<chisel::fs::Path>
         return std::hash<std::filesystem::path>()(p.m_path);
     }
 };
+
+template <> struct fmt::formatter<chisel::fs::Path> : ostream_formatter {};

@@ -40,8 +40,12 @@ namespace chisel
     {
         ImGui::CreateContext();
 
+        if (fs::exists("chisel_ui_default.ini")) {
+            fs::copy("chisel_ui_default.ini", "chisel_ui.ini", fs::update_existing);
+        }
+
         ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = "chisel.ui.ini";
+        io.IniFilename = "chisel_ui.ini";
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 

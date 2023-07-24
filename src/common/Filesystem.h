@@ -8,25 +8,25 @@
 #include <iterator>
 #include <type_traits>
 #include <string>
-#include <tuple>
 #include <filesystem>
-#include <ostream>
 #include <optional>
-#include <vector>
-#include <cstdint>
-
-#include <fmt/ostream.h>
-
-// Automatic path to string conversion
-namespace std::filesystem {
-    std::ostream& operator<<(std::ostream& os, const path& path);
-    std::string operator+(const std::string& str, const path& path);
-}
 
 namespace chisel::fs
 {
     using std::filesystem::exists;
+    using std::filesystem::copy;
 
+    using enum std::filesystem::copy_options;
+    
+    // Copy file. Overwrites existing file by default.
+    inline bool copyFile(const Path& from, const Path& to, bool overwrite = true)
+    {
+        std::error_code ec;
+        std::filesystem::copy_file(from, to, overwrite ? overwrite_existing : skip_existing, ec);
+        return !ec;
+    }
+
+    // Read file into buffer.
     template <typename T = Buffer, bool Binary = !std::is_same_v<T, std::string>>
     inline std::optional<T> readFile(const Path& path)
     {
@@ -53,24 +53,9 @@ namespace chisel::fs
         return buffer;
     }
 
+    // Read text file.
     inline std::optional<std::string> readTextFile(const Path& path)
     {
         return readFile<std::string>(path);
     }
 }
-
-namespace std::filesystem
-{
-    // Write path to ostream
-    inline std::ostream& operator<<(std::ostream& os, const path& path) {
-        return os << path.string();
-    }
-
-    // Append path to string
-    inline std::string operator+(const std::string& str, const path& path) {
-        return str + path.string();
-    }
-}
-
-template <> struct fmt::formatter<std::filesystem::path> : ostream_formatter {};
-template <> struct fmt::formatter<chisel::fs::Path> : ostream_formatter {};
