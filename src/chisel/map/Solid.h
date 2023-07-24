@@ -66,6 +66,7 @@ namespace chisel
         void Delete() final override;
 
     private:
+        friend struct Face;
 
         bool m_displacement = false;
 

@@ -67,10 +67,7 @@ namespace chisel
             , side(side)
             , points(std::move(pts))
         {
-            if (points.size() > 0)
-                bounds = AABB { points[0], points[0] };
-            for (auto& point : points)
-                bounds = bounds.Extend(point);
+            UpdateBounds();
         }
 
         Face(Face&& other) = default;
@@ -94,10 +91,13 @@ namespace chisel
             return side->disp->GetIndexCount();
         }
 
+        void UpdateBounds();
+
     // Selectable Interface //
-        virtual std::optional<AABB> GetBounds() const { return bounds; }
-        virtual void Transform(const mat4x4& matrix) {}
-        virtual void Delete() {}
-        virtual void AlignToGrid(vec3 gridSize) {}
+        virtual std::optional<AABB> GetBounds() const override { return bounds; }
+        virtual void Transform(const mat4x4& matrix) override;
+        virtual void Delete() override {} // TODO
+        virtual void AlignToGrid(vec3 gridSize) {} // TODO
+        virtual Selectable* ResolveSelectable() { return this; } // TODO
     };
 }

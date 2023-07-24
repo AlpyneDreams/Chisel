@@ -35,6 +35,7 @@ chisel_src = [
     'chisel/Gizmos.cpp',
     'chisel/MapRender.cpp',
     'chisel/FGD/FGD.cpp',
+    'chisel/map/Face.cpp',
     'chisel/map/Solid.cpp',
     'chisel/map/Entity.cpp',
     'chisel/map/Map.cpp',
