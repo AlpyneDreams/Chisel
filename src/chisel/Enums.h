@@ -12,7 +12,7 @@ namespace chisel
     };
 
     enum class SelectMode {
-        Groups, Objects, Solids
+        Groups, Objects, Solids, Faces, Edges, Vertices
     };
 
     enum class PrimitiveType {

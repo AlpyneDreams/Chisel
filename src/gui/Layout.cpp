@@ -25,10 +25,10 @@ namespace chisel
         using enum SelectMode;
         ImGui::BeginDisabled();
         Option("Select:", SelectMode(-1));
-        Option(ICON_MC_VECTOR_POINT " Vertices", SelectMode(-1));
-        Option(ICON_MC_VECTOR_POLYLINE " Edges", SelectMode(-1));
-        Option(ICON_MC_VECTOR_SQUARE " Faces", SelectMode(-1));
         ImGui::EndDisabled();
+        Option(ICON_MC_VECTOR_POINT " Vertices", Vertices);
+        Option(ICON_MC_VECTOR_POLYLINE " Edges", Edges);
+        Option(ICON_MC_VECTOR_SQUARE " Faces", Faces);
         Option(ICON_MC_VECTOR_TRIANGLE " Solids", Solids);
         Option(ICON_MC_CUBE_OUTLINE " Objects", Objects);
         Option(ICON_MC_GROUP " Groups", Groups);
