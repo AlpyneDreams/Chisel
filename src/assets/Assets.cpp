@@ -19,12 +19,13 @@ namespace chisel
     Assets::~Assets()
     {
         // Delete all remaining assets on the heap
-        std::vector<Asset*> assets;
-        for (auto& [path, asset] : Asset::AssetDB)
-            assets.push_back(asset);
-        for (Asset* asset : assets)
+        while (Asset::AssetDB.size() > 0)
+        {
+            auto& [path, asset] = *Asset::AssetDB.begin();
+            uint32 refCount = (asset->incRef(), asset->decRef());
+            Console.Warn("Deleted unreleased asset: (references = {}) '{}'", refCount, path);
             delete asset;
-        Asset::AssetDB.clear();
+        }
     }
 
 // Asset Loading //
