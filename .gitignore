@@ -11,7 +11,7 @@
 /runtime/*.pdb
 
 # ImGUI and dxvk clutter
-/runtime/*.ui.ini
+/runtime/chisel_ui.ini
 /runtime/chisel_d3d11.log
 /runtime/chisel_dxgi.log
 
