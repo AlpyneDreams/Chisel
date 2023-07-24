@@ -6,7 +6,7 @@
 #include <functional>
 #include <ostream>
 
-#include "Likely.h"
+#include "Compiler.h"
 
 namespace chisel
 {
