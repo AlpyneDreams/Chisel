@@ -34,7 +34,7 @@ namespace chisel
 
     // Extending //
 
-        static AABB Extend(const AABB& bounds, vec3 point)
+        static [[nodiscard]] AABB Extend(const AABB& bounds, vec3 point)
         {
             return AABB
             {
@@ -43,15 +43,15 @@ namespace chisel
             };
         }
         
-        static AABB Extend(const AABB& bounds, const AABB aabb) {
+        static [[nodiscard]] AABB Extend(const AABB& bounds, const AABB aabb) {
             return Extend(Extend(bounds, aabb.min), aabb.max);
         }
         
-        AABB Extend(vec3 point) const {
+        [[nodiscard]] AABB Extend(vec3 point) const {
             return Extend(*this, point);
         }
         
-        AABB Extend(const AABB aabb) const {
+        [[nodiscard]] AABB Extend(const AABB aabb) const {
             return Extend(*this, aabb);
         }
     };
