@@ -5,6 +5,7 @@
 #include "FGD/FGD.h"
 #include "gui/Viewport.h"
 #include "render/CBuffers.h"
+#include <glm/gtx/normal.hpp>
 
 namespace chisel
 {
@@ -126,6 +127,121 @@ namespace chisel
         }
     }
 
+    struct BrushPass : cbuffers::BrushState
+    {
+        BrushMesh* mesh;
+        uint indices;
+        uint startIndex = 0;
+        Texture* texOverride = nullptr;
+
+        BrushPass(BrushMesh* mesh)
+        {
+            this->mesh = mesh;
+            indices = mesh->indices.size();
+            id = mesh->brush->GetSelectionID();
+            color = Colors.White;
+        }
+    };
+
+    inline void MapRender::DrawPass(const BrushPass& pass)
+    {
+        r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), pass);
+        r.ctx->PSSetConstantBuffers(1, 1, &r.cbuffers.brush);
+        r.ctx->VSSetConstantBuffers(1, 1, &r.cbuffers.brush);
+
+        uint stride = sizeof(VertexSolid);
+        uint vertexOffset = pass.mesh->alloc->offset;
+        uint indexOffset = vertexOffset + pass.mesh->vertices.size() * stride;
+        ID3D11Buffer* buffer = Chisel.brushAllocator->buffer();
+        ID3D11ShaderResourceView *srv = nullptr;
+        bool pointSample = false;
+
+        uint numLayers = 1;
+        if (Material* material = pass.mesh->material)
+        {
+            // Bind $basetexture
+            if (material->baseTexture != nullptr)
+                srv = material->baseTexture->srvSRGB.ptr();
+            
+            // Bind additional $basetexture2+ layers
+            for (uint i = 0; i < std::size(material->baseTextures); i++)
+            {
+                if (Texture* layer = material->baseTextures[i].ptr())
+                {
+                    numLayers++;
+                    r.ctx->PSSetShaderResources(i+1, 1, pass.texOverride ? &pass.texOverride->srvSRGB : &layer->srvSRGB);
+                }
+            }
+        }
+        
+        if (pass.texOverride)
+            srv = pass.texOverride->srvSRGB.ptr();
+
+        if (!srv)
+        {
+            srv = Textures.Missing->srvSRGB.ptr();
+            pointSample = true;
+        }
+        if (pointSample)
+        {
+            r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
+        }
+        r.ctx->PSSetShaderResources(0, 1, &srv);
+
+        // Choose shader variant
+        if (numLayers > 1)
+            r.SetShader(Shaders.BrushBlend);
+        else
+            r.SetShader(Shaders.Brush);
+
+        if (this->drawMode == Viewport::DrawMode::ObjectID)
+            r.SetShader(Shaders.BrushDebugID);
+
+        r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
+        r.ctx->IASetIndexBuffer(buffer, DXGI_FORMAT_R32_UINT, indexOffset);
+        r.ctx->DrawIndexed(pass.indices, pass.startIndex, 0);
+        if (pointSample)
+        {
+            r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
+        }
+    }
+
+    inline void MapRender::DrawMesh(BrushMesh* mesh)
+    {
+        BrushPass pass = BrushPass(mesh);
+
+        if (Chisel.selectMode == SelectMode::Faces)
+            pass.id = 0;
+
+        if (mesh->brush->IsSelected())
+        {
+            if (wireframe)
+            {
+                // Draw only wireframe outline
+                pass.color = color_selection_outline;
+                pass.texOverride = Textures.White.ptr();
+                DrawPass(pass);
+            }
+            else
+            {
+                // Highlight face
+                pass.color = color_selection;
+                DrawPass(pass);
+
+                // Draw wireframe outline
+                r.ctx->RSSetState(r.Raster.Wireframe.ptr());
+                pass.color = color_selection_outline;
+                pass.texOverride = Textures.White.ptr();
+                DrawPass(pass);
+                r.ctx->RSSetState(r.Raster.Default.ptr());
+            }
+        }
+        else
+        {
+            DrawPass(pass);
+        }
+    }
+
     void MapRender::DrawBrushEntity(BrushEntity& ent)
     {
         static std::vector<BrushMesh*> opaqueMeshes;
@@ -146,100 +262,6 @@ namespace chisel
             }
         }
 
-        auto DrawPass = [&](BrushMesh* mesh, float4 color, SelectionID id, Texture* texOverride = nullptr)
-        {
-            cbuffers::BrushState data;
-            data.color = color;
-            data.id = id;
-
-            r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
-            r.ctx->PSSetConstantBuffers(1, 1, &r.cbuffers.brush);
-            r.ctx->VSSetConstantBuffers(1, 1, &r.cbuffers.brush);
-
-            UINT stride = sizeof(VertexSolid);
-            UINT vertexOffset = mesh->alloc->offset;
-            UINT indexOffset = vertexOffset + mesh->vertices.size() * sizeof(VertexSolid);
-            ID3D11Buffer* buffer = Chisel.brushAllocator->buffer();
-            ID3D11ShaderResourceView *srv = nullptr;
-            bool pointSample = false;
-
-            uint numLayers = 1;
-            if (mesh->material)
-            {
-                // Bind $basetexture
-                if (mesh->material->baseTexture != nullptr)
-                    srv = mesh->material->baseTexture->srvSRGB.ptr();
-                
-                // Bind additional $basetexture2+ layers
-                for (uint i = 0; i < std::size(mesh->material->baseTextures); i++)
-                {
-                    if (Texture* layer = mesh->material->baseTextures[i].ptr())
-                    {
-                        numLayers++;
-                        r.ctx->PSSetShaderResources(i+1, 1, texOverride ? &texOverride->srvSRGB : &layer->srvSRGB);
-                    }
-                }
-            }
-            
-            if (texOverride)
-                srv = texOverride->srvSRGB.ptr();
-
-            if (!srv)
-            {
-                srv = Textures.Missing->srvSRGB.ptr();
-                pointSample = true;
-            }
-            if (pointSample)
-            {
-                r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-            }
-            r.ctx->PSSetShaderResources(0, 1, &srv);
-
-            // Choose shader variant
-            if (numLayers > 1)
-                r.SetShader(Shaders.BrushBlend);
-            else
-                r.SetShader(Shaders.Brush);
-
-            if (this->drawMode == Viewport::DrawMode::ObjectID)
-                r.SetShader(Shaders.BrushDebugID);
-
-            r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &vertexOffset);
-            r.ctx->IASetIndexBuffer(buffer, DXGI_FORMAT_R32_UINT, indexOffset);
-            r.ctx->DrawIndexed(mesh->indices.size(), 0, 0);
-            if (pointSample)
-            {
-                r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
-            }
-        };
-
-        auto DrawMesh = [&](BrushMesh* mesh)
-        {
-            SelectionID id = mesh->brush->GetSelectionID();
-
-            if (Chisel.selectMode == SelectMode::Faces)
-                id = 0;
-
-            if (mesh->brush->IsSelected())
-            {
-                if (wireframe)
-                {
-                    DrawPass(mesh, color_selection_outline, id, Textures.White.ptr());
-                }
-                else
-                {
-                    DrawPass(mesh, color_selection, id);
-                    r.ctx->RSSetState(r.Raster.Wireframe.ptr());
-                    DrawPass(mesh, color_selection_outline, id, Textures.White.ptr());
-                    r.ctx->RSSetState(r.Raster.Default.ptr());
-                }
-            }
-            else
-            {
-                DrawPass(mesh, Colors.White, id);
-            }
-        };
-
         // Draw opaque meshes.
         r.SetBlendState(render::BlendFuncs::Normal);
         r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
@@ -257,6 +279,38 @@ namespace chisel
     {
         if (Selection.Empty())
             return;
+
+        if (Chisel.selectMode == SelectMode::Faces)
+        {
+            for (auto& item : Selection)
+            {
+                if (Face* face = dynamic_cast<Face*>(item); face && face->solid)
+                {
+                    auto& meshes = face->solid->GetMeshes();
+                    if (meshes.size() > face->meshIdx)
+                    {
+                        auto& mesh = meshes[face->meshIdx];
+                        BrushPass pass = BrushPass(&mesh);
+                        pass.startIndex = face->startIndex;
+                        pass.indices = face->GetDispIndexCount();
+                        pass.id = face->GetSelectionID();
+
+                        // Highlight face
+                        r.ctx->RSSetState(r.Raster.DepthBiased.ptr());
+                        pass.color = color_selection;
+                        DrawPass(pass);
+
+                        // Draw selection outline
+                        r.ctx->RSSetState(r.Raster.Wireframe.ptr());
+                        pass.color = color_selection_outline;
+                        pass.texOverride = Textures.White.ptr();
+                        DrawPass(pass);
+                        r.ctx->RSSetState(r.Raster.Default.ptr());
+
+                    }
+                }
+            }
+        }
 
         std::optional<AABB> bounds = Selection.GetBounds();
 

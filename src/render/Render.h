@@ -179,6 +179,7 @@ namespace chisel::render
 
         struct RasterStates {
             Com<ID3D11RasterizerState> Default;
+            Com<ID3D11RasterizerState> DepthBiased;
             Com<ID3D11RasterizerState> Wireframe;
             Com<ID3D11RasterizerState> SmoothLines;
         } Raster;
