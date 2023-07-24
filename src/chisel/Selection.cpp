@@ -2,18 +2,29 @@
 
 namespace chisel
 {
-    SelectionID Selectable::s_lastId = 0;
+    SelectionID Selectable::s_nextID = 1;
 
 //-------------------------------------------------------------------------------------------------
 
+    inline SelectionID Selectable::NextID()
+    {
+        if (s_freeIDs.empty())
+            return s_nextID++;
+        
+        SelectionID id = s_freeIDs.top();
+        s_freeIDs.pop();
+        return id;
+    }
+
     Selectable::Selectable()
-        : m_id(++s_lastId)
+        : m_id(NextID())
     {
         s_map.emplace(m_id, this);
     }
 
     Selectable::~Selectable()
     {
+        s_freeIDs.push(m_id);
         Selection.Unselect(this);
         s_map.erase(m_id);
     }

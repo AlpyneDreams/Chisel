@@ -7,6 +7,7 @@
 #include "math/Math.h"
 #include <optional>
 #include <unordered_map>
+#include <stack>
 
 namespace chisel
 {
@@ -32,8 +33,11 @@ namespace chisel
         void SetSelected(bool selected) { m_selected = selected; }
         static Selectable* Find(SelectionID id);
     private:
-        static SelectionID s_lastId;
+        static SelectionID s_nextID;
         static inline std::unordered_map<SelectionID, Selectable*> s_map;
+        static inline std::stack<SelectionID> s_freeIDs;
+
+        static inline SelectionID NextID();
 
         SelectionID m_id = 0;
         bool m_selected = false;
