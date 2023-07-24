@@ -1,5 +1,6 @@
 #pragma once
 
+#include "chisel/Selection.h"
 #include "console/ConVar.h"
 #include "render/Render.h"
 #include "Orientation.h"
@@ -57,12 +58,17 @@ namespace chisel
         std::optional<DispInfo> disp;
     };
 
-    struct Face
+    struct Face : public Selectable
     {
-        Face(Side* side, std::vector<vec3> points)
+        Face(Side* side, std::vector<vec3> pts)
             : side(side)
-            , points(std::move(points))
-        {}
+            , points(std::move(pts))
+        {
+            if (points.size() > 0)
+                bounds = AABB { points[0], points[0] };
+            for (auto& point : points)
+                bounds = bounds.Extend(point);
+        }
 
         Face(Face&& other) = default;
         Face(const Face& other) = default;
@@ -70,5 +76,12 @@ namespace chisel
 
         Side* side;
         std::vector<vec3> points;
+        AABB bounds;
+
+    // Selectable Interface //
+        virtual std::optional<AABB> GetBounds() const { return bounds; }
+        virtual void Transform(const mat4x4& matrix) {}
+        virtual void Delete() {}
+        virtual void AlignToGrid(vec3 gridSize) {}
     };
 }
