@@ -24,6 +24,6 @@ Output ps_main(Varyings v)
 
     o.color.rgb = Lighting(v.normal, v.view) * baseColor.rgb * Brush.color.rgb;
     o.color.a   = alpha;
-    o.id        = Brush.id;
+    o.id        = v.id;
     return o;
 }

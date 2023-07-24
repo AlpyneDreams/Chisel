@@ -146,14 +146,15 @@ namespace chisel
             }
         }
 
-        auto DrawPass = [&](BrushMesh* mesh, float4 color, Texture* texOverride = nullptr)
+        auto DrawPass = [&](BrushMesh* mesh, float4 color, SelectionID id, Texture* texOverride = nullptr)
         {
             cbuffers::BrushState data;
             data.color = color;
-            data.id = mesh->brush->GetSelectionID();
+            data.id = id;
 
             r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
             r.ctx->PSSetConstantBuffers(1, 1, &r.cbuffers.brush);
+            r.ctx->VSSetConstantBuffers(1, 1, &r.cbuffers.brush);
 
             UINT stride = sizeof(VertexSolid);
             UINT vertexOffset = mesh->alloc->offset;
@@ -214,23 +215,28 @@ namespace chisel
 
         auto DrawMesh = [&](BrushMesh* mesh)
         {
+            SelectionID id = mesh->brush->GetSelectionID();
+
+            if (Chisel.selectMode == SelectMode::Faces)
+                id = 0;
+
             if (mesh->brush->IsSelected())
             {
                 if (wireframe)
                 {
-                    DrawPass(mesh, color_selection_outline, Textures.White.ptr());
+                    DrawPass(mesh, color_selection_outline, id, Textures.White.ptr());
                 }
                 else
                 {
-                    DrawPass(mesh, color_selection);
+                    DrawPass(mesh, color_selection, id);
                     r.ctx->RSSetState(r.Raster.Wireframe.ptr());
-                    DrawPass(mesh, color_selection_outline, Textures.White.ptr());
+                    DrawPass(mesh, color_selection_outline, id, Textures.White.ptr());
                     r.ctx->RSSetState(r.Raster.Default.ptr());
                 }
             }
             else
             {
-                DrawPass(mesh, Colors.White);
+                DrawPass(mesh, Colors.White, id);
             }
         };
 

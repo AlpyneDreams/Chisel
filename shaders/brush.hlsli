@@ -6,6 +6,7 @@ struct Input
     float3 position : POSITION;
     float3 normal   : NORMAL0;
     float3 uv       : TEXCOORD0;
+    uint   face     : BLENDINDICES0;
 };
 
 struct Varyings
@@ -14,6 +15,7 @@ struct Varyings
     float3 normal   : NORMAL0;
     float3 uv       : TEXCOORD0;
     float3 view     : TEXCOORD1;
+    uint   id       : BLENDINDICES0;
 };
 
 Varyings vs_main(Input i)
@@ -24,6 +26,7 @@ Varyings vs_main(Input i)
     v.normal   = i.normal;
     v.view     = mul(Camera.view, float4(i.position, 1.0)).xyz;
     v.uv       = i.uv;
+    v.id       = Brush.id == 0 ? i.face : Brush.id;
 
     return v;
 }
