@@ -1,8 +1,10 @@
 #pragma once
 
+#include "common/Common.h"
 #include "chisel/Selection.h"
 #include "console/ConVar.h"
 #include "render/Render.h"
+#include "Types.h"
 #include "Orientation.h"
 #include "Displacement.h"
 
@@ -60,8 +62,9 @@ namespace chisel
 
     struct Face : public Selectable
     {
-        Face(Side* side, std::vector<vec3> pts)
-            : side(side)
+        Face(Solid* brush, Side* side, std::vector<vec3> pts)
+            : solid(brush)
+            , side(side)
             , points(std::move(pts))
         {
             if (points.size() > 0)
@@ -74,9 +77,22 @@ namespace chisel
         Face(const Face& other) = default;
         Face& operator=(const Face& other) = default;
 
+        Solid* solid;
         Side* side;
         std::vector<vec3> points;
         AABB bounds;
+        uint meshIdx = 0;
+        uint startIndex = 0;
+
+        uint GetVertexCount() const { return points.size(); }
+        uint GetIndexCount() const { return (GetVertexCount() - 2) * 3; }
+
+        uint GetDispIndexCount() const
+        {
+            if (!side->disp)
+                return GetIndexCount();
+            return side->disp->GetIndexCount();
+        }
 
     // Selectable Interface //
         virtual std::optional<AABB> GetBounds() const { return bounds; }

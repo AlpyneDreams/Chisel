@@ -39,6 +39,13 @@ namespace chisel
             return &verts[row * length];
         }
 
+        uint GetIndexCount()
+        {
+            // 2^n x 2^m quads, 2 tris per quad, 3 verts per tri.
+            int quadLength = length - 1;
+            return (2 * quadLength * quadLength) * 3;
+        }
+
         void UpdatePointStartIndex(const std::vector<vec3>& points)
         {
             if (pointStartIndex != -1)

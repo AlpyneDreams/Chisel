@@ -49,6 +49,9 @@ namespace chisel
         this->m_sides = std::move(other.m_sides);
         this->m_faces = std::move(other.m_faces);
         this->m_bounds = other.m_bounds;
+
+        for (auto& face : m_faces)
+            face.solid = this;
     }
         
     Solid::~Solid()
@@ -182,7 +185,7 @@ namespace chisel
                     }
 #endif
                     
-                    m_faces.emplace_back(&side, std::vector<vec3>(currentWinding->points, currentWinding->points + currentWinding->count));
+                    m_faces.emplace_back(this, &side, std::vector<vec3>(currentWinding->points, currentWinding->points + currentWinding->count));
                 }
             }
         }
@@ -228,11 +231,10 @@ namespace chisel
 
                 assert(face.points.size() >= 3);
                 
-                // 2^n x 2^m quads, 2 tris per quad, 3 verts per tri.
                 uint numVertices = disp.verts.size();
                 int length = disp.length;
-                int quadLength = length - 1;
-                uint numIndices = (2 * quadLength * quadLength) * 3;
+                int numSlices = length - 1;
+                uint numIndices = disp.GetIndexCount();
 
                 disp.UpdatePointStartIndex(face.points);
 
@@ -257,8 +259,8 @@ namespace chisel
 
                     for (uint x = 0; x < length; x++)
                     {
-                        float xPercent = float(x) / float(quadLength);
-                        float yPercent = float(y) / float(quadLength);
+                        float xPercent = float(x) / float(numSlices);
+                        float yPercent = float(y) / float(numSlices);
 
                         vec3 pos = endPts[0] + segInt * float(x);
                         vec2 uv  = ComputeUV(pos);
@@ -288,9 +290,9 @@ namespace chisel
                     }
                 }
 
-                for (uint y = 0; y < quadLength; y++)
+                for (uint y = 0; y < numSlices; y++)
                 {
-                    for (uint x = 0; x < quadLength; x++)
+                    for (uint x = 0; x < numSlices; x++)
                     {
                         bool even = (y * length + x) % 2 == 0;
                         if (!even)
@@ -322,10 +324,10 @@ namespace chisel
             }
             else // regular brush
             {
-                uint32_t numVertices = face.points.size();
+                uint32_t numVertices = face.GetVertexCount();
                 if (numVertices < 3)
                     continue;
-                uint32_t numIndices = (numVertices - 2) * 3;
+                const uint32_t numIndices = face.GetIndexCount();
 
                 AssetID id = InvalidAssetID;
                 if (face.side->material != nullptr)
@@ -339,6 +341,10 @@ namespace chisel
                 uint32_t startingIndex = mesh.indices.size();
                 mesh.vertices.reserve(startingVertex + numVertices);
                 mesh.indices.reserve(startingIndex + numIndices);
+
+                face.meshIdx = meshIdx;
+                face.startIndex = startingIndex;
+
                 for (uint32_t i = 0; i < numVertices; i++)
                 {
                     vec3 pos = face.points[i];
