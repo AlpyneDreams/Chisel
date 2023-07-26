@@ -308,6 +308,9 @@ namespace chisel
                 if (ImGui::Selectable( ICON_MC_GRID " Align to Grid"))
                     Selection.AlignToGrid(view_grid_size);
 
+                if (ImGui::Selectable( ICON_MC_CONTENT_DUPLICATE " Duplicate"))
+                    Selection.Duplicate();
+
                 ImGui::EndPopup();
             }
         }

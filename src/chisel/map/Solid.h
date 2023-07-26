@@ -65,6 +65,8 @@ namespace chisel
 
         void Delete() final override;
 
+        Selectable* Duplicate() override;
+
     private:
         friend struct Face;
 

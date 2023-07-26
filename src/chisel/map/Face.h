@@ -99,5 +99,6 @@ namespace chisel
         virtual void Delete() override {} // TODO
         virtual void AlignToGrid(vec3 gridSize) {} // TODO
         virtual Selectable* ResolveSelectable() { return this; } // TODO
+        virtual Selectable* Duplicate() override { return nullptr; }
     };
 }

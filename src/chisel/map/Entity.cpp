@@ -43,6 +43,17 @@ namespace chisel
     {
         origin = math::Snap(origin, gridSize);
     }
+    Selectable* PointEntity::Duplicate()
+    {
+        assert(m_parent->IsMap());
+        PointEntity *newEntity = new PointEntity(m_parent);
+        newEntity->classname = this->classname;
+        newEntity->targetname = this->targetname;
+        newEntity->origin = this->origin;
+        newEntity->kv = this->kv;
+        static_cast<Map*>(m_parent)->AddEntity(newEntity);
+        return newEntity;
+    }
 
     /////////////////////
     // Brush Entity
@@ -80,6 +91,20 @@ namespace chisel
     {
         for (auto& b : m_solids)
             b.AlignToGrid(gridSize);
+    }
+
+    Selectable* BrushEntity::Duplicate()
+    {
+        assert(m_parent->IsMap());
+        BrushEntity *newEntity = new BrushEntity(m_parent);
+        newEntity->classname = this->classname;
+        newEntity->targetname = this->targetname;
+        newEntity->origin = this->origin;
+        newEntity->kv = this->kv;
+        for (Solid& brush : Brushes())
+            newEntity->AddBrush(brush.GetSides());
+        static_cast<Map*>(m_parent)->AddEntity(newEntity);
+        return newEntity;
     }
 
     Solid& BrushEntity::AddBrush(std::vector<Side> sides)

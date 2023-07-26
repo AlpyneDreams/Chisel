@@ -39,6 +39,7 @@ namespace chisel
         std::optional<AABB> GetBounds() const final override;
         void Transform(const mat4x4& matrix) final override;
         void AlignToGrid(vec3 gridSize) final override;
+        Selectable* Duplicate() final override;
 
     // Entity Interface //
 
@@ -55,6 +56,7 @@ namespace chisel
         std::optional<AABB> GetBounds() const final override;
         void Transform(const mat4x4& matrix) final override;
         void AlignToGrid(vec3 gridSize) final override;
+        Selectable* Duplicate() override;
 
     // Entity Interface //
 

@@ -92,6 +92,21 @@ namespace chisel::kv
             other.m_type = Types::None;
         }
 
+        KeyValuesVariant(const KeyValuesVariant& other)
+        {
+            if (other.m_type == KeyValuesType::KeyValues)
+            {
+                KeyValuesChild kv = std::make_unique<KeyValues>((const KeyValues&)other);
+                Set(std::move(kv));
+            }
+            else
+            {
+                memcpy(&m_data, &other.m_data, sizeof(m_data));
+                m_type = other.m_type;
+                m_str = other.m_str;
+            }
+        }
+
         template <typename T>
         KeyValuesVariant(T&& arg)
         {
@@ -227,6 +242,16 @@ namespace chisel::kv
     class KeyValues
     {
     public:
+        KeyValues()
+        {
+        }
+
+        KeyValues(const KeyValues& other)
+        {
+            for (const auto& [name, child] : m_children)
+                m_children.emplace(name, KeyValuesVariant(child));
+        }
+
         static std::unique_ptr<KeyValues> ParseFromUTF8(StringView buffer)
         {
             const char *start = buffer.begin();
@@ -278,10 +303,6 @@ namespace chisel::kv
         bool Contains(std::string_view name)
         {
             return m_children.contains(std::string(name));
-        }
-
-        KeyValues()
-        {
         }
 
         template <typename... Args>

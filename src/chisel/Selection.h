@@ -26,6 +26,7 @@ namespace chisel
         virtual void Transform(const mat4x4& matrix) = 0;
         virtual void Delete() = 0;
         virtual void AlignToGrid(vec3 gridSize) = 0;
+        virtual Selectable* Duplicate() = 0;
         virtual Selectable* ResolveSelectable() { return this; }
     protected:
         friend class Selection;
@@ -43,7 +44,7 @@ namespace chisel
         bool m_selected = false;
     };
 
-    extern class Selection : public Selectable
+    extern class Selection
     {
     public:
         Selection();
@@ -63,10 +64,11 @@ namespace chisel
     public:
     // Selectable Interface //
 
-        std::optional<AABB> GetBounds() const final override;
-        void Transform(const mat4x4& matrix) final override { for (auto* s : m_selection) s->Transform(matrix); }
-        void Delete() final override;
-        void AlignToGrid(vec3 gridSize) final override { for (auto* s : m_selection) s->AlignToGrid(gridSize); }
+        std::optional<AABB> GetBounds() const;
+        void Transform(const mat4x4& matrix) { for (auto* s : m_selection) s->Transform(matrix); }
+        void Delete();
+        void AlignToGrid(vec3 gridSize) { for (auto* s : m_selection) s->AlignToGrid(gridSize); }
+        bool Duplicate();
 
     private:
         std::vector<Selectable*> m_selection;

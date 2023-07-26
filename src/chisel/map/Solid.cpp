@@ -502,6 +502,12 @@ namespace chisel
         m_parent->RemoveBrush(*this);
     }
 
+    Selectable* Solid::Duplicate()
+    {
+        Solid& solid = m_parent->AddBrush(m_sides);
+        return &solid;
+    }
+
     std::vector<Side> CreateCubeBrush(Material* material, vec3 size, const mat4x4& transform)
     {
         static const std::array<Plane, 6> kUnitCubePlanes =

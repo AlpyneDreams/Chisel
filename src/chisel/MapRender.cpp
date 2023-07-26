@@ -317,12 +317,24 @@ namespace chisel
         if (!bounds)
             return;
 
+        static bool s_duplicated = false;
+
+        if (!Keyboard.shift || !Mouse.GetButton(MouseButton::Left))
+            s_duplicated = false;
+
         if (auto transform = Handles.Manipulate(bounds.value(), view, proj, tool, space, snap, snapSize))
         {
+            if (Keyboard.shift && !s_duplicated)
+            {
+                Selection.Duplicate();
+                s_duplicated = true;
+            }
+
             Selection.Transform(transform.value());
             // TODO: Align to grid fights with the gizmo rn :s
             //brush->GetBrush().AlignToGrid(view_grid_size);
         }
+
     }
 
 }

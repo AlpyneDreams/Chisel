@@ -103,9 +103,6 @@ namespace chisel
         std::optional<AABB> bounds;
         for (Selectable* selectable : m_selection)
         {
-            if (selectable == this)
-                continue;
-
             auto selectedBounds = selectable->GetBounds();
             if (!selectedBounds)
                 continue;
@@ -125,6 +122,26 @@ namespace chisel
             s->Delete();
         }
         Clear();
+    }
+
+    bool Selection::Duplicate()
+    {
+        bool containsUnduplicatables = false;
+
+        for (Selectable*& s : m_selection)
+        {
+            Selectable *duplicated = s->Duplicate();
+            if (duplicated)
+            {
+                s->SetSelected(false);
+                duplicated->SetSelected(true);
+                s = duplicated;
+            }
+            else
+                containsUnduplicatables = true;
+        }
+
+        return containsUnduplicatables;
     }
 
     class Selection Selection;
