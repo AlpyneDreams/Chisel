@@ -1,6 +1,6 @@
 [wrap-git]
 directory = imguizmo
-url = https://github.com/CedricGuillemet/ImGuizmo.git
+url = https://github.com/Joshua-Ashton/ImGuizmo.git
 revision = head
 patch_directory = imguizmo
 
