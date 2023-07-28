@@ -5,12 +5,7 @@
 
 namespace chisel
 {
-    static SelectTool Instance;
-
-    SelectTool::SelectTool()
-        : Tool("Select", ICON_MC_CURSOR_DEFAULT, 0)
-    {
-    }
+    static SelectTool Instance = SelectTool("Select", ICON_MC_CURSOR_DEFAULT, 0);
 
     void SelectTool::OnClick(Viewport& viewport, uint2 mouse)
     {

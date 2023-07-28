@@ -41,5 +41,9 @@ namespace chisel
         };
 
         static inline std::set<Tool*, ToolOrder> Tools;
+
+    protected:
+        // For multiple inheritance
+        Tool() {}
     };
 }
