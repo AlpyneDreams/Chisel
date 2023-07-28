@@ -8,9 +8,12 @@
 #include "console/Console.h"
 #include "render/CBuffers.h"
 #include "render/TextureFormat.h"
+#include "console/ConVar.h"
 
 namespace chisel::render
 {
+    static ConVar<bool> r_vsync("r_vsync", true, "Enable/disable vsync");
+
     void RenderContext::Init(Window* window)
     {
         D3D_FEATURE_LEVEL level = D3D_FEATURE_LEVEL_11_1;
@@ -240,7 +243,7 @@ namespace chisel::render
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
         // Present
-        swapchain->Present(0, 0);
+        swapchain->Present(r_vsync, 0);
     }
 
     Rc<RenderTarget> RenderContext::CreateRenderTarget(uint width, uint height, DXGI_FORMAT format)
