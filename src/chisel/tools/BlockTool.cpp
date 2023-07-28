@@ -17,8 +17,8 @@ namespace chisel
         virtual void DrawHandles(Viewport& viewport) override;
         virtual bool HasPropertiesGUI() override { return true; }
         virtual void DrawPropertiesGUI() override;
-        virtual void OnRayHit(Viewport& viewport) override;
-        virtual void OnFinishDrag(Viewport& viewport) override;
+        virtual void OnMouseOver(Viewport& viewport, vec3 point, vec3 normal) override;
+        virtual void OnFinishDrag(Viewport& viewport, vec3 point, vec3 normal) override;
 
         PrimitiveType type = PrimitiveType::Block;
     };
@@ -68,9 +68,9 @@ namespace chisel
         }
     }
 
-    void BlockTool::OnRayHit(Viewport& viewport)
+    void BlockTool::OnMouseOver(Viewport& viewport, vec3 point, vec3 normal)
     {
-        DragTool::OnRayHit(viewport);
+        DragTool::OnMouseOver(viewport, point, normal);
         
         if (viewport.draggingBlock)
         {
@@ -88,7 +88,7 @@ namespace chisel
         }
     }
 
-    void BlockTool::OnFinishDrag(Viewport& viewport)
+    void BlockTool::OnFinishDrag(Viewport& viewport, vec3 point, vec3 normal)
     {
         vec3 vec = glm::abs(point - viewport.dragStartPos);
         vec3 center = (viewport.dragStartPos + point) / 2.f;

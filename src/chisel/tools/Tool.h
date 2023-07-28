@@ -13,10 +13,13 @@ namespace chisel
     {
         Tool(const char* name, const char* icon, uint order);
 
+        // Called on viewport click. Used for selection.
         virtual void OnClick(Viewport& viewport, uint2 mouse) {}
 
+        // Called every frame. Handle rendering and input logic go here.
         virtual void DrawHandles(Viewport& viewport) {}
         
+        // Tool Properties GUI
         virtual bool HasPropertiesGUI() { return false; }
         virtual void DrawPropertiesGUI() {}
 

@@ -2,6 +2,7 @@
 #include "chisel/Gizmos.h"
 #include "gui/IconsMaterialCommunity.h"
 #include "gui/Viewport.h"
+#include "math/Plane.h"
 
 namespace chisel
 {
@@ -13,8 +14,10 @@ namespace chisel
 
         virtual bool HasPropertiesGUI() override { return true; }
         virtual void DrawPropertiesGUI() override;
-        virtual void OnRayHit(Viewport& viewport) override;
-        virtual void OnFinishDrag(Viewport& viewport) override;
+        virtual void OnMouseOver(Viewport& viewport, vec3 point, vec3 normal) override;
+        virtual void OnFinishDrag(Viewport& viewport, vec3 point, vec3 normal) override;
+
+        Plane plane;
     };
 
     static ClipTool Instance;
@@ -31,16 +34,16 @@ namespace chisel
             ImGui::RadioButton(buttonNames[i], (int*)&tool_clip_type.value, i);
     }
 
-    void ClipTool::OnRayHit(Viewport& viewport)
+    void ClipTool::OnMouseOver(Viewport& viewport, vec3 point, vec3 normal)
     {
-        // Change to perpendicular plane
+        // Find the perpendicular plane
         if (viewport.draggingBlock)
         {
             vec3 direction = glm::normalize(point - viewport.dragStartPos);
             plane = Plane(point, glm::cross(direction, normal));
         }
 
-        DragTool::OnRayHit(viewport);
+        DragTool::OnMouseOver(viewport, point, normal);
 
         // Draw clip plane
         if (viewport.draggingBlock)
@@ -49,9 +52,12 @@ namespace chisel
             Gizmos.DrawPlane(plane, Color(0.0f, 1.0f, 1.0f, 0.1f), true);
             Gizmos.DrawPlane(plane, Color(1.0f, 0.0f, 0.0f, 0.1f), false);
         }
+
+        // Reset plane
+        plane = Plane();
     }
 
-    void ClipTool::OnFinishDrag(Viewport& viewport)
+    void ClipTool::OnFinishDrag(Viewport& viewport, vec3 point, vec3 normal)
     {
         Side sides[2] = {{ plane, Chisel.activeMaterial, 0.25f }, { plane.Inverse(), Chisel.activeMaterial, 0.25f }};
 

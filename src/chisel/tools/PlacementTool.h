@@ -1,27 +1,34 @@
 #pragma once
 
 #include "Tool.h"
-#include "math/Plane.h"
 
 namespace chisel
 {
+    //--------------------------------------------------
+    //  Raycast Placement Tool
+    //--------------------------------------------------
     struct PlacementTool : public Tool
     {
         using Tool::Tool;
 
-        virtual void DrawHandles(Viewport& viewport);
+        // Casts ray and calls OnMouseOver if hit.
+        virtual void DrawHandles(Viewport& viewport) override;
 
-        virtual void OnRayHit(Viewport& viewport) = 0;
-
-        Plane plane;
-        vec3 point;
-        vec3 normal;
+        // Called when the raycast hits a point
+        virtual void OnMouseOver(Viewport& viewport, vec3 point, vec3 normal) = 0;
     };
 
+    //--------------------------------------------------
+    //  Click and Drag Tool
+    //--------------------------------------------------
     struct DragTool : public PlacementTool
     {
         using PlacementTool::PlacementTool;
-        virtual void OnRayHit(Viewport& viewport);
-        virtual void OnFinishDrag(Viewport& viewport) = 0;
+
+        // Detects dragging and calls OnFinishDrag.
+        virtual void OnMouseOver(Viewport& viewport, vec3 point, vec3 normal) override;
+
+        // Called when the user releases dragging (drag start point in viewport.dragStartPos)
+        virtual void OnFinishDrag(Viewport& viewport, vec3 point, vec3 normal) = 0;
     };
 }

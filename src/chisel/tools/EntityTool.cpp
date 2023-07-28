@@ -10,9 +10,9 @@ namespace chisel
     struct EntityTool final : public PlacementTool
     {
         EntityTool() : PlacementTool("Entity", ICON_MC_LIGHTBULB, 100) {}
-        virtual bool HasPropertiesGUI() { return true; }
-        virtual void DrawPropertiesGUI();
-        virtual void OnRayHit(Viewport& viewport);
+        virtual bool HasPropertiesGUI() override { return true; }
+        virtual void DrawPropertiesGUI() override;
+        virtual void OnMouseOver(Viewport& viewport, vec3 point, vec3 normal) override;
 
         std::string className = "info_player_start";
         bool        randomYaw = false;
@@ -27,7 +27,7 @@ namespace chisel
         ImGui::Checkbox("Random Yaw", &randomYaw);
     }
 
-    void EntityTool::OnRayHit(Viewport& viewport)
+    void EntityTool::OnMouseOver(Viewport& viewport, vec3 point, vec3 normal)
     {
         // Draw hypothetical entity
         Chisel.Renderer->DrawPointEntity(className, true, point);

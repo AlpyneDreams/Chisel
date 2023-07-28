@@ -5,7 +5,7 @@
 
 namespace chisel
 {
-    static ConVar<bool> r_raycast_brush_placement("r_raycast_brush_placement", true, "Enable/disable raycast brush placement for perf debugging");
+    static ConVar<bool> tool_placement_raycast("tool_placement_raycast", true, "Enable/disable raycast brush placement for perf debugging");
 
     void PlacementTool::DrawHandles(Viewport& viewport)
     {
@@ -14,11 +14,11 @@ namespace chisel
         Ray ray    = viewport.GetMouseRay();
 
         bool hit = false;
-        normal = vec3(0, 0, 1);
-        point = vec3(0);
-        plane = Plane();
+        vec3 normal = vec3(0, 0, 1);
+        vec3 point = vec3(0);
         
-        if (r_raycast_brush_placement)
+        // Cast ray to nearest surface
+        if (tool_placement_raycast)
         {
             auto r_hit = map.QueryRay(ray);
             if (r_hit)
@@ -29,6 +29,7 @@ namespace chisel
             }
         }
 
+        // If no surface hit, then cast to the grid
         if (!hit)
         {
             float t;
@@ -44,6 +45,7 @@ namespace chisel
 
         if (hit)
         {
+            // Snap to grid if enabled
             if (view_grid_snap)
             {
                 vec3 snapped = math::Snap(point, view_grid_size);
@@ -51,23 +53,20 @@ namespace chisel
                 // TODO: Handle non-cardinal angles better.
                 bool cardinal = math::CloseEnough(axis, vec3(1.0f, 0.0f, 0.0f)) || math::CloseEnough(axis, vec3(0.0f, 1.0f, 0.0f)) || math::CloseEnough(axis, vec3(0.0f, 0.0f, 1.0f));
                 if (view_grid_snap_hit_normal || !cardinal)
-                {
                     point = snapped;
-                }
                 else
-                {
                     point = (point * axis) + (snapped * (glm::vec3(1.0f) - axis));
-                }
             }
 
-            OnRayHit(viewport);
+            OnMouseOver(viewport, point, normal);
         }
     }
 
-    void DragTool::OnRayHit(Viewport& viewport)
+    void DragTool::OnMouseOver(Viewport& viewport, vec3 point, vec3 normal)
     {
         Gizmos.DrawPoint(point, false);
 
+        // Check for dragging
         if (viewport.mouseOver && Mouse.GetButtonDown(MouseButton::Left))
         {
             viewport.draggingBlock = true;
@@ -78,7 +77,7 @@ namespace chisel
             viewport.draggingBlock = false;
             if (point != viewport.dragStartPos)
             {
-                OnFinishDrag(viewport);
+                OnFinishDrag(viewport, point, normal);
             }
         }
     }
