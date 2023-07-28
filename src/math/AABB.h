@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/Math.h"
+#include <array>
 
 namespace chisel
 {
@@ -65,5 +66,22 @@ namespace chisel
     inline AABB operator*(const mat3x3& mtx, const AABB& bounds)
     {
         return AABB { mtx * bounds.min, mtx * bounds.max };
+    }
+
+    inline auto AABBToCorners(const AABB& aabb)
+    {
+        std::array<vec3, 8> corners =
+        {{
+            vec3( aabb.min.x, aabb.min.y, aabb.min.z ),
+            vec3( aabb.min.x, aabb.min.y, aabb.max.z ),
+            vec3( aabb.min.x, aabb.max.y, aabb.min.z ),
+            vec3( aabb.min.x, aabb.max.y, aabb.max.z ),
+            vec3( aabb.max.x, aabb.min.y, aabb.min.z ),
+            vec3( aabb.max.x, aabb.min.y, aabb.max.z ),
+            vec3( aabb.max.x, aabb.max.y, aabb.min.z ),
+            vec3( aabb.max.x, aabb.max.y, aabb.max.z ),
+        }};
+
+        return corners;
     }
 }

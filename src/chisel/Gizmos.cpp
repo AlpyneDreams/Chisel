@@ -112,18 +112,77 @@ namespace chisel
 
         r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
         r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
-        r.UpdateDynamicBuffer(buffer, vertices, sizeof(Primitives::Vertex) * 6);
+        r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
         r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
         r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
         r.SetBlendState(render::BlendFuncs::Alpha);
 
         uint stride = sizeof(Primitives::Vertex);
         uint offset = 0;
-        r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         r.ctx->Draw(6, 0);
 
         r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         r.SetBlendState(render::BlendFuncs::Normal);
+    }
+
+    void Gizmos::DrawAABB(const AABB& aabb, Color color)
+    {
+        auto corners = AABBToCorners(aabb);
+        DrawBox(corners, color);
+    }
+
+    void Gizmos::DrawBox(std::span<vec3, 8> corners, Color color)
+    {
+        static constexpr std::array<std::array<uint32_t, 4>, 8> CornerIndices =
+        {{
+            { 5,4,6,7 },
+            { 7,6,2,3 },
+            { 1,5,7,3 },
+            { 3,2,0,1 },
+            { 1,0,4,5 },
+            { 2,6,4,0 },
+        }};
+
+        auto& r = Engine.rctx;
+        r.SetShader(sh_Color);
+
+        cbuffers::ObjectState data;
+        data.model = glm::identity<mat4x4>();
+        data.color = color;
+        data.id = 0;
+
+        Primitives::Vertex vertices[6 * 6];
+        for (uint32_t i = 0; i < 6; i++)
+        {
+            vec3 v0 = corners[CornerIndices[i][0]];
+            vec3 v1 = corners[CornerIndices[i][1]];
+            vec3 v2 = corners[CornerIndices[i][2]];
+            vec3 v3 = corners[CornerIndices[i][3]];
+
+            vertices[6 * i + 0] = { v0, vec2(0.0f) };
+            vertices[6 * i + 1] = { v1, vec2(0.0f) };
+            vertices[6 * i + 2] = { v2, vec2(0.0f) };
+            vertices[6 * i + 3] = { v0, vec2(0.0f) };
+            vertices[6 * i + 4] = { v2, vec2(0.0f) };
+            vertices[6 * i + 5] = { v3, vec2(0.0f) };
+        }
+
+        ID3D11Buffer* buffer = r.scratchVertex.ptr();
+
+        r.ctx->RSSetState(r.Raster.DepthBiased.ptr());
+        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
+        r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
+        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.SetBlendState(render::BlendFuncs::Alpha);
+
+        uint stride = sizeof(Primitives::Vertex);
+        uint offset = 0;
+        r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+        r.ctx->Draw(6 * 6, 0);
+
+        r.SetBlendState(render::BlendFuncs::Normal);
+        r.ctx->RSSetState(r.Raster.Default.ptr());
     }
 }

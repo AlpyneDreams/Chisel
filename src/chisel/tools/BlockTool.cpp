@@ -74,17 +74,22 @@ namespace chisel
         
         if (viewport.draggingBlock)
         {
-            vec3 direction = point - viewport.dragStartPos;
-            vec3 corner1 = vec3(point.x, viewport.dragStartPos.y, point.z);
-            vec3 corner2 = vec3(viewport.dragStartPos.x, point.yz);
+            vec3 start = viewport.dragStartPos;
+            vec3 end   = point;
 
-            Gizmos.DrawPoint(viewport.dragStartPos);
-            Gizmos.DrawPoint(corner1);
-            Gizmos.DrawPoint(corner2);
-            Gizmos.DrawLine(viewport.dragStartPos, corner1);
-            Gizmos.DrawLine(viewport.dragStartPos, corner2);
-            Gizmos.DrawLine(corner1, point);
-            Gizmos.DrawLine(corner2, point);
+            vec3 mins = glm::min(start, end);
+            vec3 maxs = glm::max(start, end);
+
+            auto corners = AABBToCorners(AABB{ mins, maxs });
+            for (uint32_t i = 0; i < 8; i++)
+            {
+                auto corner = corners[i];
+
+                if (corner != end)
+                    Gizmos.DrawPoint(corner);
+
+                Gizmos.DrawBox(corners, Color(0.5f, 1.0f, 0.5f, 0.2f));
+            }
         }
     }
 

@@ -6,6 +6,8 @@
 #include "Selection.h"
 #include "math/Plane.h"
 
+#include <span>
+
 namespace chisel
 {
     inline struct Gizmos
@@ -19,6 +21,8 @@ namespace chisel
         void DrawLine(vec3 start, vec3 end, Color color = Colors.White);
         void DrawPlane(const Plane& plane, Color color = Colors.White, bool backFace = true);
         void DrawPoint(vec3 pos, bool depthTest = true);
+        void DrawAABB(const AABB& aabb, Color color = Colors.White);
+        void DrawBox(std::span<vec3, 8> corners, Color color = Colors.White);
 
         void Init();
     } Gizmos;
