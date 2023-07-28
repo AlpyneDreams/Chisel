@@ -1,5 +1,4 @@
 #include "PlacementTool.h"
-#include "chisel/Handles.h"
 #include "chisel/Gizmos.h"
 #include "gui/IconsMaterialCommunity.h"
 #include "gui/Viewport.h"
@@ -46,7 +45,7 @@ namespace chisel
         // Draw clip plane
         if (viewport.draggingBlock)
         {
-            Handles.DrawPoint(viewport.dragStartPos);
+            Gizmos.DrawPoint(viewport.dragStartPos);
             Gizmos.DrawPlane(plane, Color(0.0f, 1.0f, 1.0f, 0.1f), true);
             Gizmos.DrawPlane(plane, Color(1.0f, 0.0f, 0.0f, 0.1f), false);
         }

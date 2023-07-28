@@ -1,7 +1,6 @@
 #pragma once
 
 #include "gui/Window.h"
-#include "chisel/Handles.h"
 #include "console/ConVar.h"
 #include "core/Camera.h"
 #include "render/Render.h"

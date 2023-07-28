@@ -4,7 +4,6 @@
 #include "common/System.h"
 #include "chisel/Engine.h"
 #include "chisel/Selection.h"
-#include "chisel/Handles.h"
 #include "chisel/Gizmos.h"
 
 #include "core/Primitives.h"

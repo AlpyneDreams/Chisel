@@ -1,5 +1,6 @@
 #include "TransformTool.h"
 #include "chisel/Chisel.h"
+#include "chisel/Handles.h"
 #include "gui/IconsMaterialCommunity.h"
 #include "gui/Viewport.h"
 

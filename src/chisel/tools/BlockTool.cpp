@@ -78,9 +78,9 @@ namespace chisel
             vec3 corner1 = vec3(point.x, viewport.dragStartPos.y, point.z);
             vec3 corner2 = vec3(viewport.dragStartPos.x, point.yz);
 
-            Handles.DrawPoint(viewport.dragStartPos);
-            Handles.DrawPoint(corner1);
-            Handles.DrawPoint(corner2);
+            Gizmos.DrawPoint(viewport.dragStartPos);
+            Gizmos.DrawPoint(corner1);
+            Gizmos.DrawPoint(corner2);
             Gizmos.DrawLine(viewport.dragStartPos, corner1);
             Gizmos.DrawLine(viewport.dragStartPos, corner2);
             Gizmos.DrawLine(corner1, point);

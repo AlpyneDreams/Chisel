@@ -44,8 +44,6 @@ namespace chisel
 
         void DrawTestCube(const mat4x4& view, const mat4x4& proj);
 
-        void DrawPoint(vec3 pos, bool test = true);
-
     // Grid //
 
         static constexpr int gridChunkSize = 200;

@@ -2,6 +2,7 @@
 #include "chisel/Engine.h"
 #include "chisel/Selection.h"
 #include "chisel/Chisel.h"
+#include "chisel/Handles.h"
 #include "input/Input.h"
 #include "input/Keyboard.h"
 #include "platform/Cursor.h"

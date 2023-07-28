@@ -1,6 +1,7 @@
 #include "console/Console.h"
 #include "gui/Viewport.h"
 #include "chisel/Gizmos.h"
+#include "chisel/Handles.h"
 #include "chisel/MapRender.h"
 #include "chisel/tools/Tool.h"
 

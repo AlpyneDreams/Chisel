@@ -46,6 +46,11 @@ namespace chisel
         r.SetBlendState(render::BlendFuncs::Normal);
     }
 
+    void Gizmos::DrawPoint(vec3 pos, bool depthTest)
+    {
+        DrawIcon(pos, icnHandle.ptr(), Colors.White, 0, vec3(16.f), depthTest);
+    }
+
     // TODO: These should be batched.
     void Gizmos::DrawLine(vec3 start, vec3 end, Color color)
     {

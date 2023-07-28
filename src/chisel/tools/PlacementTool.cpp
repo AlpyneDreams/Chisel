@@ -1,6 +1,6 @@
 #include "PlacementTool.h"
 #include "chisel/Chisel.h"
-#include "chisel/Handles.h"
+#include "chisel/Gizmos.h"
 #include "gui/Viewport.h"
 
 namespace chisel
@@ -66,7 +66,7 @@ namespace chisel
 
     void DragTool::OnRayHit(Viewport& viewport)
     {
-        Handles.DrawPoint(point, false);
+        Gizmos.DrawPoint(point, false);
 
         if (viewport.mouseOver && Mouse.GetButtonDown(MouseButton::Left))
         {
