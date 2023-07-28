@@ -59,6 +59,11 @@ namespace chisel
             }
 
             OnMouseOver(viewport, point, normal);
+
+            if (viewport.mouseOver && Mouse.GetButtonDown(MouseButton::Left))
+            {
+                OnClick(viewport, point, normal);
+            }
         }
     }
 

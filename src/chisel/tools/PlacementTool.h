@@ -11,11 +11,14 @@ namespace chisel
     {
         using Tool::Tool;
 
-        // Casts ray and calls OnMouseOver if hit.
+        // Casts ray and calls callbacks
         virtual void DrawHandles(Viewport& viewport) override;
 
         // Called when the raycast hits a point
         virtual void OnMouseOver(Viewport& viewport, vec3 point, vec3 normal) = 0;
+
+        // Called when clicking in world space
+        virtual void OnClick(Viewport& viewport, vec3 point, vec3 normal) {}
     };
 
     //--------------------------------------------------

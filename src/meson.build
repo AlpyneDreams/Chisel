@@ -38,6 +38,7 @@ chisel_src = [
     'chisel/tools/ClipTool.cpp',
     'chisel/tools/EntityTool.cpp',
     'chisel/tools/PlacementTool.cpp',
+    'chisel/tools/PolygonTool.cpp',
     'chisel/tools/SelectTool.cpp',
     'chisel/tools/TransformTool.cpp',
     'chisel/FGD/FGD.cpp',

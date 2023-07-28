@@ -13,6 +13,7 @@ namespace chisel
         virtual bool HasPropertiesGUI() override { return true; }
         virtual void DrawPropertiesGUI() override;
         virtual void OnMouseOver(Viewport& viewport, vec3 point, vec3 normal) override;
+        virtual void OnClick(Viewport& viewport, vec3 point, vec3 normal) override;
 
         std::string className = "info_player_start";
         bool        randomYaw = false;
@@ -31,14 +32,14 @@ namespace chisel
     {
         // Draw hypothetical entity
         Chisel.Renderer->DrawPointEntity(className, true, point);
+    }
 
+    void EntityTool::OnClick(Viewport& viewport, vec3 point, vec3 normal)
+    {
         // Place entity on click
-        if (viewport.mouseOver && Mouse.GetButtonDown(MouseButton::Left))
-        {
-            PointEntity* pt = Chisel.map.AddPointEntity(className.c_str());
-            pt->origin = point;
-            Selection.Clear();
-            Selection.Select(pt);
-        }
+        PointEntity* pt = Chisel.map.AddPointEntity(className.c_str());
+        pt->origin = point;
+        Selection.Clear();
+        Selection.Select(pt);
     }
 }
