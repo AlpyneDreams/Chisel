@@ -46,7 +46,7 @@ namespace chisel
 
         void DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles = vec3(0), bool selected = false, SelectionID id = 0);
         void DrawBrushEntity(BrushEntity& ent);
-        void DrawHandles(mat4x4& view, mat4x4& proj, Tool tool, Space space, bool snap, const vec3& snapSize);
+        void DrawHandles(mat4x4& view, mat4x4& proj);
 
     protected:
         inline void DrawPass(const BrushPass& pass);

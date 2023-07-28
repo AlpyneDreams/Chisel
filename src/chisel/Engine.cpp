@@ -103,7 +103,7 @@ namespace chisel
         Window::Shutdown();
     }
 
-    void Engine::PickObject(uint2 mouse, const Rc<render::RenderTarget>& rt_ObjectID)
+    void Engine::PickObject(uint2 mouse, const Rc<render::RenderTarget>& rt_ObjectID, void callback(void*))
     {
         auto bufferIn = cs_ObjectID.buffers[0];
 
@@ -111,7 +111,7 @@ namespace chisel
         r.UpdateDynamicBuffer(bufferIn.buffer.ptr(), mouse);
 
         // When rendering completes...
-        OnEndFrame.Once([rt_ObjectID](render::RenderContext& r)
+        OnEndFrame.Once([rt_ObjectID, callback](render::RenderContext& r)
         {
             // Unbind render targets
             r.ctx->OMSetRenderTargets(0, nullptr, nullptr);
@@ -130,28 +130,7 @@ namespace chisel
             r.ctx->Dispatch(1, 1, 1);
 
             // Download the output value
-            bufferOut.Download([](void* data)
-            {
-                uint id = ((uint*)data)[0];
-
-                if (id == 0) {
-                    Selection.Clear();
-                } else {
-                    Selectable* selection = Selection.Find(id);
-                    if (selection)
-                    {
-                        if (Keyboard.ctrl)
-                        {
-                            Selection.Toggle(selection);
-                        }
-                        else
-                        {
-                            Selection.Clear();
-                            Selection.Select(selection);
-                        }
-                    }
-                }
-            });
+            bufferOut.Download(callback);
         });
     }
 }

@@ -6,6 +6,7 @@
 #include "gui/Modal.h"
 #include "gui/Viewport.h"
 #include "input/Mouse.h"
+#include "chisel/tools/Tool.h"
 
 #include <glm/gtc/round.hpp>
 
@@ -239,25 +240,27 @@ namespace chisel
     {
         ImGui::Spacing();
 
-        Option(ICON_MC_CURSOR_DEFAULT, "Select", Tool::Select);
-        Option(ICON_MC_ARROW_ALL, "Translate", Tool::Translate);
-        Option(ICON_MC_AUTORENEW, "Rotate", Tool::Rotate);
-        Option(ICON_MC_RESIZE, "Scale", Tool::Scale);
-        Option(ICON_MC_ALPHA_U_BOX_OUTLINE, "Transform (All)", Tool::Universal);
-        Option(ICON_MC_VECTOR_SQUARE, "Bounds", Tool::Bounds);
-        ImGui::Separator();
-        Option(ICON_MC_LIGHTBULB, "Entity", Tool::Entity);
-        Option(ICON_MC_CUBE_OUTLINE, "Block", Tool::Block);
-        Option(ICON_MC_SQUARE_OFF_OUTLINE, "Clip", Tool::Clip);
+        uint category = 0;
+
+        for (Tool* tool : Tool::Tools)
+        {
+            if (uint cat = tool->GetToolCategory(); category != cat)
+            {
+                ImGui::Separator();
+                category = cat;
+            }
+
+            Option(tool->icon, tool->name, tool);
+        }
     }
 
-    void MainToolbar::Option(const char* icon, const char* name, Tool tool)
+    void MainToolbar::Option(const char* icon, const char* name, Tool* tool)
     {
-        ImGuiCol col = Chisel.activeTool == tool ? ImGuiCol_TabActive : ImGuiCol_WindowBg;
+        ImGuiCol col = Chisel.tool == tool ? ImGuiCol_TabActive : ImGuiCol_WindowBg;
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(col));
 
         if (ImGui::Button(icon)) {
-            Chisel.activeTool = tool;
+            Chisel.tool = tool;
         }
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip(name);

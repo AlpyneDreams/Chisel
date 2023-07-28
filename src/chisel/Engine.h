@@ -31,7 +31,7 @@ namespace chisel
         render::ComputeShader cs_ObjectID;
 
         // Read object ID from given selection buffer render target and update selection
-        void PickObject(uint2 mouse, const Rc<render::RenderTarget>& rt_ObjectID);
+        void PickObject(uint2 mouse, const Rc<render::RenderTarget>& rt_ObjectID, void callback(void*));
 
     // Main Engine Loop //
 

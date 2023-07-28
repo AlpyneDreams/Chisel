@@ -27,16 +27,16 @@ namespace chisel
     //  ImGuizmo
     //--------------------------------------------------
     
-    static ImGuizmo::OPERATION GetOperation(Tool tool)
+    static ImGuizmo::OPERATION GetOperation(TransformType tool)
     {
         using enum ImGuizmo::OPERATION;
         switch (tool) {
             default:
-            case Tool::Translate: return TRANSLATE;
-            case Tool::Rotate:    return ROTATE;
-            case Tool::Scale:     return SCALE;
-            case Tool::Universal: return UNIVERSAL;
-            case Tool::Bounds:    return BOUNDS;
+            case TransformType::Translate: return TRANSLATE;
+            case TransformType::Rotate:    return ROTATE;
+            case TransformType::Scale:     return SCALE;
+            case TransformType::Universal: return UNIVERSAL;
+            case TransformType::Bounds:    return BOUNDS;
         }
     }
 
@@ -63,13 +63,13 @@ namespace chisel
         return false;
     }
 
-    bool Handles::Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, Tool tool, Space space,
+    bool Handles::Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, TransformType tool, Space space,
                     bool snap, const vec3& snapSize, const float* localBounds, const vec3& boundsSnap)
     {
-        bool bounds = tool == Tool::Bounds;
+        bool bounds = tool == TransformType::Bounds;
 
         // Only snap if we're translating or rotating
-        snap = snap && (tool == Tool::Translate || tool == Tool::Rotate);
+        snap = snap && (tool == TransformType::Translate || tool == TransformType::Rotate);
 
         // Record previous model transform
         mat4x4 prev;
@@ -108,7 +108,7 @@ namespace chisel
 
     // Transform using a matrix generated from an AABB. Automatically prevents scaling to 0.
     // Bounds are snapped on the same scale as translations. Returns a new matrix if any transformation was made.
-    std::optional<mat4x4> Handles::Manipulate(const AABB& bounds, const mat4x4& view, const mat4x4& proj, Tool tool, Space space,
+    std::optional<mat4x4> Handles::Manipulate(const AABB& bounds, const mat4x4& view, const mat4x4& proj, TransformType tool, Space space,
                     bool snap, const vec3& snapSize)
     {
         auto mtx = bounds.ComputeMatrix();

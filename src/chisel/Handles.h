@@ -28,12 +28,12 @@ namespace chisel
         void Begin(const Rect& viewport, bool allowAxisFlip);
 
         bool Manipulate(Transform& transform, auto... args);
-        bool Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, Tool tool, Space space,
+        bool Manipulate(mat4x4& model, const mat4x4& view, const mat4x4& proj, TransformType tool, Space space,
                         bool snap, const vec3& snapSize, const float* localBounds = NULL, const vec3& boundsSnap = vec3(1));
         
         // Transform using a matrix generated from an AABB. Automatically prevents scaling to 0.
         // Bounds are snapped on the same scale as translations. Returns a new matrix if any transformation was made.
-        std::optional<mat4x4> Manipulate(const AABB& bounds, const mat4x4& view, const mat4x4& proj, Tool tool, Space space,
+        std::optional<mat4x4> Manipulate(const AABB& bounds, const mat4x4& view, const mat4x4& proj, TransformType tool, Space space,
                         bool snap, const vec3& snapSize);
         
         bool IsMouseOver();

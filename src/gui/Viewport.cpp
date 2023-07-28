@@ -1,8 +1,8 @@
 #include "console/Console.h"
 #include "gui/Viewport.h"
-#include "gui/ToolProperties.h"
 #include "chisel/Gizmos.h"
 #include "chisel/MapRender.h"
+#include "chisel/tools/Tool.h"
 
 #include "math/Plane.h"
 #include "math/Ray.h"
@@ -11,8 +11,6 @@
 
 namespace chisel
 {
-    ConVar<ClipType> tool_clip_type("tool_clip_type", ClipType::Front, "Which clip mode we are in.");
-
     Viewport::Viewport() : View3D(ICON_MC_IMAGE_SIZE_SELECT_ACTUAL, "Viewport", 512, 512, true) {}
 
     void Viewport::Start()
@@ -41,219 +39,16 @@ namespace chisel
 
     void Viewport::OnClick(uint2 mouse)
     {
-        switch (activeTool)
-        {
-            default:
-            case Tool::Select:
-                Engine.PickObject(mouse, rt_ObjectID);
-                break;
-            
-            case Tool::Entity:
-            case Tool::Block:
-                break;
-        }
+        Chisel.tool->OnClick(*this, mouse);
     }
-
-    ConVar<bool> r_raycast_brush_placement("r_raycast_brush_placement", true, "Enable/disable raycast brush placement for perf debugging");
 
     void Viewport::DrawHandles(mat4x4& view, mat4x4& proj)
     {
+        // Draw general handles
+        Chisel.Renderer->DrawHandles(view, proj);
+
         // Draw transform handles
-        switch (activeTool)
-        {
-            case Tool::Select: default: break;
-
-            case Tool::Translate:
-            case Tool::Rotate:
-            case Tool::Scale:
-            case Tool::Universal:
-            case Tool::Bounds:
-            {
-                bool snap = activeTool == Tool::Rotate ? view_rotate_snap : view_grid_snap;
-                vec3 snapSize = activeTool == Tool::Rotate ? vec3(view_rotate_snap_angle) : view_grid_size;
-                Chisel.Renderer->DrawHandles(view, proj, activeTool, Chisel.transformSpace, snap, snapSize);
-                break;
-            }
-
-            case Tool::Block:
-                // User can edit block bounds while adding blocks
-                Chisel.Renderer->DrawHandles(view, proj, Tool::Bounds, Chisel.transformSpace, view_grid_snap, view_grid_size);
-                if (Handles.IsMouseOver())
-                    break;
-            case Tool::Clip:
-            case Tool::Entity:
-            {
-                Plane grid = Plane(Vectors.Zero, Vectors.Up);
-                Ray ray    = GetMouseRay();
-
-                bool hit = false;
-                vec3 normal = vec3(0, 0, 1);
-                vec3 point = vec3(0);
-                Plane plane = Plane();
-                
-                if (r_raycast_brush_placement)
-                {
-                    auto r_hit = map.QueryRay(ray);
-                    if (r_hit)
-                    {
-                        hit = true;
-                        normal = r_hit->face->side->plane.normal;
-                        point = ray.GetPoint(r_hit->t);
-                    }
-                }
-
-                if (!hit)
-                {
-                    float t;
-                    hit = ray.Intersects(grid, t);
-                    if (hit) {
-                        point = ray.GetPoint(t);
-
-                        // Set z to 0 manually to avoid precision errors.
-                        // This assumes the grid is at z = 0
-                        point.z = 0.f;
-                    }
-                }
-
-                if (hit)
-                {
-                    if (view_grid_snap)
-                    {
-                        vec3 snapped = math::Snap(point, view_grid_size);
-                        vec3 axis = glm::abs(normal);
-                        // TODO: Handle non-cardinal angles better.
-                        bool cardinal = math::CloseEnough(axis, vec3(1.0f, 0.0f, 0.0f)) || math::CloseEnough(axis, vec3(0.0f, 1.0f, 0.0f)) || math::CloseEnough(axis, vec3(0.0f, 0.0f, 1.0f));
-                        if (view_grid_snap_hit_normal || !cardinal)
-                        {
-                            point = snapped;
-                        }
-                        else
-                        {
-                            point = (point * axis) + (snapped * (glm::vec3(1.0f) - axis));
-                        }
-                    }
-
-                    if (activeTool == Tool::Entity)
-                    {
-                        // Draw hypothetical entity
-                        Chisel.Renderer->DrawPointEntity(Chisel.entTool.className, true, point);
-
-                        // Place entity on click
-                        if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
-                        {
-                            PointEntity* pt = map.AddPointEntity(Chisel.entTool.className.c_str());
-                            pt->origin = point;
-                            Selection.Clear();
-                            Selection.Select(pt);
-                        }
-                        break;
-                    }
-
-                    Handles.DrawPoint(point, false);
-
-                    if (activeTool == Tool::Clip && draggingBlock)
-                    {
-                        vec3 direction = glm::normalize(point - dragStartPos);
-
-                        plane = Plane(point, glm::cross(direction, normal));
-                    }
-
-                    if (mouseOver && Mouse.GetButtonDown(MouseButton::Left))
-                    {
-                        draggingBlock = true;
-                        dragStartPos  = point;
-                    }
-                    else if (draggingBlock && Mouse.GetButtonUp(MouseButton::Left))
-                    {
-                        draggingBlock = false;
-                        if (point != dragStartPos)
-                        {
-                            if (activeTool == Tool::Clip)
-                            {
-                                Side sides[2] = {{ plane, Chisel.activeMaterial, 0.25f }, { plane.Inverse(), Chisel.activeMaterial, 0.25f }};
-
-                                for (Selectable* selectable : Selection)
-                                {
-                                    if (Solid* solid = dynamic_cast<Solid*>(selectable))
-                                    {
-                                        if (tool_clip_type == ClipType::KeepBoth)
-                                        {
-                                            BrushEntity *parent = solid->GetParent();
-                                            assert(parent != nullptr);
-
-                                            std::vector<Side> newSides = solid->GetSides();
-                                            newSides.emplace_back(sides[1]);
-                                            Solid& newSolid = parent->AddBrush(std::move(newSides));
-                                            Selection.Select(&newSolid);
-                                        }
-
-                                        solid->Clip(tool_clip_type == ClipType::Back ? sides[1] : sides[0]);
-                                        solid->UpdateMesh();
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                vec3 vec = glm::abs(point - dragStartPos);
-                                vec3 center = (dragStartPos + point) / 2.f;
-                                vec3 extrude = vec3(0);
-                                // If we have a degenerate axis, extrude by normal by 1 grid size.
-                                if (math::CloseEnough(vec.x, 0) || math::CloseEnough(vec.y, 0) || math::CloseEnough(vec.z, 0))
-                                    extrude = normal * view_grid_size.value;
-                                mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xyz) + (extrude * 0.5f));
-                                vec3 size = (vec3(vec.xyz) + extrude) * 0.5f;
-                                // make sure we are not degenerate size.
-                                bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
-                                if (!degenerate)
-                                {
-                                    Chisel.map.Actions().PerformAction("Add Cube",
-                                        // Do
-                                        [this, solids = CreateCubeBrush(Chisel.activeMaterial.ptr(), size, mtx)](
-                                            std::any& userdata)
-                                        {
-                                            auto& cube = map.AddBrush(solids);
-                                            Selection.Clear();
-                                            Selection.Select(&cube);
-                                            userdata = &cube;
-                                        },
-                                        // Undo
-                                        [ this ] (std::any& userdata)
-                                        {
-                                            Solid *cube = std::any_cast<Solid*>(userdata);
-                                            cube->Delete();
-                                        });
-                                }
-                            }
-                        }
-                    }
-
-                    if (draggingBlock)
-                    {
-                        if (activeTool == Tool::Clip)
-                        {
-                            Handles.DrawPoint(dragStartPos);
-                            Gizmos.DrawPlane(plane, Color(0.0f, 1.0f, 1.0f, 0.1f), true);
-                            Gizmos.DrawPlane(plane, Color(1.0f, 0.0f, 0.0f, 0.1f), false);
-                        }
-                        else
-                        {
-                            vec3 direction = point - dragStartPos;
-                            vec3 corner1 = vec3(point.x, dragStartPos.y, point.z);
-                            vec3 corner2 = vec3(dragStartPos.x, point.yz);
-
-                            Handles.DrawPoint(dragStartPos);
-                            Handles.DrawPoint(corner1);
-                            Handles.DrawPoint(corner2);
-                            Gizmos.DrawLine(dragStartPos, corner1);
-                            Gizmos.DrawLine(dragStartPos, corner2);
-                            Gizmos.DrawLine(corner1, point);
-                            Gizmos.DrawLine(corner2, point);
-                        }
-                    }
-                }
-                break;
-            }
-        }
+        Chisel.tool->DrawHandles(*this);
         
         // Draw view cube
         {
@@ -283,7 +78,7 @@ namespace chisel
             return;
         }
 
-        GUI::ToolPropertiesWindow(activeTool, viewport, instance);
+        Chisel.tool->DrawPropertiesWindow(viewport, instance);
 
         if (IsMouseOver(viewport))
         {

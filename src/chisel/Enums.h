@@ -2,9 +2,8 @@
 
 namespace chisel
 {
-    enum class Tool {
-        Select, Translate, Rotate, Scale, Universal, Bounds,
-        Entity, Block, Clip
+    enum class TransformType {
+        Translate, Rotate, Scale, Universal, Bounds
     };
 
     enum class ClipType : int {

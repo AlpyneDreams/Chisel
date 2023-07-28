@@ -17,6 +17,7 @@
 #include "render/Render.h"
 #include "common/Parse.h"
 #include "formats/Formats.h"
+#include "tools/Tool.h"
 
 #include <cstring>
 #include <vector>
@@ -28,6 +29,8 @@ namespace chisel
         Engine.Init();
 
         fgd = new FGD("core/test.fgd");
+        
+        tool = Tool::Default;
 
         // Add chisel systems...
         Renderer = &Engine.systems.AddSystem<MapRender>();

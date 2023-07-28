@@ -12,8 +12,6 @@ namespace chisel
     {
         Viewport();
 
-        const Tool& activeTool = Chisel.activeTool;
-
         // TODO: One map per viewport
         Map& map = Chisel.map;
         bool isDraggingCube = false;
