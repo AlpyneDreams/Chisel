@@ -56,7 +56,7 @@ if libdl_dep.found()
 endif
 sdl2_renderer_dep = dependency('sdl2', version: '>=2.0.17', required: get_option('sdl_renderer'))
 if sdl2_renderer_dep.found()
-    sources += 'backends/imgui_impl_sdlrenderer.cpp'
+    sources += 'backends/imgui_impl_sdlrenderer2.cpp'
     dependencies += sdl2_renderer_dep
 endif
 vulkan_dep = dependency('vulkan', required: get_option('vulkan'))
