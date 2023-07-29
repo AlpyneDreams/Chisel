@@ -8,6 +8,8 @@
 
 namespace chisel
 {
+    static ConVar<bool> tool_block_debug("tool_block_debug", false, "Debug highlight based on what type of surface block tool is tracing on");
+
     using BoundsTool = TransformTool<TransformType::Bounds>;
 
     struct BlockTool final : public DragTool, public BoundsTool
@@ -68,6 +70,12 @@ namespace chisel
         }
     }
 
+    static const Color BoxColors[3] = {
+        Color(0.5f, 1.0f, 0.5f, 0.2f),
+        Color(1.0f, 1.0f, 0.5f, 0.2f),
+        Color(1.0f, 0.5f, 0.5f, 0.2f),
+    };
+
     void BlockTool::OnMouseOver(Viewport& viewport, vec3 point, vec3 normal)
     {
         DragTool::OnMouseOver(viewport, point, normal);
@@ -88,7 +96,7 @@ namespace chisel
                 if (corner != end)
                     Gizmos.DrawPoint(corner);
 
-                Gizmos.DrawBox(corners, Color(0.5f, 1.0f, 0.5f, 0.2f));
+                Gizmos.DrawBox(corners, BoxColors[tool_block_debug ? traceMethod : 0]);
             }
         }
     }
@@ -98,11 +106,13 @@ namespace chisel
         vec3 vec = glm::abs(point - viewport.dragStartPos);
         vec3 center = (viewport.dragStartPos + point) / 2.f;
         vec3 extrude = vec3(0);
+
         // If we have a degenerate axis, extrude by normal by 1 grid size.
         if (math::CloseEnough(vec.x, 0) || math::CloseEnough(vec.y, 0) || math::CloseEnough(vec.z, 0))
             extrude = normal * view_grid_size.value;
         mat4x4 mtx = glm::translate(mat4x4(1), vec3(center.xyz) + (extrude * 0.5f));
         vec3 size = (vec3(vec.xyz) + extrude) * 0.5f;
+        
         // make sure we are not degenerate size.
         bool degenerate = math::CloseEnough(size.x, 0.0f) || math::CloseEnough(size.y, 0.0f) || math::CloseEnough(size.z, 0.0f);
         if (!degenerate)
