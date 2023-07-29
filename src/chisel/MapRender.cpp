@@ -210,9 +210,11 @@ namespace chisel
     {
         r.SetBlendState(render::BlendFuncs::Alpha);
         r.ctx->RSSetState(r.Raster.Wireframe.ptr());
+        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
         pass.color = color_selection_outline;
         pass.texOverride = Textures.White.ptr();
         DrawPass(pass);
+        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         r.ctx->RSSetState(r.Raster.Default.ptr());
         r.SetBlendState(nullptr);
     }

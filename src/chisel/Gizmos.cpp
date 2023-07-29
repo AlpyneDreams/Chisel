@@ -176,6 +176,7 @@ namespace chisel
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
         r.ctx->RSSetState(r.Raster.DepthBiased.ptr());
+        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
         r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
         r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.brush, nullptr, nullptr);
@@ -189,6 +190,72 @@ namespace chisel
         r.ctx->Draw(6 * 6, 0);
 
         r.SetBlendState(render::BlendFuncs::Normal);
+        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         r.ctx->RSSetState(r.Raster.Default.ptr());
+    }
+
+    void Gizmos::DrawWireAABB(const AABB& aabb, Color color)
+    {
+        auto corners = AABBToCorners(aabb);
+        DrawBox(corners, color);
+    }
+
+    void Gizmos::DrawWireBox(std::span<vec3, 8> corners, Color color)
+    {
+        // TODO: Use batched DrawLine instead of this nonsense
+
+        static constexpr std::array<uint, 24> CornerIndices =
+        {{
+            0, 1,
+            0, 2,
+            0, 4,
+
+            7, 6,
+            7, 5,
+            7, 3,
+
+            4, 6,
+            4, 5,
+
+            3, 1,
+            3, 2,
+            1, 5,
+            2, 6,
+        }};
+
+        auto& r = Engine.rctx;
+        r.SetShader(sh_Color);
+
+        cbuffers::ObjectState data;
+        data.model = glm::identity<mat4x4>();
+        data.color = color;
+        data.id = 0;
+
+        Primitives::Vertex vertices[24];
+        for (uint32_t i = 0; i < 24; i++)
+        {
+            vertices[i] = { corners[CornerIndices[i]], vec2(0.0f) };
+        }
+
+        ID3D11Buffer* buffer = r.scratchVertex.ptr();
+
+        r.ctx->RSSetState(r.Raster.SmoothLines.ptr());
+        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
+        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
+        r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
+        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.SetBlendState(render::BlendFuncs::Alpha);
+
+        uint stride = sizeof(Primitives::Vertex);
+        uint offset = 0;
+        r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+        r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+        r.ctx->Draw(24, 0);
+
+        r.SetBlendState(render::BlendFuncs::Normal);
+        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
+        r.ctx->RSSetState(r.Raster.Default.ptr());
+        r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     }
 }

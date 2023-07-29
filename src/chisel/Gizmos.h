@@ -23,6 +23,8 @@ namespace chisel
         void DrawPoint(vec3 pos, bool depthTest = true);
         void DrawAABB(const AABB& aabb, Color color = Colors.White);
         void DrawBox(std::span<vec3, 8> corners, Color color = Colors.White);
+        void DrawWireAABB(const AABB& aabb, Color color = Colors.White);
+        void DrawWireBox(std::span<vec3, 8> corners, Color color = Colors.White);
 
         void Init();
     } Gizmos;
