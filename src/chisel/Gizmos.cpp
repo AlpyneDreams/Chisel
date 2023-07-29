@@ -254,7 +254,7 @@ namespace chisel
     
     void Gizmos::PreDraw()
     {
-        r.ctx->OMSetDepthStencilState(depthTest ? r.Depth.NoWrite.ptr() : r.Depth.Ignore.ptr(), 0);
+        r.ctx->OMSetDepthStencilState(depthTest ? r.Depth.Default.ptr() : r.Depth.Ignore.ptr(), 0);
 
         if (id == 0)
             r.SetBlendState(render::BlendFuncs::AlphaNoSelection);

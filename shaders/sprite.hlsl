@@ -43,8 +43,14 @@ Varyings vs_main(Input i)
 Output ps_main(Varyings v)
 {
     Output o = (Output)0;
-    
-    o.color = s_texture.Sample(s_sampler, v.uv) * Object.color;
+
+    float4 color = s_texture.Sample(s_sampler, v.uv);
+
+    // Basic alpha test
+    if (color.a < 0.05)
+        discard;
+
+    o.color = color * Object.color;
     o.id = Object.id;
     
     return o;

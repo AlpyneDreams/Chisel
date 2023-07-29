@@ -108,10 +108,7 @@ namespace chisel
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
             Gizmos.color = color;
             Gizmos.id = id;
-            Gizmos.DrawIcon(
-                origin,
-                cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr()
-            );
+            Gizmos.DrawIcon(origin, cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr());
             Gizmos.id = 0;
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
@@ -120,10 +117,7 @@ namespace chisel
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
             Gizmos.color = color;
             Gizmos.id = id;
-            Gizmos.DrawIcon(
-                origin,
-                Gizmos.icnObsolete.ptr()
-            );
+            Gizmos.DrawIcon(origin, Gizmos.icnObsolete.ptr());
             Gizmos.id = 0;
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
