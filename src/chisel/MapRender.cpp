@@ -81,6 +81,9 @@ namespace chisel
             }
         }
 
+        if (wireframe)
+            r.ctx->RSSetState(r.Raster.Default.ptr());
+
         for (const auto* entity : map.Entities())
         {
             const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
@@ -96,6 +99,7 @@ namespace chisel
     {
         Color color = selected ? Color(color_selection) : (preview ? Color(color_preview) : Colors.White);
 
+        // Draw sprites
         if (Chisel.fgd->classes.contains(classname))
         {
             auto& cls = Chisel.fgd->classes[classname];
