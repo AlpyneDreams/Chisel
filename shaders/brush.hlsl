@@ -11,7 +11,7 @@ Output ps_main(Varyings v)
     float4 baseColor  = s_texture.Sample(s_sampler, v.uv.xy);
 
     o.color.rgb = Lighting(v.normal, v.view) * baseColor.rgb * Brush.color.rgb;
-    o.color.a   = baseColor.a;
+    o.color.a   = baseColor.a * Brush.color.a;
     o.id        = v.id;
     return o;
 }

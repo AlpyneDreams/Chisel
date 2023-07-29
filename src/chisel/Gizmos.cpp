@@ -6,6 +6,8 @@
 #include <vector>
 #include <glm/gtx/vector_angle.hpp>
 #include "math/Winding.h"
+#include "map/Common.h"
+#include "chisel/MapRender.h"
 
 namespace chisel
 {
@@ -147,14 +149,13 @@ namespace chisel
         }};
 
         auto& r = Engine.rctx;
-        r.SetShader(sh_Color);
+        r.SetShader(Chisel.Renderer->Shaders.Brush);
 
-        cbuffers::ObjectState data;
-        data.model = glm::identity<mat4x4>();
+        cbuffers::BrushState data;
         data.color = color;
         data.id = 0;
 
-        Primitives::Vertex vertices[6 * 6];
+        VertexSolid vertices[6 * 6];
         for (uint32_t i = 0; i < 6; i++)
         {
             vec3 v0 = corners[CornerIndices[i][0]];
@@ -162,24 +163,27 @@ namespace chisel
             vec3 v2 = corners[CornerIndices[i][2]];
             vec3 v3 = corners[CornerIndices[i][3]];
 
-            vertices[6 * i + 0] = { v0, vec2(0.0f) };
-            vertices[6 * i + 1] = { v1, vec2(0.0f) };
-            vertices[6 * i + 2] = { v2, vec2(0.0f) };
-            vertices[6 * i + 3] = { v0, vec2(0.0f) };
-            vertices[6 * i + 4] = { v2, vec2(0.0f) };
-            vertices[6 * i + 5] = { v3, vec2(0.0f) };
+            vec3 normal = Plane::NormalFromPoints(v0, v1, v2);
+
+            vertices[6 * i + 0] = { v0, normal };
+            vertices[6 * i + 1] = { v1, normal };
+            vertices[6 * i + 2] = { v2, normal };
+            vertices[6 * i + 3] = { v0, normal };
+            vertices[6 * i + 4] = { v2, normal };
+            vertices[6 * i + 5] = { v3, normal };
         }
 
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
         r.ctx->RSSetState(r.Raster.DepthBiased.ptr());
-        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
+        r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
-        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
-        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.brush, nullptr, nullptr);
+        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.brush, nullptr, nullptr);
         r.SetBlendState(render::BlendFuncs::Alpha);
+        r.ctx->PSSetShaderResources(0, 1, &Chisel.Renderer->Textures.White->srvSRGB);
 
-        uint stride = sizeof(Primitives::Vertex);
+        uint stride = sizeof(VertexSolid);
         uint offset = 0;
         r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         r.ctx->Draw(6 * 6, 0);
