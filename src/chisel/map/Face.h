@@ -62,10 +62,11 @@ namespace chisel
 
     struct Face : public Selectable
     {
-        Face(Solid* brush, Side* side, std::vector<vec3> pts)
+        Face(Solid* brush, uint sideIdx, Side* side, std::vector<vec3> pts)
             : solid(brush)
             , side(side)
             , points(std::move(pts))
+            , sideIdx(sideIdx)
         {
             UpdateBounds();
         }
@@ -80,6 +81,7 @@ namespace chisel
         AABB bounds;
         uint meshIdx = 0;
         uint startIndex = 0;
+        uint sideIdx = 0;
 
         uint GetVertexCount() const { return points.size(); }
         uint GetIndexCount() const { return (GetVertexCount() - 2) * 3; }

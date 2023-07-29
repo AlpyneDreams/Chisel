@@ -8,6 +8,8 @@
 namespace chisel
 {
     class Entity;
+    struct Side;
+    struct Face;
 
     struct Inspector : public GUI::Window
     {
@@ -16,10 +18,9 @@ namespace chisel
         bool debug = false;
         bool locked = false;
 
-        Entity* target = nullptr;
-
         void Draw() override;
         void DrawEntityInspector(Entity* ent);
+        void DrawFaceInspector(Face *side);
 
         static void ClassnamePicker(std::string* classname, bool solids = false, const char* label = nullptr);
 

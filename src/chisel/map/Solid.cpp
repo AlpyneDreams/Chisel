@@ -66,6 +66,7 @@ namespace chisel
     void Solid::UpdateMesh()
     {
         static bit::bitvector shouldUse;
+        static bit::bitvector sideSelected;
         static std::unordered_set<AssetID> uniqueMaterials;
 
         BrushGPUAllocator& a = *Chisel.brushAllocator;
@@ -84,12 +85,22 @@ namespace chisel
         uniqueMaterials.reserve(m_sides.size());
         m_meshes.clear();
         m_meshes.reserve(m_sides.size());
-        m_faces.clear();
-        m_faces.reserve(m_sides.size());
         shouldUse.clearAll();
         shouldUse.ensureSize(m_sides.size());
 
         bool displacement = r_displacements && HasDisplacement();
+
+        sideSelected.clearAll();
+        sideSelected.ensureSize(m_sides.size());
+        for (uint32_t i = 0; i < m_faces.size(); i++)
+        {
+            if (m_faces[i].IsSelected())
+            {
+                sideSelected.set(m_faces[i].sideIdx, true);
+            }
+        }
+        m_faces.clear();
+        m_faces.reserve(m_sides.size());
 
         for (uint32_t i = 0; i < m_sides.size(); i++)
         {
@@ -185,7 +196,9 @@ namespace chisel
                     }
 #endif
                     
-                    m_faces.emplace_back(this, &side, std::vector<vec3>(currentWinding->points, currentWinding->points + currentWinding->count));
+                    auto& face = m_faces.emplace_back(this, sideIdx, &side, std::vector<vec3>(currentWinding->points, currentWinding->points + currentWinding->count));
+                    if (sideSelected.get(sideIdx))
+                        Selection.Select(&face);
                 }
             }
         }

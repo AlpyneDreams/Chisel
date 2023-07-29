@@ -73,13 +73,17 @@ namespace chisel
                 return;
             
             // TODO: Better interface for this
-            target = dynamic_cast<Entity*>(Selection[0]);
-            if (!target) {
+            Entity* target_ent = dynamic_cast<Entity*>(Selection[0]);
+            Face* target_face = dynamic_cast<Face*>(Selection[0]);
+            if (!target_ent && !target_face) {
                 locked = false;
                 return;
             }
 
-            DrawEntityInspector(target);
+            if (target_ent)
+                DrawEntityInspector(target_ent);
+            else if (target_face)
+                DrawFaceInspector(target_face);
         }
     }
 
@@ -145,6 +149,76 @@ namespace chisel
 
         // Inspect the entity!
         DrawProperties(&cls, ent);
+    }
+
+    void Inspector::DrawFaceInspector(Face *face)
+    {
+        Side *side = face->side;
+
+        constexpr float iconSize = 64;
+        constexpr float iconPadding = 8;
+
+        ImVec2 screenPos = ImGui::GetCursorScreenPos();
+        ImVec2 endPos = ImVec2(screenPos.x + iconSize, screenPos.y + iconSize);
+        ImVec2 cursorPos = ImGui::GetCursorPos();
+
+        auto* srv = side->material != nullptr && side->material->baseTexture != nullptr ? side->material->baseTexture->srvLinear.ptr() : nullptr;
+        if (srv) {
+            ImGui::GetWindowDrawList()->AddImage(
+                srv,
+                screenPos, endPos,
+                ImVec2(0, 0), ImVec2(1, 1)
+            );
+        }
+
+        ImGui::SetCursorPos({cursorPos.x + iconSize + iconPadding, cursorPos.y});
+
+        static char inputPath[4096] = {}; // make this LESS SHIT
+        if (side->material != nullptr)
+        {
+            std::string_view path = (std::string_view)side->material->GetPath();
+            strncpy(inputPath, path.data(), path.length());
+        }
+
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        if (ImGui::InputText("Material", inputPath, 4096))
+        {
+            auto previousMaterial = side->material;
+            side->material = Assets.Load<Material>(inputPath);
+
+            if (side->material != previousMaterial)
+                face->solid->UpdateMesh();
+        }
+
+        ImGui::SetCursorPos({cursorPos.x, cursorPos.y + iconSize + iconPadding});
+        ImGui::Separator();
+
+        if (!StartTable())
+            return;
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        VarLabel("Texture scale", "Change texture scale");
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        if (ImGui::DragFloat2("Texture scale", side->scale.data(), 1.0f, 0.0f, 0.0f, "%g", ImGuiSliderFlags_NoRoundToFormat))
+            face->solid->UpdateMesh();
+        ImGui::TableNextColumn();
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        VarLabel("Lightmap scale", "Change lightmap scale");
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        ImGui::DragFloat("Lightmap scale", &side->lightmapScale, 1.0f, 0.0f, 0.0f, "%g", ImGuiSliderFlags_NoRoundToFormat);
+        ImGui::TableNextColumn();
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        VarLabel("Displacement", "Is this face a displacement?");
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        ImGui::TextUnformatted(side->disp ? "Yes" : "No");
+        ImGui::TableNextColumn();
+
+        ImGui::EndTable();
     }
 
     void Inspector::ClassnamePicker(std::string* classname, bool solids, const char* label)
