@@ -19,12 +19,13 @@ namespace chisel
 
         Color color    = Colors.White;
         bool depthTest = true;
+        SelectionID id = 0;
 
         // To manage scope: Gizmo g; g.color = ...; g.DrawLine(...);
         Gizmos() {}
         void Reset();
 
-        void DrawIcon(vec3 pos, Texture* icon, SelectionID selection = 0, vec3 size = vec3(32.0f));
+        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(32.0f));
         void DrawPoint(vec3 pos);
         void DrawLine(vec3 start, vec3 end);
         void DrawPlane(const Plane& plane, bool backFace = true);
@@ -34,6 +35,11 @@ namespace chisel
         void DrawWireAABB(const AABB& aabb);
 
         static void Init();
+    protected:
+        void PreDraw();
+        void PostDraw();
+
+        static render::RenderContext& r;
     } Gizmos;
 
     using Gizmo = struct Gizmos;

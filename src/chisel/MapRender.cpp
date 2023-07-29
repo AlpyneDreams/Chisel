@@ -107,22 +107,24 @@ namespace chisel
 
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
             Gizmos.color = color;
+            Gizmos.id = id;
             Gizmos.DrawIcon(
                 origin,
-                cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr(),
-                id
+                cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr()
             );
+            Gizmos.id = 0;
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
         else if (r_drawsprites)
         {
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
             Gizmos.color = color;
+            Gizmos.id = id;
             Gizmos.DrawIcon(
                 origin,
-                Gizmos.icnObsolete.ptr(),
-                id
+                Gizmos.icnObsolete.ptr()
             );
+            Gizmos.id = 0;
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
     }

@@ -11,6 +11,8 @@
 
 namespace chisel
 {
+    render::RenderContext& Gizmos::r = Engine.rctx;
+
     void Gizmos::Init()
     {
         icnObsolete = Assets.Load<Texture>("textures/ui/obsolete.png");
@@ -19,21 +21,16 @@ namespace chisel
         sh_Sprite   = render::Shader(Engine.rctx.device.ptr(), Primitives::Vertex::Layout, "sprite");
     }
 
-    void Gizmos::DrawIcon(vec3 pos, Texture* icon, SelectionID selection, vec3 size)
+    void Gizmos::DrawIcon(vec3 pos, Texture* icon, vec3 size)
     {
-        auto& r = Engine.rctx;
+        PreDraw();
         r.SetShader(sh_Sprite);
         r.ctx->PSSetShaderResources(0, 1, &icon->srvSRGB);
-        if (selection == 0)
-            r.SetBlendState(render::BlendFuncs::AlphaNoSelection);
-        else
-            r.SetBlendState(render::BlendFuncs::Alpha);
-        r.ctx->OMSetDepthStencilState(depthTest ? r.Depth.NoWrite.ptr() : r.Depth.Ignore.ptr(), 0);
 
         cbuffers::ObjectState data;
         data.model = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
         data.color = color;
-        data.id = selection;
+        data.id = id;
         r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
         r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
         r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
@@ -44,19 +41,18 @@ namespace chisel
         r.ctx->IASetVertexBuffers(0, 1, &Primitives.Quad, &stride, &offset);
         r.ctx->Draw(6, 0);
 
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
-        r.SetBlendState(render::BlendFuncs::Normal);
+        PostDraw();
     }
 
     void Gizmos::DrawPoint(vec3 pos)
     {
-        DrawIcon(pos, icnHandle.ptr(), 0, vec3(16.f));
+        DrawIcon(pos, icnHandle.ptr(), vec3(16.f));
     }
 
     // TODO: These should be batched.
     void Gizmos::DrawLine(vec3 start, vec3 end)
     {
-        auto& r = Engine.rctx;
+        PreDraw();
         r.SetShader(sh_Color);
 
         mat4x4 mtx = glm::translate(mat4x4(1), start);
@@ -75,13 +71,12 @@ namespace chisel
         uint offset = 0;
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
         r.ctx->IASetVertexBuffers(0, 1, &Primitives.Line, &stride, &offset);
-        r.SetBlendState(render::BlendFuncs::Alpha);
         r.ctx->RSSetState(r.Raster.SmoothLines.ptr());
         r.ctx->Draw(2, 0);
 
         r.ctx->RSSetState(r.Raster.Default.ptr());
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        r.SetBlendState(nullptr);
+        PostDraw();
     }
 
     void Gizmos::DrawPlane(const Plane& plane, bool backFace)
@@ -90,7 +85,8 @@ namespace chisel
         if (!PlaneWinding::CreateFromPlane(plane, winding))
             return;
 
-        auto& r = Engine.rctx;
+        PreDraw();
+
         r.SetShader(sh_Color);
 
         cbuffers::ObjectState data;
@@ -114,20 +110,17 @@ namespace chisel
 
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
-        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
         r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
         r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
         r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
-        r.SetBlendState(render::BlendFuncs::Alpha);
 
         uint stride = sizeof(Primitives::Vertex);
         uint offset = 0;
         r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         r.ctx->Draw(6, 0);
 
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
-        r.SetBlendState(render::BlendFuncs::Normal);
+        PostDraw();
     }
 
     void Gizmos::DrawAABB(const AABB& aabb)
@@ -138,6 +131,7 @@ namespace chisel
 
     void Gizmos::DrawBox(std::span<vec3, 8> corners)
     {
+        PreDraw();
         static constexpr std::array<std::array<uint32_t, 4>, 8> CornerIndices =
         {{
             { 5,4,6,7 },
@@ -148,7 +142,6 @@ namespace chisel
             { 2,6,4,0 },
         }};
 
-        auto& r = Engine.rctx;
         r.SetShader(Chisel.Renderer->Shaders.Brush);
 
         cbuffers::BrushState data;
@@ -176,12 +169,10 @@ namespace chisel
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
         r.ctx->RSSetState(r.Raster.DepthBiased.ptr());
-        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
         r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
         r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.brush, nullptr, nullptr);
         r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.brush, nullptr, nullptr);
-        r.SetBlendState(render::BlendFuncs::Alpha);
         r.ctx->PSSetShaderResources(0, 1, &Chisel.Renderer->Textures.White->srvSRGB);
 
         uint stride = sizeof(VertexSolid);
@@ -189,9 +180,8 @@ namespace chisel
         r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         r.ctx->Draw(6 * 6, 0);
 
-        r.SetBlendState(render::BlendFuncs::Normal);
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         r.ctx->RSSetState(r.Raster.Default.ptr());
+        PostDraw();
     }
 
     void Gizmos::DrawWireAABB(const AABB& aabb)
@@ -203,6 +193,7 @@ namespace chisel
     void Gizmos::DrawWireBox(std::span<vec3, 8> corners)
     {
         // TODO: Use batched DrawLine instead of this nonsense
+        PreDraw();
         static constexpr std::array<uint, 24> CornerIndices =
         {{
             0, 1,
@@ -222,7 +213,6 @@ namespace chisel
             2, 6,
         }};
 
-        auto& r = Engine.rctx;
         r.SetShader(sh_Color);
 
         cbuffers::ObjectState data;
@@ -239,12 +229,11 @@ namespace chisel
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
         r.ctx->RSSetState(r.Raster.SmoothLines.ptr());
-        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
+        
         r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
         r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
         r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
-        r.SetBlendState(render::BlendFuncs::Alpha);
 
         uint stride = sizeof(Primitives::Vertex);
         uint offset = 0;
@@ -252,15 +241,31 @@ namespace chisel
         r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         r.ctx->Draw(24, 0);
 
-        r.SetBlendState(render::BlendFuncs::Normal);
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         r.ctx->RSSetState(r.Raster.Default.ptr());
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        PostDraw();
     }
 
     void Gizmos::Reset()
     {
         struct Gizmos g;
         *this = g;
+    }
+    
+    void Gizmos::PreDraw()
+    {
+        r.ctx->OMSetDepthStencilState(depthTest ? r.Depth.NoWrite.ptr() : r.Depth.Ignore.ptr(), 0);
+
+        if (id == 0)
+            r.SetBlendState(render::BlendFuncs::AlphaNoSelection);
+        else
+            r.SetBlendState(render::BlendFuncs::Alpha);
+    }
+
+    void Gizmos::PostDraw()
+    {
+        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
+
+        r.SetBlendState(render::BlendFuncs::Normal);
     }
 }
