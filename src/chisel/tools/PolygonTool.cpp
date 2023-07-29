@@ -1,4 +1,5 @@
 #include "PlacementTool.h"
+#include "TransformTool.h"
 #include "chisel/Chisel.h"
 #include "chisel/Handles.h"
 #include "chisel/Gizmos.h"
@@ -11,12 +12,17 @@ namespace chisel
 {
     extern ConVar<vec3> view_grid_size;
 
-    struct PolygonTool final : public PlacementTool
+    struct PolygonTool final : public PlacementTool, public BoundsTool
     {
         PolygonTool() : PlacementTool("Polygon", ICON_MC_PENTAGON_OUTLINE, 103) {}
 
         virtual void DrawHandles(Viewport& viewport) override
         {
+            // User can edit block bounds while adding blocks
+            BoundsTool::DrawHandles(viewport);
+            if (Handles.IsMouseOver())
+                return;
+
             PlacementTool::DrawHandles(viewport);
 
             // Escape: Clear points

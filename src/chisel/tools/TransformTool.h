@@ -11,4 +11,6 @@ namespace chisel
         using SelectTool::SelectTool;
         virtual void DrawHandles(Viewport& viewport);
     };
+
+    using BoundsTool = TransformTool<TransformType::Bounds>;
 }

@@ -12,7 +12,7 @@ namespace chisel
     static auto RotateTool     = TransformTool<Rotate>("Rotate", ICON_MC_AUTORENEW, 2);
     static auto ScaleTool      = TransformTool<Scale>("Scale", ICON_MC_RESIZE, 3);
     static auto UniversalTool  = TransformTool<Universal>("Transform (All)", ICON_MC_ALPHA_U_BOX_OUTLINE, 4);
-    static auto BoundsTool     = TransformTool<Bounds>("Bounds", ICON_MC_VECTOR_SQUARE, 5);
+    static auto BoundsToolInst = BoundsTool("Bounds", ICON_MC_VECTOR_SQUARE, 5);
 
     Tool* Tool::Default        = &TranslateTool;
 

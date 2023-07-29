@@ -10,8 +10,6 @@ namespace chisel
 {
     static ConVar<bool> tool_block_debug("tool_block_debug", false, "Debug highlight based on what type of surface block tool is tracing on");
 
-    using BoundsTool = TransformTool<TransformType::Bounds>;
-
     struct BlockTool final : public DragTool, public BoundsTool
     {
         BlockTool() : DragTool("Block", ICON_MC_CUBE_OUTLINE, 101) {}
@@ -29,9 +27,6 @@ namespace chisel
 
     void BlockTool::DrawHandles(Viewport& viewport)
     {
-        mat4x4 view = viewport.camera.ViewMatrix();
-        mat4x4 proj = viewport.camera.ProjMatrix();
-
         // User can edit block bounds while adding blocks
         BoundsTool::DrawHandles(viewport);
         if (Handles.IsMouseOver())
