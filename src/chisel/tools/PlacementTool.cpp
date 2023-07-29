@@ -64,6 +64,11 @@ namespace chisel
 
         if (hit)
         {
+            // HACK: Fixup trace precision issues
+            // FIXME: Figure out if there is a better fix for this
+            if (!view_grid_snap || !view_grid_snap_hit_normal)
+                point = math::Snap(point, vec3(math::EQUAL_EPSILON));
+
             // Snap to grid if enabled
             if (view_grid_snap)
             {
