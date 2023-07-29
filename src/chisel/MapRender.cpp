@@ -213,16 +213,16 @@ namespace chisel
         if (Chisel.selectMode == SelectMode::Faces)
             pass.id = 0;
 
-        if (mesh->brush->IsSelected())
+        if (wireframe)
         {
-            if (wireframe)
-            {
-                // Draw only wireframe outline
-                pass.color = color_selection_outline;
-                pass.texOverride = Textures.White.ptr();
-                DrawPass(pass);
-            }
-            else
+            // Draw only wireframe outline
+            pass.color = mesh->brush->IsSelected() ? color_selection_outline : vec4(Colors.White);
+            pass.texOverride = Textures.White.ptr();
+            DrawPass(pass);
+        }
+        else
+        {
+            if (mesh->brush->IsSelected())
             {
                 // Highlight face
                 pass.color = color_selection;
@@ -235,10 +235,10 @@ namespace chisel
                 DrawPass(pass);
                 r.ctx->RSSetState(r.Raster.Default.ptr());
             }
-        }
-        else
-        {
-            DrawPass(pass);
+            else
+            {
+                DrawPass(pass);
+            }
         }
     }
 
@@ -263,7 +263,7 @@ namespace chisel
         }
 
         // Draw opaque meshes.
-        r.SetBlendState(render::BlendFuncs::Normal);
+        r.SetBlendState(wireframe ? render::BlendFuncs::Alpha : render::BlendFuncs::Normal);
         r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         for (auto* mesh : opaqueMeshes)
             DrawMesh(mesh);
@@ -273,6 +273,8 @@ namespace chisel
         r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
         for (auto* mesh : transMeshes)
             DrawMesh(mesh);
+        
+        r.SetBlendState(render::BlendFuncs::Normal);
     }
 
     void MapRender::DrawHandles(mat4x4& view, mat4x4& proj)

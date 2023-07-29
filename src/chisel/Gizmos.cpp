@@ -73,11 +73,13 @@ namespace chisel
         uint offset = 0;
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
         r.ctx->IASetVertexBuffers(0, 1, &Primitives.Line, &stride, &offset);
+        r.SetBlendState(render::BlendFuncs::Alpha);
         r.ctx->RSSetState(r.Raster.SmoothLines.ptr());
         r.ctx->Draw(2, 0);
 
         r.ctx->RSSetState(r.Raster.Default.ptr());
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        r.SetBlendState(nullptr);
     }
 
     void Gizmos::DrawPlane(const Plane& plane, Color color, bool backFace)
