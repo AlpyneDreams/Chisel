@@ -161,6 +161,7 @@ namespace chisel::render
         pointDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
         device->CreateSamplerState(&pointDesc, &Sample.Point);
 
+        // Global rasterizer states
         D3D11_RASTERIZER_DESC desc =
         {
             .FillMode = D3D11_FILL_SOLID,

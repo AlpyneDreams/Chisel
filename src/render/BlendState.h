@@ -63,7 +63,9 @@ namespace chisel::render
 
         BlendState() = default;
         BlendState(std::nullptr_t) {}
-        BlendState(BlendFunc func) : renderTargets {func} {}
+
+        // Only applies to RT0 by default
+        BlendState(BlendFunc func) : independent(true), renderTargets {func} {}
         BlendState(auto... funcs) : independent(true), renderTargets {funcs...} {}
 
         constexpr bool Enabled() const { return renderTargets[0].Enabled() || independent; }
@@ -73,10 +75,9 @@ namespace chisel::render
     {
         using enum BlendMode;
     public:
-        static inline BlendState Normal       = BlendFunc();
-        static inline BlendState Add          = BlendFunc(One, One);
-        static inline BlendState Alpha        = BlendFunc(SrcAlpha, OneMinusSrcAlpha);
-        static inline BlendState AlphaFirstWriteOnly = BlendState(BlendFunc(SrcAlpha, OneMinusSrcAlpha, 0b1111), BlendFunc(Zero, Zero, 0b0000));
-        static inline BlendState AlphaFirstOneRest   = BlendState(BlendFunc(SrcAlpha, OneMinusSrcAlpha, 0b1111), BlendFunc(One, One, 0b1111));
+        static inline BlendState Normal           = BlendFunc();
+        static inline BlendState Add              = BlendFunc(One, One);
+        static inline BlendState Alpha            = BlendFunc(SrcAlpha, OneMinusSrcAlpha);
+        static inline BlendState AlphaNoSelection = BlendState(BlendFunc(SrcAlpha, OneMinusSrcAlpha), BlendFunc(Zero, Zero, 0b0000));
     };
 }

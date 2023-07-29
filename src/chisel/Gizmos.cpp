@@ -23,9 +23,9 @@ namespace chisel
         r.SetShader(sh_Sprite);
         r.ctx->PSSetShaderResources(0, 1, &icon->srvSRGB);
         if (selection == 0)
-            r.SetBlendState(render::BlendFuncs::AlphaFirstWriteOnly);
+            r.SetBlendState(render::BlendFuncs::AlphaNoSelection);
         else
-            r.SetBlendState(render::BlendFuncs::AlphaFirstOneRest);
+            r.SetBlendState(render::BlendFuncs::Alpha);
         r.ctx->OMSetDepthStencilState(depthTest ? r.Depth.NoWrite.ptr() : r.Depth.Ignore.ptr(), 0);
 
         cbuffers::ObjectState data;
