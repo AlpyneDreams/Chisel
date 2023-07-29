@@ -108,11 +108,9 @@ namespace chisel
                 sides.emplace_back(plane, material, 0.25f);
             }
 
-            vec3 offset = m_points[0] * glm::abs(normal);
-
             // Cap it...
-            sides.emplace_back(Plane(offset + normal * view_grid_size.value, normal), material, 0.25f);
-            sides.emplace_back(Plane(offset, -normal), material, 0.25f);
+            sides.emplace_back(Plane(m_points[0] + normal * view_grid_size.value, normal), material, 0.25f);
+            sides.emplace_back(Plane(m_points[0], -normal), material, 0.25f);
 
             auto& brush = Chisel.map.AddBrush(sides);
             Selection.Clear();
