@@ -49,8 +49,10 @@ namespace chisel
         if (viewport.draggingBlock)
         {
             Gizmos.DrawPoint(viewport.dragStartPos);
-            Gizmos.DrawPlane(plane, Color(0.0f, 1.0f, 1.0f, 0.1f), true);
-            Gizmos.DrawPlane(plane, Color(1.0f, 0.0f, 0.0f, 0.1f), false);
+            Gizmos.color = Color(0.0f, 1.0f, 1.0f, 0.1f);
+            Gizmos.DrawPlane(plane, true);
+            Gizmos.color = Color(1.0f, 0.0f, 0.0f, 0.1f);
+            Gizmos.DrawPlane(plane, false);
         }
 
         // Reset plane

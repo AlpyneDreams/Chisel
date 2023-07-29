@@ -51,7 +51,8 @@ namespace chisel
                     vec3 direction = glm::normalize(m_points[i] - m_points[i - 1]);
                     Plane plane = Plane(m_points[i], glm::cross(direction, m_lastNormal));
 
-                    Gizmos.DrawPlane(plane, Color(0.0f, 1.0f, 1.0f, 0.2f));
+                    Gizmos.color = Color(0.0f, 1.0f, 1.0f, 0.2f);
+                    Gizmos.DrawPlane(plane);
                 }
 #endif 0
             }

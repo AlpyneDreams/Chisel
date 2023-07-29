@@ -17,15 +17,24 @@ namespace chisel
         static inline render::Shader sh_Sprite;
         static inline render::Shader sh_Color;
 
-        void DrawIcon(vec3 pos, Texture* icon, Color color = Colors.White, SelectionID selection = 0, vec3 size = vec3(32.0f), bool depthTest = true);
-        void DrawLine(vec3 start, vec3 end, Color color = Colors.White);
-        void DrawPlane(const Plane& plane, Color color = Colors.White, bool backFace = true);
-        void DrawPoint(vec3 pos, bool depthTest = true);
-        void DrawAABB(const AABB& aabb, Color color = Colors.White);
-        void DrawBox(std::span<vec3, 8> corners, Color color = Colors.White);
-        void DrawWireAABB(const AABB& aabb, Color color = Colors.White);
-        void DrawWireBox(std::span<vec3, 8> corners, Color color = Colors.White);
+        Color color    = Colors.White;
+        bool depthTest = true;
 
-        void Init();
+        // To manage scope: Gizmo g; g.color = ...; g.DrawLine(...);
+        Gizmos() {}
+        void Reset();
+
+        void DrawIcon(vec3 pos, Texture* icon, SelectionID selection = 0, vec3 size = vec3(32.0f));
+        void DrawPoint(vec3 pos);
+        void DrawLine(vec3 start, vec3 end);
+        void DrawPlane(const Plane& plane, bool backFace = true);
+        void DrawBox(std::span<vec3, 8> corners);
+        void DrawWireBox(std::span<vec3, 8> corners);
+        void DrawAABB(const AABB& aabb);
+        void DrawWireAABB(const AABB& aabb);
+
+        static void Init();
     } Gizmos;
+
+    using Gizmo = struct Gizmos;
 }

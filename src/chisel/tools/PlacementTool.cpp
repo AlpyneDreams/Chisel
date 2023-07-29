@@ -93,7 +93,9 @@ namespace chisel
 
     void DragTool::OnMouseOver(Viewport& viewport, vec3 point, vec3 normal)
     {
-        Gizmos.DrawPoint(point, false);
+        Gizmo g;
+        g.depthTest = false;
+        g.DrawPoint(point);
 
         // Check for dragging
         if (viewport.mouseOver && Mouse.GetButtonDown(MouseButton::Left))

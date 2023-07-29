@@ -19,7 +19,7 @@ namespace chisel
         sh_Sprite   = render::Shader(Engine.rctx.device.ptr(), Primitives::Vertex::Layout, "sprite");
     }
 
-    void Gizmos::DrawIcon(vec3 pos, Texture* icon, Color color, SelectionID selection, vec3 size, bool depthTest)
+    void Gizmos::DrawIcon(vec3 pos, Texture* icon, SelectionID selection, vec3 size)
     {
         auto& r = Engine.rctx;
         r.SetShader(sh_Sprite);
@@ -43,18 +43,18 @@ namespace chisel
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         r.ctx->IASetVertexBuffers(0, 1, &Primitives.Quad, &stride, &offset);
         r.ctx->Draw(6, 0);
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
 
+        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         r.SetBlendState(render::BlendFuncs::Normal);
     }
 
-    void Gizmos::DrawPoint(vec3 pos, bool depthTest)
+    void Gizmos::DrawPoint(vec3 pos)
     {
-        DrawIcon(pos, icnHandle.ptr(), Colors.White, 0, vec3(16.f), depthTest);
+        DrawIcon(pos, icnHandle.ptr(), 0, vec3(16.f));
     }
 
     // TODO: These should be batched.
-    void Gizmos::DrawLine(vec3 start, vec3 end, Color color)
+    void Gizmos::DrawLine(vec3 start, vec3 end)
     {
         auto& r = Engine.rctx;
         r.SetShader(sh_Color);
@@ -84,7 +84,7 @@ namespace chisel
         r.SetBlendState(nullptr);
     }
 
-    void Gizmos::DrawPlane(const Plane& plane, Color color, bool backFace)
+    void Gizmos::DrawPlane(const Plane& plane, bool backFace)
     {
         PlaneWinding winding;
         if (!PlaneWinding::CreateFromPlane(plane, winding))
@@ -130,13 +130,13 @@ namespace chisel
         r.SetBlendState(render::BlendFuncs::Normal);
     }
 
-    void Gizmos::DrawAABB(const AABB& aabb, Color color)
+    void Gizmos::DrawAABB(const AABB& aabb)
     {
         auto corners = AABBToCorners(aabb);
-        DrawBox(corners, color);
+        DrawBox(corners);
     }
 
-    void Gizmos::DrawBox(std::span<vec3, 8> corners, Color color)
+    void Gizmos::DrawBox(std::span<vec3, 8> corners)
     {
         static constexpr std::array<std::array<uint32_t, 4>, 8> CornerIndices =
         {{
@@ -194,16 +194,15 @@ namespace chisel
         r.ctx->RSSetState(r.Raster.Default.ptr());
     }
 
-    void Gizmos::DrawWireAABB(const AABB& aabb, Color color)
+    void Gizmos::DrawWireAABB(const AABB& aabb)
     {
         auto corners = AABBToCorners(aabb);
-        DrawBox(corners, color);
+        DrawWireBox(corners);
     }
 
-    void Gizmos::DrawWireBox(std::span<vec3, 8> corners, Color color)
+    void Gizmos::DrawWireBox(std::span<vec3, 8> corners)
     {
         // TODO: Use batched DrawLine instead of this nonsense
-
         static constexpr std::array<uint, 24> CornerIndices =
         {{
             0, 1,
@@ -257,5 +256,11 @@ namespace chisel
         r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
         r.ctx->RSSetState(r.Raster.Default.ptr());
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    }
+
+    void Gizmos::Reset()
+    {
+        struct Gizmos g;
+        *this = g;
     }
 }

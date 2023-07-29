@@ -92,10 +92,10 @@ namespace chisel
                     Gizmos.DrawPoint(corner);
             }
 
-            Color color = BoxColors[tool_block_debug ? traceMethod : 0];
-            Gizmos.DrawBox(corners, color);
-            color.a = 1.0f;
-            Gizmos.DrawWireBox(corners, color);
+            Gizmos.color = BoxColors[tool_block_debug ? traceMethod : 0];
+            Gizmos.DrawBox(corners);
+            Gizmos.color.a = 1.0f;
+            Gizmos.DrawWireBox(corners);
         }
     }
 

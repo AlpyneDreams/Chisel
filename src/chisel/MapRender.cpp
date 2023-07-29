@@ -106,10 +106,10 @@ namespace chisel
                 return;
 
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
+            Gizmos.color = color;
             Gizmos.DrawIcon(
                 origin,
                 cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr(),
-                color,
                 id
             );
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
@@ -117,10 +117,10 @@ namespace chisel
         else if (r_drawsprites)
         {
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
+            Gizmos.color = color;
             Gizmos.DrawIcon(
                 origin,
                 Gizmos.icnObsolete.ptr(),
-                color,
                 id
             );
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
