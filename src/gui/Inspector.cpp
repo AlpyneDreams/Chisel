@@ -178,6 +178,7 @@ namespace chisel
         {
             std::string_view path = (std::string_view)side->material->GetPath();
             strncpy(inputPath, path.data(), path.length());
+            inputPath[path.length()] = '\0';
         }
 
         ImGui::SetNextItemWidth(-FLT_MIN);
