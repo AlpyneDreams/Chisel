@@ -9,13 +9,13 @@ namespace chisel
 
     void PlacementTool::DrawHandles(Viewport& viewport)
     {
-        Map& map   = Chisel.map;
-        Plane grid = Plane(Vectors.Zero, Vectors.Up);
-        Ray ray    = viewport.GetMouseRay();
+        Map& map    = Chisel.map;
+        Ray ray     = viewport.GetMouseRay();
 
-        bool hit = false;
-        vec3 normal = vec3(0, 0, 1);
-        vec3 point = vec3(0);
+        bool hit    = false;
+        vec3 normal = Vectors.Up;
+        vec3 point  = Vectors.Zero;
+        traceMethod = 0;
         
         // Cast ray to nearest surface
         if (tool_placement_raycast)
@@ -32,14 +32,33 @@ namespace chisel
         // If no surface hit, then cast to the grid
         if (!hit)
         {
-            float t;
-            hit = ray.Intersects(grid, t);
-            if (hit) {
-                point = ray.GetPoint(t);
+            Plane grid = Plane(Vectors.Zero, Vectors.Up);
 
-                // Set z to 0 manually to avoid precision errors.
-                // This assumes the grid is at z = 0
-                point.z = 0.f;
+            float t = 0.0f;
+            if (hit = ray.Intersects(grid, t))
+            {
+                point = ray.GetPoint(t);
+                normal = grid.normal;
+                traceMethod = 1;
+            }
+            
+            // Try the local grid
+            if (localGrid)
+            {
+                grid = Plane(gridOffset, gridNormal);
+
+                if (float t1 = 0.0f; ray.Intersects(grid, t1))
+                {
+                    // Use local grid if we didn't hit the
+                    // global grid, or if this hit is closer
+                    if (!hit || t1 < t)
+                    {
+                        point = ray.GetPoint(t1);
+                        normal = gridNormal;
+                        hit = true;
+                        traceMethod = 2;
+                    }
+                }
             }
         }
 
@@ -76,6 +95,7 @@ namespace chisel
         {
             viewport.draggingBlock = true;
             viewport.dragStartPos  = point;
+            SetLocalGrid(point, normal);
         }
         else if (viewport.draggingBlock && Mouse.GetButtonUp(MouseButton::Left))
         {
@@ -83,6 +103,7 @@ namespace chisel
             if (point != viewport.dragStartPos)
             {
                 OnFinishDrag(viewport, point, normal);
+                ClearLocalGrid();
             }
         }
     }

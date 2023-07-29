@@ -19,6 +19,18 @@ namespace chisel
 
         // Called when clicking in world space
         virtual void OnClick(Viewport& viewport, vec3 point, vec3 normal) {}
+
+    protected:
+        void SetLocalGrid(vec3 position, vec3 normal) { localGrid = true; gridOffset = position; gridNormal = normal; }
+        void ClearLocalGrid() { localGrid = false; }
+
+    private:
+        bool localGrid = false;
+        vec3 gridOffset = Vectors.Zero;
+        vec3 gridNormal = Vectors.Up;
+
+    protected:
+        uint traceMethod = 0;
     };
 
     //--------------------------------------------------
