@@ -206,6 +206,17 @@ namespace chisel
         }
     }
 
+    inline void MapRender::DrawSelectionOutline(BrushPass pass)
+    {
+        r.SetBlendState(render::BlendFuncs::Alpha);
+        r.ctx->RSSetState(r.Raster.Wireframe.ptr());
+        pass.color = color_selection_outline;
+        pass.texOverride = Textures.White.ptr();
+        DrawPass(pass);
+        r.ctx->RSSetState(r.Raster.Default.ptr());
+        r.SetBlendState(nullptr);
+    }
+
     inline void MapRender::DrawMesh(BrushMesh* mesh)
     {
         BrushPass pass = BrushPass(mesh);
@@ -229,11 +240,7 @@ namespace chisel
                 DrawPass(pass);
 
                 // Draw wireframe outline
-                r.ctx->RSSetState(r.Raster.Wireframe.ptr());
-                pass.color = color_selection_outline;
-                pass.texOverride = Textures.White.ptr();
-                DrawPass(pass);
-                r.ctx->RSSetState(r.Raster.Default.ptr());
+                DrawSelectionOutline(pass);
             }
             else
             {
@@ -303,12 +310,7 @@ namespace chisel
                         DrawPass(pass);
 
                         // Draw selection outline
-                        r.ctx->RSSetState(r.Raster.Wireframe.ptr());
-                        pass.color = color_selection_outline;
-                        pass.texOverride = Textures.White.ptr();
-                        DrawPass(pass);
-                        r.ctx->RSSetState(r.Raster.Default.ptr());
-
+                        DrawSelectionOutline(pass);
                     }
                 }
             }

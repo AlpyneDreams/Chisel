@@ -49,6 +49,7 @@ namespace chisel
 
     protected:
         inline void DrawPass(const BrushPass& pass);
+        inline void DrawSelectionOutline(BrushPass pass);
         inline void DrawMesh(BrushMesh* mesh);
 
         bool wireframe = false;
