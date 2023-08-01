@@ -15,7 +15,7 @@ sdl_dep    = dependency('sdl2', default_options: ['with_main=false'], static: tr
 
 fmt_dep    = dependency('fmt', static: true)
 glm_dep    = dependency('glm', static: true)
-imgui_dep  = dependency('imgui', default_options: ['vulkan=disabled'], static: true)
+imgui_dep  = dependency('imgui', default_options: ['vulkan=disabled', 'sdl_renderer=disabled', 'opengl=disabled', 'dx12=disabled', 'dx11=disabled', 'metal=disabled', 'dx9=disabled', 'dx10=disabled', 'webgpu=disabled', 'sdl2=disabled', 'glfw=disabled'], static: true)
 imguizmo_dep  = dependency('imguizmo')
 zstd_dep = dependency('libzstd', static: true)
 
