@@ -7,7 +7,7 @@
             "label": "Setup",
             "detail": "Meson",
             "type": "shell",
-            "command": "meson build",
+            "command": "meson setup build",
             "group": "build"
         },
         {
