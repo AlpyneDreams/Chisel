@@ -28,8 +28,6 @@ namespace chisel
     struct SystemGroup : System
     {
     private:
-        bool started = false;
-
         // TODO: non-owned systems?
         // TODO: let systems define their own update order?
         //       (currently using insertion order)
@@ -40,19 +38,15 @@ namespace chisel
             SystemFunc* func;
         };
 
-        std::list<Callback> OnStart, OnUpdate, OnTick;
-
-
         struct SystemRecord {
             std::shared_ptr<System> system;
             std::list<Callback>::iterator Start, Update, Tick;
         };
 
-        std::multimap<std::type_index, SystemRecord> systems;
-
     public:
+        using SystemMap  = std::multimap<std::type_index, SystemRecord>;
         // Can be destructured to a std::pair<std::type_index, std::shared_ptr<System>>
-        using Iterator   = decltype(systems)::const_iterator;
+        using Iterator   = SystemMap::const_iterator;
         using SystemList = Subrange<Iterator>;
 
         SystemGroup() {}
@@ -73,7 +67,7 @@ namespace chisel
             record.Update = OnUpdate.end();
             record.Tick   = OnTick.end();
 
-            record.Start = RegisterCallback(OnStart, sys, [](System* sys) { sys->Start(); });
+            record.Start = RegisterCallback(OnStart, sys, [](System* sys) { static_cast<Sys*>(sys)->Start(); });
 
             // If Start() has already been called, then call
             // it on new systems as soon as they're created.
@@ -81,9 +75,9 @@ namespace chisel
                 system->Start();
             }
 
-            record.Update = RegisterCallback(OnUpdate, sys, [](System* sys) { sys->Update(); });
+            record.Update = RegisterCallback(OnUpdate, sys, [](System* sys) { static_cast<Sys*>(sys)->Update(); });
 
-            record.Tick = RegisterCallback(OnTick, sys, [](System* sys) { sys->Tick(); });
+            record.Tick = RegisterCallback(OnTick, sys, [](System* sys) { static_cast<Sys*>(sys)->Tick(); });
 
             return *sys;
         }
@@ -128,6 +122,14 @@ namespace chisel
             }
         }
 
+        // Remove all systems
+        void Clear() {
+            for (auto& [type, record] : systems) {
+                UnregisterCallbacks(record);
+            }
+            systems.clear();
+        }
+
     // Iteration:
 
         Iterator begin() const {return systems.begin();}
@@ -160,5 +162,9 @@ namespace chisel
             if (record.Update != OnUpdate.end()) OnUpdate.erase(record.Update);
             if (record.Tick != OnTick.end())   OnTick.erase(record.Tick);
         }
+
+        bool started = false;
+        std::list<Callback> OnStart, OnUpdate, OnTick;
+        SystemMap systems;
     };
 }

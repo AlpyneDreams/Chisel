@@ -101,6 +101,8 @@ namespace chisel
         rctx.Shutdown();
         delete window;
         Window::Shutdown();
+
+        systems.Clear();
     }
 
     void Engine::PickObject(uint2 mouse, const Rc<render::RenderTarget>& rt_ObjectID, void callback(void*))
