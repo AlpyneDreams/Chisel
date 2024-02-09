@@ -15,7 +15,7 @@ namespace chisel
 		}
 
 		Event& operator -=(auto func) {
-			listeners.push_back(func);
+			listeners.erase(std::remove(listeners.begin(), listeners.end(), func), listeners.end());
 			return *this;
 		}
 

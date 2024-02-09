@@ -4,6 +4,7 @@
 #include "Path.h"
 #include "Span.h"
 
+#include <iostream>
 #include <fstream>
 #include <iterator>
 #include <type_traits>
@@ -57,5 +58,17 @@ namespace chisel::fs
     inline std::optional<std::string> readTextFile(const Path& path)
     {
         return readFile<std::string>(path);
+    }
+
+    // Write text file.
+    inline bool writeFile(const Path& path, std::string_view text)
+    {
+        auto file = std::ofstream(std::filesystem::path(path), std::ios::out | std::ios::trunc);
+        if (!file || file.bad())
+            return false;
+
+        file << text;
+        file.close();
+        return true;
     }
 }

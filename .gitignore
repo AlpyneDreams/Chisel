@@ -10,6 +10,9 @@
 /runtime/*.exe
 /runtime/*.pdb
 
+# Configs
+/runtime/chisel.json
+
 # ImGUI and dxvk clutter
 /runtime/chisel_ui.ini
 /runtime/chisel_d3d11.log

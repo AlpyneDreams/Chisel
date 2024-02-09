@@ -18,6 +18,7 @@
 #include "common/Parse.h"
 #include "formats/Formats.h"
 #include "tools/Tool.h"
+#include "chisel/Settings.h"
 
 #include <cstring>
 #include <vector>
@@ -26,6 +27,8 @@ namespace chisel
 {
     void Chisel::Run()
     {
+        Settings::Load();
+
         Engine.Init();
 
         fgd = new FGD("core/test.fgd");

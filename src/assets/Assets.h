@@ -7,6 +7,7 @@
 #include "common/String.h"
 #include "common/Span.h"
 #include "common/Filesystem.h"
+#include "common/Event.h"
 #include "../submodules/libvpk-plusplus/libvpk++.h"
 
 #include <list>
@@ -38,11 +39,18 @@ namespace chisel
 
         void AddSearchPath(const Path& p);
         void AddPakFile(const Path& p);
+        void ResetSearchPaths();
+
+        // Call this after changing search paths
+        void Refresh();
 
     // File Enumeration //
 
         template <typename T>
         void ForEachFile(auto func);
+
+    // Events //
+        Event<> OnRefresh;
 
     private:
         std::list<Path> searchPaths;

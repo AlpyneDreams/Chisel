@@ -23,6 +23,7 @@ Bundled in repo:
 - [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader)
 - [stb](https://github.com/nothings/stb) image loader and writer
 - [Material Design Icons Font](https://materialdesignicons.com/)
+- [nlohmann/json](https://github.com/nlohmann/json)
 
 ## Building ##
 

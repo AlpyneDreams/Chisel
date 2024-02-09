@@ -32,6 +32,7 @@ chisel_src = [
     'chisel/Chisel.cpp',
     'chisel/Handles.cpp',
     'chisel/Gizmos.cpp',
+    'chisel/Settings.cpp',
     'chisel/MapRender.cpp',
     'chisel/tools/Tool.cpp',
     'chisel/tools/BlockTool.cpp',

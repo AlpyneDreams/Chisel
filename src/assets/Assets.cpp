@@ -6,14 +6,13 @@
 
 namespace chisel
 {
+    static bool Quiet = false;
+
     Assets::Assets()
     {
-        // TODO: Load search paths from app info file
-        AddSearchPath("core");
-        AddPakFile("$STEAMAPPS/Half-Life 2/hl2/hl2_textures");
-        AddPakFile("$STEAMAPPS/Half-Life 2/hl2/hl2_misc");
-        AddPakFile("$STEAMAPPS/Half-Life 2/hl1/hl1_pak");
-        AddPakFile("$STEAMAPPS/Counter-Strike Source/cstrike/cstrike_pak");
+        Quiet = true;
+        ResetSearchPaths();
+        Quiet = false;
     }
 
     Assets::~Assets()
@@ -91,6 +90,8 @@ namespace chisel
             auto vpk = path + "_dir.vpk";
             if (!fs::exists(vpk)) {
                 return Console.Error("[Assets] Failed to find search path '{}'", path);
+            } else {
+                path = vpk;
             }
         }
 
@@ -103,6 +104,7 @@ namespace chisel
         }
 
         searchPaths.push_back(path);
+        if (!Quiet) Console.Log("[Assets] Added search path: '{}'", p);
     }
 
     void Assets::AddPakFile(const Path& p)
@@ -112,6 +114,7 @@ namespace chisel
         {
             auto pak = std::make_unique<libvpk::VPKSet>(path);
             pakFiles.emplace_back(std::move(pak));
+            if (!Quiet) Console.Log("[Assets] Loaded pak file: '{}'", p);
         }
         catch (const std::exception& e)
         {
@@ -119,4 +122,16 @@ namespace chisel
         }
     }
 
+    void Assets::ResetSearchPaths()
+    {
+        searchPaths.clear();
+        pakFiles.clear();
+        AddSearchPath("core");
+    }
+
+    void Assets::Refresh()
+    {
+        Console.Log("[Assets] Refreshing...");
+        OnRefresh();
+    }
 }
