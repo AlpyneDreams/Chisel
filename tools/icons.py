@@ -1,5 +1,8 @@
 import os, json
 
+# icons.json is from https://github.com/Templarian/MaterialDesign/blob/master/meta.json
+# If you update icons.json, make sure to update the font file in runtime/core/fonts
+# from https://github.com/Templarian/MaterialDesign-Webfont/blob/master/fonts/materialdesignicons-webfont.ttf
 icons = json.load(open('icons.json'))
 
 out = open('../src/gui/IconsMaterialCommunity.h', 'w')
