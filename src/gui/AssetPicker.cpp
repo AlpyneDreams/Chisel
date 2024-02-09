@@ -79,6 +79,8 @@ namespace chisel
         uint xAssetRow = uint(scroll / (AssetThumbnailSize.y + AssetPadding.y));
         m_FirstVisibleAsset = xAssetRow * m_AssetsPerRow;
 
+        // This is in a lambda so we can PopFont when we're done
+        auto render = [&]
         {
             if (m_materials.size() == 0)
                 return;
@@ -151,6 +153,7 @@ namespace chisel
                 }
             }
         };
+        render();
 
         ImGui::PopFont();
     }
