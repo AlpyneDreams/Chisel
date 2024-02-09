@@ -58,4 +58,34 @@ namespace chisel
         // Truncate to first null
         return std::string(filename.data());
     }
+
+    std::string Platform::FolderPicker(const char* startIn)
+    {
+        std::stringstream command_stream;
+        command_stream << "zenity --file-selection --directory";
+        if (startIn)
+        {
+            command_stream << " --filename=\"" << startIn << "\"";
+        }
+
+        std::string command = command_stream.str();
+
+        std::string filename;
+        filename.resize(1024);
+
+        FILE* f = popen(command.c_str(), "r");
+        fgets(filename.data(), filename.size(), f);
+
+        int ret = pclose(f);
+        if (ret < 0)
+            Console.Error("FolderPicker(): failed (code: {})", ret);
+
+        // Strip DLE if any
+        auto pos = filename.find_last_of(10);
+        if (pos != std::string::npos)
+            filename[pos] = 0;
+
+        // Truncate to first null
+        return std::string(filename.data());
+    }
 }

@@ -2,6 +2,7 @@
 #include "platform/Platform.h"
 #include <filesystem>
 #include <string>
+#include <codecvt>
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -10,6 +11,7 @@
 
 #include <windows.h>
 #include <commdlg.h>
+#include <shlobj.h>
 
 namespace chisel
 {
@@ -109,5 +111,49 @@ namespace chisel
         } else {
             return std::string();
         }
+    }
+
+    std::string Platform::FolderPicker(const char* startIn)
+    {
+        IFileDialog* pfd;
+        if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd))))
+        {
+            if (startIn)
+            {
+                IShellItem* psi;
+                std::wstring wstartIn = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(startIn);
+                if (SUCCEEDED(SHCreateItemFromParsingName(wstartIn.c_str(), NULL, IID_PPV_ARGS(&psi))))
+                {
+                    pfd->SetFolder(psi);
+                    psi->Release();
+                }
+            }
+
+            DWORD dwOptions;
+            if (SUCCEEDED(pfd->GetOptions(&dwOptions)))
+            {
+                pfd->SetOptions(dwOptions | FOS_PICKFOLDERS);
+            }
+
+            if (SUCCEEDED(pfd->Show(NULL)))
+            {
+                IShellItem* psi;
+                if (SUCCEEDED(pfd->GetResult(&psi)))
+                {
+                    PWSTR pszPath;
+                    if (SUCCEEDED(psi->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
+                    {
+                        std::wstring wstr(pszPath);
+                        CoTaskMemFree(pszPath);
+                        psi->Release();
+                        pfd->Release();
+                        return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstr);
+                    }
+                    psi->Release();
+                }
+            }
+            pfd->Release();
+        }
+        return std::string();
     }
 }

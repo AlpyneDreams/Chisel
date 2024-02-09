@@ -41,5 +41,8 @@ namespace chisel
 
             return file;
         }
+
+        // Returns empty string on cancel.
+        std::string FolderPicker(const char* startIn = nullptr);
     } Platform;
 }
