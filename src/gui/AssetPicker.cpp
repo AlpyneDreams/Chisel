@@ -9,23 +9,53 @@
 
 #include <misc/cpp/imgui_stdlib.h>
 #include <string>
-#include <unordered_set>
 
 namespace chisel
 {
     static const uint2 AssetPadding { 16, 16 };
 
+    static std::unordered_set<AssetPicker*> s_AssetPickers;
+
     AssetPicker::AssetPicker() : GUI::Window(ICON_MC_FOLDER, "Assets", 1024, 512, false, ImGuiWindowFlags_MenuBar)
     {
+        if (static bool s_Registered = false; !s_Registered)
+        {
+            Assets.OnRefresh += [] {
+                for (auto picker : s_AssetPickers)
+                    picker->Refresh();
+            };
+            s_Registered = true;
+        }
+        
+        s_AssetPickers.insert(this);
         m_LastWindowSize = uint2(1024, 512);
         m_AssetsPerRow = uint(floor(m_LastWindowSize.x / (AssetThumbnailSize.x + AssetPadding.x)));
         Refresh();
+    }
+
+    AssetPicker::~AssetPicker()
+    {
+        if (s_AssetPickers.contains(this))
+            s_AssetPickers.erase(this);
+    }
+
+    bool AssetPicker::IsAssetVisible(uint index) const
+    {
+        return index > m_FirstVisibleAsset
+            && index < m_FirstVisibleAsset + (m_AssetsPerRow * m_NumVisibleRows);
+    }
+    
+    bool AssetPicker::IsAssetAlmostVisible(uint index) const
+    {
+        return index > m_FirstVisibleAsset - (m_AssetsPerRow * m_NumVisibleRows * 2)
+            && index < m_FirstVisibleAsset + (m_AssetsPerRow * m_NumVisibleRows * 2);
     }
 
     void AssetPicker::Draw()
     {
         if (ImGui::BeginMenuBar())
         {
+            ImGui::Text("Loaded %u/%llu", m_LoadedAssetCount, m_materials.size());
             // Right side
             ImGui::Spacing();
             ImGui::SameLine(ImGui::GetWindowWidth() - 200);
@@ -44,18 +74,17 @@ namespace chisel
 
         float scroll = ImGui::GetScrollY();
         
-        uint numVisibleRows = uint(uint(ImGui::GetWindowSize().y) / (AssetThumbnailSize.y + AssetPadding.y)) + 2;
+        m_NumVisibleRows = uint(uint(ImGui::GetWindowSize().y) / (AssetThumbnailSize.y + AssetPadding.y)) + 2;
 
         uint xAssetRow = uint(scroll / (AssetThumbnailSize.y + AssetPadding.y));
-        uint xAsset = xAssetRow * m_AssetsPerRow;
+        m_FirstVisibleAsset = xAssetRow * m_AssetsPerRow;
 
-        auto render = [&]()
         {
             if (m_materials.size() == 0)
                 return;
 
-            uint currentAsset = xAsset;
-            for (uint row = 0; row < numVisibleRows; row++)
+            uint currentAsset = m_FirstVisibleAsset;
+            for (uint row = 0; row < m_NumVisibleRows; row++)
             {
                 for (uint column = 0; column < m_AssetsPerRow; column++)
                 {
@@ -64,7 +93,6 @@ namespace chisel
                     ImVec2 basePos = ImVec2(column * (AssetThumbnailSize.x + AssetPadding.x) + initialXPadding, (xAssetRow + row) * (AssetThumbnailSize.y + AssetPadding.y) + initialYPadding);
 
                     auto& material = m_materials[currentAsset];
-                    material.Load();
 
                     if (material.thing != nullptr && material.thing->baseTexture != nullptr && material.thing->baseTexture->srvLinear != nullptr)
                     {
@@ -83,6 +111,29 @@ namespace chisel
                         if (selected)
                             ImGui::PopStyleColor();
                     }
+                    else
+                    {
+                        ImGui::SetCursorPos(basePos);
+
+                        if (ImGui::ImageButton(material.path.c_str(), (ImTextureID)nullptr,
+                            ImVec2(float(AssetThumbnailSize.x), float(AssetThumbnailSize.y)), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+                        {
+                            Chisel.activeMaterial = material.thing;
+                        }
+
+                        if (!material.triedToLoad && !m_thumbnailQueueSet.contains(currentAsset))
+                        {
+                            m_thumbnailQueue.push_front(currentAsset);
+                            m_thumbnailQueueSet.insert(currentAsset);
+                        }
+                    }
+
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::Text("%s", material.path.c_str());
+                        ImGui::EndTooltip();
+                    }
 
                     ImVec2 textPos = ImVec2(basePos.x, basePos.y + AssetThumbnailSize.y);
                     ImGui::SetCursorPos(textPos);
@@ -100,9 +151,41 @@ namespace chisel
                 }
             }
         };
-        render();
 
         ImGui::PopFont();
+    }
+
+    void AssetPicker::Tick()
+    {
+        if (!open)
+            return;
+
+        int numLoaded = 0;
+        if (m_thumbnailQueue.size() > 0)
+        {
+            // Load 8 textures per tick as we scroll in new textures
+			while ( m_thumbnailQueue.size() > 0 && numLoaded++ < 8 )
+			{
+                uint index = m_thumbnailQueue.front();
+                m_materials[index].Load();
+                m_thumbnailQueue.pop_front();
+                m_LoadedAssetCount++;
+                m_thumbnailQueueSet.erase(index);
+			}
+        }
+        else
+        {
+            // Otherwise, load 4 models per tick from off-screen
+			for ( uint i = 0; i < m_materials.size() && numLoaded <= 4; i++ )
+			{
+				if ( !m_materials[i].triedToLoad && IsAssetAlmostVisible(i) )
+				{
+					m_materials[i].Load();
+                    m_LoadedAssetCount++;
+					numLoaded++;
+				}
+			}
+        }
     }
 
     bool AssetPicker::OverrideContentSize(uint2& size)
@@ -117,6 +200,7 @@ namespace chisel
     void AssetPicker::Refresh()
     {
         m_materials.clear();
+        m_thumbnailQueue.clear();
 
         Assets.ForEachFile<Material>(
         [&](const fs::Path& p)
@@ -124,9 +208,22 @@ namespace chisel
             AssetPickerAsset<Material>& asset = m_materials.emplace_back();
             asset.path = std::string(p);
 
+            fs::Path subpath;
+            std::filesystem::path path = p;
+            bool foundMaterials = false;
+            for (auto& part : path)
+            {
+                if (foundMaterials)
+                    subpath /= part;
+                if (part == "materials")
+                    foundMaterials = true;
+            }
+            if (!foundMaterials)
+                subpath = p.dirname().filename() / p.filename();
+
             // Remove materials/ and .vmt for display name
-            std::string_view name = asset.path;
-            if ((name[9] == '/' || name[9] == '\\') && name.starts_with("materials"))
+            std::string_view name = subpath;
+            if (name.starts_with("materials") && (name[9] == '/' || name[9] == '\\'))
                 name.remove_prefix(10);
             name.remove_suffix(std::string_view(p.ext()).size());
             asset.name = name;
