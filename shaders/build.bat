@@ -1,9 +1,19 @@
 @echo off
 
 if [%DXINCLUDE%] == [] (
-    call "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Utilities\bin\dx_setenv.cmd"
-    set DXINCLUDE=1
+    if exist "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Utilities\bin\dx_setenv.cmd" (
+        call "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Utilities\bin\dx_setenv.cmd"
+        set DXINCLUDE=1
+    )
 )
+
+if [%DXINCLUDE%] == [] (
+    if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe" (
+        set path="%path%;C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64"
+        set DXINCLUDE=1
+    )
+)
+
 
 for %%F in (*.hlsl) do (
     echo %%F

@@ -29,6 +29,7 @@ namespace chisel
             render::Shader Brush;
             render::Shader BrushBlend;
             render::Shader BrushDebugID;
+            render::Shader SpriteDebugID;
         } Shaders;
 
         struct DefaultTextures {

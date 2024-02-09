@@ -21,10 +21,10 @@ namespace chisel
         sh_Sprite   = render::Shader(Engine.rctx.device.ptr(), Primitives::Vertex::Layout, "sprite");
     }
 
-    void Gizmos::DrawIcon(vec3 pos, Texture* icon, vec3 size)
+    void Gizmos::DrawIcon(vec3 pos, Texture* icon, vec3 size, const render::Shader& shader)
     {
         PreDraw();
-        r.SetShader(sh_Sprite);
+        r.SetShader(shader);
         r.ctx->PSSetShaderResources(0, 1, &icon->srvSRGB);
 
         cbuffers::ObjectState data;

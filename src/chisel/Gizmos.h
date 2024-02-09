@@ -25,7 +25,7 @@ namespace chisel
         Gizmos() {}
         void Reset();
 
-        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(32.0f));
+        void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(32.0f), const render::Shader& shader = sh_Sprite);
         void DrawPoint(vec3 pos);
         void DrawLine(vec3 start, vec3 end);
         void DrawPlane(const Plane& plane, bool backFace = true);

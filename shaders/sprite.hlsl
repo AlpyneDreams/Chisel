@@ -52,6 +52,11 @@ Output ps_main(Varyings v)
 
     o.color = color * Object.color;
     o.id = Object.id;
+
+#if DEBUG_SELECTION_ID
+    o.color.rgb = DebugSelectionID(Object.id);
+    o.color.a = 1;
+#endif
     
     return o;
 }

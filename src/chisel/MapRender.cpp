@@ -27,7 +27,8 @@ namespace chisel
     {
         Shaders.Brush = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush");
         Shaders.BrushBlend = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush_blend");
-        Shaders.BrushDebugID = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush_debug_id");
+        Shaders.BrushDebugID = render::Shader(r.device.ptr(), VertexSolid::Layout, "debug_id_brush");
+        Shaders.SpriteDebugID = render::Shader(r.device.ptr(), Primitives::Vertex::Layout, "debug_id_sprite");
 
         // Load builtin textures
         Textures.Missing = Assets.Load<Texture>("textures/error.png");
@@ -112,7 +113,10 @@ namespace chisel
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
             Gizmos.color = color;
             Gizmos.id = id;
-            Gizmos.DrawIcon(origin, cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr());
+            if (this->drawMode == Viewport::DrawMode::ObjectID)
+                Gizmos.DrawIcon(origin, cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr(), vec3(32.0f), Shaders.SpriteDebugID);
+            else
+                Gizmos.DrawIcon(origin, cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr());
             Gizmos.id = 0;
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
@@ -121,7 +125,10 @@ namespace chisel
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
             Gizmos.color = color;
             Gizmos.id = id;
-            Gizmos.DrawIcon(origin, Gizmos.icnObsolete.ptr());
+            if (this->drawMode == Viewport::DrawMode::ObjectID)
+                Gizmos.DrawIcon(origin, Gizmos.icnObsolete.ptr(), vec3(32.0f), Shaders.SpriteDebugID);
+            else
+                Gizmos.DrawIcon(origin, Gizmos.icnObsolete.ptr());
             Gizmos.id = 0;
             r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
         }
