@@ -57,6 +57,7 @@ namespace chisel
     // GUI //
         GUI::Window* console;
         GUI::Window* mainAssetPicker;
+        GUI::Window* settingsWindow;
 
     // Chisel Engine Loop //
 

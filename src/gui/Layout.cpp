@@ -344,9 +344,14 @@ namespace chisel
                     Engine.systems.AddSystem<Viewport>();
                 }
 
+                MenuItem(ICON_MC_COG " Settings", "", &Chisel.settingsWindow->open);
                 MenuItem(ICON_MC_APPLICATION_OUTLINE " GUI Demo", "", &gui_demo.value);
                 ImGui::EndMenu();
             }
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 25);
+
+            GUI::MenuBarToggle(ICON_MC_COG, &Chisel.settingsWindow->open, "Settings");
 
             EndMainMenuBar();
         }

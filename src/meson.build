@@ -24,6 +24,7 @@ chisel_src = [
     'gui/Inspector.cpp',
     'gui/View3D.cpp',
     'gui/Viewport.cpp',
+    'gui/SettingsWindow.cpp',
     'gui/impl/imgui_impl_sdl.cpp',
     'gui/impl/imgui_impl_dx11.cpp',
 

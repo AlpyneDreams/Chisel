@@ -12,6 +12,7 @@
 #include "gui/Inspector.h"
 #include "gui/Viewport.h"
 #include "gui/Keybinds.h"
+#include "gui/SettingsWindow.h"
 
 #include "common/Filesystem.h"
 #include "render/Render.h"
@@ -45,6 +46,7 @@ namespace chisel
         Engine.systems.AddSystem<EditingToolbar>();
         Engine.systems.AddSystem<Inspector>();
         mainAssetPicker = &Engine.systems.AddSystem<AssetPicker>();
+        settingsWindow = &Engine.systems.AddSystem<SettingsWindow>();
         Engine.systems.AddSystem<Viewport>();
 
         Engine.Loop();
