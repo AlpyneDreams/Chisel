@@ -23,6 +23,7 @@
 namespace chisel
 {
     inline ConVar<float> cam_maxspeed ("cam_maxspeed",  750.0f,  "Max speed");
+    inline ConVar<float> cam_fastspeed("cam_fastspeed", 2400.f,  "Max speed when holding shift");
     inline ConVar<float> cam_pitchup  ("cam_pitchup",   +89.0f,  "Set the max pitch value.");
     inline ConVar<float> cam_pitchdown("cam_pitchdown", -89.0f,  "Set the min pitch value.");
 
@@ -172,8 +173,12 @@ namespace chisel
                 float a = Keyboard.GetKey(Key::A) ? 1.f : 0.f;
                 float d = Keyboard.GetKey(Key::D) ? 1.f : 0.f;
 
-                camera.position += camera.Forward() * (w-s) * cam_maxspeed.value * float(Time.deltaTime);
-                camera.position += camera.Right() * (d-a) * cam_maxspeed.value * float(Time.deltaTime);
+                float speed = cam_maxspeed;
+                if (Keyboard.shift)
+                    speed = cam_fastspeed;
+
+                camera.position += camera.Forward() * (w-s) * speed * float(Time.deltaTime);
+                camera.position += camera.Right() * (d-a) * speed * float(Time.deltaTime);
             }
         }
 
