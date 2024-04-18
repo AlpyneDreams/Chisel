@@ -17,7 +17,7 @@ namespace chisel
         return Assets.Load<Texture>(val);
     }
 
-    static AssetLoader <Material, FixedString(".VMT")> VMTLoader = [](Material& mat, const Buffer& data)
+    static AssetLoader <Material> VMTLoader = { ".VMT", [](Material& mat, const Buffer& data)
     {
         auto r_kv = kv::KeyValues::ParseFromUTF8(chisel::StringView(data));
         if (!r_kv)
@@ -37,6 +37,6 @@ namespace chisel
 
         mat.translucent = kv["$translucent"];
         mat.alphatest = kv["$alphatest"];
-    };
+    }};
 
 }

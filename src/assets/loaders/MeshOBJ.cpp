@@ -22,7 +22,7 @@ namespace chisel
 
     };
 
-    static AssetLoader<Mesh, FixedString(".OBJ")> OBJLoader = [](Mesh& mesh, const Buffer& file_data)
+    static AssetLoader<Mesh> OBJLoader = { ".OBJ", [](Mesh& mesh, const Buffer& file_data)
     {
         static VertexLayout LayoutOBJ = VertexLayout {
             VertexAttribute::For<float>(3, VertexAttribute::Position),
@@ -118,6 +118,6 @@ namespace chisel
             group.vertices = VertexBuffer(LayoutOBJ, &verts[0], verts.size() * sizeof(VertexOBJ));
             group.indices = IndexBuffer(&indices[0], indices.size() * sizeof(uint32));
         }
-    };
+    }};
 
 }

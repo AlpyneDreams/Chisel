@@ -71,18 +71,17 @@ namespace chisel
             return nullptr;
         }
 
-        // Read asset file
-        auto data = ReadFile(path);
-        if (!data)
-            return nullptr;
-
         // Create the asset
         Rc<T> asset = new T(path);
 
         // Attempt to load asset for first time
         try
         {
-            loader->Load(*asset.ptr(), *data);
+            if (!loader->Load(*asset.ptr(), path))
+            {
+                Console.Error("[Assets] Failed to import {} asset: {}", path.ext(), path);
+                return nullptr;
+            }
         }
         catch (std::exception& err)
         {

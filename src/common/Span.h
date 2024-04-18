@@ -67,11 +67,11 @@ namespace chisel
         size_t size;
     };
 
-    using Buffer = std::vector<uint8_t>;
+    using Buffer = std::vector<byte>;
 
-    struct BufferView : public Span<uint8_t>
+    struct BufferView : public Span<byte>
     {
-        using Span<uint8_t>::Span;
+        using Span<byte>::Span;
 
         BufferView(Buffer& buffer)
             : BufferView(buffer.data(), buffer.data() + buffer.size()) {}

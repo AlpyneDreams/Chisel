@@ -68,8 +68,8 @@ namespace chisel
         Engine.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
     }
 
-    static AssetLoader<Texture, FixedString(".PNG")> PNGLoader = &LoadTexture;
-    static AssetLoader<Texture, FixedString(".TGA")> TGALoader = &LoadTexture;
+    static AssetLoader<Texture> PNGLoader = { ".PNG", &LoadTexture };
+    static AssetLoader<Texture> TGALoader = { ".TGA", &LoadTexture };
 
     inline DXGI_FORMAT RemapVTFImageFormat(libvtf::ImageFormat format)
     {
@@ -89,7 +89,7 @@ namespace chisel
         }
     }
 
-    static AssetLoader<Texture, FixedString(".VTF")> VTFLoader = [](Texture& tex, const Buffer& data)
+    static AssetLoader<Texture> VTFLoader = { ".VTF", [](Texture& tex, const Buffer& data)
     {
         // TODO: Make copy-less.
         libvtf::VTFData vtfData(data);
@@ -150,5 +150,5 @@ namespace chisel
         };
         Engine.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescLinear, &tex.srvLinear);
         Engine.rctx.device->CreateShaderResourceView(tex.texture.ptr(), &srvDescSRGB, &tex.srvSRGB);
-    };
+    }};
 }

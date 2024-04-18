@@ -4,34 +4,59 @@
 #include "common/String.h"
 #include "console/Console.h"
 #include "common/Hash.h"
+#include "common/Path.h"
 #include <unordered_map>
 #include <span>
 
 namespace chisel
 {
-
-    template <class Asset, auto... Ext>
-    struct AssetLoader;
+    struct BaseAssetLoader
+    {
+        static std::optional<Buffer> ReadFile(const fs::Path& path);
+    };
 
     template <class Asset>
-    struct AssetLoader<Asset>
+    struct AssetLoader : BaseAssetLoader
     {
         using AssetLoadFn = void(Asset&, const Buffer&);
 
-        AssetLoader(AssetLoadFn* fn) : function(fn) {}
-
-        virtual void Load(Asset& asset, const Buffer& buffer)
+        AssetLoader(const char* ext, AssetLoadFn* fn) : function(fn)
         {
-            if (function)
-                function(asset, buffer);
+            if (!ext)
+                return;
+
+            if (ext[0] != '.')
+            {
+                std::string dotext = std::string(".") + ext;
+                AssetLoader<Asset>::Extensions().insert({ HashStringLower(dotext), this });
+            }
+            else
+            {
+                AssetLoader<Asset>::Extensions().insert({ HashStringLower(ext), this });
+            }
         }
 
-    private:
+        bool Load(Asset& asset, const fs::Path& path)
+        {
+            if (!function)
+                return false;
+            
+            auto data = ReadFile(path);
+            if (!data)
+                return false;
+            
+            function(asset, *data);
+            return true;
+        }
+
+    protected:
         AssetLoadFn* function = nullptr;
 
     public:
         static AssetLoader* ForExtension(std::string_view ext)
         {
+            if (!ext.size())
+                return nullptr;
             auto hash = HashStringLower(ext);
             return AssetLoader::Extensions().contains(hash)
                  ? AssetLoader::Extensions()[hash]
@@ -44,15 +69,6 @@ namespace chisel
         {
             static std::unordered_map<Hash, AssetLoader<Asset>*> map;
             return map;
-        }
-    };
-
-    template <class Asset, FixedString Ext>
-    struct AssetLoader<Asset, Ext> : AssetLoader<Asset>
-    {
-        AssetLoader(auto fn) : AssetLoader<Asset>(fn)
-        {
-            AssetLoader<Asset>::Extensions().insert({ HashStringLower(Ext), this });
         }
     };
 }

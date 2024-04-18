@@ -48,6 +48,11 @@ namespace chisel
         return std::nullopt;
     }
 
+    std::optional<Buffer> BaseAssetLoader::ReadFile(const fs::Path& path)
+    {
+        return Assets.ReadFile(path);
+    }
+
     std::optional<Buffer> Assets::ReadLooseFile(const Path& path)
     {
         for (const auto& dir : searchPaths)
