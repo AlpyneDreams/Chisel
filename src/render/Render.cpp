@@ -513,7 +513,14 @@ namespace chisel::render
         uint strides[] = {(uint)mesh->groups[0].vertices.Stride()};
         uint offsets[] = {0};
         ctx->IASetVertexBuffers(0, 1, (ID3D11Buffer**)&mesh->groups[0].vertices.handle, strides, offsets);
-        ctx->Draw(mesh->groups[0].vertices.count, 0);
+        
+        IndexBuffer& indices = mesh->groups[0].indices;
+        if (indices.handle != nullptr) {
+            ctx->IASetIndexBuffer((ID3D11Buffer*)indices.handle, indices.type == indices.UInt32 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT, 0);
+            ctx->DrawIndexed(indices.count, 0, 0);
+        } else {
+            ctx->Draw(mesh->groups[0].vertices.count, 0);
+        }
     }
 
     void RenderContext::UploadMesh(Mesh* mesh)
@@ -521,18 +528,35 @@ namespace chisel::render
         mesh->uploaded = false;
 
         for (auto& group : mesh->groups) {
-            D3D11_BUFFER_DESC desc = {};
-            desc.ByteWidth  = group.vertices.Size();
-            desc.Usage      = D3D11_USAGE_DEFAULT;
-            desc.BindFlags  = D3D11_BIND_VERTEX_BUFFER;
+            if (group.vertices.handle == nullptr) {
+                D3D11_BUFFER_DESC desc = {};
+                desc.ByteWidth  = group.vertices.Size();
+                desc.Usage      = D3D11_USAGE_DEFAULT;
+                desc.BindFlags  = D3D11_BIND_VERTEX_BUFFER;
 
-            D3D11_SUBRESOURCE_DATA data = {};
-            data.pSysMem    = group.vertices.pointer;
+                D3D11_SUBRESOURCE_DATA data = {};
+                data.pSysMem    = group.vertices.pointer;
 
-            HRESULT hr = device->CreateBuffer(&desc, &data, (ID3D11Buffer**)&group.vertices.handle);
-            if (FAILED(hr)) {
-                Console.Error("[D3D11] Failed to create vertex buffer");
-                return;
+                HRESULT hr = device->CreateBuffer(&desc, &data, (ID3D11Buffer**)&group.vertices.handle);
+                if (FAILED(hr)) {
+                    Console.Error("[D3D11] Failed to create vertex buffer");
+                    return;
+                }
+            }
+            if (group.indices.handle == nullptr && group.indices.indices != nullptr) {
+                D3D11_BUFFER_DESC desc = {};
+                desc.ByteWidth  = group.indices.Size();
+                desc.Usage      = D3D11_USAGE_DEFAULT;
+                desc.BindFlags  = D3D11_BIND_INDEX_BUFFER;
+
+                D3D11_SUBRESOURCE_DATA data = {};
+                data.pSysMem    = group.indices.indices;
+
+                HRESULT hr = device->CreateBuffer(&desc, &data, (ID3D11Buffer**)&group.indices.handle);
+                if (FAILED(hr)) {
+                    Console.Error("[D3D11] Failed to create index buffer");
+                    return;
+                }
             }
         }
         mesh->uploaded = true;

@@ -12,7 +12,7 @@ namespace chisel
         enum { UInt16, UInt32 } type = UInt32;
         const void* indices;
 
-        IndexBuffer() {}
+        IndexBuffer() : indices(nullptr) {}
 
         IndexBuffer(const uint32* indices, size_t size)
           : ElementBuffer(size / sizeof(uint32)),
