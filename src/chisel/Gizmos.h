@@ -30,6 +30,7 @@ namespace chisel
         void DrawLine(vec3 start, vec3 end);
         void DrawPlane(const Plane& plane, bool backFace = true);
         void DrawBox(std::span<vec3, 8> corners);
+        void DrawBox(vec3 origin, float radius = 16);
         void DrawWireBox(std::span<vec3, 8> corners);
         void DrawAABB(const AABB& aabb);
         void DrawWireAABB(const AABB& aabb);

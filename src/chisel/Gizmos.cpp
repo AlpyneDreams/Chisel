@@ -145,8 +145,8 @@ namespace chisel
         r.SetShader(Chisel.Renderer->Shaders.Brush);
 
         cbuffers::BrushState data;
-        data.color = color;
-        data.id = 0;
+        data.color = this->color;
+        data.id = this->id;
 
         VertexSolid vertices[6 * 6];
         for (uint32_t i = 0; i < 6; i++)
@@ -182,6 +182,22 @@ namespace chisel
 
         r.ctx->RSSetState(r.Raster.Default.ptr());
         PostDraw();
+    }
+
+    void Gizmos::DrawBox(vec3 origin, float radius)
+    {
+        vec3 corners[8] = {
+            origin + vec3(-radius, -radius, -radius),
+            origin + vec3(-radius, -radius,  radius),
+            origin + vec3(-radius,  radius, -radius),
+            origin + vec3(-radius,  radius,  radius),
+            origin + vec3( radius, -radius, -radius),
+            origin + vec3( radius, -radius,  radius),
+            origin + vec3( radius,  radius, -radius),
+            origin + vec3( radius,  radius,  radius),
+        };
+
+        DrawBox(corners);
     }
 
     void Gizmos::DrawWireAABB(const AABB& aabb)
