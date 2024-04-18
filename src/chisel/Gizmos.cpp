@@ -67,10 +67,10 @@ namespace chisel
         uint offset = 0;
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
         r.ctx->IASetVertexBuffers(0, 1, &Primitives.Line, &stride, &offset);
-        r.ctx->RSSetState(r.Raster.SmoothLines.ptr());
+        r.SetRasterState(r.Raster.SmoothLines.ptr());
         r.ctx->Draw(2, 0);
 
-        r.ctx->RSSetState(r.Raster.Default.ptr());
+        r.SetRasterState(r.Raster.Default.ptr());
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         PostDraw();
     }
@@ -162,7 +162,7 @@ namespace chisel
 
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
-        r.ctx->RSSetState(r.Raster.DepthBiased.ptr());
+        r.SetRasterState(r.Raster.DepthBiased.ptr());
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
         r.UploadConstBuffer(1, r.cbuffers.brush, data);
         r.ctx->PSSetShaderResources(0, 1, &Chisel.Renderer->Textures.White->srvSRGB);
@@ -172,7 +172,7 @@ namespace chisel
         r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         r.ctx->Draw(6 * 6, 0);
 
-        r.ctx->RSSetState(r.Raster.Default.ptr());
+        r.SetRasterState(r.Raster.Default.ptr());
         PostDraw();
     }
 
@@ -236,7 +236,7 @@ namespace chisel
 
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
-        r.ctx->RSSetState(r.Raster.SmoothLines.ptr());
+        r.SetRasterState(r.Raster.SmoothLines.ptr());
         
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
         r.UploadConstBuffer(1, r.cbuffers.object, data);
@@ -247,7 +247,7 @@ namespace chisel
         r.ctx->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         r.ctx->Draw(24, 0);
 
-        r.ctx->RSSetState(r.Raster.Default.ptr());
+        r.SetRasterState(r.Raster.Default.ptr());
         r.ctx->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         PostDraw();
     }
@@ -260,7 +260,7 @@ namespace chisel
     
     void Gizmos::PreDraw()
     {
-        r.ctx->OMSetDepthStencilState(depthTest ? r.Depth.Default.ptr() : r.Depth.Ignore.ptr(), 0);
+        r.SetDepthStencilState(depthTest ? r.Depth.Default.ptr() : r.Depth.Ignore.ptr());
 
         if (id == 0)
             r.SetBlendState(render::BlendFuncs::AlphaNoSelection);
@@ -270,7 +270,7 @@ namespace chisel
 
     void Gizmos::PostDraw()
     {
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
+        r.SetDepthStencilState(r.Depth.Default.ptr());
 
         r.SetBlendState(render::BlendFuncs::Normal);
     }

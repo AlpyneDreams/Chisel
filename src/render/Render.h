@@ -173,6 +173,8 @@ namespace chisel::render
         Com<ID3D11Buffer> scratchVertex;
         Com<ID3D11SamplerState> sampler;
 
+        //-----------------------------------------------------------------------------
+
         GlobalCBuffers cbuffers;
 
         void SetConstBuffer(int index, const Com<ID3D11Buffer>& buf, ShaderStages flags = VertexShader | PixelShader)
@@ -188,6 +190,8 @@ namespace chisel::render
             SetConstBuffer(index, buf, flags);
         }
 
+        //-----------------------------------------------------------------------------
+
         struct DepthStates {
             Com<ID3D11DepthStencilState> Default = nullptr;
             Com<ID3D11DepthStencilState> NoWrite;
@@ -195,10 +199,22 @@ namespace chisel::render
             Com<ID3D11DepthStencilState> Ignore;
         } Depth;
 
+        void SetDepthStencilState(const Com<ID3D11DepthStencilState>& dss, uint stencilRef = 0) {
+            ctx->OMSetDepthStencilState(dss.ptr(), stencilRef);
+        }
+
+        //-----------------------------------------------------------------------------
+
         struct SampleStates {
             Com<ID3D11SamplerState> Default;
             Com<ID3D11SamplerState> Point;
         } Sample;
+
+        void SetSampler(int slot, const Com<ID3D11SamplerState>& ss) {
+            ctx->PSSetSamplers(slot, 1, &ss);
+        }
+
+        //-----------------------------------------------------------------------------
 
         struct RasterStates {
             Com<ID3D11RasterizerState> Default;
@@ -206,5 +222,9 @@ namespace chisel::render
             Com<ID3D11RasterizerState> Wireframe;
             Com<ID3D11RasterizerState> SmoothLines;
         } Raster;
+
+        void SetRasterState(const Com<ID3D11RasterizerState>& rs) {
+            ctx->RSSetState(rs.ptr());
+        }
     };
 }

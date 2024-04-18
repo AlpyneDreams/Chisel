@@ -64,9 +64,9 @@ namespace chisel
 
         drawMode = viewport.drawMode;
         if (wireframe = drawMode == Viewport::DrawMode::Wireframe)
-            r.ctx->RSSetState(r.Raster.Wireframe.ptr());
+            r.SetRasterState(r.Raster.Wireframe.ptr());
         else
-            r.ctx->RSSetState(r.Raster.Default.ptr());
+            r.SetRasterState(r.Raster.Default.ptr());
 
         // TODO: Cull!
         if (r_drawbrushes)
@@ -82,7 +82,7 @@ namespace chisel
         }
 
         if (wireframe)
-            r.ctx->RSSetState(r.Raster.Default.ptr());
+            r.SetRasterState(r.Raster.Default.ptr());
 
         for (const auto* entity : map.Entities())
         {
@@ -92,7 +92,7 @@ namespace chisel
             DrawPointEntity(entity->classname, false, point->origin, vec3(0), point->IsSelected(), point->GetSelectionID());
         }
 
-        r.ctx->RSSetState(r.Raster.Default.ptr());
+        r.SetRasterState(r.Raster.Default.ptr());
     }
 
     void MapRender::DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles, bool selected, SelectionID id)
@@ -213,13 +213,13 @@ namespace chisel
     inline void MapRender::DrawSelectionOutline(BrushPass pass)
     {
         r.SetBlendState(render::BlendFuncs::Alpha);
-        r.ctx->RSSetState(r.Raster.Wireframe.ptr());
-        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
+        r.SetRasterState(r.Raster.Wireframe.ptr());
+        r.SetDepthStencilState(r.Depth.NoWrite.ptr());
         pass.color = color_selection_outline;
         pass.texOverride = Textures.White.ptr();
         DrawPass(pass);
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
-        r.ctx->RSSetState(r.Raster.Default.ptr());
+        r.SetDepthStencilState(r.Depth.Default.ptr());
+        r.SetRasterState(r.Raster.Default.ptr());
         r.SetBlendState(nullptr);
     }
 
@@ -277,13 +277,13 @@ namespace chisel
 
         // Draw opaque meshes.
         r.SetBlendState(wireframe ? render::BlendFuncs::Alpha : render::BlendFuncs::Normal);
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
+        r.SetDepthStencilState(r.Depth.Default.ptr());
         for (auto* mesh : opaqueMeshes)
             DrawMesh(mesh);
 
         // Draw trans meshes.
         r.SetBlendState(render::BlendFuncs::Alpha);
-        r.ctx->OMSetDepthStencilState(r.Depth.NoWrite.ptr(), 0);
+        r.SetDepthStencilState(r.Depth.NoWrite.ptr());
         for (auto* mesh : transMeshes)
             DrawMesh(mesh);
         
@@ -311,7 +311,7 @@ namespace chisel
                         pass.id = face->GetSelectionID();
 
                         // Highlight face
-                        r.ctx->RSSetState(r.Raster.DepthBiased.ptr());
+                        r.SetRasterState(r.Raster.DepthBiased.ptr());
                         pass.color = color_selection;
                         DrawPass(pass);
 

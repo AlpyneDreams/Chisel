@@ -167,9 +167,9 @@ namespace chisel
     {
         auto& r = Engine.rctx;
         r.SetBlendState(render::BlendFuncs::Alpha);
-        r.ctx->OMSetDepthStencilState(r.Depth.LessEqual.ptr(), 0);
+        r.SetDepthStencilState(r.Depth.LessEqual.ptr());
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-        r.ctx->RSSetState(r.Raster.SmoothLines.ptr());
+        r.SetRasterState(r.Raster.SmoothLines.ptr());
         r.SetShader(sh_Grid);
 
         // Determine center of grid based on camera position
@@ -213,9 +213,9 @@ namespace chisel
             }
         }
 
-        r.ctx->RSSetState(r.Raster.Default.ptr());
+        r.SetRasterState(r.Raster.Default.ptr());
         r.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        r.ctx->OMSetDepthStencilState(r.Depth.Default.ptr(), 0);
+        r.SetDepthStencilState(r.Depth.Default.ptr());
         r.SetBlendState(nullptr);
     }
 
