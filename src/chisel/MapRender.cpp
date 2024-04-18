@@ -49,8 +49,7 @@ namespace chisel
         data.viewProj = proj * view;
         data.view = view;
 
-        r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), data);
-        r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
+        r.UploadConstBuffer(0, r.cbuffers.camera, data, render::VertexShader);
 
         ID3D11RenderTargetView* rts[] = {viewport.rt_SceneView->rtv.ptr(), viewport.rt_ObjectID->rtv.ptr()};
         r.ctx->OMSetRenderTargets(2, rts, viewport.ds_SceneView->dsv.ptr());
@@ -152,9 +151,7 @@ namespace chisel
 
     inline void MapRender::DrawPass(const BrushPass& pass)
     {
-        r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), pass);
-        r.ctx->PSSetConstantBuffers(1, 1, &r.cbuffers.brush);
-        r.ctx->VSSetConstantBuffers(1, 1, &r.cbuffers.brush);
+        r.UploadConstBuffer(1, r.cbuffers.brush, pass);
 
         uint stride = sizeof(VertexSolid);
         uint vertexOffset = pass.mesh->alloc->offset;

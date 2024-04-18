@@ -31,9 +31,7 @@ namespace chisel
         data.model = glm::scale(glm::translate(mat4x4(1.0f), pos), size);
         data.color = color;
         data.id = id;
-        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
-        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
-        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.UploadConstBuffer(1, r.cbuffers.object, data);
         
         uint stride = sizeof(Primitives::Vertex);
         uint offset = 0;
@@ -63,9 +61,7 @@ namespace chisel
         data.model = mtx;
         data.color = color;
         data.id = 0;
-        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
-        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
-        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.UploadConstBuffer(1, r.cbuffers.object, data);
 
         uint stride = sizeof(Primitives::Vertex);
         uint offset = 0;
@@ -110,10 +106,8 @@ namespace chisel
 
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
-        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
-        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
-        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.UploadConstBuffer(1, r.cbuffers.object, data);
 
         uint stride = sizeof(Primitives::Vertex);
         uint offset = 0;
@@ -169,10 +163,8 @@ namespace chisel
         ID3D11Buffer* buffer = r.scratchVertex.ptr();
 
         r.ctx->RSSetState(r.Raster.DepthBiased.ptr());
-        r.UpdateDynamicBuffer(r.cbuffers.brush.ptr(), data);
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
-        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.brush, nullptr, nullptr);
-        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.brush, nullptr, nullptr);
+        r.UploadConstBuffer(1, r.cbuffers.brush, data);
         r.ctx->PSSetShaderResources(0, 1, &Chisel.Renderer->Textures.White->srvSRGB);
 
         uint stride = sizeof(VertexSolid);
@@ -246,10 +238,8 @@ namespace chisel
 
         r.ctx->RSSetState(r.Raster.SmoothLines.ptr());
         
-        r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
         r.UpdateDynamicBuffer(buffer, vertices, sizeof(vertices));
-        r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
-        r.ctx->PSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+        r.UploadConstBuffer(1, r.cbuffers.object, data);
 
         uint stride = sizeof(Primitives::Vertex);
         uint offset = 0;

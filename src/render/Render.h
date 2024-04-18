@@ -65,6 +65,16 @@ namespace chisel::render
         Com<ID3D11DepthStencilView> dsv;
     };
 
+    enum ShaderStages
+    {
+        VertexShader = 1,
+        PixelShader  = 2,
+        // etc.
+    };
+
+    inline ShaderStages operator|(ShaderStages a, ShaderStages b) { return ShaderStages(int(a) | int(b)); }
+    inline ShaderStages operator&(ShaderStages a, ShaderStages b) { return ShaderStages(int(a) & int(b)); }
+
     struct Shader
     {
         Com<ID3D11VertexShader> vs;
@@ -161,9 +171,22 @@ namespace chisel::render
         RenderTarget backbuffer;
 
         Com<ID3D11Buffer> scratchVertex;
+        Com<ID3D11SamplerState> sampler;
 
         GlobalCBuffers cbuffers;
-        Com<ID3D11SamplerState> sampler;
+
+        void SetConstBuffer(int index, const Com<ID3D11Buffer>& buf, ShaderStages flags = VertexShader | PixelShader)
+        {
+            if (flags & VertexShader) ctx->VSSetConstantBuffers1(index, 1, &buf, nullptr, nullptr);
+            if (flags & PixelShader) ctx->PSSetConstantBuffers1(index, 1, &buf, nullptr, nullptr);
+        }
+
+        template <typename T>
+        void UploadConstBuffer(int index, const Com<ID3D11Buffer>& buf, const T& data, ShaderStages flags = VertexShader | PixelShader)
+        {
+            UpdateDynamicBuffer(buf.ptr(), &data, sizeof(T));
+            SetConstBuffer(index, buf, flags);
+        }
 
         struct DepthStates {
             Com<ID3D11DepthStencilState> Default = nullptr;

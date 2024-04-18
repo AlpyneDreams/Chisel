@@ -194,8 +194,7 @@ namespace chisel
         camState.viewProj = proj * view;
         camState.view = view;
         camState.farZ = glm::min(farZ.x, farZ.y);
-        r.UpdateDynamicBuffer(r.cbuffers.camera.ptr(), camState);
-        r.ctx->VSSetConstantBuffers1(0, 1, &r.cbuffers.camera, nullptr, nullptr);
+        r.UploadConstBuffer(0, r.cbuffers.camera, camState, render::VertexShader);
 
         // Draw each cell
         for (int x = -radius.x; x <= radius.x; x++)
@@ -208,8 +207,7 @@ namespace chisel
                 data.model = glm::translate(mtx, translation);
                 data.id = 0;
 
-                r.UpdateDynamicBuffer(r.cbuffers.object.ptr(), data);
-                r.ctx->VSSetConstantBuffers1(1, 1, &r.cbuffers.object, nullptr, nullptr);
+                r.UploadConstBuffer(1, r.cbuffers.object, data, render::VertexShader);
 
                 r.DrawMesh(grid.ptr());
             }
