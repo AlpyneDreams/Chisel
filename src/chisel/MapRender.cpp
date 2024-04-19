@@ -163,12 +163,12 @@ namespace chisel
 
     inline void MapRender::DrawPixelSprite(vec3 pos, Texture* tex)
     {
-        r.SetSampler(0, r.Sample.Default);
+        r.SetSampler(0, r.Sample.Point);
         if (this->drawMode == Viewport::DrawMode::ObjectID)
             Gizmos.DrawIcon(pos, tex != nullptr ? tex : Gizmos.icnObsolete.ptr(), vec3(32.0f), Shaders.SpriteDebugID);
         else
             Gizmos.DrawIcon(pos, tex != nullptr ? tex : Gizmos.icnObsolete.ptr(), vec3(32.0f));
-        r.SetSampler(0, r.Sample.Point);
+        r.SetSampler(0, r.Sample.Default);
 
     }
     
