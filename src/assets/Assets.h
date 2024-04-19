@@ -32,7 +32,7 @@ namespace chisel
         Rc<T> Load(const Path& path);
 
         bool FileExists(const Path& path);
-        std::optional<Buffer> ReadFile(const Path& path);
+        std::optional<Buffer> ReadFile(const Path& path, bool complain = true);
         std::optional<Buffer> ReadLooseFile(const Path& path);
         std::optional<Buffer> ReadPakFile(const Path& path);
 

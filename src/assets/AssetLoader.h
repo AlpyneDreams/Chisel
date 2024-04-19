@@ -12,7 +12,7 @@ namespace chisel
 {
     struct BaseAssetLoader
     {
-        static std::optional<Buffer> ReadFile(const fs::Path& path);
+        static std::optional<Buffer> ReadFile(const fs::Path& path, bool complain = true);
     };
 
     template <class Asset>
@@ -112,7 +112,7 @@ namespace chisel
             {
                 fs::Path file = path;
                 file.setExt(ext);
-                auto data = BaseAssetLoader::ReadFile(file);
+                auto data = BaseAssetLoader::ReadFile(file, false);
                 if (data)
                     foundAny = true;
                 buffers.push_back(data ? *data : Buffer());

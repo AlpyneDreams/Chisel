@@ -62,7 +62,7 @@ namespace chisel
         return false;
     }
 
-    std::optional<Buffer> Assets::ReadFile(const Path& path)
+    std::optional<Buffer> Assets::ReadFile(const Path& path, bool complain)
     {
         auto loose_data = ReadLooseFile(path);
         if (loose_data)
@@ -72,13 +72,14 @@ namespace chisel
         if (vpk_data)
             return vpk_data;
 
-        Console.Error("[Assets] Can't find file: '{}'", path);
+        if (complain)
+            Console.Error("[Assets] Can't find file: '{}'", path);
         return std::nullopt;
     }
 
-    std::optional<Buffer> BaseAssetLoader::ReadFile(const fs::Path& path)
+    std::optional<Buffer> BaseAssetLoader::ReadFile(const fs::Path& path, bool complain)
     {
-        return Assets.ReadFile(path);
+        return Assets.ReadFile(path, complain);
     }
 
     std::optional<Buffer> Assets::ReadLooseFile(const Path& path)

@@ -56,7 +56,6 @@ namespace chisel
 
                 if (Assets.FileExists(path.str()))
                 {
-                    Console.Log("Loading material: '{}'", path.str());
                     mesh.materials.push_back(Assets.Load<Material>(path.str()));
                     break;
                 }
