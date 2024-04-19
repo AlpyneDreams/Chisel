@@ -7,6 +7,7 @@
 #include "common/Hash.h"
 #include "math/Math.h"
 #include "render/Render.h"
+#include "core/Mesh.h"
 
 namespace chisel
 {
@@ -141,14 +142,19 @@ namespace chisel
 
         struct Class : Base
         {
-            ClassType type;
-            List<Var> variables;
-            HashMap<size_t> varMap;
-            Dict<InputOutput> inputs;
-            Dict<InputOutput> outputs;
-            List<Class*> bases;
-            List<Helper> helpers;
+            // FGD class definition
+            ClassType           type;
+            List<Var>           variables;
+            HashMap<size_t>     varMap;
+            Dict<InputOutput>   inputs;
+            Dict<InputOutput>   outputs;
+            List<Class*>        bases;
+            List<Helper>        helpers;
+
+            // Rendering parameters
             Rc<Texture> texture;
+            Rc<Mesh> model;
+            bool isProp = false;
             int3 bbox[2] = {int3(-8, -8, -8), int3(8, 8, 8)};
             int3 color = int3(255, 255, 255);
 

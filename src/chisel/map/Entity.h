@@ -17,7 +17,8 @@ namespace chisel
 
         void Delete() final override;
 
-        virtual bool IsBrushEntity() const = 0;
+        virtual bool IsBrushEntity() const { return false;}
+        virtual Rc<Mesh> GetModel() const { return nullptr; }
 
     // Public members
 
@@ -29,7 +30,7 @@ namespace chisel
         kv::KeyValues kv;
     };
 
-    class PointEntity final : public Entity
+    class PointEntity : public Entity
     {
     public:
         PointEntity(BrushEntity* parent);
@@ -40,10 +41,16 @@ namespace chisel
         void Transform(const mat4x4& matrix) final override;
         void AlignToGrid(vec3 gridSize) final override;
         Selectable* Duplicate() final override;
+    };
 
-    // Entity Interface //
+    class ModelEntity final : public PointEntity
+    {
+    public:
+        using PointEntity::PointEntity;
+        
+        virtual Rc<Mesh> GetModel() const { return model; }
 
-        virtual bool IsBrushEntity() const override { return false; }
+        Rc<Mesh> model;
     };
 
     class BrushEntity : public Entity

@@ -1,4 +1,5 @@
 #include "../Chisel.h"
+#include "../FGD/FGD.h"
 
 namespace chisel
 {
@@ -345,11 +346,19 @@ namespace chisel
     static bool AddEntity(Map& map, kv::KeyValues& kvEntity, std::string& matNameScratch)
     {
         auto solids = kvEntity.FindAll("solid");
+        std::string classname = std::string(kvEntity["classname"]);
         // Solid can also be the vphysics solid type.
         // Really annoying.
         bool point = solids.first == solids.second || solids.first->second.GetType() != kv::Types::KeyValues;
+        bool prop = Chisel.fgd->classes.contains(classname) && Chisel.fgd->classes[classname].isProp;
         Entity* entity = nullptr;
-        if (point)
+        if (point && prop)
+        {
+            ModelEntity* model = new ModelEntity(&map);
+            model->model = Assets.Load<Mesh>((std::string)kvEntity["model"]);
+            entity = model;
+        }
+        else if (point)
         {
             PointEntity* point = new PointEntity(&map);
             entity = point;

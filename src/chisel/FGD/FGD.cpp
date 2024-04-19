@@ -165,6 +165,17 @@ namespace chisel
                         Expect(')');
                         break;
                     }
+                    case Studio:
+                    case StudioProp:
+                    {
+                        Expect('(');
+                        if (cur->type != Tokens.RightParen)
+                            cls.model = Assets.Load<Mesh>(ParseString());
+                        else
+                            cls.isProp = true;
+                        Expect(')');
+                        break;
+                    }
                     // Parse generic helper args
                     default:
                     if (*cur == '(') {
