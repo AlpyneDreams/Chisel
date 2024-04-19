@@ -31,6 +31,7 @@ namespace chisel
         template <typename T>
         Rc<T> Load(const Path& path);
 
+        bool FileExists(const Path& path);
         std::optional<Buffer> ReadFile(const Path& path);
         std::optional<Buffer> ReadLooseFile(const Path& path);
         std::optional<Buffer> ReadPakFile(const Path& path);

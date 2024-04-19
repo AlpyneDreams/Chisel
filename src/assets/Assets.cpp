@@ -29,9 +29,37 @@ namespace chisel
 
 // Asset Loading //
 
+    static inline std::string NormalizePath(const fs::Path& path)
+    {
+        std::string str = str::toLower(path);
+        str = str::replace(str, "\\", "/");
+        return str;
+    }
+
     bool Assets::IsLoaded(const Path& path)
     {
         return Asset::AssetDB.contains(path);
+    }
+
+    bool Assets::FileExists(const Path& path)
+    {
+        // Check loose files
+        for (const auto& dir : searchPaths)
+        {
+            Path fullPath = dir / path;
+            if (fs::exists(fullPath))
+                return true;
+        }
+
+        // Check paks
+        std::string cleanPath = NormalizePath(path);
+        for (const auto& pak : pakFiles)
+        {
+            if (pak->files().contains(cleanPath))
+                return true;
+        }
+
+        return false;
     }
 
     std::optional<Buffer> Assets::ReadFile(const Path& path)
@@ -66,12 +94,11 @@ namespace chisel
 
     std::optional<Buffer> Assets::ReadPakFile(const Path& path)
     {
-        std::string lower_string = str::toLower(path);
-        lower_string = str::replace(lower_string, "\\", "/");
+        std::string cleanPath = NormalizePath(path);
 
         for (const auto& pak : pakFiles)
         {
-            auto file = pak->file(lower_string);
+            auto file = pak->file(cleanPath);
             if (!file)
                 continue;
 
