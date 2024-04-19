@@ -510,16 +510,35 @@ namespace chisel::render
     void RenderContext::DrawMesh(Mesh* mesh)
     {
         assert(mesh->uploaded);
-        uint strides[] = {(uint)mesh->groups[0].vertices.Stride()};
-        uint offsets[] = {0};
-        ctx->IASetVertexBuffers(0, 1, (ID3D11Buffer**)&mesh->groups[0].vertices.handle, strides, offsets);
-        
-        IndexBuffer& indices = mesh->groups[0].indices;
-        if (indices.handle != nullptr) {
-            ctx->IASetIndexBuffer((ID3D11Buffer*)indices.handle, indices.type == indices.UInt32 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT, 0);
-            ctx->DrawIndexed(indices.count, 0, 0);
-        } else {
-            ctx->Draw(mesh->groups[0].vertices.count, 0);
+        int i = 0;
+        for (const Mesh::Group& group : mesh->groups)
+        {
+            if (group.material >= 0 && group.material < mesh->materials.size())
+            {
+                // TODO: Consistent material binding mechanism for all materials
+                // e.g. r.Bind(material)
+
+                Rc<Material> material = mesh->materials[group.material];
+                ID3D11ShaderResourceView *srv = nullptr;
+
+                // Bind $basetexture
+                if (material->baseTexture != nullptr)
+                    srv = material->baseTexture->srvSRGB.ptr();
+                
+                ctx->PSSetShaderResources(0, 1, &srv);
+            }
+
+            uint strides[] = {(uint)group.vertices.Stride()};
+            uint offsets[] = {0};
+            ctx->IASetVertexBuffers(0, 1, (ID3D11Buffer**)&group.vertices.handle, strides, offsets);
+            
+            const IndexBuffer& indices = group.indices;
+            if (indices.handle != nullptr) {
+                ctx->IASetIndexBuffer((ID3D11Buffer*)indices.handle, indices.type == indices.UInt32 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT, 0);
+                ctx->DrawIndexed(indices.count, 0, 0);
+            } else {
+                ctx->Draw(group.vertices.count, 0);
+            }
         }
     }
 
@@ -527,7 +546,9 @@ namespace chisel::render
     {
         mesh->uploaded = false;
 
-        for (auto& group : mesh->groups) {
+        for (auto& group : mesh->groups)
+        {
+            // Vertex Buffers
             if (group.vertices.handle == nullptr) {
                 D3D11_BUFFER_DESC desc = {};
                 desc.ByteWidth  = group.vertices.Size();
@@ -543,6 +564,8 @@ namespace chisel::render
                     return;
                 }
             }
+
+            // Index Buffers
             if (group.indices.handle == nullptr && group.indices.indices != nullptr) {
                 D3D11_BUFFER_DESC desc = {};
                 desc.ByteWidth  = group.indices.Size();

@@ -25,9 +25,9 @@ namespace chisel
 
     void MapRender::Start()
     {
-        Shaders.Brush = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush");
-        Shaders.BrushBlend = render::Shader(r.device.ptr(), VertexSolid::Layout, "brush_blend");
-        Shaders.BrushDebugID = render::Shader(r.device.ptr(), VertexSolid::Layout, "debug_id_brush");
+        Shaders.Brush = render::Shader(r.device.ptr(), VertexSolid::InputLayout, "brush");
+        Shaders.BrushBlend = render::Shader(r.device.ptr(), VertexSolid::InputLayout, "brush_blend");
+        Shaders.BrushDebugID = render::Shader(r.device.ptr(), VertexSolid::InputLayout, "debug_id_brush");
         Shaders.SpriteDebugID = render::Shader(r.device.ptr(), Primitives::Vertex::Layout, "debug_id_sprite");
 
         // Load builtin textures
