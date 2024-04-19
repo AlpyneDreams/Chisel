@@ -29,6 +29,7 @@ namespace chisel
         Shaders.BrushBlend = render::Shader(r.device.ptr(), VertexSolid::InputLayout, "brush_blend");
         Shaders.BrushDebugID = render::Shader(r.device.ptr(), VertexSolid::InputLayout, "debug_id_brush");
         Shaders.SpriteDebugID = render::Shader(r.device.ptr(), Primitives::Vertex::Layout, "debug_id_sprite");
+        Shaders.Model = render::Shader(r.device.ptr(), VertexSolid::InputLayout, "model");
 
         // Load builtin textures
         Textures.Missing = Assets.Load<Texture>("textures/error.png");
@@ -89,48 +90,94 @@ namespace chisel
             const PointEntity* point = dynamic_cast<const PointEntity*>(entity);
             if (!point) continue;
 
-            DrawPointEntity(entity->classname, false, point->origin, vec3(0), point->IsSelected(), point->GetSelectionID());
+            DrawPointEntity(entity->classname, false, point->origin, vec3(0), point->IsSelected(), point->GetSelectionID(), point);
         }
 
         r.SetRasterState(r.Raster.Default.ptr());
     }
 
-    void MapRender::DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles, bool selected, SelectionID id)
+    void MapRender::DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles, bool selected, SelectionID id, const PointEntity* ent)
     {
-        Color color = selected ? Color(color_selection) : (preview ? Color(color_preview) : Colors.White);
+        const Color color = selected ? Color(color_selection) : (preview ? Color(color_preview) : Colors.White);
+
+        Gizmos.color = color;
+        Gizmos.id = id;
+
+        // TODO: Should cache FGD class with each ent...
+        if (!Chisel.fgd->classes.contains(classname))
+        {
+            DrawObsolete(origin);
+            Gizmos.id = 0;
+            return;
+        }
+
+        bool drew = false;
+
+        auto& cls = Chisel.fgd->classes[classname];
+
+        //AABB bounds = AABB{cls.bbox[0], cls.bbox[1]};
+        // TODO: Draw boxes if no sprite
+
+        // Draw models
+        if (cls.model != nullptr || cls.isProp)
+        {
+            Rc<Mesh> model = cls.isProp ? ent->GetModel() : cls.model;
+            if (model != nullptr)
+            {
+                // Just upload it if it's not uploaded
+                if (!model->uploaded) [[unlikely]]
+                    r.UploadMesh(model.ptr());
+
+                r.SetShader(Shaders.Model);
+                r.ctx->PSSetShaderResources(0, 1, &Textures.White->srvSRGB);
+
+                cbuffers::ObjectState data;
+                data.color = color;
+                data.id = id;
+                data.model = glm::translate(glm::identity<mat4x4>(), origin);
+
+                r.UploadConstBuffer(1, r.cbuffers.object, data);
+
+                r.SetDepthStencilState(r.Depth.Default);
+                r.SetRasterState(r.Raster.Default);
+                r.SetSampler(0, r.Sample.Default);
+
+                r.DrawMesh(model.ptr());
+                drew = true;
+            }
+        }
 
         // Draw sprites
-        if (Chisel.fgd->classes.contains(classname))
+        if (r_drawsprites && cls.texture != nullptr)
         {
-            auto& cls = Chisel.fgd->classes[classname];
-
-            AABB bounds = AABB{cls.bbox[0], cls.bbox[1]};
-
-            if (!r_drawsprites)
-                return;
-
-            r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-            Gizmos.color = color;
-            Gizmos.id = id;
-            if (this->drawMode == Viewport::DrawMode::ObjectID)
-                Gizmos.DrawIcon(origin, cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr(), vec3(32.0f), Shaders.SpriteDebugID);
-            else
-                Gizmos.DrawIcon(origin, cls.texture != nullptr ? cls.texture.ptr() : Gizmos.icnObsolete.ptr());
-            Gizmos.id = 0;
-            r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
+            DrawPixelSprite(origin, cls.texture.ptr());
+            drew = true;
         }
-        else if (r_drawsprites)
-        {
-            r.ctx->PSSetSamplers(0, 1, &r.Sample.Point);
-            Gizmos.color = color;
-            Gizmos.id = id;
-            if (this->drawMode == Viewport::DrawMode::ObjectID)
-                Gizmos.DrawIcon(origin, Gizmos.icnObsolete.ptr(), vec3(32.0f), Shaders.SpriteDebugID);
-            else
-                Gizmos.DrawIcon(origin, Gizmos.icnObsolete.ptr());
-            Gizmos.id = 0;
-            r.ctx->PSSetSamplers(0, 1, &r.Sample.Default);
-        }
+
+        if (!drew)
+            DrawObsolete(origin);
+
+        Gizmos.color = Colors.White;
+        Gizmos.id = 0;
+    }
+
+    inline void MapRender::DrawPixelSprite(vec3 pos, Texture* tex)
+    {
+        r.SetSampler(0, r.Sample.Default);
+        if (this->drawMode == Viewport::DrawMode::ObjectID)
+            Gizmos.DrawIcon(pos, tex != nullptr ? tex : Gizmos.icnObsolete.ptr(), vec3(32.0f), Shaders.SpriteDebugID);
+        else
+            Gizmos.DrawIcon(pos, tex != nullptr ? tex : Gizmos.icnObsolete.ptr(), vec3(32.0f));
+        r.SetSampler(0, r.Sample.Point);
+
+    }
+    
+    inline void MapRender::DrawObsolete(vec3 pos)
+    {
+        if (r_drawsprites)
+            DrawPixelSprite(pos, nullptr);
+        else
+            Gizmos.DrawPoint(pos);
     }
 
     struct BrushPass : cbuffers::BrushState
@@ -159,6 +206,9 @@ namespace chisel
         ID3D11Buffer* buffer = Chisel.brushAllocator->buffer();
         ID3D11ShaderResourceView *srv = nullptr;
         bool pointSample = false;
+
+        // TODO: Consistent material binding mechanism for all materials
+        // e.g. r.Bind(material)
 
         uint numLayers = 1;
         if (Material* material = pass.mesh->material)

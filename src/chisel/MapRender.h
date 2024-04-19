@@ -30,6 +30,7 @@ namespace chisel
             render::Shader BrushBlend;
             render::Shader BrushDebugID;
             render::Shader SpriteDebugID;
+            render::Shader Model;
         } Shaders;
 
         struct DefaultTextures {
@@ -44,7 +45,7 @@ namespace chisel
         // Called by Viewport::Render
         void DrawViewport(Viewport& viewport);
 
-        void DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles = vec3(0), bool selected = false, SelectionID id = 0);
+        void DrawPointEntity(const std::string& classname, bool preview, vec3 origin, vec3 angles = vec3(0), bool selected = false, SelectionID id = 0, const PointEntity* ent = nullptr);
         void DrawBrushEntity(BrushEntity& ent);
         void DrawHandles(mat4x4& view, mat4x4& proj);
 
@@ -52,6 +53,8 @@ namespace chisel
         inline void DrawPass(const BrushPass& pass);
         inline void DrawSelectionOutline(BrushPass pass);
         inline void DrawMesh(BrushMesh* mesh);
+        inline void DrawPixelSprite(vec3 pos, Texture* tex);
+        inline void DrawObsolete(vec3 pos);
 
         bool wireframe = false;
         Viewport::DrawMode drawMode = Viewport::DrawMode::Shaded;
