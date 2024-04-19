@@ -10,3 +10,6 @@
 [submodule "submodules/yyjson"]
 	path = submodules/yyjson
 	url = https://github.com/ibireme/yyjson
+[submodule "submodules/libmdl-plusplus"]
+	path = submodules/libmdl-plusplus
+	url = https://github.com/AlpyneDreams/libmdl-plusplus.git
