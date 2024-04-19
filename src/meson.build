@@ -11,6 +11,7 @@ chisel_src = [
     'assets/loaders/Textures.cpp',
     'assets/loaders/Materials.cpp',
     'assets/loaders/MeshOBJ.cpp',
+    'assets/loaders/MeshMDL.cpp',
     windows ?
         'platform/win32/PlatformWin32.cpp' :
         'platform/linux/PlatformLinux.cpp',
