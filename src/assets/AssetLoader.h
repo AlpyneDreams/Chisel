@@ -36,12 +36,12 @@ namespace chisel
             }
         }
 
-        bool Load(Asset& asset, const fs::Path& path)
+        virtual bool Load(Asset& asset, const fs::Path& path)
         {
             if (!function)
                 return false;
             
-            auto data = ReadFile(path);
+            auto data = BaseAssetLoader::ReadFile(path);
             if (!data)
                 return false;
             
@@ -50,6 +50,8 @@ namespace chisel
         }
 
     protected:
+        AssetLoader() {}
+
         AssetLoadFn* function = nullptr;
 
     public:
@@ -70,6 +72,62 @@ namespace chisel
             static std::unordered_map<Hash, AssetLoader<Asset>*> map;
             return map;
         }
+    };
+
+    template <class Asset>
+    struct MultiFileAssetLoader final : AssetLoader<Asset>
+    {
+        using MultiAssetLoadFn = void(Asset&, const std::span<Buffer>& buffers);
+
+        MultiFileAssetLoader(std::initializer_list<const char*> exts, MultiAssetLoadFn* fn) : multiFunction(fn), extensions(exts)
+        {
+            if (!extensions.size())
+                return;
+
+            for (auto ext : extensions)
+            {
+                if (!ext)
+                    continue;
+
+                if (ext[0] != '.')
+                {
+                    std::string dotext = std::string(".") + ext;
+                    AssetLoader<Asset>::Extensions().insert({ HashStringLower(dotext), this });
+                }
+                else
+                {
+                    AssetLoader<Asset>::Extensions().insert({ HashStringLower(ext), this });
+                }
+            }
+        }
+
+        virtual bool Load(Asset& asset, const fs::Path& path) override
+        {
+            if (!multiFunction)
+                return false;
+
+            bool foundAny = false;
+            std::vector<Buffer> buffers;
+            for (auto ext : extensions)
+            {
+                fs::Path file = path;
+                file.setExt(ext);
+                auto data = BaseAssetLoader::ReadFile(file);
+                if (data)
+                    foundAny = true;
+                buffers.push_back(data ? *data : Buffer());
+            }
+
+            if (!foundAny)
+                return false;
+            
+            multiFunction(asset, buffers);
+            return true;
+        }
+
+    protected:
+        MultiAssetLoadFn* multiFunction = nullptr;
+        std::vector<const char*> extensions;
     };
 }
 
