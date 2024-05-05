@@ -5,6 +5,8 @@ namespace chisel
     Map::Map()
         : BrushEntity(nullptr)
     {
+        static ConVar<> world_classname("world_classname", "worldspawn", "Classname of the world entity");
+        classname = world_classname;
     }
 
     Map::~Map()

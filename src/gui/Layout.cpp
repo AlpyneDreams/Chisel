@@ -312,7 +312,8 @@ namespace chisel
 
         bool unsaved = Chisel.HasUnsavedChanges();
         static enum FileAction {
-            None, New, Open, Close, Exit, EntityGallery
+            None, New, Open, Close, Exit,
+            EntityGallery, MapProperties
         } action = None;
 
         if (BeginMainMenuBar())
@@ -332,6 +333,7 @@ namespace chisel
             if (BeginMenu("Map"))
             {
                 if (MenuItem("Entity Gallery")) action = EntityGallery;
+                if (MenuItem("Map Properties")) action = MapProperties;
                 ImGui::EndMenu();
             }
 
@@ -356,8 +358,18 @@ namespace chisel
             EndMainMenuBar();
         }
 
-        if (action)
+        switch (action)
         {
+        case MapProperties:
+            Selection.Clear();
+            Selection.Select(&Chisel.map);
+            action = None;
+            break;
+
+        default:
+            if (!action)
+                break;
+
             static bool popup = false;
             if (unsaved && !popup)
             {
@@ -385,8 +397,9 @@ namespace chisel
                     Console.Log("Closing map...");
                     Chisel.CloseMap();
                     switch (action) {
+                        default: break;
                         case Open: OpenFilePicker(); break;
-                        case Exit: Console.Execute("quit"); default: break;
+                        case Exit: Console.Execute("quit"); break;
                         case EntityGallery: Chisel.CreateEntityGallery(); break;
                     }
                 }

@@ -343,7 +343,24 @@ namespace chisel
         return true;
     }
 
-    static bool AddEntity(Map& map, kv::KeyValues& kvEntity, std::string& matNameScratch)
+    static bool AddEntity(Map& map, Entity* entity, kv::KeyValues& kvEntity)
+    {
+        entity->classname = (std::string_view)kvEntity["classname"];
+        entity->targetname = (std::string_view)kvEntity["targetname"];
+        entity->origin = kvEntity["origin"];
+        kvEntity.RemoveAll("origin");
+        kvEntity.RemoveAll("classname");
+        kvEntity.RemoveAll("targetname");
+        kvEntity.RemoveAll("id");
+        kvEntity.RemoveAllWithType("editor", kv::Types::KeyValues);
+        kvEntity.RemoveAllWithType("solid", kv::Types::KeyValues);
+        entity->kv = std::move(kvEntity);
+        if (entity != &map)
+            map.AddEntity(entity);
+        return true;
+    }
+
+    static bool CreateEntity(Map& map, kv::KeyValues& kvEntity, std::string& matNameScratch)
     {
         auto solids = kvEntity.FindAll("solid");
         std::string classname = std::string(kvEntity["classname"]);
@@ -370,18 +387,7 @@ namespace chisel
             entity = brush;
         }
 
-        entity->classname = (std::string_view)kvEntity["classname"];
-        entity->targetname = (std::string_view)kvEntity["targetname"];
-        entity->origin = kvEntity["origin"];
-        kvEntity.RemoveAll("origin");
-        kvEntity.RemoveAll("classname");
-        kvEntity.RemoveAll("targetname");
-        kvEntity.RemoveAll("id");
-        kvEntity.RemoveAllWithType("editor", kv::Types::KeyValues);
-        kvEntity.RemoveAllWithType("solid", kv::Types::KeyValues);
-        entity->kv = std::move(kvEntity);
-        map.AddEntity(entity);
-        return true;
+        return AddEntity(map, entity, kvEntity);
     }
 
     bool ImportVMF(std::string_view filepath, Map& map)
@@ -404,7 +410,7 @@ namespace chisel
             std::string matname;
             kv::KeyValues& kvWorld = (kv::KeyValues&)world;
             // TODO: Do we want to parse the other "worldspawn" KVs?
-            if (!AddSolid(map, kvWorld, matname))
+            if (!AddEntity(map, &map, kvWorld))
             {
                 Chisel.brushAllocator->close();
                 return false;
@@ -418,7 +424,7 @@ namespace chisel
                     return false;
 
                 kv::KeyValues& kvEntity = (kv::KeyValues&)entity;
-                if (!AddEntity(map, kvEntity, matname))
+                if (!CreateEntity(map, kvEntity, matname))
                 {
                     Chisel.brushAllocator->close();
                     return false;
