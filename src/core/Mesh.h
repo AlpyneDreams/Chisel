@@ -30,6 +30,10 @@ namespace chisel
 
         using Asset::Asset;
 
+        static const char* Default() {
+            return "models/error.mdl";
+        }
+
         Group& AddGroup() {
             return groups.emplace_back();
         }

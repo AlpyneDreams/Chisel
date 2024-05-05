@@ -27,7 +27,9 @@ namespace chisel
         }
     }
 
-// Asset Loading //
+    //=============================================================================
+    // Asset Loading
+    //=============================================================================
 
     static inline std::string NormalizePath(const fs::Path& path)
     {
@@ -114,7 +116,10 @@ namespace chisel
         return std::nullopt;
     }
 
-// Search Paths //
+
+    //=============================================================================
+    // Search Paths
+    //=============================================================================
 
     void Assets::AddSearchPath(const Path& p)
     {

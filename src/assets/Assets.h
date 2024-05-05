@@ -10,11 +10,17 @@
 #include "common/Event.h"
 #include "../submodules/libvpk-plusplus/libvpk++.h"
 
-#include <list>
+#include <vector>
 #include <unordered_map>
 
 namespace chisel
 {
+    template <class Asset>
+    concept HasDefault = requires(Asset a)
+    {
+        a.Default();
+    };
+
     // TODO: Exceptions or Result<T> for FindFile, Load, etc...
 
     inline struct Assets
@@ -30,6 +36,19 @@ namespace chisel
 
         template <typename T>
         Rc<T> Load(const Path& path);
+        
+        template <typename T> requires HasDefault<T>
+        Rc<T> GetDefaultAsset()
+        {
+            return Load<T>(T::Default());
+        }
+
+        template <typename T> requires !HasDefault<T>
+        Rc<T> GetDefaultAsset()
+        {
+            return nullptr;
+        }
+
 
         bool FileExists(const Path& path);
         std::optional<Buffer> ReadFile(const Path& path, bool complain = true);
@@ -54,8 +73,8 @@ namespace chisel
         Event<> OnRefresh;
 
     private:
-        std::list<Path> searchPaths;
-        std::list<std::unique_ptr<libvpk::VPKSet>> pakFiles;
+        std::vector<Path> searchPaths;
+        std::vector<std::unique_ptr<libvpk::VPKSet>> pakFiles;
     } Assets;
 
     template <typename T>
@@ -81,14 +100,14 @@ namespace chisel
             if (!loader->Load(*asset.ptr(), path))
             {
                 Console.Error("[Assets] Failed to import {} asset: {}", path.ext(), path);
-                return nullptr;
+                return GetDefaultAsset<T>();
             }
         }
         catch (std::exception& err)
         {
             Console.Error("[Assets] Failed to import {} asset: {}", path.ext(), path);
             Console.Error("[Assets] Exception: '{}'", err.what());
-            return nullptr;
+            return GetDefaultAsset<T>();
         }
 
         return asset;
