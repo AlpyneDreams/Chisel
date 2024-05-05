@@ -42,9 +42,17 @@ namespace chisel
         PostDraw();
     }
 
-    void Gizmos::DrawPoint(vec3 pos)
+    void Gizmos::DrawPoint(vec3 pos, float scale)
     {
-        DrawIcon(pos, icnHandle.ptr(), vec3(16.f));
+        if (scale = -1.f)
+        {
+            // use the grid scale by default
+            extern ConVar<vec3> view_grid_size;
+            vec3 grid = view_grid_size;
+            scale = glm::max(glm::max(grid.x, grid.y), grid.z) * 0.5f;
+        }
+
+        DrawIcon(pos, icnHandle.ptr(), vec3(scale));
     }
 
     // TODO: These should be batched.

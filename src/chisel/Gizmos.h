@@ -26,7 +26,7 @@ namespace chisel
         void Reset();
 
         void DrawIcon(vec3 pos, Texture* icon, vec3 size = vec3(32.0f), const render::Shader& shader = sh_Sprite);
-        void DrawPoint(vec3 pos);
+        void DrawPoint(vec3 pos, float scale = -1.f); // scale by default is based on grid size
         void DrawLine(vec3 start, vec3 end);
         void DrawPlane(const Plane& plane, bool backFace = true);
         void DrawBox(std::span<vec3, 8> corners);
