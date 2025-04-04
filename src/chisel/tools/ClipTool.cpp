@@ -63,6 +63,7 @@ namespace chisel
     {
         Side sides[2] = {{ plane, Chisel.activeMaterial, 0.25f }, { plane.Inverse(), Chisel.activeMaterial, 0.25f }};
 
+        std::vector<Solid*> updatedSolids;
         for (Selectable* selectable : Selection)
         {
             if (Solid* solid = dynamic_cast<Solid*>(selectable))
@@ -75,12 +76,21 @@ namespace chisel
                     std::vector<Side> newSides = solid->GetSides();
                     newSides.emplace_back(sides[1]);
                     Solid& newSolid = parent->AddBrush(std::move(newSides));
-                    Selection.Select(&newSolid);
+                    updatedSolids.emplace_back(&newSolid);
                 }
 
                 solid->Clip(tool_clip_type == ClipType::Back ? sides[1] : sides[0]);
                 solid->UpdateMesh();
+                updatedSolids.emplace_back(solid);
             }
+        }
+
+        for (Solid* solid : updatedSolids)
+        {
+            if (solid->GetFaces().empty())
+                solid->Delete();
+            else
+                Selection.Select(solid);
         }
     }
 }
